@@ -1,24 +1,130 @@
-<html>
-    <head>
-        <!--HTML file auto generated using EmulatorJS codehelper-->
-        <style>
-            body, html {
-                margin: 0;
-                padding: 0;
-            }
-        </style>
-    </head>
-    <body>
-        <div style="width:100%;height:100%;max-width:100%">
-            <div id="game"></div>
-        </div>
-        <script>
-            EJS_player = "#game";
-            EJS_core = "arcade";
-            EJS_color = "#0064ff";
-            EJS_pathtodata = "https://cdn.emulatorjs.org/stable/data/";
-            EJS_gameUrl = "arkanoid.zip";
-        </script>
-        <script src="https://cdn.emulatorjs.org/stable/data/loader.js"></script>
-    </body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arcade</title>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        #gameContainer {
+            width: 100%;
+            height: 100%;
+            #padding: 10px;
+            #box-sizing: border-box;
+        }
+
+        #gameFrame {
+            width: 100%;
+            height: 100%;
+            max-height: 100%;
+            display: none; /* Initially hidden */
+        }
+
+        #gameGrid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .game-item {
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .game-item img {
+            width: 150px; /* Set a fixed width */
+            height: 222px; /* Set a fixed height */
+            object-fit: cover; /* Ensures images fit nicely */
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth transition for hover effect */
+        }
+
+        .game-item img:hover {
+            transform: translateY(-10px) scale(1.1); /* Moves image up and slightly enlarges it */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Adds a deeper shadow effect */
+        }
+
+        .game-item span {
+            display: block;
+            margin-top: 8px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <iframe id="gameFrame" frameborder="no" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" scrolling="no"></iframe>
+        <div id="gameGrid"></div>
+    </div>
+
+    <script>
+        // Function to get the value of a query string parameter
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+
+        // Example data for the grid
+        const games = [
+            { title: "Leaderboards", url: "https://felx.cc/alloarcade", image: "/img/trophy.jpg"},
+            { title: "1943: The Battle of Midway", url: "https://felx.cc/1943", image: "/img/games/1943.jpg" },
+            { title: "Scramble", url: "https://felx.cc/scramble", image: "/img/games/scramble.jpg" },
+            { title: "Berzerk", url: "https://felx.cc/berzerk", image: "/img/games/berzerk.jpg" },
+            { title: "Arkanoid", url: "https://felx.cc/arkanoid", image: "/img/games/arkanoid.jpg" },
+            { title: "Pac-Man", url: "https://felx.cc/pacman", image: "/img/games/pac-man.jpg" },
+            { title: "Gyruss", url: "https://felx.cc/gyruss", image: "/img/games/gyruss.jpg" },
+        ];
+
+        // Get the 'game' and 'title' query parameters from the URL
+        const gameUrl =
+          "https://www.retrogames.cc/embed/7795-arkanoid-bootleg-on-block-hardware-bootleg.html"
+        const pageTitle = getQueryParam('title');
+
+        // If the 'game' parameter exists, display the iframe
+        if (gameUrl) {
+            document.getElementById('gameFrame').src = gameUrl;
+            document.getElementById('gameFrame').style.display = 'block';
+            document.getElementById('gameGrid').style.display = 'none';
+        } else {
+            // If no 'game' parameter, populate the grid with games
+            const gameGrid = document.getElementById('gameGrid');
+            // Sort games by title
+            //games.sort((a, b) => a.title.localeCompare(b.title));
+            games.forEach(game => {
+                const gameItem = document.createElement('div');
+                gameItem.className = 'game-item';
+                gameItem.innerHTML = `
+                    <img src="${game.image}" alt="${game.title}">
+                    <span>${game.title}</span>
+                `;
+                gameItem.onclick = () => {
+                    const url = new URL(window.location.href);
+                    if (game.url == "https://felx.cc/alloarcade") {
+                      // Separate case, we don't load the leaderboards in an iframe. We go directly to them.
+                      window.location.href = game.url;
+                    } else {
+                    url.searchParams.set('game', game.url);
+                    url.searchParams.set('title', game.title);
+                    window.location.href = url.toString();
+                    }
+                };
+                gameGrid.appendChild(gameItem);
+            });
+        }
+
+        // If the 'title' parameter exists, set it as the page's title
+        if (pageTitle) {
+            document.title = pageTitle;
+        }
+    </script>
+</body>
 </html>

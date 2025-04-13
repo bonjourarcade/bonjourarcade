@@ -62,3 +62,4 @@ unless you want to contribute back to the upstream project.
 [index.html]: https://gitlab.com/pages/plain-html/-/blob/main/public/index.html
 [userpages]: https://docs.gitlab.com/ee/user/project/pages/introduction.html#gitlab-pages-in-projects-and-groups
 [projpages]: https://docs.gitlab.com/ee/user/project/pages/introduction.html#gitlab-pages-in-projects-and-groups
+

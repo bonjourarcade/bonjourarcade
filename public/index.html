@@ -1,23 +1,24 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="generator" content="GitLab Pages">
-    <title>Plain HTML site using GitLab Pages</title>
-    <link rel="stylesheet" href="style.css">
-  </head>
-  <body>
-    <div class="navbar">
-      <a href="https://pages.gitlab.io/plain-html/">Plain HTML Example</a>
-      <a href="https://gitlab.com/pages/plain-html/">Repository</a>
-      <a href="https://gitlab.com/pages/">Other Examples</a>
-    </div>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Redirecting...</title>
+  <script>
+    let redirectTimeout;
 
-    <h1>Hello World!</h1>
+    function redirectNow() {
+      clearTimeout(redirectTimeout);
+      window.location.href = "https://alloarcade.web.app";
+    }
 
-    <p>
-      This is a simple plain-HTML website on GitLab Pages, without any fancy static site generator.
-    </p>
-  </body>
+    window.onload = function () {
+      redirectTimeout = setTimeout(redirectNow, 5000);
+    };
+  </script>
+</head>
+<body>
+  <h1>Redirecting you to <a href="https://alloarcade.web.app">https://alloarcade.web.app</a> in 5 seconds...</h1>
+  <p>If you're in a hurry, you can <button onclick="redirectNow()">click here</button> to go now.</p>
+</body>
 </html>
 

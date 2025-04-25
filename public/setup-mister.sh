@@ -1,3 +1,5 @@
+set -e
+
 # Install barcode launcher code
 curl -sSLk https://felx.cc/install-barcode | sh
 
@@ -5,5 +7,8 @@ curl -sSLk https://felx.cc/install-barcode | sh
 /media/fat/Scripts/update_barcode_database.sh
 
 # Download game archive and expand locally
-wget -N -P /media/fat/ https://bonjourarcade-f11f7f.gitlab.io/games.zip
+cd /media/fat
+wget -N https://bonjourarcade-f11f7f.gitlab.io/games.zip
 unzip games.zip
+
+echo "Setup and update complete! :) Happy gaming."

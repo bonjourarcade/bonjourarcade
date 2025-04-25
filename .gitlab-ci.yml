@@ -6,7 +6,9 @@ image: busybox
 pages:
   stage: deploy
   script:
+    - cd public
     - echo "The site will be deployed to $CI_PAGES_URL"
+    - zip -r games.zip games
   artifacts:
     paths:
       - public

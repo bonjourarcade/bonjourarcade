@@ -14,4 +14,11 @@ ln -s update_bonjourarcade.sh \@update_bonjourarcade.sh
 
 /media/fat/Scripts/update_bonjourarcade.sh
 
-echo "Installation initiale de BonjourArcade complétée avec succès. À l'avenir, tu pourras utiliser le script 'update_bonjourarcade' pour télécharger les jeux de la semaine. Tourlou!"
+echo -n "
+#####################################################################
+# Installation initiale de BonjourArcade complétée avec succès. À
+# l'avenir, tu pourras lancer le script 'update_bonjourarcade' pour
+# télécharger les jeux de la semaine. N'hésite pas à nous faire signe
+# si tu as des questions. Tourlou!
+#####################################################################
+"

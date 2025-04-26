@@ -8,4 +8,4 @@ cd /media/fat
 wget -N https://bonjourarcade-f11f7f.gitlab.io/games.zip
 unzip -o games.zip
 
-echo "Setup and update complete! :) Happy gaming."
+echo "Update complete! :) Happy gaming."

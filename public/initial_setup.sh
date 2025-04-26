@@ -8,7 +8,7 @@ mv /media/fat/Scripts/update_bonjourarcade{,.sh}
 # Create convenient link so it shows up at the top of the Scripts menu
 # on MiSTer
 
-ln -s update_bonjourarcade.sh \@update_bonjourarcade.sh
+ln -sf update_bonjourarcade.sh \@update_bonjourarcade.sh
 
 # Launch update_bonjourarcade.sh!
 

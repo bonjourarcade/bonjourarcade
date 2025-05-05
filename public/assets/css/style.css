@@ -1,0 +1,150 @@
+/* Basic Reset */
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: sans-serif;
+    background-color: #f4f4f4; /* Light background */
+    color: #333;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 20px auto; /* Center container with some margin */
+    padding: 15px;
+    background-color: #fff; /* White background for content area */
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+header h1 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #555;
+}
+
+/* Main layout using Flexbox */
+.main-content {
+    display: flex;
+    flex-wrap: wrap; /* Allow wrapping on smaller screens */
+    gap: 30px; /* Space between columns */
+}
+
+/* Featured Game Section (Left Column) */
+.featured-section {
+    flex: 1; /* Takes up available space */
+    min-width: 280px; /* Minimum width before wrapping */
+    padding: 15px;
+    border: 1px solid #ddd;
+    background-color: #fff;
+    text-align: center;
+}
+
+.featured-section h2 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+}
+
+#featured-game-content img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto 15px auto; /* Center images and add space below */
+}
+
+/* Add to public/assets/css/style.css */
+.static-qr-code {
+    max-width: 150px; /* Or desired size */
+    height: auto;
+    display: block;
+    margin: 15px auto; /* Adjust spacing */
+}
+
+#leaderboard-link {
+    display: inline-block; /* Allows margin/padding */
+    margin-top: 10px;
+    padding: 8px 15px;
+    background-color: #007bff;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+}
+#leaderboard-link:hover {
+    background-color: #0056b3;
+}
+
+.featured-title {
+    font-weight: bold;
+    margin-top: 15px;
+    font-size: 1.1em;
+}
+
+/* Previous Games Section (Right Column / Grid) */
+.grid-section {
+    flex: 2; /* Takes up more space */
+    min-width: 300px; /* Minimum width */
+}
+
+.grid-section h2 {
+     margin-top: 0;
+     margin-bottom: 15px;
+     border-bottom: 2px solid #eee;
+     padding-bottom: 10px;
+}
+
+.game-grid {
+    display: grid;
+    /* Adjust columns based on available width */
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 20px; /* Space between grid items */
+}
+
+.game-item {
+    border: 1px solid #eee;
+    text-align: center;
+    background-color: #fff;
+    padding: 10px;
+    transition: transform 0.2s ease-in-out;
+}
+.game-item:hover {
+    transform: translateY(-5px); /* Slight lift effect on hover */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.game-item a {
+    text-decoration: none;
+    color: inherit; /* Inherit text color */
+}
+
+.game-item img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.game-item .game-title {
+    font-size: 0.9em;
+    margin: 0;
+    font-weight: bold;
+}
+
+footer {
+    text-align: center;
+    margin-top: 30px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+    font-size: 0.9em;
+    color: #777;
+}
+
+/* Basic Responsive Handling */
+@media (max-width: 768px) {
+    .main-content {
+        flex-direction: column; /* Stack columns on smaller screens */
+    }
+    .featured-section, .grid-section {
+        min-width: 100%; /* Take full width when stacked */
+    }
+}

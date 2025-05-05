@@ -7,7 +7,7 @@ pages:
   stage: deploy
   script:
     - apk update && apk add zip
-    - apk add yq jq
+    - apk add yq jq bash
     - bash scripts/generate_gamelist.sh
     - cd public
     - zip -r games.zip games

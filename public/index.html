@@ -7,7 +7,14 @@
 <body>
     <div class="container">
         <header>
-            <h1>Welcome to the Arcade!</h1> </header>
+            <div class="header-flex">
+                <h1>Welcome to the Arcade!</h1>
+                <div class="header-actions">
+                    <a id="leaderboard-link" href="#">Leaderboards</a>
+                    <img src="assets/images/my_app_qr.png" alt="QR Code" class="static-qr-code">
+                </div>
+            </div>
+        </header>
 
         <main class="main-content">
             <section id="game-of-the-week" class="featured-section">
@@ -15,16 +22,14 @@
                 <div id="featured-game-content">
                     <img id="featured-game-img"
                          src="/assets/images/placeholder_thumb.png" alt="Featured Game Cover">
-                    <img src="assets/images/placeholder_qr.png" alt="QR Code">
-                    <a id="leaderboard-link" href="#">Leaderboards</a>
-                </div>
-                <div id="featured-game-title" class="featured-title">
-                    Loading...
+                    <div id="featured-game-title" class="featured-title">
+                        Loading...
+                    </div>
                 </div>
             </section>
 
             <section id="previous-games" class="grid-section">
-                <h2>Previous Games</h2>
+                <button id="random-game-btn" class="random-game-btn">Play Random Game</button>
                 <div id="previous-games-grid" class="game-grid">
                     <p>Loading games...</p>
                 </div>

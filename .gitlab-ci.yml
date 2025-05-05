@@ -8,7 +8,7 @@ pages:
   script:
     - apk update && apk add zip
     - apk add yq jq
-    - ./scripts/generate_gamelist.sh"
+    - ./scripts/generate_gamelist.sh
     - cd public
     - zip -r games.zip games
     - echo "The site will be deployed to $CI_PAGES_URL"

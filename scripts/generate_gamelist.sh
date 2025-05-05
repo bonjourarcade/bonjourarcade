@@ -64,6 +64,7 @@ for game_dir in "$GAMES_DIR"/*/; do
     year=""
     system=""
     genre=""
+    hide=""
     echo "  - Default Title: $title"
 
     if [ -f "$metadata_file" ]; then
@@ -75,6 +76,7 @@ for game_dir in "$GAMES_DIR"/*/; do
             year=$(echo "$metadata_json" | jq -r '.year // ""')
             system=$(echo "$metadata_json" | jq -r '.system // ""')
             genre=$(echo "$metadata_json" | jq -r '.genre // ""')
+            hide=$(echo "$metadata_json" | jq -r '.hide // ""')
         else
             echo "  - metadata.yaml found but failed to parse. Using default title ($game_id)."
         fi
@@ -90,7 +92,7 @@ for game_dir in "$GAMES_DIR"/*/; do
         cover_art_abs="/games/$game_id/cover.png" # Use convention path
     else
         # If cover.png missing, log warning and keep the default path
-        echo "Warning: Expected cover file not found: [$expected_cover_file]. Using default."
+        echo -e "\033[30;43mWarning: Expected cover file not found: [$expected_cover_file]. Using default.\033[0m"
     fi
     echo "  - Cover Path: $cover_art_abs" # This now uses the correctly determined path
                                                                                        # <<< --- END MISSING BLOCK 2 ---
@@ -106,7 +108,7 @@ for game_dir in "$GAMES_DIR"/*/; do
         rom_path="/$(echo "$found_rom" | sed 's|public/||')" # Web path
 
         if [ -z "$core" ]; then
-             echo "Warning: No core mapping found for ROM directory: [$rom_subdir] for game [$game_id]."
+             echo -e "\033[30;43mWarning: No core mapping found for ROM directory: [$rom_subdir] for game [$game_id].\033[0m"
         fi
         echo "  - Found ROM: $rom_path"
         echo "  - Inferred Core: $core (from dir: $rom_subdir)"
@@ -123,11 +125,12 @@ for game_dir in "$GAMES_DIR"/*/; do
                   --arg year "$year" \
                   --arg system "$system" \
                   --arg genre "$genre" \
+                  --arg hide "$hide" \
                   --arg coverArt "$cover_art_abs" \
                   --arg pageUrl "$page_url" \
                   --arg core "${core:-null}" \
                   --arg romPath "${rom_path:-null}" \
-                  '{id: $id, title: $title, developer: $developer, year: $year, system: $system, genre: $genre, coverArt: $coverArt, pageUrl: $pageUrl, core: $core, romPath: $romPath}')
+                  '{id: $id, title: $title, developer: $developer, year: $year, system: $system, genre: $genre, hide: $hide, coverArt: $coverArt, pageUrl: $pageUrl, core: $core, romPath: $romPath}')
 
     # --- Check if Featured / Add to List ---
     if [ "$game_id" == "$FEATURED_GAME_ID" ]; then

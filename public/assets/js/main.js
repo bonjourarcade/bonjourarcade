@@ -29,14 +29,36 @@ async function fetchGameData() {
 
         // Populate sections using the fetched data
         populateFeaturedGame(data.gameOfTheWeek);
-        populatePreviousGames(data.previousGames);
+
+        // Combine game of the week with previous games for grid and randomizer
+        let allGames = [];
+        if (data.gameOfTheWeek && data.gameOfTheWeek.id) {
+            allGames.push(data.gameOfTheWeek);
+        }
+        if (Array.isArray(data.previousGames)) {
+            allGames = allGames.concat(data.previousGames);
+        }
+
+        // Sort allGames alphabetically by display title
+        allGames.sort((a, b) => {
+            // Use the same display logic as in the UI
+            let titleA = a.title;
+            if (!titleA || titleA === a.id) titleA = capitalizeFirst(a.id);
+            let titleB = b.title;
+            if (!titleB || titleB === b.id) titleB = capitalizeFirst(b.id);
+            return titleA.toLowerCase().localeCompare(titleB.toLowerCase());
+        });
+
+        populatePreviousGames(allGames);
 
         // Add randomizer button logic
         const randomBtn = document.getElementById('random-game-btn');
-        if (randomBtn && Array.isArray(data.previousGames) && data.previousGames.length > 0) {
+        // Filter out hidden games for randomizer
+        const visibleGames = allGames.filter(game => !(game.hide === true || game.hide === 'yes'));
+        if (randomBtn && Array.isArray(visibleGames) && visibleGames.length > 0) {
             randomBtn.onclick = () => {
-                const randomIdx = Math.floor(Math.random() * data.previousGames.length);
-                const randomGame = data.previousGames[randomIdx];
+                const randomIdx = Math.floor(Math.random() * visibleGames.length);
+                const randomGame = visibleGames[randomIdx];
                 if (randomGame && randomGame.pageUrl) {
                     window.location.href = randomGame.pageUrl;
                 }
@@ -78,7 +100,13 @@ function populateFeaturedGame(game) {
 
     // Clear placeholder content and set the title
     contentContainer.innerHTML = '';
-    titleContainer.textContent = game.title || game.id;
+
+    // Set the title (capitalize if using default)
+    let displayTitle = game.title;
+    if (!displayTitle || displayTitle === game.id) {
+        displayTitle = capitalizeFirst(game.id);
+    }
+    titleContainer.textContent = displayTitle;
 
     // Add rom-missing class to parent container if needed
     const featuredSection = document.getElementById('game-of-the-week');
@@ -140,8 +168,11 @@ function populatePreviousGames(games) {
          return;
     }
 
+    // Filter out hidden games
+    const visibleGames = games.filter(game => !(game.hide === true || game.hide === 'yes'));
+
     // Handle case where there are no previous games
-    if (!games || games.length === 0) {
+    if (!visibleGames || visibleGames.length === 0) {
         gridContainer.innerHTML = '<p>No previous games found.</p>';
         return;
     }
@@ -150,7 +181,7 @@ function populatePreviousGames(games) {
     gridContainer.innerHTML = '';
 
     // Create grid items for each game
-    games.forEach(game => {
+    visibleGames.forEach(game => {
         // Skip if game data is invalid
         if(!game || !game.id) {
              console.warn("Skipping invalid game entry in previousGames:", game);
@@ -177,7 +208,13 @@ function populatePreviousGames(games) {
 
         const title = document.createElement('p');
         title.className = 'game-title';
-        title.textContent = game.title || game.id;
+
+        // Set the title (capitalize if using default)
+        let displayTitle = game.title;
+        if (!displayTitle || displayTitle === game.id) {
+            displayTitle = capitalizeFirst(game.id);
+        }
+        title.textContent = displayTitle;
 
         link.appendChild(img);
         link.appendChild(title);
@@ -251,4 +288,9 @@ function displayError(selector, message) {
         // Log error if the target element for the message isn't found
         console.error(`displayError: Element with selector "${selector}" not found.`);
     }
+}
+
+function capitalizeFirst(str) {
+    if (!str) return '';
+    return str.charAt(0).toUpperCase() + str.slice(1);
 }

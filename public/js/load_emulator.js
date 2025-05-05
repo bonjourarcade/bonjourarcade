@@ -80,6 +80,7 @@ async function setupEmulator() {
 // --- Execute Setup ---
 // Use DOMContentLoaded to ensure the minimal HTML is parsed, and EJS_core is available.
 document.addEventListener('DOMContentLoaded', () => {
+    console.log("@@@ HELLO");
     if (typeof EJS_core !== 'undefined') {
         // Dynamically create a script tag to load the *correct* controls file
         const controlsScript = document.createElement('script');
@@ -89,11 +90,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         controlsScript.onload = () => {
             // Once the controls script has loaded, run the main setup
+            console.log("@@@Calling setupEmulator 1");
             setupEmulator();
         };
         controlsScript.onerror = () => {
             console.error(`Failed to load control script: ${controlsScript.src}`);
             // Try running setup anyway, it will handle the missing controls
+            console.log("@@@Calling setupEmulator 2");
              setupEmulator();
         };
         document.head.appendChild(controlsScript); // Append to head to load early

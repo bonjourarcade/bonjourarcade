@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loading Game...</title>
+    <style>
+        /* Basic styling to make the emulator fill the page */
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background-color: #000; color: #eee;}
+        #game-container { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; }
+        #game { width: 100%; height: 100%; }
+        .error-message { font-family: sans-serif; padding: 20px; text-align: center; color: #ffdddd; background-color: #330000; border: 1px solid red;}
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div id="game"><p style="text-align: center; padding-top: 50px;">Initializing...</p></div>
+    </div>
+
+    <script>
+        // --- Logic for the Single Game Launcher Page (using JSON Controls) ---
+
+        /**
+         * Displays an error message within the game container.
+         * @param {string} message - The error message to display.
+         */
+        function showLauncherError(message) {
+            const gameContainer = document.getElementById('game-container');
+            if (gameContainer) {
+                // Display the error message inside the main container
+                gameContainer.innerHTML = `<p class="error-message">Error: ${message}</p>`;
+            }
+            // Also set a generic error title for the page tab
+            document.title = "Error Loading Game";
+        }
+
+        /**
+         * Main async function to:
+         * 1. Get game ID from URL.
+         * 2. Fetch game list data.
+         * 3. Find the specific game's details.
+         * 4. Fetch emulator settings.
+         * 5. Fetch game controls (from JSON).
+         * 6. Set up EmulatorJS variables.
+         * 7. Load the EmulatorJS engine.
+         */
+        async function loadSelectedGame() {
+            // Step 1: Get Game ID from URL parameter (?game=...)
+            const urlParams = new URLSearchParams(window.location.search);
+            const gameId = urlParams.get('game');
+
+            if (!gameId) {
+                showLauncherError("No game specified in the URL.");
+                console.error("URL parameter 'game' is missing.");
+                return;
+            }
+            console.log(`Attempting to load game with ID: ${gameId}`);
+
+            try {
+                // Step 2: Fetch the master game list
+                console.log("Fetching game list: /gamelist.json");
+                const listResponse = await fetch('/gamelist.json'); // Fetch from site root
+                if (!listResponse.ok) {
+                    throw new Error(`Failed to fetch game list '/gamelist.json' (Status: ${listResponse.status})`);
+                }
+                const gameData = await listResponse.json();
+                console.log("Game list fetched successfully.");
+
+                // Step 3: Find the specific game data using the gameId
+                console.log(`Searching for game ID '${gameId}' in game list...`);
+                let selectedGame = null;
+                if (gameData.gameOfTheWeek && gameData.gameOfTheWeek.id === gameId) {
+                    selectedGame = gameData.gameOfTheWeek;
+                } else if (gameData.previousGames) { // Check if previousGames exists
+                    selectedGame = gameData.previousGames.find(game => game.id === gameId);
+                }
+
+                // Handle case where the game is not found in the list
+                if (!selectedGame) {
+                    throw new Error(`Game with ID '${gameId}' not found in game list.`);
+                }
+                console.log("Found game data:", selectedGame);
+
+                // Step 4: Check if the ROM or Core info for this game is missing
+                if (selectedGame.romMissing === true || !selectedGame.romPath || !selectedGame.core || selectedGame.core === 'null') {
+                     throw new Error(`Required files (ROM or Core info) for game '${selectedGame.title || gameId}' are missing according to gamelist.json.`);
+                }
+
+                // Step 5: Set the Page Title
+                document.title = selectedGame.title || gameId; // Use game title or fallback to ID
+
+                // Step 6: Set the Core EJS Variables Globally (used by EmulatorJS loader)
+                console.log(`Setting EJS Vars - Core: ${selectedGame.core}, ROM: ${selectedGame.romPath}`);
+                window.EJS_player = "#game";        // Emulator renders in the #game div
+                window.EJS_core = selectedGame.core;    // Core name from gamelist.json
+                window.EJS_gameUrl = selectedGame.romPath; // ROM path from gamelist.json
+
+                // Step 7: Fetch General Emulator Settings
+                console.log("Fetching emulator settings: /config/emulator_settings.json");
+                const settingsResponse = await fetch('/config/emulator_settings.json'); // Absolute path
+                if (!settingsResponse.ok) throw new Error(`Failed to load '/config/emulator_settings.json' (Status: ${settingsResponse.status})`);
+                const settings = await settingsResponse.json();
+                if (!settings) throw new Error("Emulator settings file loaded but contained invalid data.");
+
+                // Step 8: Assign Fetched Settings Globally
+                window.EJS_color = settings.EJS_color;
+                window.EJS_pathtodata = settings.EJS_pathtodata; // Path to EJS core files/assets
+                console.log(`Emulator Settings Loaded: Color=${window.EJS_color}, PathToData=${window.EJS_pathtodata}`);
+
+                // Step 9: Fetch Controls JSON based on Core
+                const coreName = window.EJS_core;
+                const controlsJsonPath = `/config/controls_${coreName}.json`; // Path to control JSON file
+                console.log(`Attempting to fetch controls: ${controlsJsonPath}`);
+                try {
+                    const controlsResponse = await fetch(controlsJsonPath);
+                    if (!controlsResponse.ok) {
+                         // Handle file not found gracefully - use defaults
+                         if (controlsResponse.status === 404) {
+                              console.warn(`Controls file not found: ${controlsJsonPath}. Using EmulatorJS default controls.`);
+                              window.EJS_defaultControls = { "0":{}, "1":{}, "2":{}, "3":{} }; // Use default empty controls (valid JSON)
+                         } else {
+                              // Throw error for other HTTP issues
+                              throw new Error(`Failed to fetch controls file (Status: ${controlsResponse.status})`);
+                         }
+                    } else {
+                        // Parse JSON and assign directly
+                        const controlsData = await controlsResponse.json();
+                        if (!controlsData) throw new Error(`Controls file '${controlsJsonPath}' loaded but contained invalid JSON.`);
+                        window.EJS_defaultControls = controlsData; // Assign fetched object
+                        console.log(`Controls assigned successfully for core: ${coreName}`);
+                    }
+                } catch (controlsError) {
+                     // Handle fetch/parse errors specifically for controls JSON
+                     console.error(`Error loading or parsing controls from ${controlsJsonPath}:`, controlsError);
+                     console.warn("Using EmulatorJS default controls due to controls loading error.");
+                     window.EJS_defaultControls = { "0":{}, "1":{}, "2":{}, "3":{} }; // Fallback to default empty controls
+                }
+
+                // Step 10: Load the main EmulatorJS engine (loader.js)
+                // This now happens sequentially after successfully fetching/setting up everything else
+                if (window.EJS_pathtodata) {
+                    console.log("Loading EmulatorJS engine (loader.js)...");
+                    const loaderScript = document.createElement('script');
+                    // Use the path defined in emulator_settings.json
+                    loaderScript.src = `${window.EJS_pathtodata}loader.js`;
+                    loaderScript.onerror = () => {
+                        console.error("CRITICAL: Error loading EmulatorJS 'loader.js' from:", loaderScript.src);
+                        showLauncherError("Could not load the core emulator engine. Check network connection and EJS_pathtodata setting.");
+                    };
+                    document.body.appendChild(loaderScript);
+                    console.log("EmulatorJS 'loader.js' script added to page.");
+                } else {
+                     console.error("EJS_pathtodata is not defined after loading settings. Cannot load emulator engine.");
+                     showLauncherError("Emulator configuration error: Path to required emulator data is missing.");
+                }
+
+            } catch (error) { // Catch errors from initial fetches (gamelist, settings) or setup logic
+                console.error("Error during game loading process:", error);
+                showLauncherError(error.message || "An unexpected error occurred while preparing the game.");
+            }
+        }
+
+        // --- Start the loading process once the DOM is ready ---
+        // Using DOMContentLoaded ensures the #game-container element exists
+        document.addEventListener('DOMContentLoaded', loadSelectedGame);
+
+    </script>
+</body>
+</html>

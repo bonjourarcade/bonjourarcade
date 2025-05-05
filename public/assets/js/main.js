@@ -31,6 +31,18 @@ async function fetchGameData() {
         populateFeaturedGame(data.gameOfTheWeek);
         populatePreviousGames(data.previousGames);
 
+        // Add randomizer button logic
+        const randomBtn = document.getElementById('random-game-btn');
+        if (randomBtn && Array.isArray(data.previousGames) && data.previousGames.length > 0) {
+            randomBtn.onclick = () => {
+                const randomIdx = Math.floor(Math.random() * data.previousGames.length);
+                const randomGame = data.previousGames[randomIdx];
+                if (randomGame && randomGame.pageUrl) {
+                    window.location.href = randomGame.pageUrl;
+                }
+            };
+        }
+
     } catch (error) {
         // Log the error to the browser console for debugging
         console.error("Could not load or process game list:", error);
@@ -88,19 +100,33 @@ function populateFeaturedGame(game) {
     gameLink.appendChild(img);
     contentContainer.appendChild(gameLink); // Add linked game image
 
-    // Re-add the static QR code
-    const qrImg = document.createElement('img');
-    qrImg.src = '/assets/images/my_app_qr.png'; // Static path
-    qrImg.alt = 'Link to My App';
-    qrImg.className = 'static-qr-code'; // Apply styling class
-    contentContainer.appendChild(qrImg); // Add static QR code
-
-    // Add Leaderboard link
-    const leaderboardLink = document.createElement('a');
-    leaderboardLink.id = 'leaderboard-link';
-    leaderboardLink.href = `/leaderboards/${game.id}/`; // Example structure
-    leaderboardLink.textContent = 'Leaderboards';
-    contentContainer.appendChild(leaderboardLink); // Add leaderboard link
+    // Add metadata fields if present (as a table)
+    const metaTable = document.createElement('table');
+    metaTable.className = 'game-meta-table';
+    const fields = [
+        { label: 'Title', key: 'title' },
+        { label: 'Developer', key: 'developer' },
+        { label: 'Year', key: 'year' },
+        { label: 'System', key: 'system' },
+        { label: 'Genre', key: 'genre' }
+    ];
+    fields.forEach(field => {
+        if (game[field.key]) {
+            const row = document.createElement('tr');
+            const labelCell = document.createElement('td');
+            labelCell.innerHTML = `<strong>${field.label}:</strong>`;
+            labelCell.className = 'meta-label';
+            const valueCell = document.createElement('td');
+            valueCell.textContent = game[field.key];
+            valueCell.className = 'meta-value';
+            row.appendChild(labelCell);
+            row.appendChild(valueCell);
+            metaTable.appendChild(row);
+        }
+    });
+    if (metaTable.children.length > 0) {
+        contentContainer.appendChild(metaTable);
+    }
 }
 
 /**
@@ -157,6 +183,55 @@ function populatePreviousGames(games) {
         link.appendChild(title);
         gameItem.appendChild(link);
         gridContainer.appendChild(gameItem);
+
+        // --- Tooltip for metadata ---
+        gameItem.addEventListener('mouseenter', (e) => {
+            // Remove any existing tooltip
+            const oldTooltip = document.getElementById('game-meta-tooltip');
+            if (oldTooltip) oldTooltip.remove();
+
+            // Create tooltip
+            const tooltip = document.createElement('div');
+            tooltip.id = 'game-meta-tooltip';
+            tooltip.className = 'game-meta-tooltip';
+            const fields = [
+                // { label: 'Title', key: 'title' },
+                { label: 'Developer', key: 'developer' },
+                { label: 'Year', key: 'year' },
+                { label: 'System', key: 'system' },
+                { label: 'Genre', key: 'genre' }
+            ];
+            let hasData = false;
+            const table = document.createElement('table');
+            table.className = 'game-meta-table';
+            fields.forEach(field => {
+                if (game[field.key]) {
+                    hasData = true;
+                    const row = document.createElement('tr');
+                    const labelCell = document.createElement('td');
+                    labelCell.innerHTML = `<strong>${field.label}:</strong>`;
+                    labelCell.className = 'meta-label';
+                    const valueCell = document.createElement('td');
+                    valueCell.textContent = game[field.key];
+                    valueCell.className = 'meta-value';
+                    row.appendChild(labelCell);
+                    row.appendChild(valueCell);
+                    table.appendChild(row);
+                }
+            });
+            if (hasData) {
+                tooltip.appendChild(table);
+                document.body.appendChild(tooltip);
+                // Position tooltip near the game item
+                const rect = gameItem.getBoundingClientRect();
+                tooltip.style.left = `${rect.right + 8 + window.scrollX}px`;
+                tooltip.style.top = `${rect.top + window.scrollY}px`;
+            }
+        });
+        gameItem.addEventListener('mouseleave', () => {
+            const tooltip = document.getElementById('game-meta-tooltip');
+            if (tooltip) tooltip.remove();
+        });
     });
 }
 

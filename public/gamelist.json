@@ -1,148 +1,196 @@
 {
   "gameOfTheWeek": {
     "id": "ddonpach",
-    "title": "ddonpach",
+    "title": "DoDonPachi",
+    "developer": "CAVE",
+    "year": "1997",
+    "system": "arcade",
+    "genre": "shoot 'em up",
     "coverArt": "/games/ddonpach/cover.png",
     "pageUrl": "/play.html?game=ddonpach",
     "core": "arcade",
-    "romPath": "/roms/mame/ddonpach.zip",
-    "romMissing": false
+    "romPath": "/roms/mame/ddonpach.zip"
   },
   "previousGames": [
     {
       "id": "1943",
-      "title": "1943",
+      "title": "1943: The Battle of Midway",
+      "developer": "Capcom",
+      "year": "1987",
+      "system": "arcade",
+      "genre": "shoot 'em up",
       "coverArt": "/games/1943/cover.png",
       "pageUrl": "/play.html?game=1943",
       "core": "arcade",
-      "romPath": "/roms/mame/1943.zip",
-      "romMissing": false
+      "romPath": "/roms/mame/1943.zip"
     },
     {
       "id": "apotris",
       "title": "apotris",
+      "developer": "",
+      "year": "",
+      "system": "",
+      "genre": "",
       "coverArt": "/assets/images/placeholder_thumb.png",
       "pageUrl": "/play.html?game=apotris",
       "core": "gba",
-      "romPath": "/roms/GBA/apotris.gba",
-      "romMissing": false
+      "romPath": "/roms/GBA/apotris.gba"
     },
     {
       "id": "arkanoid",
       "title": "arkanoid",
+      "developer": "",
+      "year": "",
+      "system": "",
+      "genre": "",
       "coverArt": "/assets/images/placeholder_thumb.png",
       "pageUrl": "/play.html?game=arkanoid",
       "core": "arcade",
-      "romPath": "/roms/mame/arkanoid.zip",
-      "romMissing": false
+      "romPath": "/roms/mame/arkanoid.zip"
     },
     {
       "id": "berzerk",
       "title": "berzerk",
+      "developer": "",
+      "year": "",
+      "system": "",
+      "genre": "",
       "coverArt": "/assets/images/placeholder_thumb.png",
       "pageUrl": "/play.html?game=berzerk",
       "core": "arcade",
-      "romPath": "/roms/mame/berzerk.zip",
-      "romMissing": false
+      "romPath": "/roms/mame/berzerk.zip"
     },
     {
       "id": "findluigi",
       "title": "findluigi",
+      "developer": "",
+      "year": "",
+      "system": "",
+      "genre": "",
       "coverArt": "/assets/images/placeholder_thumb.png",
       "pageUrl": "/play.html?game=findluigi",
       "core": "snes",
-      "romPath": "/roms/SNES/findluigi.sfc",
-      "romMissing": false
+      "romPath": "/roms/SNES/findluigi.sfc"
     },
     {
       "id": "gyruss",
       "title": "gyruss",
+      "developer": "",
+      "year": "",
+      "system": "",
+      "genre": "",
       "coverArt": "/assets/images/placeholder_thumb.png",
       "pageUrl": "/play.html?game=gyruss",
       "core": "arcade",
-      "romPath": "/roms/mame/gyruss.zip",
-      "romMissing": false
+      "romPath": "/roms/mame/gyruss.zip"
     },
     {
       "id": "outrun",
       "title": "outrun",
+      "developer": "",
+      "year": "",
+      "system": "",
+      "genre": "",
       "coverArt": "/assets/images/placeholder_thumb.png",
       "pageUrl": "/play.html?game=outrun",
       "core": "arcade",
-      "romPath": "/roms/mame/outrun.zip",
-      "romMissing": false
+      "romPath": "/roms/mame/outrun.zip"
     },
     {
       "id": "pacman",
       "title": "pacman",
+      "developer": "",
+      "year": "",
+      "system": "",
+      "genre": "",
       "coverArt": "/assets/images/placeholder_thumb.png",
       "pageUrl": "/play.html?game=pacman",
       "core": "arcade",
-      "romPath": "/roms/mame/pacman.zip",
-      "romMissing": false
+      "romPath": "/roms/mame/pacman.zip"
     },
     {
       "id": "pacmance",
       "title": "pacmance",
+      "developer": "",
+      "year": "",
+      "system": "",
+      "genre": "",
       "coverArt": "/assets/images/placeholder_thumb.png",
       "pageUrl": "/play.html?game=pacmance",
       "core": "nes",
-      "romPath": "/roms/NES/pacmance.nes",
-      "romMissing": false
+      "romPath": "/roms/NES/pacmance.nes"
     },
     {
       "id": "pandora",
       "title": "pandora",
+      "developer": "",
+      "year": "",
+      "system": "",
+      "genre": "",
       "coverArt": "/assets/images/placeholder_thumb.png",
       "pageUrl": "/play.html?game=pandora",
       "core": "gb",
-      "romPath": "/roms/GAMEBOY/pandora.gbc",
-      "romMissing": false
+      "romPath": "/roms/GAMEBOY/pandora.gbc"
     },
     {
       "id": "pyoro64",
       "title": "pyoro64",
+      "developer": "",
+      "year": "",
+      "system": "",
+      "genre": "",
       "coverArt": "/assets/images/placeholder_thumb.png",
       "pageUrl": "/play.html?game=pyoro64",
       "core": "n64",
-      "romPath": "/roms/N64/pyoro64.n64",
-      "romMissing": false
+      "romPath": "/roms/N64/pyoro64.n64"
     },
     {
       "id": "scramble",
       "title": "scramble",
+      "developer": "",
+      "year": "",
+      "system": "",
+      "genre": "",
       "coverArt": "/assets/images/placeholder_thumb.png",
       "pageUrl": "/play.html?game=scramble",
       "core": "arcade",
-      "romPath": "/roms/mame/scramble.zip",
-      "romMissing": false
+      "romPath": "/roms/mame/scramble.zip"
     },
     {
       "id": "smashremix",
       "title": "smashremix",
+      "developer": "",
+      "year": "",
+      "system": "",
+      "genre": "",
       "coverArt": "/assets/images/placeholder_thumb.png",
       "pageUrl": "/play.html?game=smashremix",
       "core": "n64",
-      "romPath": "/roms/N64/smashremix.n64",
-      "romMissing": false
+      "romPath": "/roms/N64/smashremix.n64"
     },
     {
       "id": "snake",
       "title": "snake",
+      "developer": "",
+      "year": "",
+      "system": "",
+      "genre": "",
       "coverArt": "/assets/images/placeholder_thumb.png",
       "pageUrl": "/play.html?game=snake",
       "core": "gb",
-      "romPath": "/roms/GAMEBOY/snake.gb",
-      "romMissing": false
+      "romPath": "/roms/GAMEBOY/snake.gb"
     },
     {
       "id": "sstriker",
       "title": "sstriker",
+      "developer": "",
+      "year": "",
+      "system": "",
+      "genre": "",
       "coverArt": "/assets/images/placeholder_thumb.png",
       "pageUrl": "/play.html?game=sstriker",
       "core": "arcade",
-      "romPath": "/roms/mame/sstriker.zip",
-      "romMissing": false
+      "romPath": "/roms/mame/sstriker.zip"
     }
   ]
 }

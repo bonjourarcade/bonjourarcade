@@ -60,20 +60,21 @@ for game_dir in "$GAMES_DIR"/*/; do
 
     # --- Determine Title: Default to game_id, override if metadata has valid title --- # <<< --- START MISSING BLOCK 1 ---
     title="$game_id" # DEFAULT title is the game ID (folder name)
+    developer=""
+    year=""
+    system=""
+    genre=""
     echo "  - Default Title: $title"
 
     if [ -f "$metadata_file" ]; then
         # Try to parse YAML and extract title (default to empty string if key missing)
         metadata_json=$(yq '.' "$metadata_file" 2>/dev/null || echo "INVALID_YAML")
         if [ "$metadata_json" != "INVALID_YAML" ] && echo "$metadata_json" | jq -e . > /dev/null 2>&1; then
-            metadata_title=$(echo "$metadata_json" | jq -r '.title // ""')
-
-            if [ -n "$metadata_title" ]; then # Check if extracted title is non-empty
-                title="$metadata_title" # Override default title
-                echo "  - Title Override from metadata.yaml: $title"
-            else
-                 echo "  - metadata.yaml found, but 'title' key missing or empty. Using default title ($game_id)."
-            fi
+            title=$(echo "$metadata_json" | jq -r '.title // ""')
+            developer=$(echo "$metadata_json" | jq -r '.developer // ""')
+            year=$(echo "$metadata_json" | jq -r '.year // ""')
+            system=$(echo "$metadata_json" | jq -r '.system // ""')
+            genre=$(echo "$metadata_json" | jq -r '.genre // ""')
         else
             echo "  - metadata.yaml found but failed to parse. Using default title ($game_id)."
         fi
@@ -118,12 +119,15 @@ for game_dir in "$GAMES_DIR"/*/; do
     game_json=$(jq -n \
                   --arg id "$game_id" \
                   --arg title "$title" \
+                  --arg developer "$developer" \
+                  --arg year "$year" \
+                  --arg system "$system" \
+                  --arg genre "$genre" \
                   --arg coverArt "$cover_art_abs" \
                   --arg pageUrl "$page_url" \
                   --arg core "${core:-null}" \
                   --arg romPath "${rom_path:-null}" \
-                  --argjson missing "$rom_missing" \
-                  '{id: $id, title: $title, coverArt: $coverArt, pageUrl: $pageUrl, core: $core, romPath: $romPath, romMissing: $missing}')
+                  '{id: $id, title: $title, developer: $developer, year: $year, system: $system, genre: $genre, coverArt: $coverArt, pageUrl: $pageUrl, core: $core, romPath: $romPath}')
 
     # --- Check if Featured / Add to List ---
     if [ "$game_id" == "$FEATURED_GAME_ID" ]; then

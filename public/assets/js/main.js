@@ -261,8 +261,19 @@ function populatePreviousGames(games) {
                 document.body.appendChild(tooltip);
                 // Position tooltip near the game item
                 const rect = gameItem.getBoundingClientRect();
-                tooltip.style.left = `${rect.right + 8 + window.scrollX}px`;
-                tooltip.style.top = `${rect.top + window.scrollY}px`;
+                const tooltipRect = tooltip.getBoundingClientRect();
+                let left = rect.right + 8 + window.scrollX;
+                let top = rect.top + window.scrollY;
+                // If tooltip would overflow right, show to the left
+                if (left + tooltipRect.width > window.innerWidth) {
+                    left = rect.left - tooltipRect.width - 8 + window.scrollX;
+                }
+                // If tooltip would overflow bottom, adjust upward
+                if (top + tooltipRect.height > window.scrollY + window.innerHeight) {
+                    top = window.scrollY + window.innerHeight - tooltipRect.height - 8;
+                }
+                tooltip.style.left = `${left}px`;
+                tooltip.style.top = `${top}px`;
             }
         });
         gameItem.addEventListener('mouseleave', () => {

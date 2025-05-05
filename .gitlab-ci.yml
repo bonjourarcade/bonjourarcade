@@ -7,7 +7,12 @@ pages:
   stage: deploy
   script:
     - apk update && apk add zip
-    - apk add yq jq bash
+    - apk add jq bash
+    - apk add python3 py3-pip
+    - pip3 install yq pipx
+    - pipx ensurepath  # Add pipx to your PATH
+    - source ~/.profile  # or ~/.bashrc, etc. to update your PATH
+    - pipx install yq
     - bash scripts/generate_gamelist.sh
     - cd public
     - zip -r games.zip games

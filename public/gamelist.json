@@ -28,12 +28,12 @@
     },
     {
       "id": "apotris",
-      "title": "apotris",
+      "title": "",
       "developer": "",
       "year": "",
       "system": "",
       "genre": "",
-      "hide": "",
+      "hide": "yes",
       "coverArt": "/games/apotris/cover.png",
       "pageUrl": "/play.html?game=apotris",
       "core": "gba",
@@ -132,7 +132,7 @@
     },
     {
       "id": "pandora",
-      "title": "pandora",
+      "title": "Pandora's Blocks",
       "developer": "",
       "year": "",
       "system": "",

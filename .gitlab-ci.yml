@@ -5,14 +5,13 @@ image: alpine
 
 pages:
   stage: deploy
+  before_script:
+    - apk update
+    - apk add --no-cache bash python3 py3-pip virtualenv jq zip  # Install necessary packages
+    - python3 -m venv /tmp/yq-env                      # Create a virtual environment
+    - . /tmp/yq-env/bin/activate                       # Activate the virtual environment
+    - pip3 install yq                                  # Install the Python-based yq
   script:
-    - apk update && apk add zip
-    - apk add jq bash
-    - apk add python3 py3-pip
-    - pip3 install pipx
-    - pipx ensurepath  # Add pipx to your PATH
-    - source ~/.profile  # or ~/.bashrc, etc. to update your PATH
-    - pipx install yq
     - bash scripts/generate_gamelist.sh
     - cd public
     - zip -r games.zip games

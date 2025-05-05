@@ -9,7 +9,7 @@ pages:
     - apk update && apk add zip
     - apk add jq bash
     - apk add python3 py3-pip
-    - pip3 install yq pipx
+    - pip3 install pipx
     - pipx ensurepath  # Add pipx to your PATH
     - source ~/.profile  # or ~/.bashrc, etc. to update your PATH
     - pipx install yq

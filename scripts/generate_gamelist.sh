@@ -11,32 +11,22 @@ LAUNCHER_PAGE="/play.html"
 
 # --- Core Mapping (Directory name -> EJS_core name) ---
 get_core_from_dir() {
-    # Input is the directory name (e.g., "SNES", "MEGADRIVE")
-    local dir_name="$1"
-    # Recommend using lowercase for matching and output for consistency
-    local lower_dir_name=$(echo "$dir_name" | tr '[:upper:]' '[:lower:]')
-
-    case "$lower_dir_name" in
-        # --- Your Mappings ---       # --- Likely EmulatorJS Core ID ---
-        mame|arcade|fbneo) echo "arcade" ;;    # OK
-        atari2600)         echo "a26" ;;       # Changed: 'a26' or 'stella' are common
-        gba)               echo "gba" ;;       # OK (or sometimes 'mGBA')
-        gameboy)           echo "gambatte" ;;  # Changed: 'gambatte' is common for GB/GBC
-        snes|sfc)          echo "snes9x" ;;    # Changed: 'snes9x' is the typical core name
-        nes|fc)            echo "nes" ;;       # OK
-        n64)               echo "mupen64plus_next" ;; # Changed: This is common for N64
-        megadrive|genesis|md) echo "genesis_plus_gx" ;; # Changed: Handles MD/Gen, MS, GG, SegaCD
-        psx|ps1)           echo "duckstation" ;; # Changed: 'duckstation' or 'mednafen_psx'
-        sms)               echo "genesis_plus_gx" ;; # Changed: Often handled by the Genesis core
-
+    case "$1" in
+        mame|arcade|fbneo) echo "arcade" ;; # Map mame, arcade, fbneo folders to 'arcade' core
+        ATARI2600) echo "atari2600" ;;
+        GBA)      echo "gba" ;;
+        GAMEBOY)      echo "gb" ;;
+        SNES) echo "snes" ;; # Map snes, sfc folders to 'snes9x' core
+        NES)   echo "nes" ;;    # Map nes, fc folders to 'nes' core
+        N64)   echo "n64" ;;
+        MEGADRIVE) echo "segaMD" ;;
+        PSX) echo "psx" ;;
+        SMS) echo "segaMS" ;;
         # Add mappings for other systems/cores here
-        # Example: wonderswan -> "mednafen_wswan"
-        # Example: pcengine -> "mednafen_pce"
-        # Example: virtualboy -> "mednafen_vb"
-
-        *)                 echo "" ;; # Return empty if no mapping found
+        *)        echo "" ;; # Return empty if no mapping found
     esac
 }
+
 # --- Check tools ---
 if ! command -v yq &> /dev/null || ! command -v jq &> /dev/null; then
     echo "Error: 'yq' (pip version) and 'jq' are required."
@@ -63,49 +53,68 @@ shopt -s nullglob
 for game_dir in "$GAMES_DIR"/*/; do
     game_id=$(basename "$game_dir")
     metadata_file="${game_dir}metadata.yaml"
-    expected_cover_file="${game_dir}cover.png"
+    expected_cover_file="${game_dir}cover.png" # Path based on convention
     page_url="${LAUNCHER_PAGE}?game=${game_id}"
 
     echo "Processing Game ID: $game_id"
 
+    # --- Determine Title: Default to game_id, override if metadata has valid title --- # <<< --- START MISSING BLOCK 1 ---
+    title="$game_id" # DEFAULT title is the game ID (folder name)
+    echo "  - Default Title: $title"
 
-    # --- Determine Title ---
-    # ... (title logic remains the same) ...
-    echo "  - Title: $title"
+    if [ -f "$metadata_file" ]; then
+        # Try to parse YAML and extract title (default to empty string if key missing)
+        metadata_json=$(yq '.' "$metadata_file" 2>/dev/null || echo "INVALID_YAML")
+        if [ "$metadata_json" != "INVALID_YAML" ] && echo "$metadata_json" | jq -e . > /dev/null 2>&1; then
+            metadata_title=$(echo "$metadata_json" | jq -r '.title // ""')
 
-    # --- Determine Cover Art ---
-    # ... (cover art logic remains the same) ...
-    echo "  - Cover Path: $cover_art_abs"
-
+            if [ -n "$metadata_title" ]; then # Check if extracted title is non-empty
+                title="$metadata_title" # Override default title
+                echo "  - Title Override from metadata.yaml: $title"
+            else
+                 echo "  - metadata.yaml found, but 'title' key missing or empty. Using default title ($game_id)."
+            fi
+        else
+            echo "  - metadata.yaml found but failed to parse. Using default title ($game_id)."
+        fi
+    else
+        echo "  - No metadata.yaml found. Using default title ($game_id)."
+    fi
+    # 'title' variable now holds the final title to use
+                                                                                       # <<< --- END MISSING BLOCK 1 ---
+    # --- Determine Cover Art ---                                                      # <<< --- START MISSING BLOCK 2 ---
+    cover_art_abs="/$DEFAULT_COVER" # Start with default path
+    if [ -f "$expected_cover_file" ]; then
+        # If cover.png exists, set the absolute web path correctly
+        cover_art_abs="/games/$game_id/cover.png" # Use convention path
+    else
+        # If cover.png missing, log warning and keep the default path
+        echo "Warning: Expected cover file not found: [$expected_cover_file]. Using default."
+    fi
+    echo "  - Cover Path: $cover_art_abs" # This now uses the correctly determined path
+                                                                                       # <<< --- END MISSING BLOCK 2 ---
     # --- Find ROM and Infer Core ---
-    core=""          # Initialize core
-    rom_path=""      # Initialize rom_path
+    core=""
+    rom_path=""
+    rom_missing=false
     found_rom=$(find "$ROMS_DIR" -maxdepth 2 -type f -name "$game_id.*" -print -quit)
 
     if [ -n "$found_rom" ]; then
-        # ROM Found - Proceed as before
         rom_subdir=$(basename "$(dirname "$found_rom")")
         core=$(get_core_from_dir "$rom_subdir")
         rom_path="/$(echo "$found_rom" | sed 's|public/||')" # Web path
 
         if [ -z "$core" ]; then
-             # Keep this warning standard, or color it differently if you like
              echo "Warning: No core mapping found for ROM directory: [$rom_subdir] for game [$game_id]."
         fi
         echo "  - Found ROM: $rom_path"
         echo "  - Inferred Core: $core (from dir: $rom_subdir)"
-        # rom_missing remains false
     else
-        # ROM IS MISSING - Set flag and print COLORED warning
         rom_missing=true
-        # \033[37;41m sets FG White, BG Red. \033[0m resets.
         echo -e "\033[37;41mWarning: No ROM file found matching '$game_id.*' in $ROMS_DIR/*/\033[0m"
-        # core and rom_path remain empty
     fi
 
-    # --- Create JSON object (ALWAYS add the game now) ---
-    # Note: Using ${core:-null} passes the string "null" if core is empty/unset.
-    # Same for rom_path. jq --argjson treats the boolean correctly.
+    # --- Create JSON object ---
     game_json=$(jq -n \
                   --arg id "$game_id" \
                   --arg title "$title" \
@@ -113,7 +122,8 @@ for game_dir in "$GAMES_DIR"/*/; do
                   --arg pageUrl "$page_url" \
                   --arg core "${core:-null}" \
                   --arg romPath "${rom_path:-null}" \
-                  '{id: $id, title: $title, coverArt: $coverArt, pageUrl: $pageUrl, core: $core, romPath: $romPath}')
+                  --argjson missing "$rom_missing" \
+                  '{id: $id, title: $title, coverArt: $coverArt, pageUrl: $pageUrl, core: $core, romPath: $romPath, romMissing: $missing}')
 
     # --- Check if Featured / Add to List ---
     if [ "$game_id" == "$FEATURED_GAME_ID" ]; then
@@ -127,7 +137,6 @@ done
 shopt -u nullglob
 
 # --- Final Check for Featured Game ---
-# ... (check remains the same) ...
 featured_id_check=$(echo "$json_output" | jq -r '.gameOfTheWeek.id')
 if [ "$featured_id_check" == "null" ] || [ "$featured_id_check" != "$FEATURED_GAME_ID" ]; then
      echo "Warning: Featured game '$FEATURED_GAME_ID' specified in '$FEATURED_ID_FILE' was not found or processed correctly (missing ROM/core?)."

@@ -1,132 +1,148 @@
 {
   "gameOfTheWeek": {
-    "id": "dodonpachi",
-    "title": "",
-    "coverArt": "",
-    "pageUrl": "/play.html?game=dodonpachi",
+    "id": "ddonpach",
+    "title": "ddonpach",
+    "coverArt": "/games/ddonpach/cover.png",
+    "pageUrl": "/play.html?game=ddonpach",
     "core": "arcade",
-    "romPath": "/roms/mame/dodonpachi.zip"
+    "romPath": "/roms/mame/ddonpach.zip",
+    "romMissing": false
   },
   "previousGames": [
     {
       "id": "1943",
-      "title": "",
-      "coverArt": "",
+      "title": "1943",
+      "coverArt": "/games/1943/cover.png",
       "pageUrl": "/play.html?game=1943",
       "core": "arcade",
-      "romPath": "/roms/mame/1943.zip"
+      "romPath": "/roms/mame/1943.zip",
+      "romMissing": false
     },
     {
       "id": "apotris",
-      "title": "",
-      "coverArt": "",
+      "title": "apotris",
+      "coverArt": "/assets/images/placeholder_thumb.png",
       "pageUrl": "/play.html?game=apotris",
       "core": "gba",
-      "romPath": "/roms/GBA/apotris.gba"
+      "romPath": "/roms/GBA/apotris.gba",
+      "romMissing": false
     },
     {
       "id": "arkanoid",
-      "title": "",
-      "coverArt": "",
+      "title": "arkanoid",
+      "coverArt": "/assets/images/placeholder_thumb.png",
       "pageUrl": "/play.html?game=arkanoid",
       "core": "arcade",
-      "romPath": "/roms/mame/arkanoid.zip"
+      "romPath": "/roms/mame/arkanoid.zip",
+      "romMissing": false
     },
     {
       "id": "berzerk",
-      "title": "",
-      "coverArt": "",
+      "title": "berzerk",
+      "coverArt": "/assets/images/placeholder_thumb.png",
       "pageUrl": "/play.html?game=berzerk",
       "core": "arcade",
-      "romPath": "/roms/mame/berzerk.zip"
+      "romPath": "/roms/mame/berzerk.zip",
+      "romMissing": false
     },
     {
       "id": "findluigi",
-      "title": "",
-      "coverArt": "",
+      "title": "findluigi",
+      "coverArt": "/assets/images/placeholder_thumb.png",
       "pageUrl": "/play.html?game=findluigi",
-      "core": "snes9x",
-      "romPath": "/roms/SNES/findluigi.sfc"
+      "core": "snes",
+      "romPath": "/roms/SNES/findluigi.sfc",
+      "romMissing": false
     },
     {
       "id": "gyruss",
-      "title": "",
-      "coverArt": "",
+      "title": "gyruss",
+      "coverArt": "/assets/images/placeholder_thumb.png",
       "pageUrl": "/play.html?game=gyruss",
       "core": "arcade",
-      "romPath": "/roms/mame/gyruss.zip"
+      "romPath": "/roms/mame/gyruss.zip",
+      "romMissing": false
     },
     {
       "id": "outrun",
-      "title": "",
-      "coverArt": "",
+      "title": "outrun",
+      "coverArt": "/assets/images/placeholder_thumb.png",
       "pageUrl": "/play.html?game=outrun",
       "core": "arcade",
-      "romPath": "/roms/mame/outrun.zip"
+      "romPath": "/roms/mame/outrun.zip",
+      "romMissing": false
     },
     {
       "id": "pacman",
-      "title": "",
-      "coverArt": "",
+      "title": "pacman",
+      "coverArt": "/assets/images/placeholder_thumb.png",
       "pageUrl": "/play.html?game=pacman",
       "core": "arcade",
-      "romPath": "/roms/mame/pacman.zip"
+      "romPath": "/roms/mame/pacman.zip",
+      "romMissing": false
     },
     {
       "id": "pacmance",
-      "title": "",
-      "coverArt": "",
+      "title": "pacmance",
+      "coverArt": "/assets/images/placeholder_thumb.png",
       "pageUrl": "/play.html?game=pacmance",
       "core": "nes",
-      "romPath": "/roms/NES/pacmance.nes"
+      "romPath": "/roms/NES/pacmance.nes",
+      "romMissing": false
     },
     {
       "id": "pandora",
-      "title": "",
-      "coverArt": "",
+      "title": "pandora",
+      "coverArt": "/assets/images/placeholder_thumb.png",
       "pageUrl": "/play.html?game=pandora",
-      "core": "gambatte",
-      "romPath": "/roms/GAMEBOY/pandora.gbc"
+      "core": "gb",
+      "romPath": "/roms/GAMEBOY/pandora.gbc",
+      "romMissing": false
     },
     {
       "id": "pyoro64",
-      "title": "",
-      "coverArt": "",
+      "title": "pyoro64",
+      "coverArt": "/assets/images/placeholder_thumb.png",
       "pageUrl": "/play.html?game=pyoro64",
-      "core": "mupen64plus_next",
-      "romPath": "/roms/N64/pyoro64.n64"
+      "core": "n64",
+      "romPath": "/roms/N64/pyoro64.n64",
+      "romMissing": false
     },
     {
       "id": "scramble",
-      "title": "",
-      "coverArt": "",
+      "title": "scramble",
+      "coverArt": "/assets/images/placeholder_thumb.png",
       "pageUrl": "/play.html?game=scramble",
       "core": "arcade",
-      "romPath": "/roms/mame/scramble.zip"
+      "romPath": "/roms/mame/scramble.zip",
+      "romMissing": false
     },
     {
       "id": "smashremix",
-      "title": "",
-      "coverArt": "",
+      "title": "smashremix",
+      "coverArt": "/assets/images/placeholder_thumb.png",
       "pageUrl": "/play.html?game=smashremix",
-      "core": "mupen64plus_next",
-      "romPath": "/roms/N64/smashremix.n64"
+      "core": "n64",
+      "romPath": "/roms/N64/smashremix.n64",
+      "romMissing": false
     },
     {
       "id": "snake",
-      "title": "",
-      "coverArt": "",
+      "title": "snake",
+      "coverArt": "/assets/images/placeholder_thumb.png",
       "pageUrl": "/play.html?game=snake",
-      "core": "gambatte",
-      "romPath": "/roms/GAMEBOY/snake.gb"
+      "core": "gb",
+      "romPath": "/roms/GAMEBOY/snake.gb",
+      "romMissing": false
     },
     {
       "id": "sstriker",
-      "title": "",
-      "coverArt": "",
+      "title": "sstriker",
+      "coverArt": "/assets/images/placeholder_thumb.png",
       "pageUrl": "/play.html?game=sstriker",
       "core": "arcade",
-      "romPath": "/roms/mame/sstriker.zip"
+      "romPath": "/roms/mame/sstriker.zip",
+      "romMissing": false
     }
   ]
 }

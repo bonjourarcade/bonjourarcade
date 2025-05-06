@@ -9,10 +9,13 @@ body, html {
 
 .container {
     max-width: 1200px;
-    margin: 20px auto; /* Center container with some margin */
+    margin: 0 auto; /* Remove top/bottom margin on mobile */
     padding: 15px;
     background-color: #fff; /* White background for content area */
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    min-height: 100vh; /* Ensure container takes full viewport height */
+    display: flex;
+    flex-direction: column;
 }
 
 header h1 {
@@ -26,6 +29,7 @@ header h1 {
     display: flex;
     flex-wrap: wrap; /* Allow wrapping on smaller screens */
     gap: 30px; /* Space between columns */
+    flex: 1; /* Take up remaining space */
 }
 
 /* Featured Game Section (Left Column) */
@@ -161,21 +165,11 @@ header h1 {
 
 footer {
     text-align: center;
-    margin-top: 30px;
-    padding-top: 15px;
+    margin-top: auto; /* Push footer to bottom */
+    padding: 15px 0;
     border-top: 1px solid #eee;
     font-size: 0.9em;
     color: #777;
-}
-
-/* Basic Responsive Handling */
-@media (max-width: 768px) {
-    .main-content {
-        flex-direction: column; /* Stack columns on smaller screens */
-    }
-    .featured-section, .grid-section {
-        min-width: 100%; /* Take full width when stacked */
-    }
 }
 
 /* Header Flex Layout */
@@ -185,16 +179,20 @@ footer {
     justify-content: space-between;
     margin-bottom: 30px;
     gap: 18px;
+    flex-wrap: wrap; /* Allow wrapping on mobile */
 }
 .header-flex h1 {
     margin-bottom: 0;
     text-align: center;
     flex: 1;
+    min-width: 200px; /* Ensure title has enough space */
 }
 .header-actions {
     display: flex;
     align-items: center;
     gap: 16px;
+    flex-wrap: wrap; /* Allow wrapping on mobile */
+    justify-content: center; /* Center items when wrapped */
 }
 .header-flex .random-game-btn {
     margin: 0;
@@ -253,4 +251,67 @@ footer {
     pointer-events: none;
     opacity: 0.98;
     transition: opacity 0.15s;
+}
+
+/* Basic Responsive Handling */
+@media (max-width: 768px) {
+    .container {
+        margin: 0;
+        padding: 10px;
+        min-height: 90vh; /* Reduce min-height on mobile to lessen whitespace */
+    }
+    
+    .main-content {
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .featured-section, .grid-section {
+        min-width: 100%;
+    }
+    
+    .header-flex {
+        flex-direction: column;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .header-flex h1 {
+        order: -1;
+        margin-bottom: 10px;
+    }
+    
+    .header-actions {
+        width: 100%;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+    .header-actions #leaderboard-link {
+        width: 100%;
+        margin-bottom: 8px;
+    }
+    .header-actions .static-qr-code {
+        margin: 0 auto 0 auto;
+        display: block;
+    }
+    
+    .random-game-btn, #leaderboard-link {
+        min-width: 140px;
+        padding: 10px 20px;
+        font-size: 1em;
+    }
+    
+    .game-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 15px;
+    }
+    
+    footer {
+        margin-top: 10px;
+        padding: 10px 0 5px 0;
+        background: #f4f4f4;
+        border-radius: 0 0 10px 10px;
+    }
 }

@@ -11,3 +11,5 @@
 
 - Modifier le gamelist.json pour enlever les fields inutiles (on devrait pouvoir les guesser par le game_id)
 - Faire que le system show up dans le tooltip d'un jeu même s'il n'est pas spécifié dans le json
+
+- Remettre les fichuers trash où ils devraient être et modifier raccourci felx.cc pour que les scripts MiSTer fonctionnent encore. Documenter la commande curl à utiliser pour faire le setup sur MiSTer. Cela pourrait me servir pour synchroniser mes bébelles!

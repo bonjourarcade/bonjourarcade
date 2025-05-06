@@ -58,13 +58,11 @@
 
             try {
                 // Step 2: Fetch the master game list
-                console.log("Fetching game list: /gamelist.json");
                 const listResponse = await fetch('/gamelist.json'); // Fetch from site root
                 if (!listResponse.ok) {
                     throw new Error(`Failed to fetch game list '/gamelist.json' (Status: ${listResponse.status})`);
                 }
                 const gameData = await listResponse.json();
-                console.log("Game list fetched successfully.");
 
                 // Step 3: Find the specific game data using the gameId
                 console.log(`Searching for game ID '${gameId}' in game list...`);

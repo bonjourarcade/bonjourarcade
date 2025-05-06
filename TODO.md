@@ -4,3 +4,4 @@
   game, the tooltip is always white regardless of the theme
 - Footer doesn't update on dark theme
 - Have a field to type game id and launch game directly
+- Allow to set game specific controls

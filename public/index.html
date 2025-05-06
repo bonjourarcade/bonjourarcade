@@ -14,6 +14,12 @@
                     <a id="leaderboard-link" href="#">Leaderboards</a>
                     <img src="assets/images/my_app_qr.png" alt="QR Code" class="static-qr-code">
                 </div>
+                <button id="theme-toggle-btn" style="margin-top:10px;font-size:1.5em;background:none;border:none;cursor:pointer;" aria-label="Switch theme">
+                  <svg id="theme-toggle-icon" width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;">
+                    <circle cx="14" cy="14" r="12" stroke="#222" stroke-width="2" fill="#222"/>
+                    <rect x="14" y="2" width="12" height="24" fill="#fff"/>
+                  </svg>
+                </button>
             </div>
         </header>
 
@@ -42,5 +48,45 @@
     </div>
 
     <script src="assets/js/main.js"></script>
+    <script>
+    // Theme toggling logic
+    function setTheme(theme) {
+        document.body.classList.remove('theme-light', 'theme-dark');
+        document.body.classList.add(theme);
+        // Update icon
+        const icon = document.getElementById('theme-toggle-icon');
+        if (icon) {
+          if (theme === 'theme-dark') {
+            icon.querySelector('circle').setAttribute('stroke', '#f4f4f4');
+            icon.querySelector('circle').setAttribute('fill', '#f4f4f4');
+            icon.querySelector('rect').setAttribute('fill', '#222');
+          } else {
+            icon.querySelector('circle').setAttribute('stroke', '#222');
+            icon.querySelector('circle').setAttribute('fill', '#222');
+            icon.querySelector('rect').setAttribute('fill', '#fff');
+          }
+        }
+    }
+    function getSystemTheme() {
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'theme-dark' : 'theme-light';
+    }
+    // On load: use localStorage or system preference
+    const savedTheme = localStorage.getItem('theme');
+    const initialTheme = savedTheme || getSystemTheme();
+    setTheme(initialTheme);
+    // Toggle button
+    document.getElementById('theme-toggle-btn').onclick = function() {
+        const current = document.body.classList.contains('theme-dark') ? 'theme-dark' : 'theme-light';
+        const next = current === 'theme-dark' ? 'theme-light' : 'theme-dark';
+        setTheme(next);
+        localStorage.setItem('theme', next);
+    };
+    // Listen for system theme changes if user hasn't chosen
+    if (!savedTheme) {
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+            setTheme(e.matches ? 'theme-dark' : 'theme-light');
+        });
+    }
+    </script>
 </body>
 </html>

@@ -5,3 +5,6 @@
 - Footer doesn't update on dark theme
 - Have a field to type game id and launch game directly
 - Allow to set game specific controls
+
+- Modifier le gamelist.json pour enlever les fields inutiles (on devrait pouvoir les guesser par le game_id)
+- Faire que le system show up dans le tooltip d'un jeu même s'il n'est pas spécifié dans le json

@@ -7,7 +7,7 @@ ROMS_DIR="public/roms"
 OUTPUT_FILE="public/gamelist.json"
 FEATURED_ID_FILE="game-of-the-week"
 DEFAULT_COVER="assets/images/placeholder_thumb.png" # Relative to public root
-LAUNCHER_PAGE="/play.html"
+LAUNCHER_PAGE="/play"
 
 # --- Core Mapping (Directory name -> EJS_core name) ---
 get_core_from_dir() {
@@ -62,7 +62,6 @@ for game_dir in "$GAMES_DIR"/*/; do
     title="$game_id" # DEFAULT title is the game ID (folder name)
     developer=""
     year=""
-    system=""
     genre=""
     hide=""
     echo "  - Default Title: $title"
@@ -74,7 +73,6 @@ for game_dir in "$GAMES_DIR"/*/; do
             title=$(echo "$metadata_json" | jq -r '.title // ""')
             developer=$(echo "$metadata_json" | jq -r '.developer // ""')
             year=$(echo "$metadata_json" | jq -r '.year // ""')
-            system=$(echo "$metadata_json" | jq -r '.system // ""')
             genre=$(echo "$metadata_json" | jq -r '.genre // ""')
             hide=$(echo "$metadata_json" | jq -r '.hide // ""')
         else
@@ -123,14 +121,13 @@ for game_dir in "$GAMES_DIR"/*/; do
                   --arg title "$title" \
                   --arg developer "$developer" \
                   --arg year "$year" \
-                  --arg system "$system" \
                   --arg genre "$genre" \
                   --arg hide "$hide" \
                   --arg coverArt "$cover_art_abs" \
                   --arg pageUrl "$page_url" \
                   --arg core "${core:-null}" \
                   --arg romPath "${rom_path:-null}" \
-                  '{id: $id, title: $title, developer: $developer, year: $year, system: $system, genre: $genre, hide: $hide, coverArt: $coverArt, pageUrl: $pageUrl, core: $core, romPath: $romPath}')
+                  '{id: $id, title: $title, developer: $developer, year: $year, genre: $genre, hide: $hide, coverArt: $coverArt, pageUrl: $pageUrl, core: $core, romPath: $romPath}')
 
     # --- Check if Featured / Add to List ---
     if [ "$game_id" == "$FEATURED_GAME_ID" ]; then

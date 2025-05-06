@@ -105,7 +105,15 @@
                 // Step 8: Assign Fetched Settings Globally
                 window.EJS_color = settings.EJS_color;
                 window.EJS_pathtodata = settings.EJS_pathtodata; // Path to EJS core files/assets
-                console.log(`Emulator Settings Loaded: Color=${window.EJS_color}, PathToData=${window.EJS_pathtodata}`);
+                window.EJS_backgroundBlur = settings.EJS_backgroundBlur;
+                window.EJS_alignStartButton = settings.EJS_alignStartButton;
+                window.EJS_backgroundImage =
+                `${window.location.protocol}//${window.location.hostname}:${window.location.port}/games/${gameId}/cover.png`; // Set background to game's cover
+                console.log(`Emulator Settings Loaded:",
+                  "Color=${window.EJS_color}",
+                  "PathToData=${window.EJS_pathtodata}",
+                  "BackgroundBlur=${window.EJS_backgroundBlur}",
+                  "BackgroundImage=${window.EJS_backgroundImage}"`);
 
                 // Step 9: Fetch Controls JSON based on Core
                 const coreName = window.EJS_core;

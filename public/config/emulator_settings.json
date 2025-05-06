@@ -1,4 +1,5 @@
 {
-  "EJS_color": "#0064ff",
+  "EJS_backgroundBlur": "true",
+  "EJS_alignStartButton": "center",
   "EJS_pathtodata": "https://cdn.emulatorjs.org/stable/data/"
 }

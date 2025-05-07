@@ -16,3 +16,5 @@
 
 - Joystick emoji doesn't work on RPi, use image?
 - If /play?game= is empty, redirect to home
+
+- Handle the leaderboard link in a config?

@@ -1,5 +1,9 @@
 {
   "EJS_backgroundBlur": "true",
-  "EJS_alignStartButton": "center",
-  "EJS_pathtodata": "https://cdn.emulatorjs.org/stable/data/"
+  "EJS_alignStartButton": "bottom",
+  "EJS_pathtodata": "https://cdn.emulatorjs.org/stable/data/",
+  "EJS_AdUrl": "/ola.html",
+  "EJS_AdTimer": 0,
+  "EJS_AdMode": 0,
+  "EJS_AdSize": ["400px","333px"]
 }

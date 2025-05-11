@@ -50,9 +50,7 @@
             const gameId = urlParams.get('game');
 
             if (!gameId) {
-                showLauncherError("No game specified in the URL.");
-                console.error("URL parameter 'game' is missing.");
-                return;
+                window.location.href = "../";
             }
             console.log(`Attempting to load game with ID: ${gameId}`);
 

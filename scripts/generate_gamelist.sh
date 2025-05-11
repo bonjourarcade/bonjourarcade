@@ -21,7 +21,7 @@ get_core_from_dir() {
         SNES) echo "snes" ;; # Map snes, sfc folders to 'snes' core
         NES)   echo "nes" ;;    # Map nes, fc folders to 'nes' core
         N64)   echo "n64" ;;
-        MEGADRIVE) echo "segaMD" ;;
+        GENESIS|MEGADRIVE) echo "segaMD" ;;
         PSX) echo "psx" ;;
         SMS) echo "segaMS" ;;
         # Add mappings for other systems/cores here

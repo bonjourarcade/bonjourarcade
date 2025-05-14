@@ -14,7 +14,8 @@ LAUNCHER_PAGE="/play"
 # --- Core Mapping (Directory name -> EJS_core name) ---
 get_core_from_dir() {
     case "$1" in
-        mame|arcade|fbneo) echo "arcade" ;; # Map mame, arcade, fbneo folders to 'arcade' core
+        arcade|fbneo) echo "arcade" ;; # Map mame, arcade, fbneo folders to 'arcade' core
+        mame) echo "mame2003" ;; # Map mame, arcade, fbneo folders to 'arcade' core
         ATARI2600) echo "atari2600" ;;
         GBA)      echo "gba" ;;
         GAMEBOY)      echo "gb" ;;

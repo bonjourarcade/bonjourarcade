@@ -155,6 +155,16 @@ find "$ROMS_DIR" -maxdepth 2 -type f -not -path "*/\.*" | while read -r rom_file
         printf "\033[30;43mWarning: Expected cover file not found: [$expected_cover_file]. Using default.\033[0m\n"
     fi
 
+    # --- Use save state if exists ---
+    save_state="" # Default, no save state
+    expected_save_state="${game_dir}save.state"
+    if [ -f "$expected_save_state" ]; then
+        # If save.state exists, set the absolute web path correctly
+        save_state="/games/$game_id/save.state"
+        echo "  - Found save state: $save_state"
+    fi
+
+
     # --- Check if core mapping was found ---
     if [ -z "$core" ]; then
         printf "\033[30;43mWarning: No core mapping found for ROM directory: [$rom_subdir] for game [$game_id].\033[0m\n"
@@ -172,7 +182,8 @@ find "$ROMS_DIR" -maxdepth 2 -type f -not -path "*/\.*" | while read -r rom_file
               --arg pageUrl "$page_url" \
               --arg core "${core:-null}" \
               --arg romPath "${rom_path:-null}" \
-              '{id: $id, title: $title, developer: $developer, year: $year, genre: $genre, hide: $hide, coverArt: $coverArt, pageUrl: $pageUrl, core: $core, romPath: $romPath}')
+              --arg saveState "${save_state:-}" \
+              '{id: $id, title: $title, developer: $developer, year: $year, genre: $genre, hide: $hide, coverArt: $coverArt, pageUrl: $pageUrl, core: $core, romPath: $romPath, saveState: $saveState}')
 
     # --- Check if Featured / Add to List ---
     if [ "$game_id" = "$FEATURED_GAME_ID" ]; then

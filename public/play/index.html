@@ -90,7 +90,7 @@
                 window.EJS_player = "#game";        // Emulator renders in the #game div
                 window.EJS_core = selectedGame.core;    // Core name from gamelist.json
                 window.EJS_gameUrl = selectedGame.romPath; // ROM path from gamelist.json
-                window.EJS_loadStateURL = selectedGame.saveState;
+                window.EJS_loadStateURL = selectedGame.saveState !== '' ? selectedGame.saveState : undefined;
 
                 // Step 7: Fetch General Emulator Settings
                 console.log("Fetching emulator settings: /config/emulator_settings.json");

@@ -35,3 +35,9 @@ In `public/games/game_id`, two metadata files are supported:
 You can do this in [public/config](public/config/), look for the
 `controls_*.json` files. Follow [this documentation from
 EmulatorJS](https://emulatorjs.org/docs4devs/control-mapping).
+
+# Automatically load a save state when starting a game
+
+Create a state file by clicking on the "floppy" button from the
+emulator. Then move and rename this file to
+`public/games/<game_id>/save.state`.

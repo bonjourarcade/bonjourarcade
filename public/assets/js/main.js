@@ -6,6 +6,24 @@ document.addEventListener('DOMContentLoaded', () => {
 /**
  * Fetches the gamelist.json file and triggers functions to update the page.
  */
+// Detect if browser is Chromium-based
+function isChromiumBased() {
+    const userAgent = navigator.userAgent.toLowerCase();
+    return userAgent.includes('chrome') ||
+           userAgent.includes('chromium') ||
+           userAgent.includes('edg') ||
+           userAgent.includes('brave');
+}
+
+// Check browser and show warning if needed
+function checkBrowser() {
+    if (!isChromiumBased()) {
+        document.getElementById('browser-warning').style.display = 'block';
+    }
+}
+
+// Check browser when page loads
+window.addEventListener('DOMContentLoaded', checkBrowser);
 async function fetchGameData() {
     try {
         // Use absolute path from root, matching HTML links/server root

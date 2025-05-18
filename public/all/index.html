@@ -1,72 +1,116 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>All games</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      background: #f0f0f0;
-      margin: 0;
-      padding: 2rem;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-      gap: 1rem;
-    }
-    .game {
-      background: white;
-      border-radius: 8px;
-      overflow: hidden;
-      text-align: center;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      transition: transform 0.2s;
-    }
-    .game:hover {
-      transform: scale(1.03);
-    }
-    .game img {
-      width: 100%;
-      height: 150px;
-      object-fit: cover;
-      display: block;
-    }
-    .game-title {
-      padding: 0.5rem;
-      font-size: 0.95rem;
-    }
-  </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>All games</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background: #f0f0f0;
+            margin: 0;
+            padding: 2rem;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+        .game {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        .game:hover {
+            transform: scale(1.03);
+        }
+        .game img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            display: block;
+        }
+        .game-title {
+            padding: 0.5rem;
+            font-size: 0.95rem;
+        }
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        .random-game-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.25rem;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .random-game-btn:hover {
+            background-color: #45a049;
+        }
+    </style>
 </head>
 <body>
-  <h1>You have found the hidden game stash.</h1>
-  <h2>There is nothing I can hide from you.</h2>
-  <div class="grid" id="gameGrid"></div>
+    <div class="header-content">
+        <div>
+            <h1>You have found the hidden game stash.</h1>
+            <h2>There is nothing I can hide from you.</h2>
+        </div>
+        <button id="random-game-btn" class="random-game-btn">Play Random Game</button>
+    </div>
 
-  <script>
-    fetch('/gamelist.json')
-      .then(res => res.json())
-      .then(data => {
-        const container = document.getElementById('gameGrid');
-        data.previousGames
-          .forEach(game => {
-            const div = document.createElement('div');
-            div.className = 'game';
-            div.innerHTML = `
-              <a href="${game.pageUrl}">
-                <img src="${game.coverArt}" alt="${game.title}">
-                <div class="game-title">${game.title}</div>
-              </a>
-            `;
-            container.appendChild(div);
-          });
-      })
-      .catch(err => {
-        console.error('Error loading games.json:', err);
-        document.getElementById('gameGrid').textContent = "Failed to load game data.";
-      });
-  </script>
+    <div class="grid" id="gameGrid"></div>
+
+    <script>
+        // Store all games data globally so we can access it for the random button
+        let gamesData = [];
+
+        // Function to select a random game from the list
+        function playRandomGame() {
+            if (gamesData.length > 0) {
+                const randomIndex = Math.floor(Math.random() * gamesData.length);
+                const randomGame = gamesData[randomIndex];
+                window.location.href = randomGame.pageUrl;
+            } else {
+                console.error('No games available to select from');
+            }
+        }
+
+        // Add event listener to random game button
+        document.getElementById('random-game-btn').addEventListener('click', playRandomGame);
+
+        // Fetch and render games
+        fetch('/gamelist.json')
+            .then(res => res.json())
+            .then(data => {
+                // Store the games data globally
+                gamesData = data.previousGames;
+
+                const container = document.getElementById('gameGrid');
+                gamesData.forEach(game => {
+                    const div = document.createElement('div');
+                    div.className = 'game';
+                    div.innerHTML = `
+                        <a href="${game.pageUrl}">
+                            <img src="${game.coverArt}" alt="${game.title}">
+                            <div class="game-title">${game.title}</div>
+                        </a>
+                    `;
+                    container.appendChild(div);
+                });
+            })
+            .catch(err => {
+                console.error('Error loading games.json:', err);
+                document.getElementById('gameGrid').textContent = "Failed to load game data.";
+            });
+    </script>
 </body>
 </html>
-

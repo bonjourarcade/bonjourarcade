@@ -56,6 +56,18 @@
         .random-game-btn:hover {
             background-color: #45a049;
         }
+        .browser-warning {
+            background-color: #ffecb3;
+            border-left: 4px solid #ff9800;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            display: none; /* Hidden by default */
+        }
+        .browser-warning p {
+            margin: 0;
+            font-size: 0.95rem;
+        }
     </style>
 </head>
 <body>
@@ -65,6 +77,10 @@
             <h2>There is nothing I can hide from you.</h2>
         </div>
         <button id="random-game-btn" class="random-game-btn">Play Random Game</button>
+    </div>
+
+    <div id="browser-warning" class="browser-warning">
+        <p><strong>Note:</strong> For the best gaming experience, we recommend using a Chromium-based browser like Google Chrome, Microsoft Edge, or Brave. Some games may not run optimally in your current browser.</p>
     </div>
 
     <div class="grid" id="gameGrid"></div>
@@ -84,8 +100,27 @@
             }
         }
 
+        // Detect if browser is Chromium-based
+        function isChromiumBased() {
+            const userAgent = navigator.userAgent.toLowerCase();
+            return userAgent.includes('chrome') ||
+                   userAgent.includes('chromium') ||
+                   userAgent.includes('edg') ||
+                   userAgent.includes('brave');
+        }
+
+        // Check browser and show warning if needed
+        function checkBrowser() {
+            if (!isChromiumBased()) {
+                document.getElementById('browser-warning').style.display = 'block';
+            }
+        }
+
         // Add event listener to random game button
         document.getElementById('random-game-btn').addEventListener('click', playRandomGame);
+
+        // Check browser when page loads
+        window.addEventListener('DOMContentLoaded', checkBrowser);
 
         // Fetch and render games
         fetch('/gamelist.json')

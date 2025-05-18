@@ -12,6 +12,19 @@ body.theme-light {
     background-image: repeating-linear-gradient(0deg, #bbb 0, #bbb 1px, transparent 1px, transparent 24px),
                       repeating-linear-gradient(90deg, #bbb 0, #bbb 1px, transparent 1px, transparent 24px);
 }
+.browser-warning {
+    background-color: #ffecb3;
+    border-left: 4px solid #ff9800;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    display: none; /* Hidden by default */
+}
+.browser-warning p {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #000000 !important; /* Force black text regardless of theme */
+}
 body.theme-dark {
     --background: #181a1b;
     --text-color: #f4f4f4;
@@ -405,4 +418,11 @@ body.theme-dark #game-of-the-week .game-meta-table,
 body.theme-dark #game-of-the-week .meta-label,
 body.theme-dark #game-of-the-week .meta-value {
     color: #e0e0e0;
+}
+/* Ensure visibility in dark mode */
+@media (prefers-color-scheme: dark) {
+    .browser-warning {
+        background-color: #664d00;
+        border-left-color: #ff9800;
+    }
 }

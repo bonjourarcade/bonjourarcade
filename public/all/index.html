@@ -94,6 +94,11 @@
                 // Store the games data globally
                 gamesData = data.previousGames;
 
+                // Sort games alphabetically by title
+                gamesData.sort((a, b) => {
+                    return a.title.localeCompare(b.title);
+                });
+
                 const container = document.getElementById('gameGrid');
                 gamesData.forEach(game => {
                     const div = document.createElement('div');

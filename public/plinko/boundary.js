@@ -17,6 +17,11 @@ class Boundary {
         this.w = w;
         this.h = h;
         World.add(world, this.body);
+        
+        // Default colors (White in HSB: H=0, S=0, B=100)
+        this.hue = 0;
+        this.saturation = 0;
+        this.brightness = 100;
     }
 
     /**
@@ -26,14 +31,26 @@ class Boundary {
      * Zach Robinson.
      */
     show() {
-        fill(255);
-        stroke(255);
+        // Use stored HSB colors
+        fill(this.hue, this.saturation, this.brightness);
+        stroke(this.hue, this.saturation, this.brightness);
         push();
         var pos = this.body.position;
         translate(pos.x, pos.y);
         rectMode(CENTER);
         rect(0, 0, this.w, this.h);
         pop();
+    }
+
+    /**
+     * Sets the color of the boundary to match the given particle.
+     * Assumes particle has HSB color properties (hue, saturation, brightness).
+     * @param {Particle} particle The particle whose color to match
+     */
+    setColor(particle) {
+        this.hue = particle.hue;
+        this.saturation = particle.saturation;
+        this.brightness = particle.brightness;
     }
 }
 

@@ -23,9 +23,10 @@ class Particle {
         this.body = null; // Body is null initially
         this.options = options; // Store options for later body creation
 
-        this.red = Math.max(Math.random() * 255, 20);
-        this.green = Math.max(Math.random() * 255, 210);
-        this.blue = Math.max(Math.random() * 255, 150);
+        // Generate random HSB colors (Hue 0-360, Saturation 80-100, Brightness 80-100 for vibrant colors)
+        this.hue = Math.random() * 360;
+        this.saturation = Math.max(Math.random() * 100, 80);
+        this.brightness = Math.max(Math.random() * 100, 80);
         this.pointValue = 0;
     }
 
@@ -49,8 +50,9 @@ class Particle {
      * Zach Robinson.
      */
     show() {
-        fill(this.red, this.green, this.blue);
-        stroke(this.red, this.green, this.blue);
+        // Use stored HSB colors for the main particle body
+        fill(this.hue, this.saturation, this.brightness);
+        stroke(this.hue, this.saturation, this.brightness);
         push();
         // Use body position if it exists, otherwise use stored position
         var pos = this.body ? this.body.position : { x: this.x, y: this.y };

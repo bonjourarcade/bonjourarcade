@@ -166,40 +166,64 @@ function handleCollision(event) {
 
 /**
  * Draws the canvas, calculates the spacing to be used when populating the initial static objects.
- * Sets canvas size based on window size.
+ * Sets canvas size based on window size and adjusts complexity for mobile.
  * 
  * Zach Robinson and Gemini.
  */
 function initializeCanvas() {
     console.log('initializeCanvas called.');
-    // Calculate new dimensions based on window size
-    var newWidth = windowWidth;
-    var newHeight = windowHeight * 2;
-
-    console.log(`Window size: ${windowWidth}x${windowHeight}`);
-
-    // Keep the original well width ratio to calculate new number of columns
-    const originalWellWidth = 600 / 11;
-    columns = floor(newWidth / originalWellWidth); // Calculate new number of columns
-
-    // Ensure a minimum number of columns
-    if (columns < 5) { // Set a reasonable minimum
-        columns = 5;
-    }
     
-    // Recalculate spacing based on new width and columns
-    var spacing = newWidth / columns;
+    var newWidth = windowWidth;
+    var newHeight;
 
-    // Calculate new number of rows based on height and spacing
-    // Assuming vertical spacing is roughly the same as horizontal spacing
-    rows = floor((newHeight - spacing) / spacing); // Adjust based on initial row offset
+    // Define a mobile breakpoint
+    const mobileBreakpoint = 1000; // pixels
 
-     // Ensure a minimum number of rows
-     if (rows < 10) { // Set a reasonable minimum
-        rows = 10;
+    if (newWidth < mobileBreakpoint) {
+        console.log('Applying Mobile Layout');
+        // Mobile layout: board height is screen height, fewer columns and rows
+        newHeight = windowHeight; // Board height is screen height
+        columns = 7; // Fewer columns for mobile
+         // Recalculate spacing based on new width and fixed mobile columns
+        var spacing = newWidth / columns;
+        // Target a higher number of rows for mobile within the screen height
+        // Let's aim for a fixed number like 15 rows if the height allows, otherwise calculate to fit
+        const targetMobileRows = 15;
+        rows = floor((newHeight - spacing * 1.5) / spacing); // Calculate based on height
+        if (rows < targetMobileRows) {
+            rows = rows; // Keep calculated rows if less than target
+        } else {
+            rows = targetMobileRows; // Limit to target rows if calculated is more
+        }
+         // Ensure a minimum number of rows for mobile
+         if (rows < 8) {
+             rows = 8;
+         }
+         console.log(`Mobile layout - Window size: ${windowWidth}x${windowHeight}`);
+         console.log(`Calculated mobile board dimensions: ${newWidth}x${newHeight}, columns: ${columns}, rows: ${rows}`);
+
+    } else {
+        console.log('Applying PC Layout');
+        // PC layout: board height is twice screen height, columns and rows based on original well ratio
+        newHeight = windowHeight * 2;
+        // Keep the original well width ratio to calculate new number of columns
+        const originalWellWidth = 600 / 11;
+        columns = floor(newWidth / originalWellWidth); // Calculate new number of columns
+        // Ensure a minimum number of columns for PC
+        if (columns < 11) { // Set a reasonable minimum
+            columns = 11;
+        }
+        // Recalculate spacing based on new width and columns
+        var spacing = newWidth / columns;
+        // Calculate new number of rows based on height and spacing
+        rows = floor((newHeight - spacing) / spacing); // Adjust based on initial row offset
+        // Ensure a minimum number of rows for PC
+         if (rows < 20) {
+            rows = 20;
+        }
+        console.log(`PC layout - Window size: ${windowWidth}x${windowHeight}`);
+        console.log(`Calculated PC board dimensions: ${newWidth}x${newHeight}, columns: ${columns}, rows: ${rows}`);
     }
-
-    console.log(`Calculated board dimensions: ${newWidth}x${newHeight}, columns: ${columns}, rows: ${rows}`);
 
     var canvas = createCanvas(newWidth, newHeight); // Set canvas size
     canvas.parent('game-container'); // Set the parent container for the canvas
@@ -235,15 +259,30 @@ function initializeCanvas() {
  * Zach Robinson and Gemini.
  */
 function populatePegs(spacing) {
-    let radius = 4;
-    // Iterate only up to rows - 5 to remove the last 5 rows of pegs
-    for (var row = 0; row < rows - 5; row++){
+    // Determine peg radius based on device type
+    const mobileBreakpoint = 1000; // Use the same breakpoint
+    let pegRadius = 4; // Default PC size
+    if (windowWidth < mobileBreakpoint) {
+        pegRadius = 6; // Larger size for mobile
+    }
+
+    // Determine how many rows of pegs to draw based on device and total rows
+    let rowsToDraw;
+    if (windowWidth < mobileBreakpoint) {
+         // On mobile, remove fewer rows from the bottom
+        rowsToDraw = rows > 3 ? rows - 3 : 0; // Remove 3 rows
+    } else {
+        // On PC, remove 5 rows from the bottom
+        rowsToDraw = rows > 5 ? rows - 5 : 0; // Remove 5 rows
+    }
+
+    for (var row = 0; row < rowsToDraw; row++){
         for (var col = 0; col < columns; col++){
             var x = col * spacing + spacing/2; // Center pegs in their column space
             if (row % 2 == 1)
                 x += spacing/2;
             var y = spacing + row * spacing;
-            var p = new Peg(x, y, radius);
+            var p = new Peg(x, y, pegRadius); // Use determined radius
             pegs.push(p);
         }
     }
@@ -309,7 +348,13 @@ function populateCanvasBoundaries() {
 function createNewParticle(x) {
     // This function is no longer directly used for dropping, particles are created on mouse movement
     // and added to world on mouse press.
-    var p = new Particle(x, 0, 12); // Use the provided x, fixed y above pegs
+    // Determine particle radius based on device type
+    const mobileBreakpoint = 1000; // Use the same breakpoint
+    let particleRadius = 12; // Default PC size
+    if (windowWidth < mobileBreakpoint) {
+        particleRadius = 36; // Doubled size for mobile
+    }
+    var p = new Particle(x, 12, particleRadius); // Use the provided x, fixed y above pegs, and determined radius
     particles.push(p);
     return p; // Return the created particle
 }
@@ -364,6 +409,7 @@ function drawBoundaries() {
 /**
  * Draws the labels for any particular point zone on the canvas.
  * Uses the loaded game list to display random game titles vertically.
+ * Sets text size based on device type.
  * 
  * Zach Robinson and Gemini.
  */
@@ -398,7 +444,15 @@ function drawPointLabels() {
         translate(xCoord, yCoord);
         rotate(PI / 2);
         textAlign(RIGHT, CENTER); // Changed alignment to RIGHT
-        textSize(20); // Increased text size for better readability
+        
+        // Adjust text size based on screen width (mobile vs PC)
+        const mobileBreakpoint = 1000; // Use the same breakpoint as for layout
+        if (windowWidth < mobileBreakpoint) {
+            textSize(60); // Increased text size for mobile
+        } else {
+            textSize(20); // Original text size for PC
+        }
+
         text(selectedGames[i], 0, 0);
         pop();
     }
@@ -609,13 +663,21 @@ function mousePressed() {
 function mouseMoved() {
     // Only show preview if a particle hasn't been dropped yet and mouse is within canvas width
     if (!particleDropped && mouseX > 0 && mouseX < width) {
+        // Determine particle radius based on device type for preview
+        const mobileBreakpoint = 1000; // Use the same breakpoint
+        let particleRadius = 12; // Default PC size
+        if (windowWidth < mobileBreakpoint) {
+            particleRadius = 36; // Doubled size for mobile
+        }
+
         if (!previewParticle) {
              // Create particle object for preview (no physics body yet)
-            previewParticle = new Particle(mouseX, 12, 12); 
+            previewParticle = new Particle(mouseX, 12, particleRadius); // Use determined radius
         } else {
-            // Update the preview particle's stored position to follow the mouse (only x-coordinate)
+            // Update the preview particle's stored position and radius
             previewParticle.x = mouseX;
-            // previewParticle.y = 12; // Y is fixed, no need to update constantly
+            previewParticle.y = 12; // Keep y fixed
+            previewParticle.r = particleRadius; // Update radius as well
         }
     } else if (particleDropped && previewParticle) {
         // If a particle has been dropped, remove the preview particle
@@ -664,12 +726,15 @@ function resetGame() {
 // Add a resize event listener to reinitialize the canvas and game elements
 function windowResized() {
     console.log('windowResized called.');
-    initializeCanvas();
-    // Reset game state on resize
-    particleDropped = false; // Reset dropped flag on resize
-    previewParticle = null; // Clear preview particle on resize
-    document.getElementById(totalScoreId).innerHTML = "&nbsp;"; // Clear the score display
-     if (randomizeButton) {
-        randomizeButton.style.display = 'block'; // Show randomize button on resize
+    // Check if dimensions have actually changed before reinitializing to avoid unnecessary resets
+    if (width !== windowWidth || height !== windowHeight * (width < 768 ? 1 : 2)) {
+         initializeCanvas();
+         // Reset game state on resize
+        particleDropped = false; // Reset dropped flag on resize
+        previewParticle = null; // Clear preview particle on resize
+        document.getElementById(totalScoreId).innerHTML = "&nbsp;"; // Clear the score display
+         if (randomizeButton) {
+            randomizeButton.style.display = 'block'; // Show randomize button on resize
+        }
     }
 }

@@ -68,6 +68,7 @@ Rocket Knight Adventures
 R-Type
 Section Z
 Seicross
+Sin & Punishment
 Snake
 Snap Jack
 Sorcer Striker
@@ -83,6 +84,7 @@ Time Pilot '84
 Track 'n Field
 Truxton
 Undeadline #already downloaded!
+Wild Guns
 Wonder Boy
 Wonder Boy III Monster Lair
 Xevious

@@ -278,7 +278,7 @@ function populatePegs(spacing) {
 
     for (var row = 0; row < rowsToDraw; row++){
         for (var col = 0; col < columns; col++){
-            var x = col * spacing + spacing/2; // Center pegs in their column space
+            var x = col * spacing + spacing/4; // Shift pegs to the left
             if (row % 2 == 1)
                 x += spacing/2;
             var y = spacing + row * spacing;

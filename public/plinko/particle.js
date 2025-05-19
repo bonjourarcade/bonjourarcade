@@ -55,7 +55,35 @@ class Particle {
         // Use body position if it exists, otherwise use stored position
         var pos = this.body ? this.body.position : { x: this.x, y: this.y };
         translate(pos.x, pos.y);
+        
+        // Get the rotation angle from the physics body if it exists
+        var angle = this.body ? this.body.angle : 0;
+        rotate(angle);
+        
+        // Draw the main particle body
         ellipse(0, 0, this.r * 2);
+        
+        // Draw eyes
+        fill(255); // White color for eyes
+        noStroke();
+        // Left eye - increased size from r/2 to r*0.7
+        ellipse(-this.r/2, -this.r/4, this.r * 0.7);
+        // Right eye - increased size from r/2 to r*0.7
+        ellipse(this.r/2, -this.r/4, this.r * 0.7);
+        
+        // Draw pupils
+        fill(0); // Black color for pupils
+        // Left pupil - increased size from r/4 to r*0.35
+        ellipse(-this.r/2, -this.r/4, this.r * 0.35);
+        // Right pupil - increased size from r/4 to r*0.35
+        ellipse(this.r/2, -this.r/4, this.r * 0.35);
+        
+        // Draw smile
+        noFill();
+        stroke(0); // Black color for smile
+        strokeWeight(this.r * 0.1); // Thickness of smile line
+        arc(0, this.r/4, this.r, this.r, 0, PI); // Draw a half circle for the smile
+        
         pop();
     }
 

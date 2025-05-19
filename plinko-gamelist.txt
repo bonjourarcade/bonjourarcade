@@ -22,14 +22,20 @@ Dig Dug
 Dolphin #Atari 2600
 Donkey Kong
 ESP Ra. De.
+Fantasy
+Fantasy Zone II - The Tears of Opa-Opa
+Firepower 2000
 Fire Shark #Same Same Same
 Flicky
 Frogger
-Galaga
+Galaga '88
+Galaxy Force 2
 Gauntlet
 Ghouls n Ghosts'
+Giga Wing
 Gradius
 Gun.Smoke
+Guwange
 H.E.R.O. #Atari 2600
 Kung Fu #NES
 Gunlock # Layer Section, Galactic Attack, Rayforce
@@ -37,6 +43,7 @@ Juno First # Atari 2600 only for now
 Lode Runner
 League Bowling
 Mad Planets
+Mario Bros.
 Metal Storm #Patched
 Metal Slug Super Vehicle-001
 Metal Slug 2
@@ -49,6 +56,7 @@ Ms Pac-Man
 Neo Turf Masters
 Ninja Baseball Batman
 Out Zone
+Pac-Land
 Parodius Da!
 Pengo
 Pitfall II
@@ -59,6 +67,7 @@ Pyoro 64
 Q*Bert
 QIX #bright NES hack
 R.C. Pro-AM
+Rainbow Islands
 River Raid #Atari 2600
 Road Fighter
 Robby Roto
@@ -68,10 +77,10 @@ Rocket Knight Adventures
 R-Type
 Section Z
 Seicross
-Sin & Punishment
 Snake
 Snap Jack
 Sorcer Striker
+Space Harrier
 Stampede #Atari 2600
 Strikers 1945 Plus
 Sunset Riders
@@ -79,6 +88,7 @@ Super Contra
 Super Hang-on
 Super Mario Bros.
 Tapper #Root Beer
+Tempest
 Time Pilot
 Time Pilot '84
 Track 'n Field

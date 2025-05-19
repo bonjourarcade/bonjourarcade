@@ -272,8 +272,8 @@ function populatePegs(spacing) {
          // On mobile, remove fewer rows from the bottom
         rowsToDraw = rows > 3 ? rows - 3 : 0; // Remove 3 rows
     } else {
-        // On PC, remove 5 rows from the bottom
-        rowsToDraw = rows > 5 ? rows - 5 : 0; // Remove 5 rows
+        // On PC, remove 3 rows from the bottom
+        rowsToDraw = rows > 3 ? rows - 3 : 0; // Remove 3 rows
     }
 
     for (var row = 0; row < rowsToDraw; row++){

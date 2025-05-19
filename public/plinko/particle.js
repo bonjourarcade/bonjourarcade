@@ -63,26 +63,22 @@ class Particle {
         // Draw the main particle body
         ellipse(0, 0, this.r * 2);
         
-        // Draw eyes
-        fill(255); // White color for eyes
-        noStroke();
-        // Left eye - increased size from r/2 to r*0.7
-        ellipse(-this.r/2, -this.r/4, this.r * 0.7);
-        // Right eye - increased size from r/2 to r*0.7
-        ellipse(this.r/2, -this.r/4, this.r * 0.7);
-        
-        // Draw pupils
-        fill(0); // Black color for pupils
-        // Left pupil - increased size from r/4 to r*0.35
-        ellipse(-this.r/2, -this.r/4, this.r * 0.35);
-        // Right pupil - increased size from r/4 to r*0.35
-        ellipse(this.r/2, -this.r/4, this.r * 0.35);
-        
-        // Draw smile
-        noFill();
-        stroke(0); // Black color for smile
-        strokeWeight(this.r * 0.1); // Thickness of smile line
-        arc(0, this.r/4, this.r, this.r, 0, PI); // Draw a half circle for the smile
+        // Draw star with yellow fill and black stroke (using HSB colors)
+        fill(60, 100, 100); // Yellow color for star in HSB (hue, saturation, brightness)
+        stroke(0); // Black outline (brightness 0 in HSB, or just 0)
+        strokeWeight(this.r * 0.1); // Thickness of outline proportional to particle size
+        beginShape();
+        for (let i = 0; i < 5; i++) {
+            // Outer point
+            let outerX = cos(i * TWO_PI / 5 - PI/2) * this.r * 0.8;
+            let outerY = sin(i * TWO_PI / 5 - PI/2) * this.r * 0.8;
+            vertex(outerX, outerY);
+            // Inner point
+            let innerX = cos((i + 0.5) * TWO_PI / 5 - PI/2) * this.r * 0.4;
+            let innerY = sin((i + 0.5) * TWO_PI / 5 - PI/2) * this.r * 0.4;
+            vertex(innerX, innerY);
+        }
+        endShape(CLOSE);
         
         pop();
     }

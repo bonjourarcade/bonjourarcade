@@ -350,7 +350,7 @@ function createNewParticle(x) {
     // and added to world on mouse press.
     // Determine particle radius based on device type
     const mobileBreakpoint = 1000; // Use the same breakpoint
-    let particleRadius = 12; // Default PC size
+    let particleRadius = 18; // Default PC size
     if (windowWidth < mobileBreakpoint) {
         particleRadius = 36; // Doubled size for mobile
     }
@@ -665,7 +665,7 @@ function mouseMoved() {
     if (!particleDropped && mouseX > 0 && mouseX < width) {
         // Determine particle radius based on device type for preview
         const mobileBreakpoint = 1000; // Use the same breakpoint
-        let particleRadius = 12; // Default PC size
+        let particleRadius = 18; // Default PC size
         if (windowWidth < mobileBreakpoint) {
             particleRadius = 36; // Doubled size for mobile
         }

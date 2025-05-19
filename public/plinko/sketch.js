@@ -8,8 +8,8 @@ var particles = [];
 var pegs = [];
 var boundaries = [];
 var particleFrequency = 60;
-var columns = 11;
-var rows = 20;
+var columns = 11; // This will be calculated dynamically now
+var rows = 20; // This will be calculated dynamically now
 let font,
     fontSize = 40;
 var totalScoreId = "score";
@@ -34,6 +34,15 @@ function preload() {
 }
 
 function loadGameList(data) {
+  console.log('Data received by loadGameList:', data);
+  if (!data || typeof data.filter !== 'function') {
+      console.error('loadGameList did not receive an array of strings:', data);
+      // Handle the error - maybe set gameList to empty or a default value
+      gameList = []; 
+      // Display an error message on the page
+      document.getElementById(totalScoreId).innerHTML = "Error loading game list.";
+      return;
+  }
   gameList = data.map(line => {
     const commentIndex = line.indexOf('#');
     if (commentIndex !== -1) {
@@ -157,30 +166,80 @@ function handleCollision(event) {
 
 /**
  * Draws the canvas, calculates the spacing to be used when populating the initial static objects.
+ * Sets canvas size based on window size.
  * 
  * Zach Robinson and Gemini.
  */
 function initializeCanvas() {
-    var canvas = createCanvas(600, 1400);
-    canvas.parent('game-container');
-    var spacing = width / columns;
+    console.log('initializeCanvas called.');
+    // Calculate new dimensions based on window size
+    var newWidth = windowWidth;
+    var newHeight = windowHeight * 2;
+
+    console.log(`Window size: ${windowWidth}x${windowHeight}`);
+
+    // Keep the original well width ratio to calculate new number of columns
+    const originalWellWidth = 600 / 11;
+    columns = floor(newWidth / originalWellWidth); // Calculate new number of columns
+
+    // Ensure a minimum number of columns
+    if (columns < 5) { // Set a reasonable minimum
+        columns = 5;
+    }
+    
+    // Recalculate spacing based on new width and columns
+    var spacing = newWidth / columns;
+
+    // Calculate new number of rows based on height and spacing
+    // Assuming vertical spacing is roughly the same as horizontal spacing
+    rows = floor((newHeight - spacing) / spacing); // Adjust based on initial row offset
+
+     // Ensure a minimum number of rows
+     if (rows < 10) { // Set a reasonable minimum
+        rows = 10;
+    }
+
+    console.log(`Calculated board dimensions: ${newWidth}x${newHeight}, columns: ${columns}, rows: ${rows}`);
+
+    var canvas = createCanvas(newWidth, newHeight); // Set canvas size
+    canvas.parent('game-container'); // Set the parent container for the canvas
+
+    // Clear existing pegs and boundaries before repopulating
+    pegs = [];
+    boundaries = [];
+
     populatePegs(spacing);
     populateCanvasBoundaries();
     populatePointZones(spacing);
+
+    // Resample selected games based on the new number of columns if gameList is loaded
+    if (gameList.length > 0) {
+        randomizeBoard(); // Use the existing function to resample and redraw
+    } else {
+         // If gameList wasn't loaded, set selectedGames to placeholders
+         selectedGames = [];
+         for(let i = 0; i < columns; i++) {
+             selectedGames.push('-- Loading Error --');
+         }
+         redraw(); // Redraw to show placeholders
+    }
+
 
 }
 
 /**
  * Populates the pegs using a nested for loop. Some manipulation for the spacing
  * of individual rows. Pushes all pegs to the object array designed to hold them.
+ * Uses the dynamically calculated number of columns and rows.
  * 
- * Zach Robinson.
+ * Zach Robinson and Gemini.
  */
 function populatePegs(spacing) {
     let radius = 4;
-    for (var row = 0; row < rows; row++){
+    // Iterate only up to rows - 5 to remove the last 5 rows of pegs
+    for (var row = 0; row < rows - 5; row++){
         for (var col = 0; col < columns; col++){
-            var x = col * spacing + 12;
+            var x = col * spacing + spacing/2; // Center pegs in their column space
             if (row % 2 == 1)
                 x += spacing/2;
             var y = spacing + row * spacing;
@@ -193,18 +252,26 @@ function populatePegs(spacing) {
 /**
  * Populates the point zones using a for loop. Pushes all boundary objects
  * to the object array designed to hold them.
+ * Uses the dynamically calculated number of columns.
  * 
- * Zach Robinson.
+ * Zach Robinson and Gemini.
  */
 function populatePointZones(spacing) {
     for (var i = 0; i < columns; i++){
-        var h = 100;
+        var h = 100; 
         var w = 5;
-        var x = i * spacing - w / 2;
+        var x = i * spacing; // Align boundaries to the left of the well
         var y = height - h / 2;
         var wall = new Boundary(x, y, w, h);
         boundaries.push(wall);
     }
+     // Add the rightmost boundary wall
+     var h = 100; 
+     var w = 5;
+     var x = columns * spacing; // Position at the right edge of the last well
+     var y = height - h / 2;
+     var wall = new Boundary(x, y, w, h);
+     boundaries.push(wall);
 }
 
 /**
@@ -380,8 +447,8 @@ function assignPointValuesAndDisplay() {
     function pointZones(xCoord) {
         var zoneWidth = width/columns;
         for(var i = 0; i < columns; i++){
-            var previous = zoneWidth * i;
-            var current = zoneWidth * (i + 1);
+            var previous = i * zoneWidth;
+            var current = (i + 1) * zoneWidth;
             if(xCoord > previous && xCoord < current){
                 return selectedGames[i];
             }
@@ -460,6 +527,7 @@ function draw() {
         let latestParticle = particles[particles.length - 1];
         let particleY = latestParticle.body.position.y;
         let canvasTop = document.getElementById('game-container').getBoundingClientRect().top + window.scrollY;
+        // Adjust scroll target calculation for the new height
         let scrollTarget = canvasTop + particleY - (window.innerHeight / 2); // Center the particle in the viewport
         window.scrollTo({ top: scrollTarget, behavior: 'smooth' });
     }
@@ -490,7 +558,24 @@ function spawnParticles() {
  */
 function randomizeBoard() {
     selectedGames = []; // Clear the selected games
-    shuffleArray(gameList); // Reshuffle the main game list
+    // Only shuffle and sample if gameList is loaded and has games
+    if (gameList.length > 0 && gameList.length >= columns) {
+         shuffleArray(gameList); // Reshuffle the main game list
+        selectedGames = gameList.slice(0, columns); // Take the first 'columns' games after shuffling
+    } else if (gameList.length > 0 && gameList.length < columns) {
+         // If fewer games than columns, use all games and fill remaining with placeholders
+         shuffleArray(gameList); // Still shuffle the small list
+         selectedGames = gameList.slice();
+         while (selectedGames.length < columns) {
+             selectedGames.push('-- No Game --'); // Placeholder
+         }
+    } else {
+         // If gameList is empty or not loaded, fill with placeholders
+         selectedGames = [];
+          while (selectedGames.length < columns) {
+             selectedGames.push('-- Loading Error --'); // Placeholder
+         }
+    }
     redraw(); // Redraw the canvas to update labels
 }
 
@@ -574,4 +659,17 @@ function resetGame() {
     }
 
     redraw(); // Redraw the canvas
+}
+
+// Add a resize event listener to reinitialize the canvas and game elements
+function windowResized() {
+    console.log('windowResized called.');
+    initializeCanvas();
+    // Reset game state on resize
+    particleDropped = false; // Reset dropped flag on resize
+    previewParticle = null; // Clear preview particle on resize
+    document.getElementById(totalScoreId).innerHTML = "&nbsp;"; // Clear the score display
+     if (randomizeButton) {
+        randomizeButton.style.display = 'block'; // Show randomize button on resize
+    }
 }

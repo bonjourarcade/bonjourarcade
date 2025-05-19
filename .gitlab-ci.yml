@@ -14,7 +14,7 @@ pages:
   script:
     - bash scripts/generate_gamelist.sh
     - cp plinko-gamelist.txt public/plinko/gamelist.txt
-    - cd public
+    #- cd public
     #- zip -r games.zip games
     - echo "The site will be deployed to $CI_PAGES_URL"
   artifacts:

@@ -20,6 +20,7 @@ let audioContext = null; // Declare audio context
 let previewParticle = null; // Variable to hold the particle being previewed
 let particleDropped = false; // Flag to track if a particle has been dropped
 let randomizeButton; // Variable to hold the randomize button element
+let shouldScroll = false; // Flag to control scrolling
 
 /**
  * Preloads the font and game list before drawing canvas.
@@ -84,7 +85,7 @@ function setup() {
     textFont(font);
     textSize(fontSize);
     textAlign(CENTER, CENTER);
-    colorMode(HSB, 360, 100, 100); // Change color mode to HSB for rainbow colors
+    colorMode(HSB, 360, 100, 100); // Keep HSB color mode
     
     initializeCanvas();
 
@@ -151,15 +152,53 @@ function handleCollision(event) {
 
     for (var i = 0; i < pairs.length; i++) {
         var pair = pairs[i];
+        var bodyA = pair.bodyA;
+        var bodyB = pair.bodyB;
 
-        // Check if the collision involves a particle and another body (peg, wall, or floor)
-        if (pair.bodyA.label === 'Circle Body' || pair.bodyB.label === 'Circle Body') {
-            // Play the tick sound - uncomment the next line if you have loaded a sound file
-            // if (tickSound && !tickSound.isPlaying()) {
-            //     tickSound.play();
-            // }
-            playClinkSound(); // Play the generated click sound
-            console.log('Collision detected!'); // Log to console for now
+        // Find the particle involved in the collision
+        let particle = null;
+        let otherBody = null;
+
+        // Check if bodyA is a particle
+        for (let p of particles) {
+            if (p.body === bodyA) {
+                particle = p;
+                otherBody = bodyB;
+                break;
+            }
+        }
+
+        // If bodyA wasn't a particle, check if bodyB is
+        if (!particle) {
+            for (let p of particles) {
+                if (p.body === bodyB) {
+                    particle = p;
+                    otherBody = bodyA;
+                    break;
+                }
+            }
+        }
+
+        // If we found a particle collision
+        if (particle) {
+            // Play the tick sound
+            playClinkSound();
+            
+            // Check if the other body is a peg
+            for (let peg of pegs) {
+                if (peg.body === otherBody) {
+                    peg.setColor(particle);
+                    break;
+                }
+            }
+
+            // Check if the other body is a boundary
+            for (let boundary of boundaries) {
+                if (boundary.body === otherBody) {
+                    boundary.setColor(particle);
+                    break;
+                }
+            }
         }
     }
 }
@@ -431,13 +470,30 @@ function drawPointLabels() {
          }
     }
 
+    // Define start and end colors for the rainbow gradient in HSB
+    let startColor = color(0, 100, 100); // Red (Hue 0, Saturation 100, Brightness 100)
+    let endColor = color(300, 100, 100); // Purple (Hue 300, Saturation 100, Brightness 100)
+
     for(var i = 0; i < columns; i++){
         var xCoord = zoneWidth * i + offset;
         
-        // Calculate rainbow color based on column index
-        let hue = map(i, 0, columns - 1, 0, 360); // Map column index to hue value (0-360)
-        fill(hue, 100, 100); // Set fill color with calculated hue, full saturation and brightness
-        stroke(hue, 100, 100); // Set stroke color
+        // Calculate interpolation factor (0 to 1) for the current column
+        let inter = map(i, 0, columns - 1, 0, 1);
+        
+        // Interpolate the color using lerpColor
+        let interpolatedColor = lerpColor(startColor, endColor, inter);
+        
+        // Extract HSB components and adjust for more paleness
+        let h = hue(interpolatedColor);
+        let s = saturation(interpolatedColor) * 0.5; // Further reduce saturation
+        let b = brightness(interpolatedColor) * 1.2; // Further increase brightness
+        
+        // Ensure adjusted values are within the valid HSB range (0-360, 0-100, 0-100)
+        s = constrain(s, 0, 100);
+        b = constrain(b, 0, 100);
+        
+        // Create the final paler color using the adjusted HSB values
+        let textColor = color(h, s, b);
 
         // Draw text vertically
         push();
@@ -445,6 +501,13 @@ function drawPointLabels() {
         rotate(PI / 2);
         textAlign(RIGHT, CENTER); // Changed alignment to RIGHT
         
+        // Apply the paler interpolated color for fill
+        fill(textColor); 
+        
+        // Set stroke to black for outline and define stroke weight
+        stroke(0); // Black color for stroke (0 in HSB is black with S=0, B=0)
+        strokeWeight(2); // Small stroke weight
+
         // Adjust text size based on screen width (mobile vs PC)
         const mobileBreakpoint = 1000; // Use the same breakpoint as for layout
         if (windowWidth < mobileBreakpoint) {
@@ -487,6 +550,7 @@ function assignPointValuesAndDisplay() {
         if(yCoord >= threshold){
             var xCoord = particle.body.position.x;
             particle.setPointValue(pointZones(xCoord));
+            shouldScroll = false; // Disable scrolling when particle reaches scoring threshold
         }
     }
 
@@ -576,8 +640,8 @@ function draw() {
         assignPointValuesAndDisplay();
     }
 
-    // Scroll to follow the latest particle - only if a particle has been dropped and particles exist
-    if (particleDropped && particles.length > 0) {
+    // Scroll to follow the latest particle - only if a particle has been dropped, particles exist, and shouldScroll is true
+    if (particleDropped && particles.length > 0 && shouldScroll) {
         let latestParticle = particles[particles.length - 1];
         let particleY = latestParticle.body.position.y;
         let canvasTop = document.getElementById('game-container').getBoundingClientRect().top + window.scrollY;
@@ -646,6 +710,7 @@ function mousePressed() {
         particles.push(previewParticle); // Add to our particles array for drawing/tracking
         previewParticle = null; // Clear the preview particle after dropping
         particleDropped = true; // Set the flag to true after dropping the first particle
+        shouldScroll = true; // Enable scrolling when the particle is dropped
 
         // Hide the randomize button after the first particle is dropped
         if (randomizeButton) {

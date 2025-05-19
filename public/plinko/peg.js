@@ -15,7 +15,11 @@ class Peg {
         this.body = Bodies.circle(x, y, r, options);
         this.r = r;
         World.add(world, this.body);
-
+        
+        // Default colors (White in HSB: H=0, S=0, B=100)
+        this.hue = 0;
+        this.saturation = 0;
+        this.brightness = 100;
     }
 
     /**
@@ -25,13 +29,25 @@ class Peg {
      * Zach Robinson.
      */
     show() {
-        fill(127);
-        stroke(125);
+        // Use stored HSB colors
+        fill(this.hue, this.saturation, this.brightness);
+        stroke(this.hue, this.saturation, this.brightness);
         push();
         var pos = this.body.position;
         translate(pos.x, pos.y);
         ellipse(0, 0, this.r * 2);
         pop();
+    }
+
+    /**
+     * Sets the color of the peg to match the given particle.
+     * Assumes particle has HSB color properties (hue, saturation, brightness).
+     * @param {Particle} particle The particle whose color to match
+     */
+    setColor(particle) {
+        this.hue = particle.hue;
+        this.saturation = particle.saturation;
+        this.brightness = particle.brightness;
     }
 }
 

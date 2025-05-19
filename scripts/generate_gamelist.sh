@@ -107,6 +107,9 @@ find "$ROMS_DIR" -maxdepth 2 -type f -not -path "*/\.*" | while read -r rom_file
     game_id=$(basename "$rom_file" | sed 's/\.[^.]*$//')
     rom_subdir=$(basename "$(dirname "$rom_file")")
     rom_path="/$(echo "$rom_file" | sed 's|public/||')" # Web path
+    if [ "$rom_subdir" = "bios" ]; then
+      continue
+    fi
     core=$(get_core_from_dir "$rom_subdir")
     page_url="${LAUNCHER_PAGE}?game=${game_id}"
 

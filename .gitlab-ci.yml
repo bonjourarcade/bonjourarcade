@@ -7,14 +7,15 @@ pages:
   stage: deploy
   before_script:
     - apk update
-    - apk add --no-cache bash python3 py3-pip jq zip  # Install necessary packages
+    - apk add --no-cache bash python3 py3-pip jq #zip  # Install necessary packages
     - python3 -m venv /tmp/yq-env                      # Create a virtual environment
     - . /tmp/yq-env/bin/activate                       # Activate the virtual environment
     - pip3 install yq                                  # Install the Python-based yq
   script:
     - bash scripts/generate_gamelist.sh
+    - cp plinko-gamelist.txt public/plinko/gamelist.txt
     - cd public
-    - zip -r games.zip games
+    #- zip -r games.zip games
     - echo "The site will be deployed to $CI_PAGES_URL"
   artifacts:
     paths:

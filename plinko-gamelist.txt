@@ -67,6 +67,7 @@ Robotron 2084
 Rocket Knight Adventures
 R-Type
 Section Z
+Seicross
 Snake
 Snap Jack
 Sorcer Striker

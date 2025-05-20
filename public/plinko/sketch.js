@@ -245,6 +245,11 @@ function initializeCanvas() {
         console.log('Applying PC Layout');
         // PC layout: board height is twice screen height, columns and rows based on original well ratio
         newHeight = windowHeight * 2;
+        if (newHeight > 1610) {
+          // Some screens are much bigger than others, and this makes
+          // the game last too long. We ensure a max height.
+          newHeight = 1610
+        }
         // Keep the original well width ratio to calculate new number of columns
         const originalWellWidth = 600 / 11;
         columns = floor(newWidth / originalWellWidth); // Calculate new number of columns

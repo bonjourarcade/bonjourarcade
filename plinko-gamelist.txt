@@ -69,6 +69,8 @@ Pyoro 64
 Q*Bert
 QIX #bright NES hack
 R.C. Pro-AM
+Raiden
+Raiden II
 Rainbow Islands
 River Raid #Atari 2600
 Road Fighter

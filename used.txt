@@ -1,6 +1,7 @@
 1943: The Battle of Midway
 Arkanoid
 Berzerk
+Bubbles
 Contra
 DoDonPachi
 Find Luigi

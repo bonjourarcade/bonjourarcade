@@ -82,6 +82,7 @@ Section Z
 Seicross
 Snake
 Snap Jack
+Sonic 2
 Sorcer Striker
 Space Harrier
 Stampede #Atari 2600

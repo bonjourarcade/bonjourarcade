@@ -7,6 +7,7 @@ Atomic Runner
 B-Wings #Famicom
 Ballon Fight
 Battletoads
+Blades of Steel
 Blazing Star
 Bubble Bobble
 Burgertime
@@ -35,6 +36,8 @@ Galaxy Force 2
 Gauntlet
 Ghouls n Ghosts'
 Giga Wing
+Golden Axe
+Golden Axe II: Revenge of Death Adder
 Gradius
 Gradius 2
 Gun.Smoke
@@ -48,6 +51,7 @@ Lode Runner
 League Bowling
 Mad Planets
 Mario Bros.
+Mega Man II
 Metal Storm #Patched
 Metal Slug Super Vehicle-001
 Metal Slug 2

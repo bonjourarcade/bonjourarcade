@@ -86,6 +86,7 @@ Rocket Knight Adventures
 R-Type
 Section Z
 Seicross
+Sensible Soccer
 Snake
 Snap Jack
 Sonic 2

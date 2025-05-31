@@ -10,6 +10,7 @@ Battletoads
 Blazing Star
 Bubble Bobble
 Burgertime
+Castlevania
 Centipede
 Choplifter # downloaded, chplftb (bootleg)
 Chopper Command #Atari 2600

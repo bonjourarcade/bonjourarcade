@@ -228,7 +228,7 @@ function initializeCanvas() {
         // Target a higher number of rows for mobile within the screen height
         // Let's aim for a fixed number like 15 rows if the height allows, otherwise calculate to fit
         const targetMobileRows = 15;
-        rows = floor((newHeight - spacing * 1.5) / spacing); // Calculate based on height
+        rows = Math.floor((newHeight - spacing * 1.5) / spacing); // Calculate based on height
         if (rows < targetMobileRows) {
             rows = rows; // Keep calculated rows if less than target
         } else {
@@ -252,7 +252,7 @@ function initializeCanvas() {
         }
         // Keep the original well width ratio to calculate new number of columns
         const originalWellWidth = 600 / 11;
-        columns = floor(newWidth / originalWellWidth); // Calculate new number of columns
+        columns = Math.floor(newWidth / originalWellWidth); // Calculate new number of columns
         // Ensure a minimum number of columns for PC
         if (columns < 11) { // Set a reasonable minimum
             columns = 11;
@@ -260,7 +260,7 @@ function initializeCanvas() {
         // Recalculate spacing based on new width and columns
         var spacing = newWidth / columns;
         // Calculate new number of rows based on height and spacing
-        rows = floor((newHeight - spacing) / spacing); // Adjust based on initial row offset
+        rows = Math.floor((newHeight - spacing) / spacing); // Adjust based on initial row offset
         // Ensure a minimum number of rows for PC
          if (rows < 20) {
             rows = 20;

@@ -78,6 +78,7 @@ function shuffleArray(array) {
  * Zach Robinson and Gemini.
  */
 function setup() {
+    pixelDensity(1);
     engine = Engine.create();
     world = engine.world;
     world.gravity.y = 1;

@@ -51,6 +51,7 @@ Juno First # Atari 2600 only for now
 Lode Runner
 League Bowling
 Mad Planets
+Marble Madness
 Mario Bros.
 Mega Man II
 Metal Storm #Patched
@@ -92,6 +93,8 @@ R-Type
 Section Z
 Seicross
 Sensible Soccer
+Shinobi
+Shinobi III: Return of the Ninja Master
 Snake
 Snap Jack
 Sonic 2

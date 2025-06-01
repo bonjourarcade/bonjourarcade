@@ -215,7 +215,6 @@ function initializeCanvas() {
     
     var newWidth = windowWidth;
     var newHeight;
-
     // Define a mobile breakpoint
     const mobileBreakpoint = 1000; // pixels
 
@@ -245,6 +244,8 @@ function initializeCanvas() {
     } else {
         console.log('Applying PC Layout');
         // PC layout: board height is 1.5 times screen height, columns and rows based on original well ratio
+        var maxWidth = 768;
+        newWidth = Math.min(windowWidth, maxWidth);
         newHeight = windowHeight * 1.5;
         if (newHeight > 1610) {
           // Some screens are much bigger than others, and this makes

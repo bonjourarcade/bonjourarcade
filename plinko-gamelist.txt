@@ -45,6 +45,7 @@ Gun.Smoke
 Guwange
 H.E.R.O. #Atari 2600
 Ice Climber
+Kirby's Adventure
 Kung Fu #NES
 Gunlock # Layer Section, Galactic Attack, Rayforce
 Juno First # Atari 2600 only for now
@@ -101,6 +102,7 @@ Sonic 2
 Sorcer Striker
 Space Harrier
 Stampede #Atari 2600
+Streets of Rage 2
 Strider
 Strikers 1945 Plus
 Sunset Riders

@@ -7,6 +7,7 @@ Atomic Runner
 B-Wings #Famicom
 Ballon Fight
 Battletoads
+Biker Mice from Mars
 Blades of Steel
 Blazing Star
 Bubble Bobble
@@ -91,6 +92,7 @@ Robby Roto
 Robocop
 Robotron 2084
 Rocket Knight Adventures
+Rock 'n Roll Racing
 R-Type
 Section Z
 Seicross

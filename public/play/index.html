@@ -104,6 +104,32 @@
                   window[`${key}`] = value;
                 }
 
+                // --- NEW: Attempt to load game-specific config.js ---
+                try {
+                  const gameConfigPath = `/games/${gameId}/config.js`;
+                  console.log(`Attempting to fetch game-specific config: ${gameConfigPath}`);
+                  const gameConfigResponse = await fetch(gameConfigPath);
+                  if (gameConfigResponse.ok) {
+                    const gameConfig = await gameConfigResponse.json();
+                    if (!gameConfig || typeof gameConfig !== 'object') {
+                      throw new Error(`Game config file '${gameConfigPath}' loaded but contained invalid JSON.`);
+                    }
+                    // Merge/override global settings with game-specific settings
+                    for (const [key, value] of Object.entries(gameConfig)) {
+                      window[`${key}`] = value;
+                    }
+                    console.log(`Game-specific config loaded and merged for: ${gameId}`);
+                  } else if (gameConfigResponse.status !== 404) {
+                    throw new Error(`Failed to load game config '${gameConfigPath}' (Status: ${gameConfigResponse.status})`);
+                  } else {
+                    console.log(`No game-specific config found for: ${gameId}`);
+                  }
+                } catch (gameConfigError) {
+                  console.error(`Error loading or parsing game-specific config:`, gameConfigError);
+                  showLauncherError(gameConfigError.message || `An error occurred loading game-specific config.`);
+                  return;
+                }
+
                 console.log("Emulator Settings Loaded:");
                 for (const [key, value] of Object.entries(settings)) {
                   console.log(`${key} = ${value}`);

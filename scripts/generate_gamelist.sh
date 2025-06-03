@@ -123,7 +123,8 @@ find "$ROMS_DIR" -maxdepth 2 -type f -not -path "*/\.*" | while read -r rom_file
     developer=""
     year=""
     genre=""
-    hide="yes" # Default to hiding games with no metadata
+    recommended="" # Initialize recommended field
+    hide="yes" # Default to hiding games even with no metadata
 
     # Check if there's a corresponding game directory with metadata
     game_dir="$GAMES_DIR/$game_id/"
@@ -137,6 +138,7 @@ find "$ROMS_DIR" -maxdepth 2 -type f -not -path "*/\.*" | while read -r rom_file
             developer=$(echo "$metadata_json" | jq -r '.developer // ""')
             year=$(echo "$metadata_json" | jq -r '.year // ""')
             genre=$(echo "$metadata_json" | jq -r '.genre // ""')
+            recommended=$(echo "$metadata_json" | jq -r '.recommended // ""') # Extract recommended field
             hide=$(echo "$metadata_json" | jq -r '.hide // ""') # Use metadata hide value if present
             echo "  - Found metadata.yaml: Title: $title"
         else
@@ -180,13 +182,14 @@ find "$ROMS_DIR" -maxdepth 2 -type f -not -path "*/\.*" | while read -r rom_file
               --arg developer "$developer" \
               --arg year "$year" \
               --arg genre "$genre" \
+              --arg recommended "$recommended" \
               --arg hide "$hide" \
               --arg coverArt "$cover_art_abs" \
               --arg pageUrl "$page_url" \
               --arg core "${core:-null}" \
               --arg romPath "${rom_path:-null}" \
               --arg saveState "${save_state:-}" \
-              '{id: $id, title: $title, developer: $developer, year: $year, genre: $genre, hide: $hide, coverArt: $coverArt, pageUrl: $pageUrl, core: $core, romPath: $romPath, saveState: $saveState}')
+              '{id: $id, title: $title, developer: $developer, year: $year, genre: $genre, recommended: $recommended, hide: $hide, coverArt: $coverArt, pageUrl: $pageUrl, core: $core, romPath: $romPath, saveState: $saveState}')
 
     # --- Check if Featured / Add to List ---
     if [ "$game_id" = "$FEATURED_GAME_ID" ]; then

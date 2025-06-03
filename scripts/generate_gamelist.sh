@@ -204,6 +204,26 @@ find "$ROMS_DIR" -maxdepth 2 -type f -not -path "*/\.*" | while read -r rom_file
 
 done
 
+# Add the SHMUPS entry to the previous games list
+shmups_json=$(jq -n \
+              --arg id "shmups" \
+              --arg title "SHMUPS" \
+              --arg developer "" \
+              --arg year "" \
+              --arg genre "" \
+              --arg recommended "" \
+              --arg hide "no" \
+              --arg coverArt "/assets/shmups.jpg" \
+              --arg pageUrl "https://felx.cc/s" \
+              --arg core "null" \
+              --arg romPath "null" \
+              --arg saveState "" \
+              '{id: $id, title: $title, developer: $developer, year: $year, genre: $genre, recommended: $recommended, hide: $hide, coverArt: $coverArt, pageUrl: $pageUrl, core: $core, romPath: $romPath, saveState: $saveState}')
+
+# Append the SHMUPS entry to the temporary games file
+temp_games=$(cat "$temp_games_file")
+echo "$temp_games" | jq --argjson shmups "$shmups_json" '. += [$shmups]' > "$temp_games_file"
+
 # --- Combine the data from temporary files to create final JSON ---
 games_list=$(cat "$temp_games_file")
 featured_game=$(cat "$temp_featured_file")

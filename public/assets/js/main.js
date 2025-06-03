@@ -254,7 +254,8 @@ function populatePreviousGames(games) {
                 { label: 'Developer', key: 'developer' },
                 { label: 'Year', key: 'year' },
                 { label: 'System', key: 'system' },
-                { label: 'Genre', key: 'genre' }
+                { label: 'Genre', key: 'genre' },
+                { label: 'Recommandé par', key: 'recommended' }
             ];
             let hasData = false;
             const table = document.createElement('table');

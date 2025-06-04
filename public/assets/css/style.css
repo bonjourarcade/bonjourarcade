@@ -2,15 +2,24 @@
     box-sizing: border-box;
 }
 
+html {
+    min-height: 100%; /* Ensures html expands to full content height */
+}
+
 html, body {
     margin: 0;
     padding: 0;
     font-family: sans-serif;
-    background-color: var(--background);
     color: var(--text-color);
-    height: 100%; /* Ensure full viewport height */
-    width: 100%; /* Ensure full viewport width */
-    overflow: hidden; /* Prevent any scrolling */
+    /* Removed background-color: var(--background); from here, themes handle it */
+    /* height: 100%; */ 
+    /* width: 100%; */  
+    /* overflow: hidden; */ 
+}
+
+body {
+    min-height: 100vh; /* Ensure body is at least viewport height */
+    overflow-y: auto; /* Allow vertical scrolling */
 }
 
 :root {

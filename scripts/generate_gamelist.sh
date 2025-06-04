@@ -44,7 +44,6 @@ fi
 if [ ! -f "$FEATURED_ID_FILE" ]; then echo "Error: $FEATURED_ID_FILE not found."; exit 1; fi
 FEATURED_GAME_ID=$(cat "$FEATURED_ID_FILE")
 if [ -z "$FEATURED_GAME_ID" ]; then echo "Error: $FEATURED_ID_FILE is empty."; exit 1; fi
-echo "Featured game ID: $FEATURED_GAME_ID"
 
 # --- Initialize JSON Output and Temp File ---
 json_output=$(jq -n --arg default_cover "/$DEFAULT_COVER" \
@@ -54,7 +53,6 @@ temp_json_file=$(mktemp)
 echo "$json_output" > "$temp_json_file"
 
 # --- Check for duplicate game IDs ---
-echo "Checking for duplicate game IDs in ROM files..."
 
 # Create a temporary file to store the game IDs
 temp_game_ids=$(mktemp)
@@ -92,7 +90,6 @@ fi
 rm -f "$temp_game_ids" "$temp_duplicates"
 
 # --- Scan ROM files to generate game list ---
-echo "Scanning $ROMS_DIR for ROM files..."
 
 # Create a temp file to store all the games data
 temp_games_file=$(mktemp)
@@ -112,11 +109,6 @@ find "$ROMS_DIR" -maxdepth 2 -type f -not -path "*/\.*" | while read -r rom_file
     fi
     core=$(get_core_from_dir "$rom_subdir")
     page_url="${LAUNCHER_PAGE}?game=${game_id}"
-
-    echo "Processing ROM: $rom_file"
-    echo "  - Game ID: $game_id"
-    echo "  - ROM path: $rom_path"
-    echo "  - Core: $core (from dir: $rom_subdir)"
 
     # --- Determine Title and other metadata ---
     title="$game_id" # DEFAULT title is the game ID (filename without extension)
@@ -142,7 +134,6 @@ find "$ROMS_DIR" -maxdepth 2 -type f -not -path "*/\.*" | while read -r rom_file
             recommended=$(echo "$metadata_json" | jq -r '.recommended // ""') # Extract recommended field
             added=$(echo "$metadata_json" | jq -r '.added // ""') # Extract added field
             hide=$(echo "$metadata_json" | jq -r '.hide // ""') # Use metadata hide value if present
-            echo "  - Found metadata.yaml: Title: $title"
         else
             echo "  - metadata.yaml found but failed to parse. Using default title ($game_id)."
         fi
@@ -157,7 +148,6 @@ find "$ROMS_DIR" -maxdepth 2 -type f -not -path "*/\.*" | while read -r rom_file
     if [ -f "$expected_cover_file" ]; then
         # If cover.png exists, set the absolute web path correctly
         cover_art_abs="/games/$game_id/cover.png"
-        echo "  - Found cover image: $cover_art_abs"
     else
         printf "\033[30;43mWarning: Expected cover file not found: ["$expected_cover_file"]. Using default.\033[0m\n"
     fi
@@ -168,7 +158,6 @@ find "$ROMS_DIR" -maxdepth 2 -type f -not -path "*/\.*" | while read -r rom_file
     if [ -f "$expected_save_state" ]; then
         # If save.state exists, set the absolute web path correctly
         save_state="/games/$game_id/save.state"
-        echo "  - Found save state: $save_state"
     fi
 
 
@@ -196,7 +185,6 @@ find "$ROMS_DIR" -maxdepth 2 -type f -not -path "*/\.*" | while read -r rom_file
 
     # --- Check if Featured / Add to List ---
     if [ "$game_id" = "$FEATURED_GAME_ID" ]; then
-        echo "  -> Matched as Featured Game"
         # Write featured game to temp file
         echo "$game_json" > "$temp_featured_file"
     else
@@ -246,10 +234,7 @@ if [ "$featured_id_check" = "null" ] || [ "$featured_id_check" != "$FEATURED_GAM
 fi
 
 # --- Write Output ---
-echo "Writing final JSON to $OUTPUT_FILE"
 echo "$json_output" | jq '.' > "$OUTPUT_FILE"
 
 # Clean up temporary files
 rm -f "$temp_json_file" "$temp_games_file" "$temp_featured_file"
-
-echo "Script finished successfully."

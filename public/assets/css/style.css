@@ -467,10 +467,12 @@ body.theme-dark #game-of-the-week .meta-value {
 
 .screensaver-image {
     position: absolute;
-    width: 300px; /* Adjust size as needed */
-    height: auto;
-    max-width: 80%;
-    max-height: 80%;
+    width: auto; /* Allow natural width based on aspect ratio */
+    height: auto; /* Allow natural height based on aspect ratio */
+    max-width: min(80vw, 400px); /* Max 80% of viewport width, or 400px, whichever is smaller */
+    max-height: min(80vh, 400px); /* Max 80% of viewport height, or 400px, whichever is smaller */
+    object-fit: contain; /* Scale image to fit within bounds, preserving aspect ratio */
+    object-position: center; /* Center the image within its content box */
     z-index: 10; /* Ensure this is on top */
 }
 

@@ -110,7 +110,7 @@ function populateFeaturedGame(game) {
 
     // Check if essential elements exist
     if (!contentContainer || !titleContainer) {
-         console.error("Required HTML elements for featured game not found.");
+         // console.error("Required HTML elements for featured game not found."); // Removed for cleaner console
          return;
     }
 
@@ -214,7 +214,7 @@ function populatePreviousGames(games) {
     visibleGames.forEach(game => {
         // Skip if game data is invalid
         if(!game || !game.id) {
-             console.warn("Skipping invalid game entry in previousGames:", game);
+             // console.warn("Skipping invalid game entry in previousGames:", game); // Removed for cleaner console
              return; // Skip this iteration
         }
 
@@ -263,11 +263,12 @@ function populatePreviousGames(games) {
             tooltip.className = 'game-meta-tooltip';
             const fields = [
                 // { label: 'Title', key: 'title' },
-                { label: 'Developer', key: 'developer' },
-                { label: 'Year', key: 'year' },
-                { label: 'System', key: 'system' },
+                { label: 'Developpeur', key: 'developer' },
+                { label: 'Année', key: 'year' },
+                { label: 'Système', key: 'system' },
                 { label: 'Genre', key: 'genre' },
-                { label: 'Recommandé par', key: 'recommended' }
+                { label: 'Recommandé par', key: 'recommended' },
+                { label: 'Ajouté', key: 'added' }
             ];
             let hasData = false;
             const table = document.createElement('table');

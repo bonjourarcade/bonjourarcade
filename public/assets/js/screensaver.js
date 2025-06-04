@@ -50,30 +50,30 @@ function timerIncrement() {
 }
 
 function resetIdleTime() {
-    console.log('resetIdleTime called. Current screensaverActive:', screensaverActive);
+    // console.log('resetIdleTime called. Current screensaverActive:', screensaverActive);
     if (isActivatingScreensaver) {
-        console.log('Ignoring resetIdleTime during activation.');
+        // console.log('Ignoring resetIdleTime during activation.');
         return; // Ignore activity during the screensaver activation phase
     }
     idleTime = 0;
 
     // If screensaver is active, stop it (which also hides the overlay and clears timer)
     if (screensaverActive) {
-        console.log('screensaverActive is true. Calling stopScreensaver().');
+        // console.log('screensaverActive is true. Calling stopScreensaver().');
         stopScreensaver();
     }
 
     // After reset, if on index.html and screensaver is not active, ensure timer is visible for countdown
     if (!screensaverActive && !window.location.pathname.includes('/play/')) {
-        console.log('On index.html, screensaver not active. Showing timer.');
+        // console.log('On index.html, screensaver not active. Showing timer.');
         screensaverTimer.style.display = 'block';
     }
     // If on play page, or screensaver is active, ensure timer is hidden
     else if (window.location.pathname.includes('/play/') || screensaverActive) {
-        console.log('On play page or screensaver active. Hiding timer.');
+        // console.log('On play page or screensaver active. Hiding timer.');
         screensaverTimer.style.display = 'none';
     }
-    console.log('resetIdleTime finished. New screensaverActive:', screensaverActive);
+    // console.log('resetIdleTime finished. New screensaverActive:', screensaverActive);
 }
 
 function startScreensaver() {
@@ -158,10 +158,10 @@ function startScreensaver() {
 }
 
 function stopScreensaver() {
-    console.log('stopScreensaver called. Initial screensaverActive:', screensaverActive);
+    // console.log('stopScreensaver called. Initial screensaverActive:', screensaverActive);
     if (screensaverActive) {
         screensaverActive = false;
-        console.log('screensaverActive set to false. Attempting to remove classes and hide overlay.');
+        // console.log('screensaverActive set to false. Attempting to remove classes and hide overlay.');
         document.body.classList.remove('screensaver-active');
         document.documentElement.classList.remove('screensaver-active');
         screensaverOverlay.style.display = 'none';
@@ -171,12 +171,12 @@ function stopScreensaver() {
         screensaverImage.onload = null;
         screensaverLogo.onload = null; // Remove logo onload handler
         screensaverOverlay.classList.remove('screensaver-dark-background'); // Remove dark background
-        console.log('Screensaver stopped. Final screensaverActive:', screensaverActive);
-        console.log('Body classes:', document.body.classList.value);
-        console.log('HTML classes:', document.documentElement.classList.value);
-        console.log('Overlay display style:', screensaverOverlay.style.display);
+        // console.log('Screensaver stopped. Final screensaverActive:', screensaverActive);
+        // console.log('Body classes:', document.body.classList.value);
+        // console.log('HTML classes:', document.documentElement.classList.value);
+        // console.log('Overlay display style:', screensaverOverlay.style.display);
     }
-    console.log('stopScreensaver finished. Final screensaverActive (after if-block):', screensaverActive);
+    // console.log('stopScreensaver finished. Final screensaverActive (after if-block):', screensaverActive);
 }
 
 function updateScreensaverImagePosition() {

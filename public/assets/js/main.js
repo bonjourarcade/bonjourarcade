@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const idleInterval = setInterval(timerIncrement, 1000); // 1 second
     const SCREENSAVER_TIMEOUT_MINUTES = 10; // Reverted to 10 minutes
     let screensaverActive = false;
+    let isActivatingScreensaver = false; // New flag to prevent immediate deactivation during activation
     const screensaverOverlay = document.getElementById('screensaver-overlay');
     const screensaverImage = document.getElementById('screensaver-image');
     const screensaverLogo = document.getElementById('screensaver-logo'); // Get the logo element
@@ -39,15 +40,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // Reset idle time on user activity
     document.addEventListener('mousemove', resetIdleTime);
     document.addEventListener('touchstart', resetIdleTime); // For touch devices
-    document.addEventListener('scroll', resetIdleTime); // For scroll activity
 
     // Key 'é' for immediate screensaver activation, and general key presses for deactivation
     document.addEventListener('keydown', (event) => {
-        if (event.key === 'é' && !screensaverActive) {
-            startScreensaver();
-            return;
+        if (event.key === 'é') {
+            if (!screensaverActive) {
+                event.preventDefault(); // Prevent default browser action (like scrolling)
+                startScreensaver();
+                return; // IMPORTANT: Exit here, don't reset idle time for 'é' activation
+            }
         }
-
+        
+        // For any other key, or for 'é' when screensaver is already active, reset idle time.
         resetIdleTime();
     });
 
@@ -69,6 +73,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function resetIdleTime() {
+        if (isActivatingScreensaver) {
+            return; // Ignore activity during the screensaver activation phase
+        }
+
         idleTime = 0;
         screensaverTimer.style.display = 'none';
         if (screensaverActive) {
@@ -79,10 +87,21 @@ document.addEventListener('DOMContentLoaded', () => {
     function startScreensaver() {
         if (!screensaverActive) {
             screensaverActive = true;
+            isActivatingScreensaver = true; // Set flag when activation begins
+
+            // Programmatically scroll to the top to handle browser behavior proactively
+            window.scrollTo(0, 0);
+
             document.body.classList.add('screensaver-active');
             document.documentElement.classList.add('screensaver-active');
             screensaverOverlay.style.display = 'flex';
             screensaverTimer.style.display = 'none';
+
+            // Add scroll listener AFTER a brief delay to allow browser to handle overflow:hidden scroll
+            setTimeout(() => {
+                document.addEventListener('scroll', stopScreensaver, { once: true });
+                isActivatingScreensaver = false; // Reset flag after delay
+            }, 300); // Increased delay to 300ms for more robustness
 
             // Set main image source
             if (featuredGameCoverArt) {

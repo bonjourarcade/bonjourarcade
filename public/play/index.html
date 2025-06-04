@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Loading Game...</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
     <style>
         /* Basic styling to make the emulator fill the page */
         body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background-color: #000; color: #eee;}
@@ -13,11 +14,17 @@
     </style>
 </head>
 <body>
+    <div id="screensaver-timer" class="screensaver-timer"></div>
     <div id="game-container">
         <div id="game"><p style="text-align: center; padding-top: 50px;">Initializing...</p></div>
     </div>
 
     <script>
+        // Hide screensaver timer on play page
+        if (window.setScreensaverTimerVisibility) {
+            window.setScreensaverTimerVisibility(false);
+        }
+
         // --- Logic for the Single Game Launcher Page (using JSON Controls) ---
 
         /**
@@ -195,6 +202,17 @@
         // Using DOMContentLoaded ensures the #game-container element exists
         document.addEventListener('DOMContentLoaded', loadSelectedGame);
 
+        // Initialize screensaver after game is loaded
+        if (window.initScreensaver) {
+            document.addEventListener('DOMContentLoaded', () => {
+                window.initScreensaver();
+            });
+        }
     </script>
+    <script src="../assets/js/screensaver.js"></script>
+    <div id="screensaver-overlay" class="screensaver-overlay">
+        <img id="screensaver-image" class="screensaver-image" src="" alt="Screensaver Image">
+        <img id="screensaver-logo" class="screensaver-logo" src="" alt="BonjourArcade Logo">
+    </div>
 </body>
 </html>

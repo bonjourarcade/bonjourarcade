@@ -1,226 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // This function starts the process when the HTML page is fully loaded
     fetchGameData();
-
-    // Screensaver functionality
-    let idleTime = 0;
-    const idleInterval = setInterval(timerIncrement, 1000); // 1 second
-    const SCREENSAVER_TIMEOUT_MINUTES = 10; // Reverted to 10 minutes
-    let screensaverActive = false;
-    let isActivatingScreensaver = false; // New flag to prevent immediate deactivation during activation
-    const screensaverOverlay = document.getElementById('screensaver-overlay');
-    const screensaverImage = document.getElementById('screensaver-image');
-    const screensaverLogo = document.getElementById('screensaver-logo'); // Get the logo element
-    const screensaverTimer = document.getElementById('screensaver-timer'); // Get the timer element
-    let featuredGameCoverArt = '';
-
-    // Screensaver animation variables for main image
-    let screensaverAnimationFrame;
-    let imageX = 0;
-    let imageY = 0;
-    let imageDx = 1; // Initial horizontal speed
-    let imageDy = 1; // Initial vertical speed
-
-    // Screensaver animation variables for logo
-    let logoX = 0;
-    let logoY = 0;
-    let logoDx = 1.2; // Slightly different speed for independent path
-    let logoDy = 1.2; // Slightly different speed for independent path
-    const logoSize = 150; // Matches CSS width for the logo
-
-    // Capture initial featured game cover art after it's loaded
-    const originalPopulateFeaturedGame = populateFeaturedGame;
-    populateFeaturedGame = function(game) {
-        originalPopulateFeaturedGame(game);
-        if (game && game.coverArt) {
-            featuredGameCoverArt = game.coverArt;
-        }
-    };
-
-    // Reset idle time on user activity
-    document.addEventListener('mousemove', resetIdleTime);
-    document.addEventListener('touchstart', resetIdleTime); // For touch devices
-
-    // Key 'é' for immediate screensaver activation, and general key presses for deactivation
-    document.addEventListener('keydown', (event) => {
-        if (event.key === 'é') {
-            if (!screensaverActive) {
-                event.preventDefault(); // Prevent default browser action (like scrolling)
-                startScreensaver();
-                return; // IMPORTANT: Exit here, don't reset idle time for 'é' activation
-            }
-        }
-        
-        // For any other key, or for 'é' when screensaver is already active, reset idle time.
-        resetIdleTime();
-    });
-
-    function timerIncrement() {
-        idleTime++;
-        const timeLeft = SCREENSAVER_TIMEOUT_MINUTES * 60 - idleTime;
-        if (timeLeft > 0 && !screensaverActive) {
-            const minutes = Math.floor(timeLeft / 60);
-            const seconds = timeLeft % 60;
-            screensaverTimer.textContent = `Screensaver in ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-            screensaverTimer.style.display = 'block';
-        } else {
-            screensaverTimer.style.display = 'none';
-        }
-
-        if (idleTime >= SCREENSAVER_TIMEOUT_MINUTES * 60 && !screensaverActive) {
-            startScreensaver();
-        }
-    }
-
-    function resetIdleTime() {
-        if (isActivatingScreensaver) {
-            return; // Ignore activity during the screensaver activation phase
-        }
-
-        idleTime = 0;
-        screensaverTimer.style.display = 'none';
-        if (screensaverActive) {
-            stopScreensaver();
-        }
-    }
-
-    function startScreensaver() {
-        if (!screensaverActive) {
-            screensaverActive = true;
-            isActivatingScreensaver = true; // Set flag when activation begins
-
-            // Programmatically scroll to the top to handle browser behavior proactively
-            window.scrollTo(0, 0);
-
-            document.body.classList.add('screensaver-active');
-            document.documentElement.classList.add('screensaver-active');
-            screensaverOverlay.style.display = 'flex';
-            screensaverTimer.style.display = 'none';
-
-            // Add scroll listener AFTER a brief delay to allow browser to handle overflow:hidden scroll
-            setTimeout(() => {
-                document.addEventListener('scroll', stopScreensaver, { once: true });
-                isActivatingScreensaver = false; // Reset flag after delay
-            }, 300); // Increased delay to 300ms for more robustness
-
-            // Set main image source
-            if (featuredGameCoverArt) {
-                screensaverImage.src = featuredGameCoverArt;
-            } else {
-                screensaverImage.src = '/assets/images/placeholder_thumb.png';
-            }
-            // Set logo source
-            screensaverLogo.src = '/assets/images/bonjourarcade-logo.png';
-
-            const initScreensaverAnimation = () => {
-                // Initialize main image position
-                const currentImageWidth = screensaverImage.offsetWidth;
-                const currentImageHeight = screensaverImage.offsetHeight;
-                // console.log('initScreensaverAnimation: Main Image Dimensions - Width:', currentImageWidth, 'Height:', currentImageHeight);
-
-                imageX = Math.random() * (document.documentElement.clientWidth - currentImageWidth);
-                imageY = Math.random() * (document.documentElement.clientHeight - currentImageHeight);
-
-                // Initialize logo position
-                const currentLogoWidth = screensaverLogo.offsetWidth;
-                const currentLogoHeight = screensaverLogo.offsetHeight;
-                // console.log('initScreensaverAnimation: Logo Dimensions - Width:', currentLogoWidth, 'Height:', currentLogoHeight);
-
-                logoX = Math.random() * (document.documentElement.clientWidth - currentLogoWidth);
-                logoY = Math.random() * (document.documentElement.clientHeight - currentLogoHeight);
-
-                screensaverAnimationFrame = requestAnimationFrame(updateScreensaverImagePosition);
-                // console.log('Animation frame requested.');
-            };
-
-            // Wait for both images to load before starting animation
-            let imagesLoaded = 0;
-            const imageLoadHandler = (event) => {
-                // console.log('Image loaded:', event.target.id || event.target.src);
-                imagesLoaded++;
-                if (imagesLoaded === 2) { // Assuming 2 images: screensaverImage and screensaverLogo
-                    // console.log('All images loaded. Initializing animation.');
-                    initScreensaverAnimation();
-                }
-            };
-
-            if (screensaverImage.complete) {
-                // console.log('screensaverImage already complete.');
-                imageLoadHandler({ target: { id: 'screensaver-image', src: screensaverImage.src } });
-            } else {
-                screensaverImage.onload = imageLoadHandler;
-                // console.log('screensaverImage onload registered.');
-            }
-            if (screensaverLogo.complete) {
-                // console.log('screensaverLogo already complete.');
-                imageLoadHandler({ target: { id: 'screensaver-logo', src: screensaverLogo.src } });
-            } else {
-                screensaverLogo.onload = imageLoadHandler;
-                // console.log('screensaverLogo onload registered.');
-            }
-        }
-    }
-
-    function stopScreensaver() {
-        if (screensaverActive) {
-            screensaverActive = false;
-            document.body.classList.remove('screensaver-active');
-            document.documentElement.classList.remove('screensaver-active');
-            screensaverOverlay.style.display = 'none';
-            screensaverImage.src = '';
-            screensaverLogo.src = ''; // Clear logo source
-            cancelAnimationFrame(screensaverAnimationFrame);
-            screensaverImage.onload = null;
-            screensaverLogo.onload = null; // Remove logo onload handler
-        }
-    }
-
-    function updateScreensaverImagePosition() {
-        const viewportWidth = document.documentElement.clientWidth;
-        const viewportHeight = document.documentElement.clientHeight;
-
-        // Update and check main image position
-        imageX += imageDx;
-        imageY += imageDy;
-        const currentImageWidth = screensaverImage.offsetWidth;
-        const currentImageHeight = screensaverImage.offsetHeight;
-
-        if (imageX + currentImageWidth > viewportWidth || imageX < 0) {
-            imageDx *= -1;
-            if (imageX < 0) imageX = 0;
-            if (imageX + currentImageWidth > viewportWidth) imageX = viewportWidth - currentImageWidth;
-        }
-        if (imageY + currentImageHeight > viewportHeight || imageY < 0) {
-            imageDy *= -1;
-            if (imageY < 0) imageY = 0;
-            if (imageY + currentImageHeight > viewportHeight) imageY = viewportHeight - currentImageHeight;
-        }
-        screensaverImage.style.left = `${imageX}px`;
-        screensaverImage.style.top = `${imageY}px`;
-
-        // Update and check logo position
-        logoX += logoDx;
-        logoY += logoDy;
-        const currentLogoWidth = screensaverLogo.offsetWidth;
-        const currentLogoHeight = screensaverLogo.offsetHeight;
-
-        if (logoX + currentLogoWidth > viewportWidth || logoX < 0) {
-            logoDx *= -1;
-            if (logoX < 0) logoX = 0;
-            if (logoX + currentLogoWidth > viewportWidth) logoX = viewportWidth - currentLogoWidth;
-        }
-        if (logoY + currentLogoHeight > viewportHeight || logoY < 0) {
-            logoDy *= -1;
-            if (logoY < 0) logoY = 0;
-            if (logoY + currentLogoHeight > viewportHeight) logoY = viewportHeight - currentLogoHeight;
-        }
-        screensaverLogo.style.left = `${logoX}px`;
-        screensaverLogo.style.top = `${logoY}px`;
-
-        if (screensaverActive) {
-            screensaverAnimationFrame = requestAnimationFrame(updateScreensaverImagePosition);
-        }
-    }
 });
 
 /**
@@ -289,6 +69,11 @@ async function fetchGameData() {
 
         populatePreviousGames(allGames);
 
+        // Initialize screensaver after game data is loaded
+        // if (window.initScreensaver) {
+        //     window.initScreensaver();
+        // }
+
         // Add randomizer button logic
         const randomBtn = document.getElementById('random-game-btn');
         // Filter out hidden games for randomizer
@@ -334,6 +119,13 @@ function populateFeaturedGame(game) {
         titleContainer.textContent = ' '; // Clear loading text
         displayError('#featured-game-content', 'Featured game data missing or invalid.');
         return;
+    }
+
+    // Set featuredGameCoverArt for screensaver
+    if (game && game.coverArt) {
+        window.featuredGameCoverArt = game.coverArt;
+    } else {
+        window.featuredGameCoverArt = '';
     }
 
     // Clear placeholder content and set the title

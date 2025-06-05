@@ -80,6 +80,12 @@ async function fetchGameData() {
         if (gameIdInput) {
             gameIdInput.addEventListener('input', (e) => {
                 const searchTerm = e.target.value.toLowerCase();
+                // Toggle class on body based on search term presence
+                if (searchTerm.length > 0) {
+                    document.body.classList.add('search-active');
+                } else {
+                    document.body.classList.remove('search-active');
+                }
                 const filteredGames = window.allGamesData.filter(game => {
                     let displayTitle = game.title;
                     if (!displayTitle || displayTitle === game.id) {
@@ -92,26 +98,26 @@ async function fetchGameData() {
                 const previousGamesGrid = document.getElementById('previous-games-grid');
                 const noResultsMessage = document.getElementById('no-results-message');
                 if (filteredGames.length === 0 && searchTerm.length > 0) {
-                    if (!noResultsMessage) {
-                        const p = document.createElement('p');
-                        p.id = 'no-results-message';
-                        p.textContent = 'Aucun jeu ne correspond à votre filtre!';
-                        p.style.textAlign = 'center';
-                        p.style.marginTop = '20px';
-                        if (previousGamesGrid) {
-                            previousGamesGrid.innerHTML = ''; // Clear existing games
+                    if (previousGamesGrid) {
+                        previousGamesGrid.innerHTML = ''; // Clear existing games
+                        // Add class to game-grid to handle no results display
+                        previousGamesGrid.classList.add('no-results-active');
+                        if (!noResultsMessage) {
+                            const p = document.createElement('p');
+                            p.id = 'no-results-message';
+                            p.textContent = 'Aucun jeu ne correspond à votre filtre!';
                             previousGamesGrid.appendChild(p);
-                        }
-                    } else {
-                        noResultsMessage.style.display = 'block';
-                        if (previousGamesGrid) {
-                            previousGamesGrid.innerHTML = ''; // Clear existing games
-                            previousGamesGrid.appendChild(noResultsMessage);
+                        } else {
+                            noResultsMessage.style.display = 'block';
+                            previousGamesGrid.appendChild(noResultsMessage); // Re-append if it exists but was hidden
                         }
                     }
                 } else {
                     if (noResultsMessage) {
                         noResultsMessage.style.display = 'none';
+                    }
+                    if (previousGamesGrid) {
+                        previousGamesGrid.classList.remove('no-results-active'); // Remove class when results are shown
                     }
                     // populatePreviousGames will handle displaying games if there are any
                 }

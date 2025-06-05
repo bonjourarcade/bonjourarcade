@@ -259,7 +259,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Initialize interval and event listeners
-    const idleInterval = setInterval(timerIncrement, 1000); // 1 second
+    setInterval(timerIncrement, 1000); // 1 second
 
     document.addEventListener('mousemove', resetIdleTime);
     document.addEventListener('touchstart', resetIdleTime); // For touch devices

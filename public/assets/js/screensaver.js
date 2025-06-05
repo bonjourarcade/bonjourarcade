@@ -1,6 +1,6 @@
 // Global variables (declared here so functions can access them)
 let idleTime = 0;
-const SCREENSAVER_TIMEOUT_MINUTES = 10;
+const SCREENSAVER_TIMEOUT_MINUTES = 1;
 let screensaverActive = false;
 let isActivatingScreensaver = false;
 
@@ -8,7 +8,6 @@ let isActivatingScreensaver = false;
 let screensaverOverlay;
 let screensaverImage;
 let screensaverLogo;
-let screensaverTimer;
 
 // Animation variables
 let screensaverAnimationFrame;
@@ -31,17 +30,17 @@ function timerIncrement() {
     idleTime++;
     const timeLeft = SCREENSAVER_TIMEOUT_MINUTES * 60 - idleTime;
     if (timeLeft > 0 && !screensaverActive) {
-        const minutes = Math.floor(timeLeft / 60);
-        const seconds = timeLeft % 60;
-        screensaverTimer.textContent = `Screensaver in ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+        // const minutes = Math.floor(timeLeft / 60);
+        // const seconds = timeLeft % 60;
+        // screensaverTimer.textContent = `Screensaver in ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
         // Only show timer on non-play pages, and only when not active
-        if (!window.location.pathname.includes('/play/')) {
-            screensaverTimer.style.display = 'block';
-        } else {
-            screensaverTimer.style.display = 'none';
-        }
+        // if (!window.location.pathname.includes('/play/')) {
+        //     screensaverTimer.style.display = 'block';
+        // } else {
+        //     screensaverTimer.style.display = 'none';
+        // }
     } else {
-        screensaverTimer.style.display = 'none'; // Always hide when screensaver is active or timeout reached
+        // screensaverTimer.style.display = 'none'; // Always hide when screensaver is active or timeout reached
     }
 
     if (idleTime >= SCREENSAVER_TIMEOUT_MINUTES * 60 && !screensaverActive) {
@@ -66,12 +65,12 @@ function resetIdleTime() {
     // After reset, if on index.html and screensaver is not active, ensure timer is visible for countdown
     if (!screensaverActive && !window.location.pathname.includes('/play/')) {
         // console.log('On index.html, screensaver not active. Showing timer.');
-        screensaverTimer.style.display = 'block';
+        // screensaverTimer.style.display = 'block';
     }
     // If on play page, or screensaver is active, ensure timer is hidden
     else if (window.location.pathname.includes('/play/') || screensaverActive) {
         // console.log('On play page or screensaver active. Hiding timer.');
-        screensaverTimer.style.display = 'none';
+        // screensaverTimer.style.display = 'none';
     }
     // console.log('resetIdleTime finished. New screensaverActive:', screensaverActive);
 }
@@ -87,7 +86,7 @@ function startScreensaver() {
         document.body.classList.add('screensaver-active');
         document.documentElement.classList.add('screensaver-active');
         screensaverOverlay.style.display = 'flex';
-        screensaverTimer.style.display = 'none'; // Explicitly hide timer when screensaver starts
+        // screensaverTimer.style.display = 'none'; // Explicitly hide timer when screensaver starts
 
         // Conditionally apply dark background based on current page
         if (window.location.pathname.includes('/play/')) {
@@ -252,10 +251,9 @@ document.addEventListener('DOMContentLoaded', () => {
     screensaverOverlay = document.getElementById('screensaver-overlay');
     screensaverImage = document.getElementById('screensaver-image');
     screensaverLogo = document.getElementById('screensaver-logo');
-    screensaverTimer = document.getElementById('screensaver-timer');
 
     // Basic check to ensure elements exist
-    if (!screensaverOverlay || !screensaverImage || !screensaverLogo || !screensaverTimer) {
+    if (!screensaverOverlay || !screensaverImage || !screensaverLogo /* || !screensaverTimer */) {
         console.error('Screensaver elements not found. Screensaver will not function.');
         return; // Exit if essential elements are missing
     }
@@ -268,17 +266,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Key 'é' for immediate screensaver activation, and general key presses for deactivation
     document.addEventListener('keydown', (event) => {
-        console.log('Key pressed:', event.key, 'Screensaver Active:', screensaverActive);
         if (event.key === 'é') {
             if (!screensaverActive) {
-                console.log('Attempting to start screensaver with \'é\'');
                 event.preventDefault(); // Prevent default browser action (like scrolling)
                 startScreensaver();
                 return; // IMPORTANT: Exit here, don't reset idle time for 'é' activation
             }
         }
         // For any other key, or for 'é' when screensaver is already active, reset idle time.
-        console.log('Resetting idle time.');
         resetIdleTime();
     });
 

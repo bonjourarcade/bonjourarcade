@@ -19,6 +19,18 @@
     </div>
 
     <script>
+        // Feature: Redirect to homepage at 5 AM local time
+        function checkAndRedirectAt5AM() {
+            const now = new Date();
+            if (now.getHours() === 5 && window.screensaverActive) {
+                console.log("It's 5 AM local time and screensaver is active. Redirecting to homepage.");
+                window.location.href = "/index.html";
+            }
+        }
+
+        // Set up interval to check every hour (3,600,000 milliseconds)
+        setInterval(checkAndRedirectAt5AM, 3600000);
+
         // Hide screensaver timer on play page
         if (window.setScreensaverTimerVisibility) {
             window.setScreensaverTimerVisibility(false);

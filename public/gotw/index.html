@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redirecting to Game of the Week...</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4;
+            font-family: sans-serif;
+            color: #333;
+            text-align: center;
+            flex-direction: column;
+        }
+        .message {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #007bff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="message">Redirecting to the Game of the Week...</div>
+    <div class="spinner"></div>
+
+    <script>
+        async function redirectToGameOfTheWeek() {
+            try {
+                const response = await fetch('/gamelist.json');
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch gamelist.json: ${response.statusText}`);
+                }
+                const data = await response.json();
+                if (data.gameOfTheWeek && data.gameOfTheWeek.pageUrl) {
+                    window.location.href = data.gameOfTheWeek.pageUrl;
+                } else {
+                    console.error('Game of the Week data not found or invalid.');
+                    // Fallback in case of error or no GOTW set
+                    window.location.href = '/';
+                }
+            } catch (error) {
+                console.error('Error fetching Game of the Week:', error);
+                // Fallback to homepage on error
+                window.location.href = '/';
+            }
+        }
+
+        redirectToGameOfTheWeek();
+    </script>
+</body>
+</html> 

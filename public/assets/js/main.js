@@ -45,6 +45,15 @@ async function fetchGameData() {
              throw new Error("Invalid data structure received from gamelist.json.");
         }
 
+        // Store game of the week data globally for potential redirects
+        window.gameOfTheWeekData = data.gameOfTheWeek;
+
+        // If the current path is /gotw, redirect to the game of the week's pageUrl
+        if (window.location.pathname === '/gotw' && window.gameOfTheWeekData && window.gameOfTheWeekData.pageUrl) {
+            window.location.href = window.gameOfTheWeekData.pageUrl;
+            return; // Stop further execution on this page
+        }
+
         // Populate sections using the fetched data
         populateFeaturedGame(data.gameOfTheWeek);
 
@@ -57,6 +66,9 @@ async function fetchGameData() {
             allGames = allGames.concat(data.previousGames);
         }
 
+        // Store all games globally for filtering purposes
+        window.allGamesData = allGames;
+
         // Sort allGames alphabetically by display title
         allGames.sort((a, b) => {
             // Use the same display logic as in the UI
@@ -68,6 +80,49 @@ async function fetchGameData() {
         });
 
         populatePreviousGames(allGames);
+
+        // Add search input listener
+        const gameIdInput = document.getElementById('game-id-input');
+        if (gameIdInput) {
+            gameIdInput.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                const filteredGames = window.allGamesData.filter(game => {
+                    let displayTitle = game.title;
+                    if (!displayTitle || displayTitle === game.id) {
+                        displayTitle = capitalizeFirst(game.id);
+                    }
+                    return displayTitle.toLowerCase().includes(searchTerm);
+                });
+                populatePreviousGames(filteredGames);
+
+                const previousGamesGrid = document.getElementById('previous-games-grid');
+                const noResultsMessage = document.getElementById('no-results-message');
+                if (filteredGames.length === 0 && searchTerm.length > 0) {
+                    if (!noResultsMessage) {
+                        const p = document.createElement('p');
+                        p.id = 'no-results-message';
+                        p.textContent = 'Aucun jeu ne correspond à votre filtre!';
+                        p.style.textAlign = 'center';
+                        p.style.marginTop = '20px';
+                        if (previousGamesGrid) {
+                            previousGamesGrid.innerHTML = ''; // Clear existing games
+                            previousGamesGrid.appendChild(p);
+                        }
+                    } else {
+                        noResultsMessage.style.display = 'block';
+                        if (previousGamesGrid) {
+                            previousGamesGrid.innerHTML = ''; // Clear existing games
+                            previousGamesGrid.appendChild(noResultsMessage);
+                        }
+                    }
+                } else {
+                    if (noResultsMessage) {
+                        noResultsMessage.style.display = 'none';
+                    }
+                    // populatePreviousGames will handle displaying games if there are any
+                }
+            });
+        }
 
         // Initialize screensaver after game data is loaded
         // if (window.initScreensaver) {
@@ -203,7 +258,7 @@ function populatePreviousGames(games) {
 
     // Handle case where there are no previous games
     if (!visibleGames || visibleGames.length === 0) {
-        gridContainer.innerHTML = '<p>No previous games found.</p>';
+        //gridContainer.innerHTML = '<p>No previous games found.</p>'; // Removed: now handled by search filter
         return;
     }
 

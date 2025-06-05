@@ -10,8 +10,9 @@
             <div class="header-flex">
                 <button id="random-game-btn" class="random-game-btn">Jouer au hasard</button>
                 <div class="game-launcher">
-                    <input type="text" id="game-id-input" placeholder="Entrez l'ID du jeu">
-                    <button id="launch-game-btn">Lancer</button>
+                    <input type="text" id="game-id-input"
+                    placeholder="Recherche">
+                    <!-- <button id="launch-game-btn">Lancer</button> -->
                 </div>
                 <img src="assets/images/bonjourarcade-logo.png" alt="BonjourArcade Logo" class="header-logo">
                 <div class="header-actions">
@@ -51,11 +52,17 @@
             </section>
         </main>
     </div>
+    <!-- <div class="all-games-link-container bottom-link">
+        <a href="/all" class="all-games-link">
+            <span class="joystick-emoji">🕹️</span>
+        </a>
+    </div> -->
 
     <script src="assets/js/screensaver.js"></script>
     <script src="assets/js/main.js"></script>
     <script>
     // Game launcher functionality
+    /*
     document.getElementById('launch-game-btn').addEventListener('click', function() {
         const gameId = document.getElementById('game-id-input').value.trim();
         if (gameId) {
@@ -69,6 +76,7 @@
             document.getElementById('launch-game-btn').click();
         }
     });
+    */
 
     // Theme toggling logic
     function setTheme(theme) {

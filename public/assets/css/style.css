@@ -26,6 +26,7 @@ body {
     --background: #f4f4f4;
     --text-color: #222;
     --footer-bg: #f4f4f4;
+    --button-height: 52px; /* Roughly 12px padding top/bottom + font-size line-height */
 }
 body.theme-light {
     --background: #fff;
@@ -253,6 +254,24 @@ footer {
     margin: 0;
 }
 
+.game-launcher {
+    flex-grow: 1; /* Allow it to take available space */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#game-id-input {
+    padding: 12px 15px;
+    font-size: 1.15em;
+    border: none;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    width: 250px; /* Make it wider */
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+    vertical-align: middle;
+}
+
 .game-meta-list {
     list-style: none;
     padding: 0;
@@ -465,6 +484,11 @@ body.theme-dark #game-of-the-week .meta-value {
     display: none; /* Hidden by default */
 }
 
+.screensaver-overlay.screensaver-dark-background {
+    background-color: rgba(0, 0, 0, 0.75); /* Dark overlay */
+    background-image: none; /* No pattern */
+}
+
 .screensaver-image {
     position: absolute;
     width: auto; /* Allow natural width based on aspect ratio */
@@ -511,3 +535,5 @@ body.theme-dark #game-of-the-week .meta-value {
 /* .screensaver-overlay.screensaver-dark-background {
     background-color: #000000; /* Pure black */
 /* } */
+
+/* Removed joystick related styles */

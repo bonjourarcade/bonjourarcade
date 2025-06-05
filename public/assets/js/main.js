@@ -48,12 +48,6 @@ async function fetchGameData() {
         // Store game of the week data globally for potential redirects
         window.gameOfTheWeekData = data.gameOfTheWeek;
 
-        // If the current path is /gotw, redirect to the game of the week's pageUrl
-        if (window.location.pathname === '/gotw' && window.gameOfTheWeekData && window.gameOfTheWeekData.pageUrl) {
-            window.location.href = window.gameOfTheWeekData.pageUrl;
-            return; // Stop further execution on this page
-        }
-
         // Populate sections using the fetched data
         populateFeaturedGame(data.gameOfTheWeek);
 
@@ -201,8 +195,8 @@ function populateFeaturedGame(game) {
 
     // Create link container for the image
     const gameLink = document.createElement('a');
-    // Use pageUrl from JSON (should point to /play.html?game=...)
-    gameLink.href = game.pageUrl || '#';
+    // Use pageUrl from JSON (should point to /play.html?game=...) but now links to /gotw
+    gameLink.href = '/gotw';
 
     // Featured Image (uses game.coverArt only now)
     const img = document.createElement('img');

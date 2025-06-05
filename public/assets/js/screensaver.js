@@ -1,6 +1,6 @@
 // Global variables (declared here so functions can access them)
 let idleTime = 0;
-const SCREENSAVER_TIMEOUT_MINUTES = 1;
+const SCREENSAVER_TIMEOUT_MINUTES = 10;
 let screensaverActive = false;
 let isActivatingScreensaver = false;
 

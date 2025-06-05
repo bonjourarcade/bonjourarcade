@@ -513,3 +513,22 @@ body.theme-dark #game-of-the-week .meta-value {
     /* display: none !important; */ /* Remove this line to show content, screensaver is transparent */
     min-height: 0 !important;
 }
+
+/* Hide game of the week when search is active */
+body.search-active #game-of-the-week {
+    display: none;
+}
+
+#no-results-message {
+    font-size: 4em; /* Make the message bigger */
+    font-weight: bold; /* Make it bold as well */
+    color: #ff0057; /* A more prominent color */
+    text-align: center; /* Center the text */
+    grid-column: 1 / -1; /* Make it span all grid columns */
+    margin-top: 20px; /* Add margin to the top */
+    width: 100%; /* Ensure it takes full width */
+}
+
+.game-grid.no-results-active {
+    display: block; /* Override grid display when no results to allow text centering */
+}

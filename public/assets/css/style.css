@@ -454,10 +454,7 @@ body.theme-dark #game-of-the-week .meta-value {
     }
 
     /* Make screensaver overlay a solid black in dark mode */
-    .screensaver-overlay {
-        background-color: #000000 !important; /* Solid black */
-        background-image: none !important; /* No pattern */
-    }
+    
 }
 
 /* Screensaver styles */
@@ -516,24 +513,3 @@ body.theme-dark #game-of-the-week .meta-value {
     /* display: none !important; */ /* Remove this line to show content, screensaver is transparent */
     min-height: 0 !important;
 }
-
-.screensaver-timer {
-    position: fixed;
-    bottom: 10px;
-    right: 10px;
-    background-color: rgba(0, 0, 0, 0.7);
-    color: white;
-    padding: 5px 10px;
-    border-radius: 5px;
-    font-family: monospace;
-    font-size: 0.9em;
-    z-index: 10000;
-    display: none; /* Hidden by default */
-}
-
-/* Removing this block as its properties are now handled by .screensaver-overlay directly in the media query. */
-/* .screensaver-overlay.screensaver-dark-background {
-    background-color: #000000; /* Pure black */
-/* } */
-
-/* Removed joystick related styles */

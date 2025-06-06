@@ -59,7 +59,14 @@
 
     <script src="assets/js/screensaver.js"></script>
     <script src="assets/js/main.js"></script>
+
+    <!--This is for loading custom cursors-->
+    <script src="https://unpkg.com/cursor-effects@latest/dist/browser.js"></script>
     <script>
+      window.addEventListener("load", (event) => {
+        // Available cursors are found here: https://github.com/tholman/cursor-effects/tree/master/src
+        new cursoreffects.rainbowCursor();
+      });
     // Game launcher functionality
     /*
     document.getElementById('launch-game-btn').addEventListener('click', function() {

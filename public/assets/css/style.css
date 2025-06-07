@@ -295,19 +295,19 @@ footer {
 }
 .game-meta-table .meta-label {
     font-weight: bold;
-    color: #222;
+    color: var(--text-color) !important; /* Force theme text color */
     text-align: right;
     white-space: nowrap;
 }
 .game-meta-table .meta-value {
-    color: #333;
+    color: var(--text-color) !important; /* Force theme text color */
     text-align: left;
 }
 
 .game-meta-tooltip {
     position: absolute;
-    background: #fff;
-    color: #222;
+    background: var(--background) !important; /* Force theme background */
+    color: var(--text-color) !important; /* Force theme text color */
     border-radius: 8px;
     box-shadow: 0 4px 16px rgba(0,0,0,0.18);
     padding: 14px 18px;
@@ -440,13 +440,7 @@ body.theme-dark #game-of-the-week {
     color: var(--text-color);
     border: 1px solid #444;
 }
-body.theme-dark #game-of-the-week .game-meta-list,
-body.theme-dark #game-of-the-week .game-meta-table,
-body.theme-dark #game-of-the-week .meta-label,
-body.theme-dark #game-of-the-week .meta-value {
-    color: #e0e0e0;
-}
-/* Ensure visibility in dark mode */
+
 @media (prefers-color-scheme: dark) {
     .browser-warning {
         background-color: #664d00;

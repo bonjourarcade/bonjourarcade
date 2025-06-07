@@ -1,2 +1,5 @@
 **/*.swp
 public/gamelist.json
+public/games/*/*_thumb.*g
+public/assets/*/*_thumb.*g
+public/assets/*_thumb.*g

@@ -7,7 +7,7 @@ GAMELIST_PATH="public/gamelist.json"
 THUMB_WIDTH=150
 
 # --- Check for ImageMagick (convert command) ---
-if ! command -v convert &> /dev/null
+if ! command -v magick &> /dev/null
 then
     echo "Error: ImageMagick (convert command) not found."
     echo "Please install ImageMagick. On macOS: brew install imagemagick. On Alpine: apk add imagemagick."
@@ -65,10 +65,10 @@ while IFS= read -r relative_path; do
     
     thumbnail_path="${dirname}/${base_name}_thumb.${extension}"
 
-    # Generate thumbnail using ImageMagick's convert command
+    # Generate thumbnail using ImageMagick's magick command
     # -resize: Resizes the image to the given width, maintaining aspect ratio.
     #          > prevents upsizing if original is smaller.
-    if convert "$full_image_path" -resize "${THUMB_WIDTH}x>" "$thumbnail_path"; then
+    if magick "$full_image_path" -resize "${THUMB_WIDTH}x>" "$thumbnail_path"; then
         echo "Generated thumbnail: $thumbnail_path"
         PROCESSED_COUNT=$((PROCESSED_COUNT+1))
     else

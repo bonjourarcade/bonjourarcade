@@ -138,9 +138,20 @@
                 gamesData.forEach(game => {
                     const div = document.createElement('div');
                     div.className = 'game';
+
+                    let coverSrc = game.coverArt || '/assets/images/placeholder_thumb.png';
+
+                    // Use thumbnail version if available
+                    if (coverSrc && coverSrc !== '/assets/images/placeholder_thumb.png') {
+                        const lastDotIndex = coverSrc.lastIndexOf('.');
+                        if (lastDotIndex !== -1) {
+                            coverSrc = coverSrc.substring(0, lastDotIndex) + '_thumb' + coverSrc.substring(lastDotIndex);
+                        }
+                    }
+
                     div.innerHTML = `
                         <a href="${game.pageUrl}">
-                            <img src="${game.coverArt}" alt="${game.title}">
+                            <img src="${coverSrc}" alt="${game.title}">
                             <div class="game-title">${game.title}</div>
                         </a>
                     `;

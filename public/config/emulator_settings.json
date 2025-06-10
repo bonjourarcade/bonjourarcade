@@ -1,7 +1,7 @@
 {
   "EJS_backgroundBlur": "true",
   "EJS_alignStartButton": "bottom",
-  "EJS_pathtodata": "https://cdn.emulatorjs.org/nightly/data/",
+  "EJS_pathtodata": "https://cdn.emulatorjs.org/stable/data/",
   "EJS_AdUrl": "/ads",
   "EJS_AdTimer": 0,
   "EJS_AdMode": 0

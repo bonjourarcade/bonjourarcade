@@ -6,19 +6,22 @@ document.addEventListener('DOMContentLoaded', () => {
 /**
  * Fetches the gamelist.json file and triggers functions to update the page.
  */
-// Detect if browser is Chromium-based
-function isChromiumBased() {
-    const userAgent = navigator.userAgent.toLowerCase();
-    return userAgent.includes('chrome') ||
-           userAgent.includes('chromium') ||
-           userAgent.includes('edg') ||
-           userAgent.includes('brave');
+// Detect if browser is Firefox
+function isFirefox() {
+    return navigator.userAgent.toLowerCase().includes('firefox');
 }
 
 // Check browser and show warning if needed
 function checkBrowser() {
-    if (!isChromiumBased()) {
-        document.getElementById('browser-warning').style.display = 'block';
+    const browserWarningDiv = document.getElementById('browser-warning');
+    if (browserWarningDiv) {
+        if (isFirefox()) {
+            browserWarningDiv.style.display = 'block';
+            browserWarningDiv.innerHTML = `<p><strong>Remarque :</strong> Pour une expérience de jeu optimale, nous vous recommandons d'utiliser un navigateur basé sur Chromium comme Google Chrome, Safari, Microsoft Edge ou Brave. <br><b>Certains jeux peuvent ne pas fonctionner de manière optimale sur Firefox.</b></p>`;
+        } else {
+            // Hide the warning for other browsers if it's not Firefox
+            browserWarningDiv.style.display = 'none';
+        }
     }
 }
 

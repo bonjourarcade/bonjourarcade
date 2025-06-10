@@ -21,8 +21,7 @@
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             z-index: 1000;
-            display: none; /* Hidden by default, shown for desktop */
-            display: flex; /* Use flexbox for centering */
+            display: none; /* Hidden by default, will be shown by JS */
             flex-direction: column;
             align-items: center;
             justify-content: center;
@@ -110,11 +109,12 @@
             console.log(`Attempting to load game with ID: ${gameId}`);
 
             // QR Code generation logic
-            if (!isMobileDevice()) {
-                const qrCodeContainer = document.getElementById('qr-code-container');
-                if (qrCodeContainer) {
+            const qrCodeContainer = document.getElementById('qr-code-container');
+            const leaderboardUrl = `https://alloarcade.web.app/leaderboards/${gameId}`;
+
+            if (qrCodeContainer) {
+                if (!isMobileDevice()) {
                     qrCodeContainer.style.display = 'flex'; // Show container for desktop
-                    const leaderboardUrl = `https://alloarcade.web.app/leaderboards/${gameId}`;
                     new QRCode(document.getElementById("qr-code"), {
                         text: leaderboardUrl,
                         width: 90,
@@ -123,12 +123,20 @@
                         colorLight : "#ffffff",
                         correctLevel : QRCode.CorrectLevel.H
                     });
-                    
-                    // Make the container clickable
-                    qrCodeContainer.addEventListener('click', () => {
-                        window.open(leaderboardUrl, '_blank'); // Open in new tab
-                    });
+                } else {
+                    // On mobile, just show the container (without QR code) for the clickable text
+                    qrCodeContainer.style.display = 'flex';
+                    // Hide the qr-code div itself on mobile
+                    const qrCodeDiv = document.getElementById('qr-code');
+                    if (qrCodeDiv) {
+                        qrCodeDiv.style.display = 'none';
+                    }
                 }
+
+                // Make the container clickable for both desktop and mobile
+                qrCodeContainer.addEventListener('click', () => {
+                    window.open(leaderboardUrl, '_blank'); // Open in new tab
+                });
             }
 
             try {

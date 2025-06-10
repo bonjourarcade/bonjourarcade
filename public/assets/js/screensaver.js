@@ -227,14 +227,14 @@ function updateScreensaverImagePosition() {
 
 // Gamepad detection for screensaver dismissal
 function checkGamepads() {
-    console.log('Checking gamepads...');
+    //console.log('Checking gamepads...');
     const gamepads = navigator.getGamepads();
     for (const gamepad of gamepads) {
         if (gamepad) {
             // Check if any button is pressed
             for (const button of gamepad.buttons) {
                 if (button.pressed) {
-                    console.log('Gamepad button pressed!', button);
+                    //console.log('Gamepad button pressed!', button);
                     resetIdleTime();
                     // IMPORTANT: Do NOT return here. Allow the loop to continue to schedule the next frame.
                 }

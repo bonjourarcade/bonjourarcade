@@ -238,3 +238,6 @@ echo "$json_output" | jq '.' > "$OUTPUT_FILE"
 
 # Clean up temporary files
 rm -f "$temp_json_file" "$temp_games_file" "$temp_featured_file"
+
+# Generate thumbnails
+bash scripts/generate_thumbnails.sh

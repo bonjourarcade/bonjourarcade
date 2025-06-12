@@ -13,7 +13,6 @@ pages:
     - pip3 install yq                                  # Install the Python-based yq
   script:
     - bash scripts/generate_gamelist.sh
-    - bash scripts/generate_thumbnails.sh
     - cp plinko-gamelist.txt public/plinko/gamelist.txt
     #- cd public
     #- zip -r games.zip games

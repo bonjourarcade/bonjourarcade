@@ -35,9 +35,40 @@
             margin-bottom: 0;
             text-align: center;
         }
+        /* Menu button styling */
+        #menu-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: sans-serif;
+            font-size: 14px;
+            z-index: 1000;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: background-color 0.2s;
+        }
+        #menu-button:hover {
+            background-color: rgba(0, 0, 0, 0.9);
+        }
+        #menu-button .arrow {
+            font-size: 18px;
+        }
     </style>
 </head>
 <body>
+    <!-- Menu Button -->
+    <div id="menu-button" onclick="window.location.href='/'">
+        <span class="arrow">←</span>
+        <span>MENU</span>
+    </div>
+
     <div id="game-container">
         <div id="game"><p style="text-align: center; padding-top: 50px;">Initializing...</p></div>
     </div>

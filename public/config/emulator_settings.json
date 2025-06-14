@@ -1,4 +1,5 @@
 {
+  "EJS_DEBUG_XX": "true",
   "EJS_backgroundBlur": "true",
   "EJS_alignStartButton": "bottom",
   "EJS_pathtodata": "https://cdn.emulatorjs.org/nightly/data/",

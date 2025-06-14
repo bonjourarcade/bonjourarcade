@@ -1,4 +1,7 @@
 {
+  "EJS_defaultOptions": {
+    "shader":"crt-aperture"
+  },
   "EJS_DEBUG_XX": "true",
   "EJS_backgroundBlur": "true",
   "EJS_alignStartButton": "bottom",

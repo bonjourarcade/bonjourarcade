@@ -8,7 +8,6 @@ Asteroids Deluxe
 Atomic Runner
 B-Wings #Famicom
 Ballon Fight
-Battletoads
 Biker Mice from Mars
 Blades of Steel
 Blazing Star
@@ -105,7 +104,6 @@ Seicross
 Sensible Soccer
 Shinobi
 Shinobi III: Return of the Ninja Master
-Snake
 Snap Jack
 Sonic 2
 Sorcer Striker

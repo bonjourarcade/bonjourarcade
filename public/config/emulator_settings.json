@@ -1,4 +1,7 @@
 {
+  "EJS_defaultOptions": {
+    "save-state-location": "browser"
+  },
   "EJS_DEBUG_XX": "true",
   "EJS_backgroundBlur": "true",
   "EJS_alignStartButton": "bottom",

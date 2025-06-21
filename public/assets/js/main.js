@@ -186,6 +186,9 @@ function populateFeaturedGame(game) {
         window.featuredGameCoverArt = '';
     }
 
+    // Update social media meta tags with game information
+    updateSocialMediaMetaTags(game);
+
     // Clear placeholder content and set the title
     contentContainer.innerHTML = '';
 
@@ -242,6 +245,60 @@ function populateFeaturedGame(game) {
     });
     if (metaTable.children.length > 0) {
         contentContainer.appendChild(metaTable);
+    }
+}
+
+/**
+ * Updates social media meta tags with game information
+ * @param {object} game - The game object containing metadata
+ */
+function updateSocialMediaMetaTags(game) {
+    // Get display title
+    let displayTitle = game.title;
+    if (!displayTitle || displayTitle === game.id) {
+        displayTitle = capitalizeFirst(game.id);
+    }
+
+    // Create description with game info
+    let description = `Jouer à ${displayTitle}`;
+    if (game.year) {
+        description += ` (${game.year})`;
+    }
+    if (game.developer) {
+        description += ` par ${game.developer}`;
+    }
+    if (game.system) {
+        description += ` sur ${game.system}`;
+    }
+
+    // Update page title
+    document.title = `BonjourArcade - ${displayTitle}`;
+
+    // Update Open Graph meta tags
+    updateMetaTag('og:title', `BonjourArcade - ${displayTitle}`);
+    updateMetaTag('og:description', description);
+    if (game.coverArt) {
+        updateMetaTag('og:image', `https://bonjourarcade.com${game.coverArt}`);
+    }
+
+    // Update Twitter meta tags
+    updateMetaTag('twitter:title', `BonjourArcade - ${displayTitle}`);
+    updateMetaTag('twitter:description', description);
+    if (game.coverArt) {
+        updateMetaTag('twitter:image', `https://bonjourarcade.com${game.coverArt}`);
+    }
+}
+
+/**
+ * Helper function to update meta tags
+ * @param {string} property - The meta tag property to update
+ * @param {string} content - The new content value
+ */
+function updateMetaTag(property, content) {
+    const metaTag = document.querySelector(`meta[property="${property}"]`) || 
+                   document.querySelector(`meta[name="${property}"]`);
+    if (metaTag) {
+        metaTag.setAttribute('content', content);
     }
 }
 

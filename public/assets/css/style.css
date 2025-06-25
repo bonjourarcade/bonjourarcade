@@ -74,18 +74,43 @@ body.theme-dark {
 /* Main layout using Flexbox */
 .main-content {
     display: flex;
-    flex-wrap: wrap; /* Allow wrapping on smaller screens */
-    gap: 30px; /* Space between columns */
-    flex: 1; /* Take up remaining space */
-    align-items: flex-start; /* Align items to the start to prevent stretching */
+    flex-direction: row;
+    align-items: stretch;
+    min-height: calc(100vh - 120px); /* Adjust 120px if header/footer size changes */
+    gap: 30px;
 }
 
 /* Featured Game Section (Left Column) */
 .featured-section {
-    min-width: 280px; /* Minimum width before wrapping */
-    border: 1px solid #ddd;
-    background-color: #fff;
-    text-align: center;
+    flex: 1 1 350px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 320px;
+    max-width: 480px;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+.featured-content-vertical {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    height: 100%;
+}
+
+#featured-game-content img {
+    width: auto;
+    max-width: 100%;
+    max-height: 60vh;
+    height: auto;
+    margin: 0 auto 15px auto;
+    display: block;
+}
+
+#featured-game-title, .featured-title, .game-meta-table {
+    margin-bottom: 0;
 }
 
 .featured-section h2 {
@@ -93,14 +118,6 @@ body.theme-dark {
     margin-bottom: 15px;
     border-bottom: 2px solid #eee;
     padding-bottom: 10px;
-}
-
-#featured-game-content img {
-    max-width: 100%;
-    max-height: 800px; /* Reverted to fixed pixel value */
-    height: auto;
-    display: block;
-    margin: 0 auto 15px auto; /* Center images and add space below */
 }
 
 /* Add to public/assets/css/style.css */
@@ -162,8 +179,11 @@ body.theme-dark {
 
 /* Previous Games Section (Right Column / Grid) */
 .grid-section {
-    flex: 2; /* Takes up more space */
-    min-width: 300px; /* Minimum width */
+    flex: 2 1 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
 }
 
 .grid-section h2 {
@@ -399,6 +419,22 @@ footer {
         padding: 10px 0 5px 0;
         background: #f4f4f4;
         border-radius: 0 0 10px 10px;
+    }
+}
+
+@media (max-width: 900px) {
+    .main-content {
+        flex-direction: column;
+        min-height: unset;
+    }
+    .featured-section, .grid-section {
+        max-width: 100%;
+        width: 100%;
+        min-width: 0;
+        height: auto;
+    }
+    #featured-game-content img {
+        max-height: 40vh;
     }
 }
 

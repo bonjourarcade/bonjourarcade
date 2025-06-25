@@ -23,6 +23,7 @@ Combat School
 Comix Zone
 Darius Gaiden #Saturn
 Dig Dug
+DoDonPachi Dai-Fukkatsu
 Dolphin #Atari 2600
 Donkey Kong
 Doom
@@ -48,6 +49,7 @@ Gradius 2
 Gun.Smoke
 Guwange
 H.E.R.O. #Atari 2600
+Ibara
 Kirby's Adventure
 Kung Fu #NES
 Gunlock # Layer Section, Galactic Attack, Rayforce
@@ -137,6 +139,7 @@ Truxton
 Ultimate Mortal Kombat 3
 Undeadline #already downloaded!
 Uniracers
+Vimana
 Wild Guns
 Windjammers
 Wonder Boy

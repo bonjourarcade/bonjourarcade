@@ -207,8 +207,8 @@ function populateFeaturedGame(game) {
 
     // Create link container for the image
     const gameLink = document.createElement('a');
-    // Use pageUrl from JSON (should point to /play.html?game=...) but now links to /gotw
-    gameLink.href = '/gotw';
+    // Use pageUrl from JSON (should point to /play?game=...)
+    gameLink.href = game.pageUrl || ('/play?game=' + game.id);
 
     // Featured Image (uses game.coverArt only now)
     const img = document.createElement('img');

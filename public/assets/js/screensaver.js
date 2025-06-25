@@ -3,6 +3,7 @@ let idleTime = 0;
 const SCREENSAVER_TIMEOUT_MINUTES = 10;
 let screensaverActive = false;
 let isActivatingScreensaver = false;
+window.screensaverActive = screensaverActive; // Ensure global access
 
 // DOM elements (will be assigned inside DOMContentLoaded)
 let screensaverOverlay;
@@ -78,6 +79,8 @@ function resetIdleTime() {
 function startScreensaver() {
     if (!screensaverActive) {
         screensaverActive = true;
+        window.screensaverActive = true; // Keep in sync
+        sessionStorage.setItem('bonjourarcade_screensaver_was_active', '1'); // Persist state
         isActivatingScreensaver = true; // Set flag when activation begins
 
         // Programmatically scroll to the top to handle browser behavior proactively
@@ -160,6 +163,8 @@ function stopScreensaver() {
     // console.log('stopScreensaver called. Initial screensaverActive:', screensaverActive);
     if (screensaverActive) {
         screensaverActive = false;
+        window.screensaverActive = false; // Keep in sync
+        sessionStorage.removeItem('bonjourarcade_screensaver_was_active'); // Clear state
         // console.log('screensaverActive set to false. Attempting to remove classes and hide overlay.');
         document.body.classList.remove('screensaver-active');
         document.documentElement.classList.remove('screensaver-active');

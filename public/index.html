@@ -51,7 +51,7 @@
 
         <main class="main-content">
             <section id="game-of-the-week" class="featured-section">
-                <h2>Jeu de la semaine</h2>
+              <center><h2>Jeu de la semaine</h2></center>
                 <div id="featured-game-content" class="featured-content-vertical">
                     <img id="featured-game-img"
                          src="" alt="Couverture du jeu sélectionné">
@@ -140,6 +140,33 @@
             setTheme(e.matches ? 'theme-dark' : 'theme-light');
         });
     }
+    </script>
+    <script>
+    // --- Auto-refresh every 3 hours, and auto-restart screensaver if it was active before refresh ---
+    (function() {
+      // Refresh every 3 hours (10,800,000 ms)
+      const THREE_HOURS_MS = 3 * 60 * 60 * 1000;
+      setTimeout(() => {
+        // If screensaver is active, set a flag before reload
+        if (window.screensaverActive) {
+          sessionStorage.setItem('bonjourarcade_screensaver_was_active', '1');
+        }
+        location.reload();
+      }, THREE_HOURS_MS);
+
+      // On load, if the flag is set, start the screensaver after DOM is ready
+      document.addEventListener('DOMContentLoaded', function() {
+        if (sessionStorage.getItem('bonjourarcade_screensaver_was_active') === '1') {
+          sessionStorage.removeItem('bonjourarcade_screensaver_was_active');
+          // Wait a tick to ensure screensaver.js is initialized
+          setTimeout(function() {
+            if (typeof startScreensaver === 'function') {
+              startScreensaver();
+            }
+          }, 300);
+        }
+      });
+    })();
     </script>
     <div id="screensaver-overlay" class="screensaver-overlay">
         <img id="screensaver-image" class="screensaver-image" src="" alt="Screensaver Image">

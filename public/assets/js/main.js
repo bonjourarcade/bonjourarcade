@@ -89,13 +89,25 @@ async function fetchGameData() {
                 } else {
                     document.body.classList.remove('search-active');
                 }
-                const filteredGames = window.allGamesData.filter(game => {
-                    let displayTitle = game.title;
-                    if (!displayTitle || displayTitle === game.id) {
-                        displayTitle = capitalizeFirst(game.id);
-                    }
-                    return displayTitle.toLowerCase().includes(searchTerm);
-                });
+
+                // Check for exact id match (case-insensitive, full match only)
+                const exactMatch = window.allGamesData.find(game => game.id && game.id.toLowerCase() === searchTerm);
+                let filteredGames;
+                if (exactMatch && searchTerm.length > 0 && searchTerm === exactMatch.id.toLowerCase()) {
+                    // Show only the exact match, even if hidden
+                    filteredGames = [exactMatch];
+                } else {
+                    // Normal filtering (by title, only visible games)
+                    filteredGames = window.allGamesData.filter(game => {
+                        // Only match visible games for substring search
+                        if (game.hide === true || game.hide === 'yes') return false;
+                        let displayTitle = game.title;
+                        if (!displayTitle || displayTitle === game.id) {
+                            displayTitle = capitalizeFirst(game.id);
+                        }
+                        return displayTitle.toLowerCase().includes(searchTerm);
+                    });
+                }
                 populatePreviousGames(filteredGames);
 
                 const previousGamesGrid = document.getElementById('previous-games-grid');
@@ -313,8 +325,14 @@ function populatePreviousGames(games) {
          return;
     }
 
-    // Filter out hidden games
-    const visibleGames = games.filter(game => !(game.hide === true || game.hide === 'yes'));
+    let visibleGames;
+    // If only one game is passed, show it even if hidden (for exact id match)
+    if (games.length === 1) {
+        visibleGames = games;
+    } else {
+        // Filter out hidden games
+        visibleGames = games.filter(game => !(game.hide === true || game.hide === 'yes'));
+    }
 
     // Handle case where there are no previous games
     if (!visibleGames || visibleGames.length === 0) {

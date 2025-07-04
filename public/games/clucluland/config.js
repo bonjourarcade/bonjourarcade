@@ -1,3 +1,3 @@
 {
-  "EJS_biosUrl": "/games/bios/disksys.rom"
+  "EJS_biosUrl": "/roms/bios/disksys.rom"
 }

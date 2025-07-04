@@ -562,3 +562,27 @@ body.search-active #game-of-the-week {
 .game-grid.no-results-active {
     display: block; /* Override grid display when no results to allow text centering */
 }
+
+/* Blue highlight for selected game in light mode */
+.game-item--selected {
+  border: 3px solid #2196f3;
+  box-shadow: 0 0 16px 2px #2196f355;
+  transform: scale(1.06) translateY(-8px);
+  z-index: 2;
+  transition: border 0.15s, box-shadow 0.15s, transform 0.15s;
+}
+body.theme-dark .game-item--selected {
+  border: 3px solid #fffd37;
+  box-shadow: 0 0 16px 2px #fffd3755;
+}
+
+#game-of-the-week.game-item--selected {
+  border: 3px solid #2196f3;
+  box-shadow: 0 0 16px 2px #2196f355;
+  transition: border 0.15s, box-shadow 0.15s, transform 0.15s;
+  z-index: 2;
+}
+body.theme-dark #game-of-the-week.game-item--selected {
+  border: 3px solid #fffd37;
+  box-shadow: 0 0 16px 2px #fffd3755;
+}

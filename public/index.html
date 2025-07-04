@@ -82,8 +82,18 @@
     <script>
       window.addEventListener("load", (event) => {
         // Available cursors are found here: https://github.com/tholman/cursor-effects/tree/master/src
-        new cursoreffects.rainbowCursor();
-        new cursoreffects.fairyDustCursor();
+        // Ensure cursor effects are on top of everything
+        const rainbowCursor = new cursoreffects.rainbowCursor();
+        const fairyDustCursor = new cursoreffects.fairyDustCursor();
+        
+        // Set high z-index for cursor effects with a small delay to ensure they're created
+        setTimeout(() => {
+            const cursorElements = document.querySelectorAll('.cursor-effects');
+            cursorElements.forEach(element => {
+                element.style.zIndex = '99999';
+                element.style.pointerEvents = 'none';
+            });
+        }, 100);
       });
     // Game launcher functionality
     /*

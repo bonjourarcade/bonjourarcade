@@ -544,6 +544,12 @@ body.theme-dark #game-of-the-week {
     min-height: 0 !important;
 }
 
+/* Ensure cursor effects are on top of everything */
+.cursor-effects {
+    z-index: 99999 !important;
+    pointer-events: none !important;
+}
+
 /* Hide game of the week when search is active */
 body.search-active #game-of-the-week {
     display: none;

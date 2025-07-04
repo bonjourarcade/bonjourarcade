@@ -230,6 +230,13 @@
                     if (!gameConfig || typeof gameConfig !== 'object') {
                       throw new Error(`Game config file '${gameConfigPath}' loaded but contained invalid JSON.`);
                     }
+                    
+                    // Log the game-specific config values
+                    console.log(`Game-specific config values for ${gameId}:`);
+                    for (const [key, value] of Object.entries(gameConfig)) {
+                      console.log(`  ${key} = ${value}`);
+                    }
+                    
                     // Merge/override global settings with game-specific settings
                     for (const [key, value] of Object.entries(gameConfig)) {
                       window[`${key}`] = value;
@@ -246,9 +253,12 @@
                   return;
                 }
 
-                console.log("Emulator Settings Loaded:");
-                for (const [key, value] of Object.entries(settings)) {
-                  console.log(`${key} = ${value}`);
+                console.log("Final merged emulator settings (global + game-specific):");
+                // Log all EJS_* variables that are set
+                for (const key of Object.keys(window)) {
+                  if (key.startsWith('EJS_')) {
+                    console.log(`  ${key} = ${window[key]}`);
+                  }
                 }
 
                 window.EJS_backgroundImage =

@@ -1,3 +1,64 @@
+// --- Tooltip Functions (Global Scope) ---
+function showTooltipForItem(item) {
+    removeTooltip(); // Clear any existing tooltip
+    if (!item) return;
+    // Use the attached game data
+    let game = item._gameData;
+    if (!game) return;
+    // Create tooltip
+    const tooltip = document.createElement('div');
+    tooltip.id = 'game-meta-tooltip';
+    tooltip.className = 'game-meta-tooltip';
+    const fields = [
+        { label: 'Developpeur', key: 'developer' },
+        { label: 'Année', key: 'year' },
+        { label: 'Système', key: 'system' },
+        { label: 'Genre', key: 'genre' },
+        { label: 'Recommandé par', key: 'recommended' },
+        { label: 'Ajouté', key: 'added' }
+    ];
+    let hasData = false;
+    const table = document.createElement('table');
+    table.className = 'game-meta-table';
+    fields.forEach(field => {
+        if (game[field.key]) {
+            hasData = true;
+            const row = document.createElement('tr');
+            const labelCell = document.createElement('td');
+            labelCell.innerHTML = `<strong>${field.label}:</strong>`;
+            labelCell.className = 'meta-label';
+            const valueCell = document.createElement('td');
+            valueCell.textContent = game[field.key];
+            valueCell.className = 'meta-value';
+            row.appendChild(labelCell);
+            row.appendChild(valueCell);
+            table.appendChild(row);
+        }
+    });
+    if (hasData) {
+        tooltip.appendChild(table);
+        document.body.appendChild(tooltip);
+        // Position tooltip near the item
+        const rect = item.getBoundingClientRect();
+        const tooltipRect = tooltip.getBoundingClientRect();
+        let left = rect.right + 8 + window.scrollX;
+        let top = rect.top + window.scrollY;
+        if (left + tooltipRect.width > window.innerWidth) {
+            left = rect.left - tooltipRect.width - 8 + window.scrollX;
+        }
+        if (top + tooltipRect.height > window.scrollY + window.innerHeight) {
+            top = window.scrollY + window.innerHeight - tooltipRect.height - 8;
+        }
+        tooltip.style.left = `${left}px`;
+        tooltip.style.top = `${top}px`;
+    }
+}
+
+function removeTooltip() {
+    const tooltip = document.getElementById('game-meta-tooltip');
+    if (tooltip) tooltip.remove();
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     // This function starts the process when the HTML page is fully loaded
     fetchGameData();
@@ -469,60 +530,7 @@ setInterval(checkAndRefreshAt5AM, 3600000);
         gameItems.forEach(item => item.classList.remove('game-item--selected'));
     }
 
-    function showTooltipForItem(item) {
-        removeTooltip();
-        if (!item) return;
-        // Use the attached game data
-        let game = item._gameData;
-        if (!game) return;
-        // Create tooltip (copied from mouseenter logic)
-        const tooltip = document.createElement('div');
-        tooltip.id = 'game-meta-tooltip';
-        tooltip.className = 'game-meta-tooltip';
-        const fields = [
-            { label: 'Developpeur', key: 'developer' },
-            { label: 'Année', key: 'year' },
-            { label: 'Système', key: 'system' },
-            { label: 'Genre', key: 'genre' },
-            { label: 'Recommandé par', key: 'recommended' },
-            { label: 'Ajouté', key: 'added' }
-        ];
-        let hasData = false;
-        const table = document.createElement('table');
-        table.className = 'game-meta-table';
-        fields.forEach(field => {
-            if (game[field.key]) {
-                hasData = true;
-                const row = document.createElement('tr');
-                const labelCell = document.createElement('td');
-                labelCell.innerHTML = `<strong>${field.label}:</strong>`;
-                labelCell.className = 'meta-label';
-                const valueCell = document.createElement('td');
-                valueCell.textContent = game[field.key];
-                valueCell.className = 'meta-value';
-                row.appendChild(labelCell);
-                row.appendChild(valueCell);
-                table.appendChild(row);
-            }
-        });
-        if (hasData) {
-            tooltip.appendChild(table);
-            document.body.appendChild(tooltip);
-            // Position tooltip near the item
-            const rect = item.getBoundingClientRect();
-            const tooltipRect = tooltip.getBoundingClientRect();
-            let left = rect.right + 8 + window.scrollX;
-            let top = rect.top + window.scrollY;
-            if (left + tooltipRect.width > window.innerWidth) {
-                left = rect.left - tooltipRect.width - 8 + window.scrollX;
-            }
-            if (top + tooltipRect.height > window.scrollY + window.innerHeight) {
-                top = window.scrollY + window.innerHeight - tooltipRect.height - 8;
-            }
-            tooltip.style.left = `${left}px`;
-            tooltip.style.top = `${top}px`;
-        }
-    }
+    // Note: showTooltipForItem and removeTooltip are now in global scope
 
     // Helper: scroll element into view with margin
     function scrollElementIntoViewWithMargin(element, margin = 40) {
@@ -560,7 +568,7 @@ setInterval(checkAndRefreshAt5AM, 3600000);
         if (!userHasNavigated) return;
         
         clearHighlights();
-        removeTooltip();
+        removeTooltipWithTimeout();
         if (currentIndex === 0 && featuredGameSection) {
             featuredGameSection.classList.add('game-item--selected');
             scrollElementIntoViewWithMargin(featuredGameSection);
@@ -575,10 +583,10 @@ setInterval(checkAndRefreshAt5AM, 3600000);
         }
     }
 
-    function removeTooltip() {
+    // Note: removeTooltip is now in global scope, but we need to handle tooltipTimeout here
+    function removeTooltipWithTimeout() {
         if (tooltipTimeout) clearTimeout(tooltipTimeout);
-        const tooltip = document.getElementById('game-meta-tooltip');
-        if (tooltip) tooltip.remove();
+        removeTooltip();
     }
 
     function playNavSound() {
@@ -839,7 +847,14 @@ setInterval(checkAndRefreshAt5AM, 3600000);
         }
     });
 
-    document.addEventListener('mousemove', removeTooltip);
+    // Only remove tooltip on mouse move if not hovering over a game item
+    document.addEventListener('mousemove', (e) => {
+        const target = e.target;
+        const isOverGameItem = target.closest('.game-item') || target.closest('#game-of-the-week');
+        if (!isOverGameItem) {
+            removeTooltip();
+        }
+    });
     document.addEventListener('click', removeTooltip);
 
     const observer = new MutationObserver(() => {

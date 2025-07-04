@@ -319,6 +319,36 @@ function populateFeaturedGame(game) {
     if (metaTable.children.length > 0) {
         contentContainer.appendChild(metaTable);
     }
+
+    // Add mouse event listeners for featured game section (same as keyboard navigation)
+    const featuredGameSection = document.getElementById('game-of-the-week');
+    if (featuredGameSection) {
+        featuredGameSection.addEventListener('mouseenter', (e) => {
+            // Clear any existing highlights
+            clearHighlights();
+            removeTooltipWithTimeout();
+            
+            // Add highlight to featured section
+            featuredGameSection.classList.add('game-item--selected');
+            
+            // Show tooltip with delay (same as keyboard)
+            if (tooltipTimeout) clearTimeout(tooltipTimeout);
+            tooltipTimeout = setTimeout(() => {
+                showTooltipForItem(featuredGameSection);
+            }, 80);
+        });
+        featuredGameSection.addEventListener('mouseleave', () => {
+            // Remove highlight from featured section
+            featuredGameSection.classList.remove('game-item--selected');
+            removeTooltipWithTimeout();
+        });
+        
+        // --- Click behavior (same as Enter key) ---
+        featuredGameSection.addEventListener('click', (e) => {
+            e.preventDefault(); // Prevent default link behavior
+            handleGameClick(featuredGameSection);
+        });
+    }
 }
 
 /**
@@ -456,12 +486,31 @@ function populatePreviousGames(games) {
         gameItem.appendChild(link);
         gridContainer.appendChild(gameItem);
 
-        // --- Tooltip for metadata ---
+        // --- Mouse hover behavior (same as keyboard navigation) ---
         gameItem.addEventListener('mouseenter', (e) => {
-            showTooltipForItem(gameItem);
+            // Clear any existing highlights
+            clearHighlights();
+            removeTooltipWithTimeout();
+            
+            // Add highlight to this item
+            gameItem.classList.add('game-item--selected');
+            
+            // Show tooltip with delay (same as keyboard)
+            if (tooltipTimeout) clearTimeout(tooltipTimeout);
+            tooltipTimeout = setTimeout(() => {
+                showTooltipForItem(gameItem);
+            }, 80);
         });
         gameItem.addEventListener('mouseleave', () => {
-            removeTooltip();
+            // Remove highlight from this item
+            gameItem.classList.remove('game-item--selected');
+            removeTooltipWithTimeout();
+        });
+        
+        // --- Click behavior (same as Enter key) ---
+        gameItem.addEventListener('click', (e) => {
+            e.preventDefault(); // Prevent default link behavior
+            handleGameClick(gameItem);
         });
     });
 }
@@ -503,6 +552,163 @@ function checkAndRefreshAt5AM() {
 // Set up interval to check every hour (3,600,000 milliseconds)
 setInterval(checkAndRefreshAt5AM, 3600000);
 
+// --- Global functions for navigation and highlighting ---
+let tooltipTimeout = null;
+
+function clearHighlights() {
+    const featuredGameSection = document.getElementById('game-of-the-week');
+    const gameItems = Array.from(document.querySelectorAll('.game-item'));
+    if (featuredGameSection) featuredGameSection.classList.remove('game-item--selected');
+    gameItems.forEach(item => item.classList.remove('game-item--selected'));
+}
+
+function removeTooltipWithTimeout() {
+    if (tooltipTimeout) clearTimeout(tooltipTimeout);
+    removeTooltip();
+}
+
+function playNavSound() {
+    try {
+        const navSound = new Audio('/assets/click.mp3');
+        navSound.currentTime = 0;
+        navSound.play();
+    } catch (e) {}
+}
+
+function playSelectSound() {
+    try {
+        const selectSound = new Audio('/assets/select.mp3');
+        selectSound.currentTime = 0;
+        selectSound.play();
+    } catch (e) {}
+}
+
+// Global function to handle clicks the same way as Enter key
+function handleGameClick(element) {
+    playSelectSound();
+    
+    // Find the target URL
+    const link = element.querySelector('a');
+    if (!link || !link.href) return;
+    
+    const targetUrl = link.href;
+
+    // Block input
+    document.body.classList.add('radial-exit-block');
+
+    // Get all main elements to animate
+    const container = document.querySelector('.container');
+    const header = container.querySelector('header');
+    const main = container.querySelector('main');
+    const footer = document.querySelector('footer');
+    const allGameItems = Array.from(document.querySelectorAll('.game-item'));
+    const featured = document.getElementById('game-of-the-week');
+
+    // Get center of selected element
+    const selRect = element.getBoundingClientRect();
+    const selCenter = {
+        x: selRect.left + selRect.width / 2,
+        y: selRect.top + selRect.height / 2
+    };
+
+    // Animate header
+    if (header && header !== element && !header.contains(element)) {
+        header.classList.add('radial-exit');
+        header.style.transform = 'translateY(-1000px) scale(0.7)';
+    }
+    // Animate footer
+    if (footer && footer !== element && !footer.contains(element)) {
+        footer.classList.add('radial-exit');
+        footer.style.transform = 'translateY(1000px) scale(0.7)';
+    }
+    // Animate main children (sections)
+    if (main) {
+        Array.from(main.children).forEach(child => {
+            // If the featured section is selected, animate all .game-item elements outward, but NOT the grid section as a whole
+            if (element === featured && child.id === 'previous-games') {
+                const gridItems = child.querySelectorAll('.game-item');
+                gridItems.forEach(item => {
+                    if (item !== element) {
+                        const rect = item.getBoundingClientRect();
+                        const center = {
+                            x: rect.left + rect.width / 2,
+                            y: rect.top + rect.height / 2
+                        };
+                        const dx = center.x - selCenter.x;
+                        const dy = center.y - selCenter.y;
+                        const angle = Math.atan2(dy, dx);
+                        const dist = 1600 + Math.random() * 200;
+                        const tx = Math.cos(angle) * dist;
+                        const ty = Math.sin(angle) * dist;
+                        item.classList.add('radial-exit');
+                        item.style.transform = `translate(${tx}px, ${ty}px) scale(0.7)`;
+                    }
+                });
+            } else if (child !== element && !child.contains(element)) {
+                // For all other cases, animate the section as a whole
+                const rect = child.getBoundingClientRect();
+                const dx = rect.left + rect.width / 2 - selCenter.x;
+                const dir = dx < 0 ? -1 : 1;
+                child.classList.add('radial-exit');
+                child.style.transform = `translateX(${dir * 1600}px) scale(0.7)`;
+            } else if (child.id === 'previous-games' && child !== element) {
+                // Only animate grid items if grid section is NOT being animated as a whole
+                const gridItems = child.querySelectorAll('.game-item');
+                gridItems.forEach(item => {
+                    if (item !== element) {
+                        const rect = item.getBoundingClientRect();
+                        const center = {
+                            x: rect.left + rect.width / 2,
+                            y: rect.top + rect.height / 2
+                        };
+                        const dx = center.x - selCenter.x;
+                        const dy = center.y - selCenter.y;
+                        const angle = Math.atan2(dy, dx);
+                        const dist = 1600 + Math.random() * 200;
+                        const tx = Math.cos(angle) * dist;
+                        const ty = Math.sin(angle) * dist;
+                        item.classList.add('radial-exit');
+                        item.style.transform = `translate(${tx}px, ${ty}px) scale(0.7)`;
+                    }
+                });
+            }
+        });
+    }
+    // Animate all other game items radially (skip if already handled above)
+    allGameItems.forEach(item => {
+        if (item !== element && !item.classList.contains('radial-exit')) {
+            const rect = item.getBoundingClientRect();
+            const center = {
+                x: rect.left + rect.width / 2,
+                y: rect.top + rect.height / 2
+            };
+            const dx = center.x - selCenter.x;
+            const dy = center.y - selCenter.y;
+            const angle = Math.atan2(dy, dx);
+            const dist = 1600 + Math.random() * 200; // px, much farther
+            const tx = Math.cos(angle) * dist;
+            const ty = Math.sin(angle) * dist;
+            item.classList.add('radial-exit');
+            item.style.transform = `translate(${tx}px, ${ty}px) scale(0.7)`;
+        }
+    });
+    // Animate all other direct children of .container except selectedEl
+    Array.from(container.children).forEach(child => {
+        if (child !== element && !child.contains(element) && child !== header && child !== main && child !== footer) {
+            child.classList.add('radial-exit');
+            child.style.transform = 'scale(0.7)';
+        }
+    });
+    // Animate body background fade
+    document.body.style.transition = 'background 0.7s, opacity 0.7s';
+    document.body.style.opacity = '0.7';
+
+    // After animation and sound, navigate
+    setTimeout(() => {
+        window.location.href = targetUrl;
+    }, 700);
+}
+
 // --- Keyboard Navigation for Game Selection ---
 (function() {
     // Navigation and selection sounds
@@ -516,7 +722,6 @@ setInterval(checkAndRefreshAt5AM, 3600000);
     let featuredGameSection = document.getElementById('game-of-the-week');
     let searchInput = document.getElementById('game-id-input');
     let navThrottle = false;
-    let tooltipTimeout = null;
     let userHasNavigated = false; // Track if user has started navigating with arrow keys
 
     function updateGameItems() {
@@ -525,10 +730,7 @@ setInterval(checkAndRefreshAt5AM, 3600000);
         searchInput = document.getElementById('game-id-input');
     }
 
-    function clearHighlights() {
-        if (featuredGameSection) featuredGameSection.classList.remove('game-item--selected');
-        gameItems.forEach(item => item.classList.remove('game-item--selected'));
-    }
+    // clearHighlights is now in global scope
 
     // Note: showTooltipForItem and removeTooltip are now in global scope
 
@@ -583,24 +785,7 @@ setInterval(checkAndRefreshAt5AM, 3600000);
         }
     }
 
-    // Note: removeTooltip is now in global scope, but we need to handle tooltipTimeout here
-    function removeTooltipWithTimeout() {
-        if (tooltipTimeout) clearTimeout(tooltipTimeout);
-        removeTooltip();
-    }
-
-    function playNavSound() {
-        try {
-            navSound.currentTime = 0;
-            navSound.play();
-        } catch (e) {}
-    }
-    function playSelectSound() {
-        try {
-            selectSound.currentTime = 0;
-            selectSound.play();
-        } catch (e) {}
-    }
+    // removeTooltipWithTimeout, playNavSound, and playSelectSound are now in global scope
 
     function selectCurrent() {
         playSelectSound();
@@ -765,11 +950,7 @@ setInterval(checkAndRefreshAt5AM, 3600000);
                 }
                 // Reset highlight to featured game
                 currentIndex = 0;
-                userHasNavigated = true; // Allow highlighting after Escape
-                setTimeout(() => {
-                    updateGameItems();
-                    highlightCurrent();
-                }, 10);
+                // Don't set userHasNavigated or highlight - just clear the search
                 e.preventDefault();
             }
             return;

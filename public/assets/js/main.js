@@ -456,6 +456,7 @@ setInterval(checkAndRefreshAt5AM, 3600000);
     let searchInput = document.getElementById('game-id-input');
     let navThrottle = false;
     let tooltipTimeout = null;
+    let userHasNavigated = false; // Track if user has started navigating with arrow keys
 
     function updateGameItems() {
         gameItems = Array.from(document.querySelectorAll('.game-item'));
@@ -555,6 +556,9 @@ setInterval(checkAndRefreshAt5AM, 3600000);
     }
 
     function highlightCurrent() {
+        // Only highlight if user has started navigating with arrow keys
+        if (!userHasNavigated) return;
+        
         clearHighlights();
         removeTooltip();
         if (currentIndex === 0 && featuredGameSection) {
@@ -753,6 +757,7 @@ setInterval(checkAndRefreshAt5AM, 3600000);
                 }
                 // Reset highlight to featured game
                 currentIndex = 0;
+                userHasNavigated = true; // Allow highlighting after Escape
                 setTimeout(() => {
                     updateGameItems();
                     highlightCurrent();
@@ -769,6 +774,9 @@ setInterval(checkAndRefreshAt5AM, 3600000);
         }
         // Navigation keys
         if (["ArrowDown","ArrowUp","ArrowLeft","ArrowRight","Enter","Tab"].includes(e.key)) {
+            // Set flag that user has started navigating
+            userHasNavigated = true;
+            
             // Only throttle if key is held (event.repeat)
             if (e.repeat && navThrottle) return;
             if (e.repeat) {
@@ -836,12 +844,12 @@ setInterval(checkAndRefreshAt5AM, 3600000);
 
     const observer = new MutationObserver(() => {
         updateGameItems();
-        highlightCurrent();
+        // Don't highlight when grid changes - only when user navigates
     });
     observer.observe(document.getElementById('previous-games-grid'), {childList: true, subtree: false});
 
     window.addEventListener('DOMContentLoaded', () => {
         updateGameItems();
-        highlightCurrent();
+        // Don't highlight on page load - only when user navigates
     });
 })();

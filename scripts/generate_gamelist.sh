@@ -15,7 +15,7 @@ LAUNCHER_PAGE="/play"
 get_core_from_dir() {
     case "$1" in
         arcade|fbneo) echo "arcade" ;; # Map arcade, fbneo folders to 'arcade' core
-        mame) echo "mame2003" ;; # Map mame  to 'mame2003' core
+        mame) echo "mame2003_plus" ;; # Map mame  to 'mame2003' core
         ATARI2600) echo "atari2600" ;;
         GBA)      echo "gba" ;;
         GAMEBOY)      echo "gb" ;;

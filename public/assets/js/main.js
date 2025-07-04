@@ -344,15 +344,17 @@ function populatePreviousGames(games) {
     gridContainer.innerHTML = '';
 
     // Create grid items for each game
-    visibleGames.forEach(game => {
+    visibleGames.forEach((game, idx) => {
         // Skip if game data is invalid
         if(!game || !game.id) {
-             // console.warn("Skipping invalid game entry in previousGames:", game); // Removed for cleaner console
              return; // Skip this iteration
         }
 
         const gameItem = document.createElement('div');
         gameItem.className = 'game-item';
+        gameItem.setAttribute('data-game-index', idx + 1); // +1 because 0 will be reserved for featured game
+        gameItem.dataset.gameId = game.id;
+        gameItem._gameData = game; // Attach game data directly
 
         // Add the 'rom-missing' class if the flag is true
         if (game.romMissing === true) {
@@ -395,64 +397,10 @@ function populatePreviousGames(games) {
 
         // --- Tooltip for metadata ---
         gameItem.addEventListener('mouseenter', (e) => {
-            // Remove any existing tooltip
-            const oldTooltip = document.getElementById('game-meta-tooltip');
-            if (oldTooltip) oldTooltip.remove();
-
-            // Create tooltip
-            const tooltip = document.createElement('div');
-            tooltip.id = 'game-meta-tooltip';
-            tooltip.className = 'game-meta-tooltip';
-            const fields = [
-                // { label: 'Title', key: 'title' },
-                { label: 'Developpeur', key: 'developer' },
-                { label: 'Année', key: 'year' },
-                { label: 'Système', key: 'system' },
-                { label: 'Genre', key: 'genre' },
-                { label: 'Recommandé par', key: 'recommended' },
-                { label: 'Ajouté', key: 'added' }
-            ];
-            let hasData = false;
-            const table = document.createElement('table');
-            table.className = 'game-meta-table';
-            fields.forEach(field => {
-                if (game[field.key]) {
-                    hasData = true;
-                    const row = document.createElement('tr');
-                    const labelCell = document.createElement('td');
-                    labelCell.innerHTML = `<strong>${field.label}:</strong>`;
-                    labelCell.className = 'meta-label';
-                    const valueCell = document.createElement('td');
-                    valueCell.textContent = game[field.key];
-                    valueCell.className = 'meta-value';
-                    row.appendChild(labelCell);
-                    row.appendChild(valueCell);
-                    table.appendChild(row);
-                }
-            });
-            if (hasData) {
-                tooltip.appendChild(table);
-                document.body.appendChild(tooltip);
-                // Position tooltip near the game item
-                const rect = gameItem.getBoundingClientRect();
-                const tooltipRect = tooltip.getBoundingClientRect();
-                let left = rect.right + 8 + window.scrollX;
-                let top = rect.top + window.scrollY;
-                // If tooltip would overflow right, show to the left
-                if (left + tooltipRect.width > window.innerWidth) {
-                    left = rect.left - tooltipRect.width - 8 + window.scrollX;
-                }
-                // If tooltip would overflow bottom, adjust upward
-                if (top + tooltipRect.height > window.scrollY + window.innerHeight) {
-                    top = window.scrollY + window.innerHeight - tooltipRect.height - 8;
-                }
-                tooltip.style.left = `${left}px`;
-                tooltip.style.top = `${top}px`;
-            }
+            showTooltipForItem(gameItem);
         });
         gameItem.addEventListener('mouseleave', () => {
-            const tooltip = document.getElementById('game-meta-tooltip');
-            if (tooltip) tooltip.remove();
+            removeTooltip();
         });
     });
 }
@@ -493,3 +441,407 @@ function checkAndRefreshAt5AM() {
 
 // Set up interval to check every hour (3,600,000 milliseconds)
 setInterval(checkAndRefreshAt5AM, 3600000);
+
+// --- Keyboard Navigation for Game Selection ---
+(function() {
+    // Navigation and selection sounds
+    const navSound = new Audio('/assets/click.mp3');
+    navSound.preload = 'auto';
+    const selectSound = new Audio('/assets/select.mp3');
+    selectSound.preload = 'auto';
+
+    let currentIndex = 0; // 0 = featured, 1...N = games in grid
+    let gameItems = [];
+    let featuredGameSection = document.getElementById('game-of-the-week');
+    let searchInput = document.getElementById('game-id-input');
+    let navThrottle = false;
+    let tooltipTimeout = null;
+
+    function updateGameItems() {
+        gameItems = Array.from(document.querySelectorAll('.game-item'));
+        featuredGameSection = document.getElementById('game-of-the-week');
+        searchInput = document.getElementById('game-id-input');
+    }
+
+    function clearHighlights() {
+        if (featuredGameSection) featuredGameSection.classList.remove('game-item--selected');
+        gameItems.forEach(item => item.classList.remove('game-item--selected'));
+    }
+
+    function showTooltipForItem(item) {
+        removeTooltip();
+        if (!item) return;
+        // Use the attached game data
+        let game = item._gameData;
+        if (!game) return;
+        // Create tooltip (copied from mouseenter logic)
+        const tooltip = document.createElement('div');
+        tooltip.id = 'game-meta-tooltip';
+        tooltip.className = 'game-meta-tooltip';
+        const fields = [
+            { label: 'Developpeur', key: 'developer' },
+            { label: 'Année', key: 'year' },
+            { label: 'Système', key: 'system' },
+            { label: 'Genre', key: 'genre' },
+            { label: 'Recommandé par', key: 'recommended' },
+            { label: 'Ajouté', key: 'added' }
+        ];
+        let hasData = false;
+        const table = document.createElement('table');
+        table.className = 'game-meta-table';
+        fields.forEach(field => {
+            if (game[field.key]) {
+                hasData = true;
+                const row = document.createElement('tr');
+                const labelCell = document.createElement('td');
+                labelCell.innerHTML = `<strong>${field.label}:</strong>`;
+                labelCell.className = 'meta-label';
+                const valueCell = document.createElement('td');
+                valueCell.textContent = game[field.key];
+                valueCell.className = 'meta-value';
+                row.appendChild(labelCell);
+                row.appendChild(valueCell);
+                table.appendChild(row);
+            }
+        });
+        if (hasData) {
+            tooltip.appendChild(table);
+            document.body.appendChild(tooltip);
+            // Position tooltip near the item
+            const rect = item.getBoundingClientRect();
+            const tooltipRect = tooltip.getBoundingClientRect();
+            let left = rect.right + 8 + window.scrollX;
+            let top = rect.top + window.scrollY;
+            if (left + tooltipRect.width > window.innerWidth) {
+                left = rect.left - tooltipRect.width - 8 + window.scrollX;
+            }
+            if (top + tooltipRect.height > window.scrollY + window.innerHeight) {
+                top = window.scrollY + window.innerHeight - tooltipRect.height - 8;
+            }
+            tooltip.style.left = `${left}px`;
+            tooltip.style.top = `${top}px`;
+        }
+    }
+
+    // Helper: scroll element into view with margin
+    function scrollElementIntoViewWithMargin(element, margin = 40) {
+        if (!element) return;
+        let parent = element.parentElement;
+        while (parent && parent !== document.body && parent !== document.documentElement) {
+            const style = window.getComputedStyle(parent);
+            const overflowY = style.overflowY;
+            if (overflowY === 'auto' || overflowY === 'scroll') break;
+            parent = parent.parentElement;
+        }
+        if (!parent || parent === document.body || parent === document.documentElement) {
+            // fallback to window
+            const rect = element.getBoundingClientRect();
+            const winHeight = window.innerHeight;
+            if (rect.top < margin) {
+                window.scrollBy({top: rect.top - margin, behavior: 'smooth'});
+            } else if (rect.bottom > winHeight - margin) {
+                window.scrollBy({top: rect.bottom - winHeight + margin, behavior: 'smooth'});
+            }
+            return;
+        }
+        // scrollable parent
+        const parentRect = parent.getBoundingClientRect();
+        const elemRect = element.getBoundingClientRect();
+        if (elemRect.top < parentRect.top + margin) {
+            parent.scrollTop -= (parentRect.top + margin) - elemRect.top;
+        } else if (elemRect.bottom > parentRect.bottom - margin) {
+            parent.scrollTop += elemRect.bottom - (parentRect.bottom - margin);
+        }
+    }
+
+    function highlightCurrent() {
+        clearHighlights();
+        removeTooltip();
+        if (currentIndex === 0 && featuredGameSection) {
+            featuredGameSection.classList.add('game-item--selected');
+            scrollElementIntoViewWithMargin(featuredGameSection);
+        } else if (currentIndex > 0 && gameItems[currentIndex - 1]) {
+            const item = gameItems[currentIndex - 1];
+            item.classList.add('game-item--selected');
+            scrollElementIntoViewWithMargin(item);
+            if (tooltipTimeout) clearTimeout(tooltipTimeout);
+            tooltipTimeout = setTimeout(() => {
+                showTooltipForItem(item);
+            }, 80);
+        }
+    }
+
+    function removeTooltip() {
+        if (tooltipTimeout) clearTimeout(tooltipTimeout);
+        const tooltip = document.getElementById('game-meta-tooltip');
+        if (tooltip) tooltip.remove();
+    }
+
+    function playNavSound() {
+        try {
+            navSound.currentTime = 0;
+            navSound.play();
+        } catch (e) {}
+    }
+    function playSelectSound() {
+        try {
+            selectSound.currentTime = 0;
+            selectSound.play();
+        } catch (e) {}
+    }
+
+    function selectCurrent() {
+        playSelectSound();
+        // Find the selected element and its center
+        let selectedEl = null;
+        let targetUrl = null;
+        if (currentIndex === 0 && featuredGameSection) {
+            selectedEl = featuredGameSection;
+            const link = featuredGameSection.querySelector('a');
+            if (link) targetUrl = link.href;
+        } else if (currentIndex > 0 && gameItems[currentIndex - 1]) {
+            selectedEl = gameItems[currentIndex - 1];
+            const link = gameItems[currentIndex - 1].querySelector('a');
+            if (link) targetUrl = link.href;
+        }
+        if (!selectedEl || !targetUrl) return;
+
+        // Block input
+        document.body.classList.add('radial-exit-block');
+
+        // Get all main elements to animate
+        const container = document.querySelector('.container');
+        const header = container.querySelector('header');
+        const main = container.querySelector('main');
+        const footer = document.querySelector('footer');
+        const allGameItems = Array.from(document.querySelectorAll('.game-item'));
+        const featured = document.getElementById('game-of-the-week');
+
+        // Get center of selected element
+        const selRect = selectedEl.getBoundingClientRect();
+        const selCenter = {
+            x: selRect.left + selRect.width / 2,
+            y: selRect.top + selRect.height / 2
+        };
+
+        // Animate header
+        if (header && header !== selectedEl && !header.contains(selectedEl)) {
+            header.classList.add('radial-exit');
+            header.style.transform = 'translateY(-1000px) scale(0.7)';
+        }
+        // Animate footer
+        if (footer && footer !== selectedEl && !footer.contains(selectedEl)) {
+            footer.classList.add('radial-exit');
+            footer.style.transform = 'translateY(1000px) scale(0.7)';
+        }
+        // Animate main children (sections)
+        if (main) {
+            Array.from(main.children).forEach(child => {
+                // If the featured section is selected, animate all .game-item elements outward, but NOT the grid section as a whole
+                if (selectedEl === featured && child.id === 'previous-games') {
+                    const gridItems = child.querySelectorAll('.game-item');
+                    gridItems.forEach(item => {
+                        if (item !== selectedEl) {
+                            const rect = item.getBoundingClientRect();
+                            const center = {
+                                x: rect.left + rect.width / 2,
+                                y: rect.top + rect.height / 2
+                            };
+                            const dx = center.x - selCenter.x;
+                            const dy = center.y - selCenter.y;
+                            const angle = Math.atan2(dy, dx);
+                            const dist = 1600 + Math.random() * 200;
+                            const tx = Math.cos(angle) * dist;
+                            const ty = Math.sin(angle) * dist;
+                            item.classList.add('radial-exit');
+                            item.style.transform = `translate(${tx}px, ${ty}px) scale(0.7)`;
+                        }
+                    });
+                } else if (child !== selectedEl && !child.contains(selectedEl)) {
+                    // For all other cases, animate the section as a whole
+                    const rect = child.getBoundingClientRect();
+                    const dx = rect.left + rect.width / 2 - selCenter.x;
+                    const dir = dx < 0 ? -1 : 1;
+                    child.classList.add('radial-exit');
+                    child.style.transform = `translateX(${dir * 1600}px) scale(0.7)`;
+                } else if (child.id === 'previous-games' && child !== selectedEl) {
+                    // Only animate grid items if grid section is NOT being animated as a whole
+                    const gridItems = child.querySelectorAll('.game-item');
+                    gridItems.forEach(item => {
+                        if (item !== selectedEl) {
+                            const rect = item.getBoundingClientRect();
+                            const center = {
+                                x: rect.left + rect.width / 2,
+                                y: rect.top + rect.height / 2
+                            };
+                            const dx = center.x - selCenter.x;
+                            const dy = center.y - selCenter.y;
+                            const angle = Math.atan2(dy, dx);
+                            const dist = 1600 + Math.random() * 200;
+                            const tx = Math.cos(angle) * dist;
+                            const ty = Math.sin(angle) * dist;
+                            item.classList.add('radial-exit');
+                            item.style.transform = `translate(${tx}px, ${ty}px) scale(0.7)`;
+                        }
+                    });
+                }
+            });
+        }
+        // Animate all other game items radially (skip if already handled above)
+        allGameItems.forEach(item => {
+            if (item !== selectedEl && !item.classList.contains('radial-exit')) {
+                const rect = item.getBoundingClientRect();
+                const center = {
+                    x: rect.left + rect.width / 2,
+                    y: rect.top + rect.height / 2
+                };
+                const dx = center.x - selCenter.x;
+                const dy = center.y - selCenter.y;
+                const angle = Math.atan2(dy, dx);
+                const dist = 1600 + Math.random() * 200; // px, much farther
+                const tx = Math.cos(angle) * dist;
+                const ty = Math.sin(angle) * dist;
+                item.classList.add('radial-exit');
+                item.style.transform = `translate(${tx}px, ${ty}px) scale(0.7)`;
+            }
+        });
+        // Animate all other direct children of .container except selectedEl
+        Array.from(container.children).forEach(child => {
+            if (child !== selectedEl && !child.contains(selectedEl) && child !== header && child !== main && child !== footer) {
+                child.classList.add('radial-exit');
+                child.style.transform = 'scale(0.7)';
+            }
+        });
+        // Animate body background fade
+        document.body.style.transition = 'background 0.7s, opacity 0.7s';
+        document.body.style.opacity = '0.7';
+
+        // After animation and sound, navigate
+        setTimeout(() => {
+            window.location.href = targetUrl;
+        }, 700);
+    }
+
+    function focusSearch() {
+        if (searchInput) {
+            searchInput.focus();
+            searchInput.select();
+        }
+    }
+
+    // Listen for keyboard events
+    document.addEventListener('keydown', function(e) {
+        // If search is focused, ignore except Escape
+        if (document.activeElement === searchInput) {
+            if (e.key === 'Escape') {
+                // Clear search, blur, reset view
+                searchInput.value = '';
+                searchInput.blur();
+                document.body.classList.remove('search-active');
+                // Repopulate all games and reset grid state
+                if (window.allGamesData) {
+                    populatePreviousGames(window.allGamesData);
+                }
+                // Remove no-results and search-specific classes
+                const previousGamesGrid = document.getElementById('previous-games-grid');
+                if (previousGamesGrid) {
+                    previousGamesGrid.classList.remove('no-results-active');
+                }
+                const noResultsMessage = document.getElementById('no-results-message');
+                if (noResultsMessage) {
+                    noResultsMessage.remove();
+                }
+                // Reset highlight to featured game
+                currentIndex = 0;
+                setTimeout(() => {
+                    updateGameItems();
+                    highlightCurrent();
+                }, 10);
+                e.preventDefault();
+            }
+            return;
+        }
+        // Focus search bar on /
+        if (e.key === '/' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+            focusSearch();
+            e.preventDefault();
+            return;
+        }
+        // Navigation keys
+        if (["ArrowDown","ArrowUp","ArrowLeft","ArrowRight","Enter","Tab"].includes(e.key)) {
+            // Only throttle if key is held (event.repeat)
+            if (e.repeat && navThrottle) return;
+            if (e.repeat) {
+                navThrottle = true;
+                setTimeout(() => { navThrottle = false; }, 180);
+            }
+            updateGameItems();
+            let prevIndex = currentIndex;
+            // Determine grid width
+            const grid = document.getElementById('previous-games-grid');
+            let gridCols = 1;
+            if (grid) {
+                const style = window.getComputedStyle(grid);
+                const colStr = style.getPropertyValue('grid-template-columns');
+                gridCols = colStr.split(' ').length;
+            }
+            if (e.key === 'ArrowDown') {
+                if (currentIndex === 0) {
+                    currentIndex = 1;
+                } else {
+                    currentIndex = Math.min(gameItems.length, currentIndex + gridCols);
+                }
+                playNavSound();
+                e.preventDefault();
+            } else if (e.key === 'ArrowUp') {
+                if (currentIndex <= gridCols) {
+                    currentIndex = 0; // Go to featured
+                } else {
+                    currentIndex = Math.max(1, currentIndex - gridCols);
+                }
+                playNavSound();
+                e.preventDefault();
+            } else if (e.key === 'ArrowLeft') {
+                if (currentIndex > 0) {
+                    currentIndex = Math.max(0, currentIndex - 1);
+                    playNavSound();
+                }
+                e.preventDefault();
+            } else if (e.key === 'ArrowRight') {
+                if (currentIndex < gameItems.length) {
+                    currentIndex = Math.min(gameItems.length, currentIndex + 1);
+                    playNavSound();
+                }
+                e.preventDefault();
+            } else if (e.key === 'Tab') {
+                if (e.shiftKey) {
+                    currentIndex = (currentIndex - 1 + gameItems.length + 1) % (gameItems.length + 1);
+                } else {
+                    currentIndex = (currentIndex + 1) % (gameItems.length + 1);
+                }
+                playNavSound();
+                e.preventDefault();
+            } else if (e.key === 'Enter') {
+                selectCurrent();
+                e.preventDefault();
+            }
+            if (currentIndex !== prevIndex) {
+                highlightCurrent();
+            }
+        }
+    });
+
+    document.addEventListener('mousemove', removeTooltip);
+    document.addEventListener('click', removeTooltip);
+
+    const observer = new MutationObserver(() => {
+        updateGameItems();
+        highlightCurrent();
+    });
+    observer.observe(document.getElementById('previous-games-grid'), {childList: true, subtree: false});
+
+    window.addEventListener('DOMContentLoaded', () => {
+        updateGameItems();
+        highlightCurrent();
+    });
+})();

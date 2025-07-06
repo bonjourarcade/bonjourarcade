@@ -5,11 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>All games</title>
     <style>
+        :root {
+            --background: #f0f0f0;
+            --text-color: #222;
+            --card-bg: white;
+            --card-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            --border-color: #ddd;
+        }
+
+        body.theme-dark {
+            --background: #181a1b;
+            --text-color: #f4f4f4;
+            --card-bg: #23272b;
+            --card-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            --border-color: #444;
+        }
+
         body {
             font-family: sans-serif;
-            background: #f0f0f0;
+            background: var(--background);
+            color: var(--text-color);
             margin: 0;
             padding: 2rem;
+            transition: background-color 0.3s, color 0.3s;
         }
         .grid {
             display: grid;
@@ -17,12 +35,13 @@
             gap: 1rem;
         }
         .game {
-            background: white;
+            background: var(--card-bg);
             border-radius: 8px;
             overflow: hidden;
             text-align: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            transition: transform 0.2s;
+            box-shadow: var(--card-shadow);
+            transition: transform 0.2s, background-color 0.3s;
+            border: 1px solid var(--border-color);
         }
         .game:hover {
             transform: scale(1.03);
@@ -32,16 +51,37 @@
             height: 150px;
             object-fit: cover;
             display: block;
+            background: var(--card-bg);
         }
         .game-title {
             padding: 0.5rem;
             font-size: 0.95rem;
+            color: var(--text-color);
         }
         .header-content {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 1.5rem;
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .theme-toggle {
+            background: none;
+            border: 2px solid var(--text-color);
+            color: var(--text-color);
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+        .theme-toggle:hover {
+            background: var(--text-color);
+            color: var(--background);
         }
         .random-game-btn {
             background-color: #4CAF50;
@@ -68,13 +108,20 @@
             margin: 0;
             font-size: 0.95rem;
         }
+        body.theme-dark .browser-warning {
+            background-color: #664d00;
+            color: #f4f4f4;
+        }
     </style>
 </head>
 <body>
     <div class="header-content">
-        <div>
-            <h1>You have found the hidden game stash.</h1>
-            <h2>There is nothing I can hide from you.</h2>
+        <div class="header-left">
+            <div>
+                <h1>You have found the hidden game stash.</h1>
+                <h2>There is nothing I can hide from you.</h2>
+            </div>
+            <button id="theme-toggle" class="theme-toggle">🌙</button>
         </div>
         <button id="random-game-btn" class="random-game-btn">Play Random Game</button>
     </div>
@@ -86,6 +133,33 @@
     <div class="grid" id="gameGrid"></div>
 
     <script>
+        // Theme management
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.body.classList.add('theme-dark');
+                document.getElementById('theme-toggle').textContent = '☀️';
+            } else {
+                document.body.classList.remove('theme-dark');
+                document.getElementById('theme-toggle').textContent = '🌙';
+            }
+        }
+
+        function toggleTheme() {
+            const body = document.body;
+            const toggle = document.getElementById('theme-toggle');
+            
+            if (body.classList.contains('theme-dark')) {
+                body.classList.remove('theme-dark');
+                localStorage.setItem('theme', 'light');
+                toggle.textContent = '🌙';
+            } else {
+                body.classList.add('theme-dark');
+                localStorage.setItem('theme', 'dark');
+                toggle.textContent = '☀️';
+            }
+        }
+
         // Store all games data globally so we can access it for the random button
         let gamesData = [];
 
@@ -94,6 +168,7 @@
             if (gamesData.length > 0) {
                 const randomIndex = Math.floor(Math.random() * gamesData.length);
                 const randomGame = gamesData[randomIndex];
+                sessionStorage.setItem('referrerAllGames', '1');
                 window.location.href = randomGame.pageUrl;
             } else {
                 console.error('No games available to select from');
@@ -116,11 +191,15 @@
             }
         }
 
-        // Add event listener to random game button
+        // Add event listeners
         document.getElementById('random-game-btn').addEventListener('click', playRandomGame);
+        document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
 
-        // Check browser when page loads
-        window.addEventListener('DOMContentLoaded', checkBrowser);
+        // Initialize theme and check browser when page loads
+        window.addEventListener('DOMContentLoaded', () => {
+            initTheme();
+            checkBrowser();
+        });
 
         // Fetch and render games
         fetch('/gamelist.json')
@@ -150,11 +229,15 @@
                     }
 
                     div.innerHTML = `
-                        <a href="${game.pageUrl}">
+                        <a href="${game.pageUrl}" class="game-link">
                             <img src="${coverSrc}" alt="${game.title}">
                             <div class="game-title">${game.title}</div>
                         </a>
                     `;
+                    // Add click handler to set referrer flag
+                    div.querySelector('a').addEventListener('click', function(e) {
+                        sessionStorage.setItem('referrerAllGames', '1');
+                    });
                     container.appendChild(div);
                 });
             })

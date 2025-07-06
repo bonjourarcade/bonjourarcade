@@ -64,7 +64,7 @@
 </head>
 <body>
     <!-- Menu Button -->
-    <div id="menu-button" onclick="window.location.href='/'">
+    <div id="menu-button">
         <span class="arrow">←</span>
         <span>MENU</span>
     </div>
@@ -327,6 +327,16 @@
                 window.initScreensaver();
             });
         }
+
+        // Menu button referrer logic
+        document.getElementById('menu-button').addEventListener('click', function() {
+            if (sessionStorage.getItem('referrerAllGames') === '1') {
+                sessionStorage.removeItem('referrerAllGames');
+                window.location.href = '/all/';
+            } else {
+                window.location.href = '/';
+            }
+        });
     </script>
     <script src="../assets/js/screensaver.js"></script>
     <div id="screensaver-overlay" class="screensaver-overlay">

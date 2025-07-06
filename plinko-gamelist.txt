@@ -27,6 +27,7 @@ DoDonPachi Dai-Fukkatsu
 Dolphin #Atari 2600
 Donkey Kong
 Doom
+Double Dragon II: The Revenge # Arcade
 Einhänder
 Elevator Action Returns
 ESP Ra. De.
@@ -127,6 +128,7 @@ Tapper #Root Beer
 Tempest
 Time Pilot
 Time Pilot '84
+The Legend of Kage #Already supported
 Thunder Force II
 Thunder Force III
 Thunder Force IV

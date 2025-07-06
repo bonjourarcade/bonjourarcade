@@ -1,6 +1,8 @@
 {
   "EJS_defaultOptions": {
-    "save-state-location": "browser"
+    "save-state-location": "browser",
+    "mame2003-plus_skip_disclaimer": "enabled",
+    "mame2003-plus_skip_warnings": "enabled"
   },
   "EJS_backgroundBlur": true,
   "EJS_DEBUG_XX": true,

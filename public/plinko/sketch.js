@@ -654,7 +654,7 @@ function draw() {
         let canvasTop = document.getElementById('game-container').getBoundingClientRect().top + window.scrollY;
         // Adjust scroll target calculation for the new height
         let scrollTarget = canvasTop + particleY - (window.innerHeight / 2); // Center the particle in the viewport
-        window.scrollTo({ top: scrollTarget, behavior: 'smooth' });
+        window.scrollTo(0, scrollTarget);
     }
 
     // Draw the preview particle if it exists and a particle hasn't been dropped

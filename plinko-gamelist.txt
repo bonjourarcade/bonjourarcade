@@ -130,6 +130,7 @@ Tempest
 Time Pilot
 Time Pilot '84
 The Legend of Kage #Already supported
+Thunder Blade
 Thunder Force II
 Thunder Force III
 Thunder Force IV

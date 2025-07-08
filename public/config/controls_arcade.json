@@ -1,7 +1,7 @@
 {
     "0": {
         "0": {"value": "z", "value2": "BUTTON_3"},
-        "1": {"value": "c", "value2": "BUTTON_1"},
+        "1": {"value": "c", "value2": "RIGHT_TOP_SHOULDER"},
         "2": {"value": "space", "value2": "SELECT"},
         "3": {"value": "enter", "value2": "START"},
         "4": {"value": "up arrow", "value2": "DPAD_UP"},
@@ -9,7 +9,7 @@
         "6": {"value": "left arrow", "value2": "DPAD_LEFT"},
         "7": {"value": "right arrow", "value2": "DPAD_RIGHT"},
         "8": {"value": "x", "value2": "BUTTON_4"},
-        "9": {"value": "v", "value2": "RIGHT_TOP_SHOULDER"},
+        "9": {"value": "v", "value2": "BUTTON_1"},
         "10": {"value": "q", "value2": ""},
         "11": {"value": "e", "value2": ""},
         "12": {"value": "tab", "value2": "LEFT_BOTTOM_SHOULDER"},

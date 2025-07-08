@@ -3,36 +3,41 @@ Adventure Island
 Alien Syndrome
 Alien Soldier
 Armed Police Batrider
-Astérix 
+Astérix
 Asteroids Deluxe
 Atomic Runner
 B-Wings #Famicom
 Ballon Fight
+Batsugun
+Battle Garegga
 Biker Mice from Mars
 Blades of Steel
 Blazing Star
+Boogie Wings
 Bubble Bobble
 Burgertime
 Castle of Illusion Starring Mickey Mouse
 Castlevania
 Centipede
 Choplifter # downloaded, chplftb (bootleg)
-Chopper Command #Atari 2600
 Circus Charlie
 Combat School
 Comix Zone
 Darius Gaiden #Saturn
 Dig Dug
 DoDonPachi Dai-Fukkatsu
+Dogyuun
 Dolphin #Atari 2600
 Donkey Kong
 Doom
 Double Dragon II: The Revenge # Arcade
 Dragon Breed
 Elevator Action Returns
+Espgaluda
 ESP Ra. De.
 Fantasy
 Fantasy Zone II - The Tears of Opa-Opa
+Fever SOS
 Firepower 2000
 Fire Shark #Same Same Same
 Flicky
@@ -47,10 +52,13 @@ Golden Axe
 Golden Axe II: Revenge of Death Adder
 Gradius
 Gradius 2
+Grind Stormer
+Gunbird 2
 Gun.Smoke
 Guwange
 H.E.R.O. #Atari 2600
 Ibara
+Ketsui
 Kirby's Adventure
 Kung Fu #NES
 Gunlock # Layer Section, Galactic Attack, Rayforce
@@ -59,13 +67,14 @@ Lode Runner
 League Bowling
 Mad Planets
 Marble Madness
+Mars Matrix
 Mario Bros.
 Mega Man II
 Metal Storm #Patched
 Metal Slug Super Vehicle-001
 Metal Slug 2
 Metal Slug 3
-Metroid 
+Metroid
 Mikie
 Missile Command
 Moon Patrol
@@ -73,6 +82,8 @@ Mortal Kombat
 Mortal Kombat II
 Mr Driller # Game Boy Color
 Ms Pac-Man
+Mushihimesama
+Mushihimesama Futari
 Neo Turf Masters
 NHL 94
 NHL 96
@@ -103,6 +114,7 @@ Robotron 2084
 Rocket Knight Adventures
 Rock 'n Roll Racing
 R-Type
+Salamander II
 Section Z
 Seicross
 Sensible Soccer
@@ -112,7 +124,7 @@ Snap Jack
 Sonic 2
 Sorcer Striker
 Space Harrier
-Space Invader 
+Space Invader
 Stampede #Atari 2600
 Star Wars Arcade
 Streets of Rage 2
@@ -135,6 +147,8 @@ Thunder Force III
 Thunder Force IV
 Track 'n Field
 Truxton
+Twin Cobra
+Twin Cobra II
 Ultimate Mortal Kombat 3
 Undeadline #already downloaded!
 Uniracers

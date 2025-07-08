@@ -233,12 +233,25 @@ body.theme-dark {
 footer {
     text-align: center;
     margin-top: auto;
-    padding: 10px 0 5px 0;
-    background: var(--footer-bg);
-    border-radius: 0 0 10px 10px;
-    border-top: 1px solid #eee;
-    font-size: 0.9em;
+    padding: 6px 0 3px 0;
+    background: transparent;
+    border-radius: 0;
+    border-top: none;
+    font-size: 1.1em;
     color: var(--text-color);
+    min-height: 32px;
+}
+.footer-emoji-link {
+    text-decoration: none;
+    font-size: 1.5em;
+    transition: transform 0.12s, filter 0.12s;
+    display: inline-block;
+    vertical-align: middle;
+}
+.footer-emoji-link:hover, .footer-emoji-link:focus {
+    transform: scale(1.18) rotate(-8deg);
+    filter: drop-shadow(0 2px 6px #ff0a);
+    outline: none;
 }
 
 /* Header Flex Layout */

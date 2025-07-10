@@ -349,6 +349,7 @@ function populateFeaturedGame(game) {
             handleGameClick(featuredGameSection);
         });
     }
+    // MARKER FOR COPY HTML TO SHMUPS
 }
 
 /**

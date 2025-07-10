@@ -16,18 +16,15 @@ html, body {
     /* width: 100%; */  
     /* overflow: hidden; */ 
     background-color: var(--background);
-    background-image: repeating-linear-gradient(0deg, #bbb 0, #bbb 1px, transparent 1px, transparent 24px),
-                      repeating-linear-gradient(90deg, #bbb 0, #bbb 1px, transparent 1px, transparent 24px);
+    background-image: url("data:image/svg+xml;utf8,<svg width='24' height='24' xmlns='http://www.w3.org/2000/svg'><rect x='0' y='0' width='24' height='24' fill='none' stroke='%23bbb' stroke-width='1'/></svg>");
 }
 body.theme-dark, html.theme-dark {
     background-color: #333333;
-    background-image: repeating-linear-gradient(0deg, #444444 0, #444444 1px, transparent 1px, transparent 24px),
-                      repeating-linear-gradient(90deg, #444444 0, #444444 1px, transparent 1px, transparent 24px);
+    background-image: url("data:image/svg+xml;utf8,<svg width='24' height='24' xmlns='http://www.w3.org/2000/svg'><rect x='0' y='0' width='24' height='24' fill='none' stroke='%23444' stroke-width='1'/></svg>");
 }
 body.theme-light, html.theme-light {
     background-color: #fff;
-    background-image: repeating-linear-gradient(0deg, #bbb 0, #bbb 1px, transparent 1px, transparent 24px),
-                      repeating-linear-gradient(90deg, #bbb 0, #bbb 1px, transparent 1px, transparent 24px);
+    background-image: url("data:image/svg+xml;utf8,<svg width='24' height='24' xmlns='http://www.w3.org/2000/svg'><rect x='0' y='0' width='24' height='24' fill='none' stroke='%23bbb' stroke-width='1'/></svg>");
 }
 
 body {
@@ -493,6 +490,16 @@ body.theme-dark .static-qr-code {
     filter: invert(1) hue-rotate(180deg) brightness(1.2);
 }
 
+body.theme-light .game-item {
+    background: #ececec;
+    border: 3px solid #e0e0e0;
+}
+body.theme-light .game-item:hover,
+body.theme-light .game-item--selected {
+    border: 3px solid #2196f3;
+    box-shadow: 0 0 16px 2px #2196f355;
+}
+
 .game-item, .featured-title, .game-item .game-title, .game-item a {
     color: var(--text-color);
 }
@@ -511,6 +518,14 @@ body.theme-dark #game-of-the-week {
     background: #23272b;
     color: var(--text-color);
     border: 1px solid #444;
+}
+body.theme-light #game-of-the-week {
+    background: #ececec;
+    border: 1px solid #e0e0e0;
+}
+body.theme-light #game-of-the-week.game-item--selected {
+    border: 3px solid #2196f3;
+    box-shadow: 0 0 16px 2px #2196f355;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -584,6 +599,9 @@ body.theme-dark #game-of-the-week {
 .cursor-effects {
     z-index: 99999 !important;
     pointer-events: none !important;
+    position: fixed !important;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
 }
 
 /* Hide game of the week when search is active */
@@ -610,7 +628,6 @@ body.search-active #game-of-the-week {
   border: 3px solid #2196f3;
   box-shadow: 0 0 16px 2px #2196f355;
   transform: scale(1.06) translateY(-8px);
-  z-index: 2;
   transition: border 0.15s, box-shadow 0.15s, transform 0.15s;
 }
 body.theme-dark .game-item--selected {
@@ -622,7 +639,6 @@ body.theme-dark .game-item--selected {
   border: 3px solid #2196f3;
   box-shadow: 0 0 16px 2px #2196f355;
   transition: border 0.15s, box-shadow 0.15s, transform 0.15s;
-  z-index: 2;
 }
 body.theme-dark #game-of-the-week.game-item--selected {
   border: 3px solid #fffd37;

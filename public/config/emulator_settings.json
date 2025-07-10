@@ -7,7 +7,7 @@
   },
   "EJS_backgroundBlur": true,
   "EJS_DEBUG_XX": true,
-  "EJS_alignStartButton": "bottom",
+  "EJS_alignStartButton": "top",
   "EJS_pathtodata": "https://cdn.emulatorjs.org/stable/data/",
   "EJS_AdUrl": "/ads",
   "EJS_AdTimer": 0,

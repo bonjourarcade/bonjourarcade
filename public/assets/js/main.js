@@ -567,19 +567,54 @@ function removeTooltipWithTimeout() {
     removeTooltip();
 }
 
+// --- Preload navigation and select sounds globally ---
+let navSound = null;
+let selectSound = null;
+
+function preloadSounds() {
+    navSound = new Audio('/assets/click.mp3');
+    navSound.preload = 'auto';
+    navSound.load();
+    selectSound = new Audio('/assets/select.mp3');
+    selectSound.preload = 'auto';
+    selectSound.load();
+}
+
+// Unlock selectSound on first user gesture (required for some browsers)
+function unlockSelectSound() {
+    if (selectSound) {
+        selectSound.currentTime = 0;
+        selectSound.volume = 0;
+        selectSound.play().catch(() => {});
+        setTimeout(() => { selectSound.pause(); selectSound.volume = 1; }, 10);
+    }
+    window.removeEventListener('pointerdown', unlockSelectSound);
+    window.removeEventListener('keydown', unlockSelectSound);
+}
+
 function playNavSound() {
     try {
-        const navSound = new Audio('/assets/click.mp3');
-        navSound.currentTime = 0;
-        navSound.play();
+        if (navSound) {
+            navSound.currentTime = 0;
+            navSound.play();
+        } else {
+            // fallback if not loaded
+            const temp = new Audio('/assets/click.mp3');
+            temp.play();
+        }
     } catch (e) {}
 }
 
 function playSelectSound() {
     try {
-        const selectSound = new Audio('/assets/select.mp3');
-        selectSound.currentTime = 0;
-        selectSound.play();
+        if (selectSound) {
+            selectSound.currentTime = 0;
+            selectSound.play();
+        } else {
+            // fallback if not loaded
+            const temp = new Audio('/assets/select.mp3');
+            temp.play();
+        }
     } catch (e) {}
 }
 
@@ -712,10 +747,7 @@ function handleGameClick(element) {
 // --- Keyboard Navigation for Game Selection ---
 (function() {
     // Navigation and selection sounds
-    const navSound = new Audio('/assets/click.mp3');
-    navSound.preload = 'auto';
-    const selectSound = new Audio('/assets/select.mp3');
-    selectSound.preload = 'auto';
+    // navSound and selectSound are now preloaded globally
 
     let currentIndex = 0; // 0 = featured, 1...N = games in grid
     let gameItems = [];

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>All games</title>
+    <title>Tous les jeux</title>
     <style>
         :root {
             --background: #f0f0f0;
@@ -118,16 +118,16 @@
     <div class="header-content">
         <div class="header-left">
             <div>
-                <h1>You have found the hidden game stash.</h1>
-                <h2>There is nothing I can hide from you.</h2>
+                <h1>Tu as trouvé la cachette secrète de jeux.</h1>
+                <h2>Ici, des trésors de jeux n’attendent que ton sourire. Bonne découverte !</h2>
             </div>
             <button id="theme-toggle" class="theme-toggle">🌙</button>
         </div>
-        <button id="random-game-btn" class="random-game-btn">Play Random Game</button>
+        <button id="random-game-btn" class="random-game-btn">Jouer à un jeu aléatoire</button>
     </div>
 
     <div id="browser-warning" class="browser-warning">
-        <p><strong>Note:</strong> For the best gaming experience, we recommend using a Chromium-based browser like Google Chrome, Microsoft Edge, or Brave. Some games may not run optimally in your current browser.</p>
+        <p><strong>Note :</strong> Pour une expérience de jeu optimale, nous vous recommandons d'utiliser un navigateur basé sur Chromium comme Google Chrome, Microsoft Edge ou Brave. Certains jeux peuvent ne pas fonctionner de manière optimale dans votre navigateur actuel.</p>
     </div>
 
     <div class="grid" id="gameGrid"></div>
@@ -243,7 +243,7 @@
             })
             .catch(err => {
                 console.error('Error loading games.json:', err);
-                document.getElementById('gameGrid').textContent = "Failed to load game data.";
+                document.getElementById('gameGrid').textContent = "Échec du chargement des données de jeu.";
             });
     </script>
 </body>

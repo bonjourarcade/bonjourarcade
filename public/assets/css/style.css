@@ -17,14 +17,23 @@ html, body {
     /* overflow: hidden; */ 
     background-color: var(--background);
     background-image: url("data:image/svg+xml;utf8,<svg width='24' height='24' xmlns='http://www.w3.org/2000/svg'><rect x='0' y='0' width='24' height='24' fill='none' stroke='%23bbb' stroke-width='1'/></svg>");
+    background-repeat: repeat;
+    background-position: 0 0;
+    background-size: 24px 24px;
 }
 body.theme-dark, html.theme-dark {
     background-color: #333333;
     background-image: url("data:image/svg+xml;utf8,<svg width='24' height='24' xmlns='http://www.w3.org/2000/svg'><rect x='0' y='0' width='24' height='24' fill='none' stroke='%23444' stroke-width='1'/></svg>");
+    background-repeat: repeat;
+    background-position: 0 0;
+    background-size: 24px 24px;
 }
 body.theme-light, html.theme-light {
     background-color: #fff;
     background-image: url("data:image/svg+xml;utf8,<svg width='24' height='24' xmlns='http://www.w3.org/2000/svg'><rect x='0' y='0' width='24' height='24' fill='none' stroke='%23bbb' stroke-width='1'/></svg>");
+    background-repeat: repeat;
+    background-position: 0 0;
+    background-size: 24px 24px;
 }
 
 body {
@@ -470,8 +479,10 @@ footer {
 
 body.theme-dark .game-item {
     background: #23272b;
-    border: 3px solid transparent;
+    border: 3px solid #23272b; /* Match background, not transparent */
     color: var(--text-color);
+    /* Remove background/color transitions */
+    transition: border 0.2s, box-shadow 0.2s, transform 0.2s;
 }
 body.theme-dark .game-item:hover {
     border: 3px solid #fffd37;
@@ -493,6 +504,7 @@ body.theme-dark .static-qr-code {
 body.theme-light .game-item {
     background: #ececec;
     border: 3px solid #e0e0e0;
+    transition: border 0.2s, box-shadow 0.2s, transform 0.2s;
 }
 body.theme-light .game-item:hover,
 body.theme-light .game-item--selected {
@@ -512,7 +524,8 @@ body.theme-light .game-item--selected {
     box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     border: 1px solid #ddd;
     padding: 15px;
-    transition: background 0.2s, color 0.2s;
+    /* Remove background/color transitions */
+    transition: border 0.2s, box-shadow 0.2s, transform 0.2s;
 }
 body.theme-dark #game-of-the-week {
     background: #23272b;

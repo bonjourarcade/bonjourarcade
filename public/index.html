@@ -40,12 +40,17 @@
                       href="https://felx.cc/leaderboard">Classements</a>
                     <img src="assets/images/my_app_qr.png" alt="QR Code" class="static-qr-code">
                 </div>
-                <button id="theme-toggle-btn" style="margin-top:10px;font-size:1.5em;background:none;border:none;cursor:pointer;" aria-label="Switch theme">
-                  <svg id="theme-toggle-icon" width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;">
-                    <circle cx="14" cy="14" r="12" stroke="#222" stroke-width="2" fill="#222"/>
-                    <rect x="14" y="0" width="13" height="27" fill="#fff"/>
-                  </svg>
-                </button>
+                <div style="position: relative;">
+                  <button id="theme-toggle-btn" class="theme-btn" aria-label="Changer le thème" type="button">
+                    <span id="theme-toggle-icon" style="display:inline-flex;align-items:center;font-size:1.2em;">🌓</span>
+                    <span id="theme-toggle-label">Thème</span>
+                  </button>
+                  <div id="theme-dropdown" style="display:none;position:absolute;top:110%;left:50%;transform:translateX(-50%);background:#222;color:#fff;border:1px solid #444;border-radius:8px;box-shadow:0 4px 16px #0002;min-width:170px;z-index:10000;padding:8px 0;">
+                    <button class="theme-option" data-theme="system" style="display:flex;align-items:center;width:100%;background:none;border:none;color:inherit;font:inherit;padding:8px 18px;gap:10px;cursor:pointer;"><span style='font-size:1.2em;'>🌓</span>Système</button>
+                    <button class="theme-option" data-theme="light" style="display:flex;align-items:center;width:100%;background:none;border:none;color:inherit;font:inherit;padding:8px 18px;gap:10px;cursor:pointer;"><span style='font-size:1.2em;'>☀️</span>Clair</button>
+                    <button class="theme-option" data-theme="dark" style="display:flex;align-items:center;width:100%;background:none;border:none;color:inherit;font:inherit;padding:8px 18px;gap:10px;cursor:pointer;"><span style='font-size:1.2em;'>🌙</span>Sombre</button>
+                  </div>
+                </div>
             </div>
         </header>
 
@@ -113,39 +118,85 @@
     // Theme toggling logic
     function setTheme(theme) {
         document.body.classList.remove('theme-light', 'theme-dark');
-        document.body.classList.add(theme);
-        // Update icon
+        let classToAdd;
+        if (theme === 'system') {
+          classToAdd = getSystemTheme();
+        } else if (theme === 'dark') {
+          classToAdd = 'theme-dark';
+        } else {
+          classToAdd = 'theme-light';
+        }
+        document.body.classList.add(classToAdd);
+        // Update button icon and label
         const icon = document.getElementById('theme-toggle-icon');
-        if (icon) {
-          if (theme === 'theme-dark') {
-            icon.querySelector('circle').setAttribute('stroke', '#f4f4f4');
-            icon.querySelector('circle').setAttribute('fill', '#f4f4f4');
-            icon.querySelector('rect').setAttribute('fill', '#222');
+        const label = document.getElementById('theme-toggle-label');
+        if (icon && label) {
+          if (theme === 'dark') {
+            icon.textContent = '🌙';
+            label.textContent = 'Sombre';
+          } else if (theme === 'light') {
+            icon.textContent = '☀️';
+            label.textContent = 'Clair';
           } else {
-            icon.querySelector('circle').setAttribute('stroke', '#222');
-            icon.querySelector('circle').setAttribute('fill', '#222');
-            icon.querySelector('rect').setAttribute('fill', '#fff');
+            icon.textContent = '🌓';
+            label.textContent = 'Thème';
+          }
+        }
+        // Highlight current in dropdown
+        document.querySelectorAll('.theme-option').forEach(btn => {
+          btn.style.background = (btn.dataset.theme === theme) ? '#444' : 'none';
+        });
+        // Update button style for dark/light
+        const themeBtn = document.getElementById('theme-toggle-btn');
+        if (themeBtn) {
+          if (classToAdd === 'theme-dark') {
+            themeBtn.style.background = '#222';
+            themeBtn.style.color = '#fff';
+            themeBtn.style.border = '1px solid #fff2';
+          } else {
+            themeBtn.style.background = '#fff';
+            themeBtn.style.color = '#111';
+            themeBtn.style.border = '1px solid #ccc';
           }
         }
     }
+
     function getSystemTheme() {
         return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'theme-dark' : 'theme-light';
     }
+
+    // Dropdown logic
+    const themeBtn = document.getElementById('theme-toggle-btn');
+    const themeDropdown = document.getElementById('theme-dropdown');
+    themeBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      themeDropdown.style.display = (themeDropdown.style.display === 'block') ? 'none' : 'block';
+    });
+    document.addEventListener('click', function(e) {
+      if (themeDropdown.style.display === 'block') themeDropdown.style.display = 'none';
+    });
+    themeDropdown.addEventListener('click', function(e) { e.stopPropagation(); });
+    document.querySelectorAll('.theme-option').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const selected = btn.dataset.theme;
+        if (selected === 'system') {
+          localStorage.removeItem('theme');
+        } else {
+          localStorage.setItem('theme', selected);
+        }
+        setTheme(selected);
+        themeDropdown.style.display = 'none';
+      });
+    });
+
     // On load: use localStorage or system preference
     const savedTheme = localStorage.getItem('theme');
-    const initialTheme = savedTheme || getSystemTheme();
+    const initialTheme = savedTheme || 'system';
     setTheme(initialTheme);
-    // Toggle button
-    document.getElementById('theme-toggle-btn').onclick = function() {
-        const current = document.body.classList.contains('theme-dark') ? 'theme-dark' : 'theme-light';
-        const next = current === 'theme-dark' ? 'theme-light' : 'theme-dark';
-        setTheme(next);
-        localStorage.setItem('theme', next);
-    };
     // Listen for system theme changes if user hasn't chosen
     if (!savedTheme) {
         window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
-            setTheme(e.matches ? 'theme-dark' : 'theme-light');
+            setTheme('system');
         });
     }
     </script>

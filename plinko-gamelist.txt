@@ -1,17 +1,18 @@
 1944: The Loop Master
 Adventure Island
-Alien Syndrome
 Alien Soldier
+Alien Syndrome
 Armed Police Batrider
-Astérix
 Asteroids Deluxe
+Astérix
 Atomic Runner
 B-Wings #Famicom
 Ballon Fight
 Batsugun
-Battletoads
 Battle Garegga
+Battletoads
 Biker Mice from Mars
+Bird Week
 Blades of Steel
 Blazing Star
 Boogie Wings
@@ -33,14 +34,14 @@ Donkey Kong
 Doom
 Double Dragon II: The Revenge # Arcade
 Dragon Breed
+ESP Ra. De.
 Elevator Action Returns
 Espgaluda
-ESP Ra. De.
 Fantasy
 Fantasy Zone II - The Tears of Opa-Opa
 Fever SOS
-Firepower 2000
 Fire Shark #Same Same Same
+Firepower 2000
 Flicky
 Frogger
 Gain Ground
@@ -54,27 +55,28 @@ Golden Axe II: Revenge of Death Adder
 Gradius
 Gradius 2
 Grind Stormer
-Gunbird 2
 Gun.Smoke
+Gunbird 2
+Gunlock # Layer Section, Galactic Attack, Rayforce
 Guwange
 H.E.R.O. #Atari 2600
 Ibara
+Juno First # Atari 2600 only for now
 Ketsui
 Kirby's Adventure
 Kung Fu #NES
-Gunlock # Layer Section, Galactic Attack, Rayforce
-Juno First # Atari 2600 only for now
-Lode Runner
 League Bowling
+Lode Runner
+MUSHA
 Mad Planets
 Marble Madness
-Mars Matrix
 Mario Bros.
+Mars Matrix
 Mega Man II
-Metal Storm #Patched
-Metal Slug Super Vehicle-001
 Metal Slug 2
 Metal Slug 3
+Metal Slug Super Vehicle-001
+Metal Storm #Patched
 Metroid
 Mikie
 Missile Command
@@ -85,9 +87,9 @@ Mr Driller # Game Boy Color
 Ms Pac-Man
 Mushihimesama
 Mushihimesama Futari
-Neo Turf Masters
 NHL 94
 NHL 96
+Neo Turf Masters
 Ninja Gaiden
 Ninja Gaiden II
 Out Zone
@@ -103,6 +105,7 @@ Puzzle Uo Poko
 Pyoro 64
 Q*Bert
 QIX #bright NES hack
+R-Type
 R.C. Pro-AM
 Raiden
 Raiden II
@@ -112,9 +115,8 @@ Road Fighter
 Robby Roto
 Robocop
 Robotron 2084
-Rocket Knight Adventures
 Rock 'n Roll Racing
-R-Type
+Rocket Knight Adventures
 Salamander II
 Section Z
 Seicross
@@ -134,18 +136,18 @@ Strikers 1945 Plus
 Sunset Riders
 Super Contra
 Super Hang-on
-Super Mario Bros.
 Super Mario All-Stars + World
+Super Mario Bros.
 Super Mario World 2: Yoshi's Island
 Tapper #Root Beer
 Tempest
-Time Pilot
-Time Pilot '84
 The Legend of Kage #Already supported
 Thunder Blade
 Thunder Force II
 Thunder Force III
 Thunder Force IV
+Time Pilot
+Time Pilot '84
 Track 'n Field
 Truxton
 Twin Cobra

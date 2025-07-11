@@ -11,5 +11,6 @@
   "EJS_pathtodata": "https://cdn.emulatorjs.org/stable/data/",
   "EJS_AdUrl": "/ads",
   "EJS_AdTimer": 0,
+  "EJS_AdSize": ["300px", "150px"],
   "EJS_AdMode": 0
 }

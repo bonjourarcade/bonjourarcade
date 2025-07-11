@@ -232,6 +232,12 @@
                 }
                 console.log("Found game data:", selectedGame);
 
+                // --- Hide leaderboard button if disable_score is true ---
+                if (selectedGame.disable_score === true || selectedGame.disable_score === "true") {
+                    const qrCodeContainer = document.getElementById('qr-code-container');
+                    if (qrCodeContainer) qrCodeContainer.style.display = 'none';
+                }
+
                 // Step 4: Check if the ROM or Core info for this game is missing
                 if (selectedGame.romMissing === true || !selectedGame.romPath || !selectedGame.core || selectedGame.core === 'null') {
                      throw new Error(`Required files (ROM or Core info) for game '${selectedGame.title || gameId}' are missing according to gamelist.json.`);

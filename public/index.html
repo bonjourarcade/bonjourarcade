@@ -81,20 +81,17 @@
     <script src="https://unpkg.com/cursor-effects@latest/dist/browser.js"></script>
     <script>
       window.addEventListener("load", (event) => {
-        // Available cursors are found here: https://github.com/tholman/cursor-effects/tree/master/src
-        // Ensure cursor effects are on top of everything
-        //const rainbowCursor = new cursoreffects.rainbowCursor();
-        //const fairyDustCursor = new cursoreffects.fairyDustCursor();
-        const springyEmojiCursor = new cursoreffects.springyEmojiCursor({ emoji: "💛" });
-        
-        // Set high z-index for cursor effects with a small delay to ensure they're created
-        setTimeout(() => {
+        // Only enable cursor effects on non-mobile devices
+        if (!/Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+          const springyEmojiCursor = new cursoreffects.springyEmojiCursor({ emoji: "💛" });
+          setTimeout(() => {
             const cursorElements = document.querySelectorAll('.cursor-effects');
             cursorElements.forEach(element => {
-                element.style.zIndex = '99999';
-                element.style.pointerEvents = 'none';
+              element.style.zIndex = '99999';
+              element.style.pointerEvents = 'none';
             });
-        }, 100);
+          }, 100);
+        }
       });
     // Game launcher functionality
     /*

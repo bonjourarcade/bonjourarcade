@@ -3,3 +3,4 @@ developer: Nintendo
 year: 1995
 genre: Platformer
 recommended: Pascal Bonaldo
+disable_score: true

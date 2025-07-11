@@ -118,6 +118,7 @@ find "$ROMS_DIR" -maxdepth 2 -type f -not -path "*/\.*" | while read -r rom_file
     recommended="" # Initialize recommended field
     added="" # Initialize added field
     hide="yes" # Default to hiding games even with no metadata
+    disable_score="false" # Default to false
 
     # Check if there's a corresponding game directory with metadata
     game_dir="$GAMES_DIR/$game_id/"
@@ -134,6 +135,7 @@ find "$ROMS_DIR" -maxdepth 2 -type f -not -path "*/\.*" | while read -r rom_file
             recommended=$(echo "$metadata_json" | jq -r '.recommended // ""') # Extract recommended field
             added=$(echo "$metadata_json" | jq -r '.added // ""') # Extract added field
             hide=$(echo "$metadata_json" | jq -r '.hide // ""') # Use metadata hide value if present
+            disable_score=$(echo "$metadata_json" | jq -r '.disable_score // false') # Extract disable_score, default false
         else
             echo "  - metadata.yaml found but failed to parse. Using default title ($game_id)."
         fi
@@ -181,7 +183,8 @@ find "$ROMS_DIR" -maxdepth 2 -type f -not -path "*/\.*" | while read -r rom_file
               --arg core "${core:-null}" \
               --arg romPath "${rom_path:-null}" \
               --arg saveState "${save_state:-}" \
-              '{id: $id, title: $title, developer: $developer, year: $year, genre: $genre, recommended: $recommended, added: $added, hide: $hide, coverArt: $coverArt, pageUrl: $pageUrl, core: $core, romPath: $romPath, saveState: $saveState}')
+              --argjson disable_score "$disable_score" \
+              '{id: $id, title: $title, developer: $developer, year: $year, genre: $genre, recommended: $recommended, added: $added, hide: $hide, coverArt: $coverArt, pageUrl: $pageUrl, core: $core, romPath: $romPath, saveState: $saveState, disable_score: $disable_score}')
 
     # --- Check if Featured / Add to List ---
     if [ "$game_id" = "$FEATURED_GAME_ID" ]; then

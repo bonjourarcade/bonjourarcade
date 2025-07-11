@@ -9,6 +9,7 @@ Atomic Runner
 B-Wings #Famicom
 Ballon Fight
 Batsugun
+Battle City
 Battle Garegga
 Battletoads
 Biker Mice from Mars
@@ -62,6 +63,7 @@ Guwange
 H.E.R.O. #Atari 2600
 Ibara
 Juno First # Atari 2600 only for now
+Karateka
 Ketsui
 Kirby's Adventure
 Kung Fu #NES
@@ -96,6 +98,7 @@ Out Zone
 Pac-Land
 Parodius Da!
 Pengo
+Pinball #NES
 Pitfall II
 Power Strike II
 Predator II
@@ -156,6 +159,7 @@ Ultimate Mortal Kombat 3
 Undeadline #already downloaded!
 Uniracers
 Vimana
+Warpman
 Wild Guns
 Windjammers
 Wonder Boy

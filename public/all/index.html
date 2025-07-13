@@ -42,21 +42,28 @@
             box-shadow: var(--card-shadow);
             transition: transform 0.2s, background-color 0.3s;
             border: 1px solid var(--border-color);
+            /* Remove flex and aspect-ratio from .game */
         }
-        .game:hover {
-            transform: scale(1.03);
-        }
-        .game img {
+        .game-cover {
+            aspect-ratio: 0.73;
             width: 100%;
-            height: 150px;
-            object-fit: cover;
+            background: #222;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .game-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: #222;
             display: block;
-            background: var(--card-bg);
         }
         .game-title {
             padding: 0.5rem;
             font-size: 0.95rem;
             color: var(--text-color);
+            background: var(--card-bg);
         }
         .header-content {
             display: flex;
@@ -230,7 +237,7 @@
 
                     div.innerHTML = `
                         <a href="${game.pageUrl}" class="game-link">
-                            <img src="${coverSrc}" alt="${game.title}">
+                            <div class="game-cover"><img src="${coverSrc}" alt="${game.title}"></div>
                             <div class="game-title">${game.title}</div>
                         </a>
                     `;

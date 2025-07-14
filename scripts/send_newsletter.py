@@ -154,13 +154,13 @@ class NewsletterSender:
         genre = meta.get('genre', 'Non spécifié')
         # Format the message (no Plinko link, emojis before links, no header)
         message = f"""
-Titre : {title}
-Développeur : {developer}
-Année : {year}
-Genre : {genre}
+*Titre :* {title}
+*Développeur :* {developer}
+*Année :* {year}
+*Genre :* {genre}
 
-🕹️ Faites-en l'essai : {play_url}
-🏆 Classements : {leaderboard_url}
+🕹️ *Faites-en l'essai :* {play_url}
+🏆 *Classements :* {leaderboard_url}
 
 Bonne semaine ! ☀️
 """.strip()

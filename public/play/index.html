@@ -193,20 +193,14 @@
                         colorLight : "#ffffff",
                         correctLevel : QRCode.CorrectLevel.H
                     });
+                    // Make the container clickable for desktop
+                    qrCodeContainer.addEventListener('click', () => {
+                        window.open(leaderboardUrl, '_blank');
+                    });
                 } else {
-                    // On mobile, just show the container (without QR code) for the clickable text
-                    qrCodeContainer.style.display = 'flex';
-                    // Hide the qr-code div itself on mobile
-                    const qrCodeDiv = document.getElementById('qr-code');
-                    if (qrCodeDiv) {
-                        qrCodeDiv.style.display = 'none';
-                    }
+                    // On mobile, hide the entire container
+                    qrCodeContainer.style.display = 'none';
                 }
-
-                // Make the container clickable for both desktop and mobile
-                qrCodeContainer.addEventListener('click', () => {
-                    window.open(leaderboardUrl, '_blank'); // Open in new tab
-                });
             }
 
             try {

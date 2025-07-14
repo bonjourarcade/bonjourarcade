@@ -21,6 +21,15 @@ let previewParticle = null; // Variable to hold the particle being previewed
 let particleDropped = false; // Flag to track if a particle has been dropped
 let randomizeButton; // Variable to hold the randomize button element
 let shouldScroll = false; // Flag to control scrolling
+let currentSeed = null; // Variable to hold the current seed
+let seededRandom = null; // Variable to hold the seeded random number generator
+let countdownTimer = null; // Variable to hold the countdown timer
+let countdownSeconds = 2; // Countdown duration in seconds
+let countdownActive = false; // Flag to track if countdown is active
+
+// --- Global seedInURL flag ---
+const urlParams = new URLSearchParams(window.location.search);
+let seedInURL = !!urlParams.get('seed');
 
 /**
  * Preloads the font and game list before drawing canvas.
@@ -38,9 +47,7 @@ function loadGameList(data) {
   console.log('Data received by loadGameList:', data);
   if (!data || typeof data.filter !== 'function') {
       console.error('loadGameList did not receive an array of strings:', data);
-      // Handle the error - maybe set gameList to empty or a default value
-      gameList = []; 
-      // Display an error message on the page
+      gameList = [];
       document.getElementById(totalScoreId).innerHTML = "Error loading game list.";
       return;
   }
@@ -52,8 +59,65 @@ function loadGameList(data) {
       return line.trim();
     }
   }).filter(line => line !== '');
-  // Shuffle the game list initially
-  shuffleArray(gameList);
+  // Removed: Shuffle the game list initially
+}
+
+/**
+ * Simple seeded random number generator (Linear Congruential Generator).
+ * 
+ * @param {string} seed The seed string.
+ * @returns {function} A seeded random function.
+ */
+function createSeededRandom(seed) {
+    let hash = 0;
+    for (let i = 0; i < seed.length; i++) {
+        const char = seed.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // Convert to 32-bit integer
+    }
+    
+    let state = Math.abs(hash);
+    
+    return function() {
+        state = (state * 9301 + 49297) % 233280;
+        return state / 233280;
+    };
+}
+
+/**
+ * Gets the seed from URL parameters or generates a default one.
+ * 
+ * @returns {string} The seed string.
+ */
+function getSeedFromURL() {
+    let seed = urlParams.get('seed');
+    
+    if (!seed) {
+        // Generate seed based on current year and week
+        const now = new Date();
+        const year = now.getFullYear();
+        const week = getISOWeek(now);
+        seed = `${year}${week.toString().padStart(2, '0')}`;
+    }
+    
+    return seed;
+}
+
+/**
+ * Helper function to get ISO week number.
+ * 
+ * @param {Date} date The date to get the week number for.
+ * @returns {number} The ISO week number.
+ */
+function getISOWeek(date) {
+    const d = new Date(date.getTime());
+    d.setHours(0, 0, 0, 0);
+    // Thursday in current week decides the year.
+    d.setDate(d.getDate() + 3 - (d.getDay() + 6) % 7);
+    // January 4 is always in week 1.
+    const week1 = new Date(d.getFullYear(), 0, 4);
+    // Adjust to Thursday in week 1 and count number of weeks from date to week1.
+    return 1 + Math.round(((d.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
 }
 
 /**
@@ -62,10 +126,11 @@ function loadGameList(data) {
  * Gemini.
  * 
  * @param {Array} array The array to shuffle.
+ * @param {function} randomFn Optional seeded random function.
  */
-function shuffleArray(array) {
+function shuffleArray(array, randomFn = Math.random) {
     for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
+        const j = Math.floor(randomFn() * (i + 1));
         [array[i], array[j]] = [array[j], array[i]]; // Swap elements
     }
 }
@@ -88,6 +153,13 @@ function setup() {
     textAlign(CENTER, CENTER);
     colorMode(HSB, 360, 100, 100); // Keep HSB color mode
     
+    // Initialize seed and seeded random
+    currentSeed = getSeedFromURL();
+    seededRandom = createSeededRandom(currentSeed);
+    
+    // Display the seed information
+    displaySeedInfo();
+    
     initializeCanvas();
 
     // Add collision event listener
@@ -98,6 +170,129 @@ function setup() {
 
     // Get button references
     randomizeButton = document.getElementById('randomize-button');
+    if (seedInURL && randomizeButton) {
+        randomizeButton.style.display = 'none';
+    }
+    // Start countdown if seed is provided in URL
+    if (seedInURL) {
+        startCountdown();
+    }
+    // Set the game names as soon as the page loads
+    randomizeBoard();
+}
+
+/**
+ * Displays seed information on the page.
+ */
+function displaySeedInfo() {
+    const urlParams = new URLSearchParams(window.location.search);
+    let seed = urlParams.get('seed');
+    let seedInfo = document.getElementById('seed-info');
+    if (seed) {
+        if (!seedInfo) {
+            seedInfo = document.createElement('div');
+            seedInfo.id = 'seed-info';
+            seedInfo.style.cssText = `
+                position: fixed;
+                top: 10px;
+                left: 10px;
+                background: rgba(0, 0, 0, 0.8);
+                color: white;
+                padding: 8px 12px;
+                border-radius: 5px;
+                font-family: sans-serif;
+                font-size: 14px;
+                font-weight: bold;
+                z-index: 1000;
+            `;
+            document.body.appendChild(seedInfo);
+        }
+        seedInfo.textContent = seed;
+    } else if (seedInfo) {
+        seedInfo.remove();
+    }
+}
+
+// --- Countdown: 3-2-1-PLINKO! ---
+function startCountdown() {
+    if (countdownActive) return; // Prevent multiple countdowns
+    countdownActive = true;
+    let countdownValues = ['3', '2', '1', 'PLINKO!'];
+    let index = 0;
+    let countdownDisplay = document.getElementById('countdown-display');
+    if (!countdownDisplay) {
+        countdownDisplay = document.createElement('div');
+        countdownDisplay.id = 'countdown-display';
+        countdownDisplay.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: sans-serif;
+            font-size: 48px;
+            font-weight: bold;
+            z-index: 2000;
+            text-align: center;
+        `;
+        document.body.appendChild(countdownDisplay);
+    }
+    function updateCountdown() {
+        if (index < countdownValues.length) {
+            countdownDisplay.textContent = countdownValues[index];
+            index++;
+            countdownTimer = setTimeout(updateCountdown, 800);
+        } else {
+            // Shuffle and set selectedGames right before dropping the ball
+            // randomizeBoard(); // This line is removed
+            setTimeout(() => {
+                countdownDisplay.remove();
+                dropBallFromSeed();
+            }, 500);
+        }
+    }
+    updateCountdown();
+}
+
+// --- Drop ball from seed-based location ---
+// --- Always shuffle selectedGames with seededRandom, but do not mutate gameList in place ---
+function randomizeBoard() {
+    if (!seededRandom) {
+        throw new Error('seededRandom is not set! Game order will not be deterministic. Make sure seededRandom is initialized before calling randomizeBoard().');
+    }
+    selectedGames = [];
+    const randomFn = seededRandom;
+    let gameListCopy = gameList.slice(); // Make a copy so original order is preserved
+    if (gameListCopy.length > 0 && gameListCopy.length >= columns) {
+        shuffleArray(gameListCopy, randomFn);
+        selectedGames = gameListCopy.slice(0, columns);
+    } else if (gameListCopy.length > 0 && gameListCopy.length < columns) {
+        shuffleArray(gameListCopy, randomFn);
+        selectedGames = gameListCopy.slice();
+        while (selectedGames.length < columns) {
+            selectedGames.push('-- No Game --');
+        }
+    } else {
+        selectedGames = [];
+        while (selectedGames.length < columns) {
+            selectedGames.push('-- Loading Error --');
+        }
+    }
+    redraw();
+}
+
+// --- Pass seededRandom to Particle for seed-based color ---
+function dropBallFromSeed() {
+    if (particleDropped) return;
+    let xFrac = seededRandom ? seededRandom() : 0.5;
+    let minFrac = 0.1, maxFrac = 0.9;
+    let x = width * (minFrac + (maxFrac - minFrac) * xFrac);
+    const particleRadius = windowWidth < 1000 ? 36 : 18;
+    previewParticle = new Particle(x, 12, particleRadius, seededRandom);
+    dropParticle(x, seededRandom);
 }
 
 /**
@@ -283,16 +478,17 @@ function initializeCanvas() {
     populatePointZones(spacing);
 
     // Resample selected games based on the new number of columns if gameList is loaded
-    if (gameList.length > 0) {
-        randomizeBoard(); // Use the existing function to resample and redraw
-    } else {
-         // If gameList wasn't loaded, set selectedGames to placeholders
-         selectedGames = [];
-         for(let i = 0; i < columns; i++) {
-             selectedGames.push('-- Loading Error --');
-         }
-         redraw(); // Redraw to show placeholders
-    }
+    // Remove or comment out this block:
+    // if (gameList.length > 0) {
+    //     randomizeBoard(); // Use the existing function to resample and redraw
+    // } else {
+    //      // If gameList wasn't loaded, set selectedGames to placeholders
+    //      selectedGames = [];
+    //      for(let i = 0; i < columns; i++) {
+    //          selectedGames.push('-- Loading Error --');
+    //      }
+    //      redraw(); // Redraw to show placeholders
+    // }
 
 
 }
@@ -658,7 +854,7 @@ function draw() {
     }
 
     // Draw the preview particle if it exists and a particle hasn't been dropped
-    if (previewParticle && !particleDropped) {
+    if (!seedInURL && previewParticle && !particleDropped) {
         previewParticle.show(); // Draw the preview particle using its stored position
     }
 }
@@ -677,53 +873,54 @@ function spawnParticles() {
 }
 
 /**
- * Randomizes the games displayed on the board.
- * 
- * Gemini.
- */
-function randomizeBoard() {
-    selectedGames = []; // Clear the selected games
-    // Only shuffle and sample if gameList is loaded and has games
-    if (gameList.length > 0 && gameList.length >= columns) {
-         shuffleArray(gameList); // Reshuffle the main game list
-        selectedGames = gameList.slice(0, columns); // Take the first 'columns' games after shuffling
-    } else if (gameList.length > 0 && gameList.length < columns) {
-         // If fewer games than columns, use all games and fill remaining with placeholders
-         shuffleArray(gameList); // Still shuffle the small list
-         selectedGames = gameList.slice();
-         while (selectedGames.length < columns) {
-             selectedGames.push('-- No Game --'); // Placeholder
-         }
-    } else {
-         // If gameList is empty or not loaded, fill with placeholders
-         selectedGames = [];
-          while (selectedGames.length < columns) {
-             selectedGames.push('-- Loading Error --'); // Placeholder
-         }
-    }
-    redraw(); // Redraw the canvas to update labels
-}
-
-/**
  * Handles mouse press events to drop a particle.
  * 
  * Gemini.
  */
 function mousePressed() {
+  // Skip countdown if it's active
+  if (countdownActive) {
+    if (countdownTimer) {
+      clearTimeout(countdownTimer);
+      countdownTimer = null;
+    }
+    countdownActive = false;
+    const countdownDisplay = document.getElementById('countdown-display');
+    if (countdownDisplay) {
+      countdownDisplay.remove();
+    }
+    dropBallFromSeed();
+    return;
+  }
+  
   // Check if the mouse click is within the canvas area and if a particle hasn't been dropped yet
   if (mouseX > 0 && mouseX < width && mouseY > 0 && mouseY < height && !particleDropped) {
-    if (previewParticle) {
-        previewParticle.addToWorld(); // Create and add the body to the physics world
-        particles.push(previewParticle); // Add to our particles array for drawing/tracking
-        previewParticle = null; // Clear the preview particle after dropping
-        particleDropped = true; // Set the flag to true after dropping the first particle
-        shouldScroll = true; // Enable scrolling when the particle is dropped
+    dropParticle();
+  }
+}
 
-        // Hide the randomize button after the first particle is dropped
-        if (randomizeButton) {
-            randomizeButton.style.display = 'none';
-        }
-    }
+/**
+ * Drops the current preview particle.
+ * 
+ * @param {number} x Optional x position to override preview particle position.
+ */
+function dropParticle(x = null, seededRandomOverride = null) {
+  if (particleDropped || !previewParticle) return;
+  
+  // Override position if provided
+  if (x !== null) {
+    previewParticle.x = x;
+  }
+  
+  previewParticle.addToWorld(); // Create and add the body to the physics world
+  particles.push(previewParticle); // Add to our particles array for drawing/tracking
+  previewParticle = null; // Clear the preview particle after dropping
+  particleDropped = true; // Set the flag to true after dropping the first particle
+  shouldScroll = true; // Enable scrolling when the particle is dropped
+
+  // Hide the randomize button after the first particle is dropped
+  if (randomizeButton) {
+      randomizeButton.style.display = 'none';
   }
 }
 
@@ -734,6 +931,7 @@ function mousePressed() {
  */
 function mouseMoved() {
     // Only show preview if a particle hasn't been dropped yet and mouse is within canvas width
+    if (seedInURL) return; // Skip if seed is in URL
     if (!particleDropped && mouseX > 0 && mouseX < width) {
         // Determine particle radius based on device type for preview
         const mobileBreakpoint = 1000; // Use the same breakpoint
@@ -764,6 +962,7 @@ function mouseMoved() {
  */
 function mouseOut() {
     // Remove the preview particle when the mouse leaves the canvas, only if a particle hasn't been dropped
+    if (seedInURL) return; // Skip if seed is in URL
     if (!particleDropped && previewParticle) {
         previewParticle = null; // Clear the preview particle
     }
@@ -786,6 +985,19 @@ function resetGame() {
     particleDropped = false; // Reset dropped flag
     previewParticle = null; // Ensure no preview particle exists
     document.getElementById(totalScoreId).innerHTML = "&nbsp;"; // Clear the score display
+    
+    // Reset countdown state
+    countdownActive = false;
+    if (countdownTimer) {
+        clearTimeout(countdownTimer);
+        countdownTimer = null;
+    }
+    
+    // Remove countdown display if it exists
+    const countdownDisplay = document.getElementById('countdown-display');
+    if (countdownDisplay) {
+        countdownDisplay.remove();
+    }
     
     // Show the randomize button again for a new round
     if (randomizeButton) {

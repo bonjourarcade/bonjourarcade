@@ -86,7 +86,7 @@ class NewsletterSender:
         <li><b>Genre :</b> {genre}</li>
         </ul>
         <div style="text-align:center;margin:24px 0;">
-            <a href="{play_url}" style="display:inline-block;background:#fffd37;color:#111;padding:18px 36px;border-radius:6px;text-decoration:none;font-weight:bold;font-size:1.3em;margin-right:18px;">🎮 Jouer maintenant</a>
+            <a href="{play_url}" style="display:inline-block;background:#fffd37;color:#111;padding:18px 36px;border-radius:6px;text-decoration:none;font-weight:bold;font-size:1.3em;margin-right:18px;">🕹️ Jouer maintenant</a>
             <a href="{leaderboard_url}" style="display:inline-block;background:#007bff;color:#fff;padding:18px 36px;border-radius:6px;text-decoration:none;font-weight:bold;font-size:1.3em;">🏆 Classements</a>
         </div>
         <img src="{cover_url}" alt="Couverture de {title}" style="max-width:320px;width:100%;border-radius:8px;display:block;margin:0 auto 16px auto;">

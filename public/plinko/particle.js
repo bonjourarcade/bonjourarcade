@@ -7,8 +7,9 @@ class Particle {
      * @param {number} x The x coordinate for where the object should be drawn.
      * @param {number} y The y coordinate for where the object should be drawn.
      * @param {number} r The radius of the particle object.
+     * @param {function} seededRandom Optional seeded random function for deterministic color.
      */
-    constructor(x, y, r) {
+    constructor(x, y, r, seededRandom = null) {
 
         var options = {
             restitution: .8,
@@ -23,10 +24,11 @@ class Particle {
         this.body = null; // Body is null initially
         this.options = options; // Store options for later body creation
 
-        // Generate random HSB colors (Hue 0-360, Saturation 80-100, Brightness 80-100 for vibrant colors)
-        this.hue = Math.random() * 360;
-        this.saturation = Math.max(Math.random() * 100, 80);
-        this.brightness = Math.max(Math.random() * 100, 80);
+        // Use seeded random for color if provided
+        const rand = seededRandom || Math.random;
+        this.hue = Math.floor(rand() * 360);
+        this.saturation = 80 + Math.floor(rand() * 20); // 80-100
+        this.brightness = 80 + Math.floor(rand() * 20); // 80-100
         this.pointValue = 0;
     }
 

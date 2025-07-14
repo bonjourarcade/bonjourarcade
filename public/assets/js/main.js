@@ -62,6 +62,9 @@ function removeTooltip() {
 document.addEventListener('DOMContentLoaded', () => {
     // This function starts the process when the HTML page is fully loaded
     fetchGameData();
+    
+    // Initialize newsletter functionality
+    initializeNewsletter();
 });
 
 /**
@@ -1097,3 +1100,13 @@ function handleGameClick(element) {
         // Don't highlight on page load - only when user navigates
     });
 })();
+
+// Newsletter functionality
+function initializeNewsletter() {
+    const subscribeBtn = document.getElementById('newsletter-subscribe');
+    if (!subscribeBtn) return;
+    subscribeBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.open('https://bonjourarcade.kit.com/abonne', '_blank');
+    });
+}

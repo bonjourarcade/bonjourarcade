@@ -64,14 +64,17 @@ class NewsletterSender:
     
     def create_email_content(self, game_id, meta):
         from datetime import datetime
+        import re
         cover_url = f'{BASE_URL}/games/{game_id}/cover.png'
         play_url = f'https://felx.cc/b/{game_id}'
         leaderboard_url = f'https://alloarcade.web.app/leaderboards/{game_id}'
         title = meta.get('title', game_id)
+        # Remove parenthetical content for display in email body
+        clean_title = re.sub(r'\s*\([^)]*\)', '', title).strip()
         developer = meta.get('developer', 'Inconnu')
         year = meta.get('year', 'Inconnue')
         genre = meta.get('genre', 'Non spécifié')
-        description = title
+        description = clean_title
         subject = f'🕹️ Jeu de la semaine - {title}'
         now = datetime.now()
         week = now.isocalendar()[1]
@@ -80,7 +83,7 @@ class NewsletterSender:
         html_content = f'''
         <html><body>
         <ul>
-        <li><b>Titre :</b> {title}</li>
+        <li><b>Titre :</b> {clean_title}</li>
         <li><b>Développeur :</b> {developer}</li>
         <li><b>Année :</b> {year}</li>
         <li><b>Genre :</b> {genre}</li>
@@ -89,7 +92,7 @@ class NewsletterSender:
             <a href="{play_url}" style="display:inline-block;background:#fffd37;color:#111;padding:18px 36px;border-radius:6px;text-decoration:none;font-weight:bold;font-size:1.3em;margin-right:18px;">🕹️ Jouer maintenant</a>
             <a href="{leaderboard_url}" style="display:inline-block;background:#007bff;color:#fff;padding:18px 36px;border-radius:6px;text-decoration:none;font-weight:bold;font-size:1.3em;">🏆 Classements</a>
         </div>
-        <img src="{cover_url}" alt="Couverture de {title}" style="max-width:320px;width:100%;border-radius:8px;display:block;margin:0 auto 16px auto;">
+        <img src="{cover_url}" alt="Couverture de {clean_title}" style="max-width:320px;width:100%;border-radius:8px;display:block;margin:0 auto 16px auto;">
         <div style="text-align:center;margin:8px 0 24px 0;font-size:1em;">
             <a href="{plinko_url}" style="color:#007bff;text-decoration:underline;">🎲 Voir le tirage plinko</a>
         </div>

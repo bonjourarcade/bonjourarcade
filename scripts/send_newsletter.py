@@ -25,6 +25,7 @@ import yaml
 
 # Configuration - Only keep what's needed
 DEFAULT_API_URL = 'https://api.convertkit.com/v3'
+BASE_URL = 'https://bonjourarcade-f11f7f.gitlab.io'
 
 class NewsletterSender:
     def __init__(self, api_secret, api_url=DEFAULT_API_URL, dry_run=False):
@@ -62,7 +63,8 @@ class NewsletterSender:
             sys.exit(1)
     
     def create_email_content(self, game_id, meta):
-        cover_url = f'https://bonjourarcade-f11f7f.gitlab.io/games/{game_id}/cover.png'
+        from datetime import datetime
+        cover_url = f'{BASE_URL}/games/{game_id}/cover.png'
         play_url = f'https://felx.cc/b/{game_id}'
         leaderboard_url = f'https://alloarcade.web.app/leaderboards/{game_id}'
         title = meta.get('title', game_id)
@@ -71,6 +73,10 @@ class NewsletterSender:
         genre = meta.get('genre', 'Non spécifié')
         description = title
         subject = f'🕹️ Jeu de la semaine - {title}'
+        now = datetime.now()
+        week = now.isocalendar()[1]
+        plinko_seed = f"{now.year}{week:02d}"
+        plinko_url = f"{BASE_URL}/plinko/?seed={plinko_seed}"
         html_content = f'''
         <html><body>
         <h1>🕹️ Jeu de la semaine : {title}</h1>
@@ -80,10 +86,13 @@ class NewsletterSender:
         <li><b>Genre :</b> {genre}</li>
         </ul>
         <div style="text-align:center;margin:24px 0;">
-            <a href="{play_url}" style="display:inline-block;background:#fffd37;color:#111;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:bold;margin-right:16px;">🎮 Jouer maintenant</a>
-            <a href="{leaderboard_url}" style="display:inline-block;background:#007bff;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:bold;">🏆 Classements</a>
+            <a href="{play_url}" style="display:inline-block;background:#fffd37;color:#111;padding:18px 36px;border-radius:6px;text-decoration:none;font-weight:bold;font-size:1.3em;margin-right:18px;">🎮 Jouer maintenant</a>
+            <a href="{leaderboard_url}" style="display:inline-block;background:#007bff;color:#fff;padding:18px 36px;border-radius:6px;text-decoration:none;font-weight:bold;font-size:1.3em;">🏆 Classements</a>
         </div>
         <img src="{cover_url}" alt="Couverture de {title}" style="max-width:320px;width:100%;border-radius:8px;display:block;margin:0 auto 16px auto;">
+        <div style="text-align:center;margin:8px 0 24px 0;font-size:1em;">
+            <a href="{plinko_url}" style="color:#007bff;text-decoration:underline;">🎲 Voir le tirage plinko</a>
+        </div>
         </body></html>
         '''
         return {
@@ -129,7 +138,6 @@ class NewsletterSender:
             return False
     
     def run(self):
-        """Main execution method."""
         print('📧 Starting newsletter email process...')
         
         # Read game data
@@ -147,6 +155,13 @@ class NewsletterSender:
         # Generate email content
         print("✍️  Generating email content...")
         content = self.create_email_content(game_id, meta)
+        # Extract plinko_url from the generated content
+        from datetime import datetime
+        now = datetime.now()
+        week = now.isocalendar()[1]
+        plinko_seed = f"{now.year}{week:02d}"
+        plinko_url = f"{BASE_URL}/plinko/?seed={plinko_seed}"
+        print(f'🔗 Plinko link for this week: {plinko_url}')
         print(f'✅ Email content ready: {content["subject"]}')
         
         # Send email

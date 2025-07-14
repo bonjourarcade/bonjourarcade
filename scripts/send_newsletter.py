@@ -79,8 +79,8 @@ class NewsletterSender:
         plinko_url = f"{BASE_URL}/plinko/?seed={plinko_seed}"
         html_content = f'''
         <html><body>
-        <h1>🕹️ Jeu de la semaine : {title}</h1>
         <ul>
+        <li><b>Titre :</b> {title}</li>
         <li><b>Développeur :</b> {developer}</li>
         <li><b>Année :</b> {year}</li>
         <li><b>Genre :</b> {genre}</li>

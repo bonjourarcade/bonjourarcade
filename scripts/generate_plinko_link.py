@@ -30,7 +30,7 @@ def generate_seed(year=None, week=None):
     
     return f"{year}{week:02d}"
 
-def generate_plinko_url(seed, base_url="https://bonjourarcade.com"):
+def generate_plinko_url(seed, base_url="http://localhost:8000"):
     """Generate the full plinko URL with seed."""
     return f"{base_url}/plinko/?seed={seed}"
 
@@ -47,7 +47,7 @@ def main():
     parser = argparse.ArgumentParser(description='Generate Plinko Link')
     parser.add_argument('--week', type=int, help='Week number (1-53)')
     parser.add_argument('--year', type=int, help='Year (e.g., 2025)')
-    parser.add_argument('--base-url', default='https://bonjourarcade.com',
+    parser.add_argument('--base-url', default='http://localhost:8000',
                        help='Base URL for the plinko page')
     parser.add_argument('--no-open', action='store_true',
                        help='Don\'t open the URL automatically')

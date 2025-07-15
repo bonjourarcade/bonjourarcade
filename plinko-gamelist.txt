@@ -62,7 +62,9 @@ Gradius
 Gradius 2
 Grind Stormer
 Gun.Smoke
+Gunbird
 Gunbird 2
+Gun Frontier
 Gunlock # Layer Section, Galactic Attack, Rayforce
 Guwange
 H.E.R.O. #Atari 2600

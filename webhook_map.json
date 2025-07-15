@@ -1,0 +1,14 @@
+{
+  "discord_bonjourarcade": {
+    "env": "DISCORD_BONJOURARCADE_WEBHOOK_URL",
+    "type": "discord"
+  },
+  "discord_allogaming": {
+    "env": "DISCORD_ALLOGAMING_WEBHOOK_URL",
+    "type": "discord"
+  },
+  "googlechat_alloprof": {
+    "env": "GOOGLECHAT_ALLOPROF_WEBHOOK_URL",
+    "type": "googlechat"
+  }
+}

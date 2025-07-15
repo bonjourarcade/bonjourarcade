@@ -27,6 +27,33 @@ let countdownTimer = null; // Variable to hold the countdown timer
 let countdownSeconds = 2; // Countdown duration in seconds
 let countdownActive = false; // Flag to track if countdown is active
 
+// --- Redirect seed=now to seed=YYYYWW (current year + ISO week) ---
+(function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('seed') === 'now') {
+        const now = new Date();
+        // Get ISO week number
+        function getISOWeek(date) {
+            const target = new Date(date.valueOf());
+            const dayNr = (date.getDay() + 6) % 7;
+            target.setDate(target.getDate() - dayNr + 3);
+            const firstThursday = target.valueOf();
+            target.setMonth(0, 1);
+            if (target.getDay() !== 4) {
+                target.setMonth(0, 1 + ((4 - target.getDay()) + 7) % 7);
+            }
+            const weekNumber = 1 + Math.ceil((firstThursday - target) / 604800000);
+            return weekNumber;
+        }
+        const year = now.getFullYear();
+        const week = getISOWeek(now).toString().padStart(2, '0');
+        urlParams.set('seed', `${year}${week}`);
+        // Build new URL
+        const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
+        window.location.replace(newUrl);
+    }
+})();
+
 // --- Global seedInURL flag ---
 const urlParams = new URLSearchParams(window.location.search);
 let seedInURL = !!urlParams.get('seed');

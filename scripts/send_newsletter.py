@@ -3,14 +3,25 @@
 Newsletter Email Sender for BonjourArcade
 
 This script reads the current game of the week and sends a newsletter email
-to subscribers using ConvertKit API.
+to subscribers using ConvertKit API and to one or more webhooks (e.g., Google Chat, Discord).
 
 Requirements:
 - requests library: pip install requests
 - ConvertKit account and API credentials
+- Set CONVERTKIT_API_SECRET environment variable
+- Set up a JSON file mapping webhook labels to env var names (see --webhook-map)
+- Set the corresponding environment variables for webhook URLs
 
 Usage:
-    python send_newsletter.py [--dry-run] [--api-key KEY] [--broadcast-id BROADCAST_ID]
+    python send_newsletter.py [--dry-run] [--mail-api-url URL] [--mail-only] [--webhook-only] [--webhook-map webhook_map.json] [--webhook-label LABEL]
+
+Options:
+    --mail-api-url   Override the ConvertKit API URL for sending email (default: https://api.convertkit.com/v3)
+    --mail-only      Only send the email (no webhooks)
+    --webhook-only   Only send to webhooks (no email)
+    --webhook-map    Path to JSON file mapping webhook labels to env var names
+    --webhook-label  Only send to the webhook with this label from the map
+    --dry-run        Show what would be sent without actually sending
 """
 
 import json
@@ -141,41 +152,104 @@ class NewsletterSender:
                 print(f"Response: {e.response.text}")
             return False
     
-    def send_webhook(self, content, game_id, meta):
-        """Send a plaintext version of the newsletter to the Google Chat webhook."""
+    def send_webhook(self, content, game_id, meta, webhook_map_path=None, filter_label=None):
+        """Send a plaintext version of the newsletter to one or more webhooks, using a JSON map of label:{env,type}. Optionally filter by label."""
         import requests
-        # Webhook URL (hardcoded as per user request)
-        webhook_url = "https://chat.googleapis.com/v1/spaces/AAQAkt54xKo/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=g-Er6ugSuk93Z4Dk6yXAAt_5vSI88f2f1bQLZnr7tsw"
+        import os
+        import json
+        if webhook_map_path is None:
+            webhook_map_path = "webhook_map.json"
+        # Read webhook map JSON file
+        if not os.path.exists(webhook_map_path):
+            print(f"⚠️  Webhook map file '{webhook_map_path}' not found. Skipping webhook notification.")
+            return
+        with open(webhook_map_path, "r") as f:
+            try:
+                webhook_map = json.load(f)
+            except Exception as e:
+                print(f"⚠️  Failed to parse webhook map JSON: {e}. Skipping webhook notification.")
+                return
         play_url = f'https://felx.cc/b/{game_id}'
+        cover_url = f'{BASE_URL}/games/{game_id}/cover.png'
         leaderboard_url = f'https://alloarcade.web.app/leaderboards/{game_id}'
         title = meta.get('title', game_id)
         developer = meta.get('developer', 'Inconnu')
         year = meta.get('year', 'Inconnue')
         genre = meta.get('genre', 'Non spécifié')
-        # Format the message (no Plinko link, emojis before links, no header)
-        message = f"""
-*Titre :* {title}
-*Développeur :* {developer}
-*Année :* {year}
-*Genre :* {genre}
+        # Message template with {b} for bold
+        message_template = f"""
+{{b}}Jeu de la semaine :{{b}} {title}
+{{b}}Développeur :{{b}} {developer}
+{{b}}Année :{{b}} {year}
+{{b}}Genre :{{b}} {genre}
+{{b}}Image :{{b}} {cover_url}
 
-🕹️ *Faites-en l'essai :* {play_url}
-🏆 *Classements :* {leaderboard_url}
+🕹️ {{b}}Faites-en l'essai :{{b}} {play_url}
+🏆 {{b}}Classements :{{b}} {leaderboard_url}
 
 Bonne semaine ! ☀️
 """.strip()
-        # Google Chat expects a JSON payload with a 'text' field
-        payload = {"text": message}
-        try:
-            resp = requests.post(webhook_url, json=payload)
-            resp.raise_for_status()
-            print("✅ Webhook message sent to Google Chat!")
-        except requests.exceptions.RequestException as e:
-            print(f"❌ Error sending webhook: {e}")
-            if hasattr(e, 'response') and e.response:
-                print(f"Response: {e.response.text}")
+        sent_any = False
+        # If filter_label is set, only use that label
+        if filter_label:
+            if filter_label not in webhook_map:
+                print(f"⚠️  Webhook label '{filter_label}' not found in map. Skipping webhook notification.")
+                return
+            items = [(filter_label, webhook_map[filter_label])]
+        else:
+            items = webhook_map.items()
+        if self.dry_run:
+            print("=== DRY RUN MODE (WEBHOOKS) ===")
+            for label, info in items:
+                env_var = info.get('env')
+                wtype = info.get('type')
+                url = os.getenv(env_var) if env_var else None
+                if not url:
+                    print(f"⚠️  Env var '{env_var}' for webhook label '{label}' is not set. Skipping.")
+                    continue
+                if wtype == 'discord':
+                    bold = '**'
+                    payload = {"content": message_template.replace('{b}', bold)}
+                elif wtype == 'googlechat':
+                    bold = '*'
+                    payload = {"text": message_template.replace('{b}', bold)}
+                else:
+                    print(f"⚠️  Unknown webhook type '{wtype}' for label '{label}'. Skipping.")
+                    continue
+                print(f"[DRY RUN] Would send webhook to '{label}' (env: {env_var}, type: {wtype}, url: {url}):\n{payload}\n")
+                sent_any = True
+            if not sent_any:
+                print("⚠️  No webhook messages would be sent (no valid URLs found).")
+            return
+        for label, info in items:
+            env_var = info.get('env')
+            wtype = info.get('type')
+            url = os.getenv(env_var) if env_var else None
+            if not url:
+                print(f"⚠️  Env var '{env_var}' for webhook label '{label}' is not set. Skipping.")
+                continue
+            if wtype == 'discord':
+                bold = '**'
+                payload = {"content": message_template.replace('{b}', bold)}
+            elif wtype == 'googlechat':
+                bold = '*'
+                payload = {"text": message_template.replace('{b}', bold)}
+            else:
+                print(f"⚠️  Unknown webhook type '{wtype}' for label '{label}'. Skipping.")
+                continue
+            try:
+                resp = requests.post(url, json=payload)
+                resp.raise_for_status()
+                print(f"✅ Webhook message sent to '{label}' (env: {env_var}, type: {wtype})")
+                sent_any = True
+            except requests.exceptions.RequestException as e:
+                print(f"❌ Error sending webhook to '{label}' (env: {env_var}, type: {wtype}): {e}")
+                if hasattr(e, 'response') and e.response:
+                    print(f"Response: {e.response.text}")
+        if not sent_any:
+            print("⚠️  No webhook messages sent (no valid URLs found).")
 
-    def run(self):
+    def run(self, webhook_map_path=None, filter_label=None, mail_only=False):
         print('📧 Starting newsletter email process...')
         
         # Read game data
@@ -202,12 +276,12 @@ Bonne semaine ! ☀️
         print(f'🔗 Plinko link for this week: {plinko_url}')
         print(f'✅ Email content ready: {content["subject"]}')
         
-        # Send webhook
-        print("🤖 Sending webhook to Google Chat...")
-        self.send_webhook(content, game_id, meta)
-        if self.webhook_only:
-            print("🛑 Webhook-only mode: Skipping email send.")
-            return
+        # Send webhook unless mail_only is set
+        if not mail_only:
+            self.send_webhook(content, game_id, meta, webhook_map_path=webhook_map_path, filter_label=filter_label)
+            if self.webhook_only:
+                print("🛑 Webhook-only mode: Skipping email send.")
+                return
         # Send email
         print("📤 Sending email...")
         success = self.send_email(content)
@@ -221,10 +295,16 @@ def main():
     parser = argparse.ArgumentParser(description='Send BonjourArcade newsletter')
     parser.add_argument('--dry-run', action='store_true', 
                        help='Show what would be sent without actually sending')
-    parser.add_argument('--api-url', default=DEFAULT_API_URL,
-                       help='ConvertKit API URL')
+    parser.add_argument('--mail-api-url', default=DEFAULT_API_URL,
+                       help='ConvertKit API URL (for sending email/broadcasts)')
     parser.add_argument('--webhook-only', action='store_true',
                        help='Send only to webhook and skip email (for testing)')
+    parser.add_argument('--mail-only', action='store_true',
+                       help='Send only the email (no webhooks)')
+    parser.add_argument('--webhook-map', default='webhook_map.json',
+                       help='Path to JSON file mapping webhook labels to env var names (default: webhook_map.json)')
+    parser.add_argument('--webhook-label', default=None, type=str,
+                       help='Only send to the webhook with this label from the map (for testing)')
     
     args = parser.parse_args()
     
@@ -235,12 +315,12 @@ def main():
     
     sender = NewsletterSender(
         api_secret=api_secret,
-        api_url=args.api_url,
+        api_url=args.mail_api_url,
         dry_run=args.dry_run,
         webhook_only=args.webhook_only
     )
     
-    sender.run()
+    sender.run(webhook_map_path=args.webhook_map, filter_label=args.webhook_label, mail_only=args.mail_only)
 
 if __name__ == '__main__':
     main() 

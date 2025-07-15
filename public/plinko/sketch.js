@@ -27,10 +27,11 @@ let countdownTimer = null; // Variable to hold the countdown timer
 let countdownSeconds = 2; // Countdown duration in seconds
 let countdownActive = false; // Flag to track if countdown is active
 
-// --- Redirect seed=now to seed=YYYYWW (current year + ISO week) ---
+// --- Redirect seed=now or seed=next to seed=YYYYWW (current or next week) ---
 (function() {
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('seed') === 'now') {
+    let redirectSeed = null;
+    if (urlParams.get('seed') === 'now' || urlParams.get('seed') === 'next') {
         const now = new Date();
         // Get ISO week number
         function getISOWeek(date) {
@@ -45,9 +46,18 @@ let countdownActive = false; // Flag to track if countdown is active
             const weekNumber = 1 + Math.ceil((firstThursday - target) / 604800000);
             return weekNumber;
         }
-        const year = now.getFullYear();
-        const week = getISOWeek(now).toString().padStart(2, '0');
-        urlParams.set('seed', `${year}${week}`);
+        let year, week;
+        if (urlParams.get('seed') === 'now') {
+            year = now.getFullYear();
+            week = getISOWeek(now);
+        } else if (urlParams.get('seed') === 'next') {
+            // Add 7 days to get next week
+            const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+            year = nextWeek.getFullYear();
+            week = getISOWeek(nextWeek);
+        }
+        const weekStr = week.toString().padStart(2, '0');
+        urlParams.set('seed', `${year}${weekStr}`);
         // Build new URL
         const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
         window.location.replace(newUrl);

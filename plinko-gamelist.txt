@@ -53,6 +53,7 @@ Gain Ground
 Galaga '88
 Galaxy Force 2
 Gauntlet
+Gekirindan
 Ghouls n Ghosts'
 Giga Wing
 Golden Axe
@@ -61,15 +62,19 @@ Gradius
 Gradius 2
 Grind Stormer
 Gun.Smoke
+Gunbird
 Gunbird 2
+Gun Frontier
 Gunlock # Layer Section, Galactic Attack, Rayforce
 Guwange
 H.E.R.O. #Atari 2600
+Hyper Duel
 Ibara
 In the Hunt
 Juno First # Atari 2600 only for now
 Karateka
 Ketsui
+Kingdom Grandprix
 Kirby's Adventure
 Kung Fu #NES
 League Bowling
@@ -80,6 +85,7 @@ Marble Madness
 Mario Bros.
 Mars Matrix
 Mega Man II
+Metal Black
 Metal Slug 2
 Metal Slug 3
 Metal Slug Super Vehicle-001

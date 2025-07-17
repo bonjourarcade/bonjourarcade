@@ -1,21 +1,3 @@
-
-- Frontier Force https://badcomputer0.itch.io/frontier-force
-
-# Requires special controls
-- Out Run (R2 for gas, L2 for brakes)
-
-
-# Untested for online emulation
-Guardian Force (ST-V)
-Radiant Silvergun (ST-V)
-Raiden DX (Big game)
-Shienryu (ST-V)
-Soukyugurentai (Terra Diver) (ST-V)
-Super Road Blaster (Have difficulty with 100MB limit on git)
-Tetris The Grand Master (Big game)
-Virtua Cop
-Virtua Cop 2
-
 # Note sure about these
 19XX
 Air Duel (is it too boring?)

@@ -44,6 +44,12 @@ class NewsletterSender:
         self.api_url = api_url
         self.dry_run = dry_run
         self.webhook_only = webhook_only
+        # Compute plinko_url once for the instance
+        from datetime import datetime
+        now = datetime.now()
+        week = now.isocalendar()[1]
+        plinko_seed = f"{now.year}{week:02d}"
+        self.plinko_url = f"https://felx.cc/plinko/{plinko_seed}"
         
     def read_game_of_the_week(self):
         """Read the current game of the week from the file."""
@@ -88,10 +94,6 @@ class NewsletterSender:
         genre = meta.get('genre', 'Non spécifié')
         description = clean_title
         subject = f'🕹️ Jeu de la semaine - {title}'
-        now = datetime.now()
-        week = now.isocalendar()[1]
-        plinko_seed = f"{now.year}{week:02d}"
-        plinko_url = f"{BASE_URL}/plinko/?seed={plinko_seed}"
         html_content = f'''
         <html><body>
         <ul>
@@ -106,7 +108,7 @@ class NewsletterSender:
         </div>
         <img src="{cover_url}" alt="Couverture de {clean_title}" style="max-width:320px;width:100%;border-radius:8px;display:block;margin:0 auto 16px auto;">
         <div style="text-align:center;margin:8px 0 24px 0;font-size:1em;">
-            <a href="{plinko_url}" style="color:#007bff;text-decoration:underline;">🎲 Voir le tirage plinko</a>
+            <a href="{self.plinko_url}" style="color:#007bff;text-decoration:underline;">🎲 Voir le tirage plinko</a>
         </div>
         </body></html>
         '''
@@ -176,13 +178,14 @@ class NewsletterSender:
         developer = meta.get('developer', 'Inconnu')
         year = meta.get('year', 'Inconnue')
         genre = meta.get('genre', 'Non spécifié')
-        # Message template with {b} for bold
+        # Message template with {b} for bold, now includes plinko link
         message_template = f"""
 {{b}}Jeu de la semaine :{{b}} {title}
 {{b}}Développeur :{{b}} {developer}
 {{b}}Année :{{b}} {year}
 {{b}}Genre :{{b}} {genre}
 {{b}}Image :{{b}} {cover_url}
+🎲 {{b}}Tirage Plinko :{{b}} {self.plinko_url}
 
 🕹️ {{b}}Faites-en l'essai :{{b}} {play_url}
 🏆 {{b}}Classements :{{b}} {leaderboard_url}
@@ -267,13 +270,7 @@ Bonne semaine ! ☀️
         # Generate email content
         print("✍️  Generating email content...")
         content = self.create_email_content(game_id, meta)
-        # Extract plinko_url from the generated content
-        from datetime import datetime
-        now = datetime.now()
-        week = now.isocalendar()[1]
-        plinko_seed = f"{now.year}{week:02d}"
-        plinko_url = f"{BASE_URL}/plinko/?seed={plinko_seed}"
-        print(f'🔗 Plinko link for this week: {plinko_url}')
+        print(f'🔗 Plinko link for this week: {self.plinko_url}')
         print(f'✅ Email content ready: {content["subject"]}')
         
         # Send webhook unless mail_only is set

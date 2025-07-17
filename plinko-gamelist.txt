@@ -9,6 +9,7 @@ Atomic Runner
 B-Wings #Famicom
 Ballon Fight
 Batsugun
+Battle Chopper
 Battle City
 Battle Garegga
 Battletoads
@@ -27,6 +28,7 @@ Circus Charlie
 Combat School
 Comix Zone
 Contra Hard Corps
+Cosmic Cop
 Darius Gaiden #Saturn
 Dig Dug
 DoDonPachi Dai-Fukkatsu
@@ -68,17 +70,21 @@ Gun Frontier
 Gunlock # Layer Section, Galactic Attack, Rayforce
 Guwange
 H.E.R.O. #Atari 2600
+Hammerin' Harry
 Hyper Duel
 Ibara
 In the Hunt
 Juno First # Atari 2600 only for now
 Karateka
 Ketsui
+Kid Niki Radical Ninja
 Kingdom Grandprix
 Kirby's Adventure
 Kung Fu #NES
 League Bowling
+Legend of Hero Tonma
 Lode Runner
+Meikyu Jima
 MUSHA
 Mad Planets
 Marble Madness
@@ -119,6 +125,7 @@ Pyoro 64
 Q*Bert
 QIX #bright NES hack
 R-Type
+R-Type LEO
 R.C. Pro-AM
 Raiden
 Raiden II
@@ -143,6 +150,7 @@ SonSon
 Sorcer Striker
 Space Harrier
 Space Invader
+Spelunker
 Stampede #Atari 2600
 Star Wars Arcade
 Streets of Rage 2
@@ -180,5 +188,6 @@ Wonder Boy III Monster Lair
 World of Illusion
 Xevious
 Yie Ar Kung Fu
+Youjyuden
 Zaxxon
 Zoo Keeper

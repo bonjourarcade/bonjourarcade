@@ -1,11 +1,5 @@
-- Kid Niki Radical Ninja
-- Legend of Hero Tonma
-- Hammerin' Harry
-- Kickle Cubicle
-- Mr Heli
 
 - Frontier Force https://badcomputer0.itch.io/frontier-force
-- Deathchase (ZX Spectrum)
 
 # Requires special controls
 - Out Run (R2 for gas, L2 for brakes)

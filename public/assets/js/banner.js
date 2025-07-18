@@ -9,7 +9,7 @@
     banner.style.cssText = `
       position: fixed;
       left: 0; right: 0;
-      background: #e53935;
+      background: #3460e5;
       color: #fff;
       font-weight: bold;
       text-align: center;

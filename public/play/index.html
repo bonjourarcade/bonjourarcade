@@ -57,7 +57,7 @@
             padding: 8px !important;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            z-index: 1000;
+            z-index: 2000; /* Raised above banner */
             display: none; /* Hidden by default, will be shown by JS */
             flex-direction: column;
             align-items: center;
@@ -88,7 +88,7 @@
             gap: 8px;
             font-family: sans-serif;
             font-size: 12px !important;
-            z-index: 1000;
+            z-index: 2000; /* Raised above banner */
             border: 1px solid rgba(255, 255, 255, 0.2);
             transition: background-color 0.2s;
             margin: 0 !important;
@@ -118,6 +118,7 @@
         <p>Classements</p>
     </div>
 
+    <script src="/assets/js/banner.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <script>
         // Feature: Redirect to homepage at 5 AM local time

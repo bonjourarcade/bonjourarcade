@@ -76,7 +76,7 @@ function isFirefox() {
 }
 
 // Check browser when page loads
-window.addEventListener('DOMContentLoaded', checkBrowser);
+// window.addEventListener('DOMContentLoaded', checkBrowser);
 async function fetchGameData() {
     try {
         // Use absolute path from root, matching HTML links/server root
@@ -1096,3 +1096,28 @@ function initializeNewsletter() {
         window.open('https://bonjourarcade.kit.com/abonne', '_blank');
     });
 }
+
+// --- Ensure menu and main content are visible after browser back navigation ---
+window.addEventListener('pageshow', function(event) {
+  // Remove animation classes from body
+  document.body.classList.remove('radial-exit-block');
+  document.body.style.opacity = '';
+  document.body.style.transition = '';
+
+  // Remove radial-exit and transform from all elements
+  document.querySelectorAll('.radial-exit').forEach(el => {
+    el.classList.remove('radial-exit');
+    el.style.transform = '';
+  });
+
+  // Reset header, main, footer transforms
+  ['header', 'main', 'footer'].forEach(sel => {
+    document.querySelectorAll(sel).forEach(el => {
+      el.style.transform = '';
+    });
+  });
+
+  // Optionally, reset .container display if it was hidden
+  // var container = document.querySelector('.container');
+  // if (container) container.style.display = '';
+});

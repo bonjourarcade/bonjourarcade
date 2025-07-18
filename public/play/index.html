@@ -259,9 +259,9 @@
                   window[`${key}`] = value;
                 }
 
-                // --- NEW: Attempt to load game-specific config.js ---
+                // --- NEW: Attempt to load game-specific config.json ---
                 try {
-                  const gameConfigPath = `/games/${gameId}/config.js`;
+                  const gameConfigPath = `/games/${gameId}/config.json`;
                   console.log(`Attempting to fetch game-specific config: ${gameConfigPath}`);
                   const gameConfigResponse = await fetch(gameConfigPath);
                   if (gameConfigResponse.ok) {

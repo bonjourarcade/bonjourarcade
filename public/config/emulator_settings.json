@@ -6,6 +6,7 @@
     "mame2003-plus_skip_warnings": "enabled"
   },
   "EJS_backgroundBlur": true,
+  "EJS_disableAutoLang": true,
   "EJS_DEBUG_XX": true,
   "EJS_alignStartButton": "bottom",
   "EJS_pathtodata": "https://cdn.emulatorjs.org/stable/data/",

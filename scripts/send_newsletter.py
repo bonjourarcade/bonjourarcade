@@ -33,6 +33,9 @@ from datetime import datetime, timedelta
 from pathlib import Path
 import re
 import yaml
+import tempfile
+import subprocess
+import questionary
 
 # Configuration - Only keep what's needed
 DEFAULT_API_URL = 'https://api.convertkit.com/v3'
@@ -80,7 +83,7 @@ class NewsletterSender:
             print(f"Error: Invalid YAML in metadata file for game {game_id}: {e}")
             sys.exit(1)
     
-    def create_email_content(self, game_id, meta):
+    def create_email_content(self, game_id, meta, custom_message=None):
         from datetime import datetime
         import re
         cover_url = f'{BASE_URL}/games/{game_id}/cover.png'
@@ -94,8 +97,11 @@ class NewsletterSender:
         genre = meta.get('genre', 'Non spécifié')
         description = clean_title
         subject = f'🕹️ Jeu de la semaine - {title}'
+        # Insert custom message if provided
+        custom_html = f'<div style="margin-bottom:18px;font-size:1.1em;">{custom_message}</div>' if custom_message else ''
         html_content = f'''
         <html><body>
+        {custom_html}
         <ul>
         <li><b>Titre :</b> {clean_title}</li>
         <li><b>Développeur :</b> {developer}</li>
@@ -154,7 +160,7 @@ class NewsletterSender:
                 print(f"Response: {e.response.text}")
             return False
     
-    def send_webhook(self, content, game_id, meta, webhook_map_path=None, filter_label=None):
+    def send_webhook(self, content, game_id, meta, webhook_map_path=None, filter_label=None, custom_message=None):
         """Send a plaintext version of the newsletter to one or more webhooks, using a JSON map of label:{env,type}. Optionally filter by label."""
         import requests
         import os
@@ -178,9 +184,11 @@ class NewsletterSender:
         developer = meta.get('developer', 'Inconnu')
         year = meta.get('year', 'Inconnue')
         genre = meta.get('genre', 'Non spécifié')
+        # Insert custom message if provided
+        custom_text = f"{custom_message}\n\n" if custom_message else ''
         # Message template with {b} for bold, now includes plinko link
         message_template = f"""
-{{b}}Jeu de la semaine :{{b}} {title}
+{custom_text}{{b}}Jeu de la semaine :{{b}} {title}
 {{b}}Développeur :{{b}} {developer}
 {{b}}Année :{{b}} {year}
 {{b}}Genre :{{b}} {genre}
@@ -252,7 +260,7 @@ Bonne semaine ! ☀️
         if not sent_any:
             print("⚠️  No webhook messages sent (no valid URLs found).")
 
-    def run(self, webhook_map_path=None, filter_label=None, mail_only=False):
+    def run(self, webhook_map_path=None, filter_label=None, mail_only=False, custom_message=None):
         print('📧 Starting newsletter email process...')
         
         # Read game data
@@ -269,13 +277,13 @@ Bonne semaine ! ☀️
         
         # Generate email content
         print("✍️  Generating email content...")
-        content = self.create_email_content(game_id, meta)
+        content = self.create_email_content(game_id, meta, custom_message=custom_message)
         print(f'🔗 Plinko link for this week: {self.plinko_url}')
         print(f'✅ Email content ready: {content["subject"]}')
         
         # Send webhook unless mail_only is set
         if not mail_only:
-            self.send_webhook(content, game_id, meta, webhook_map_path=webhook_map_path, filter_label=filter_label)
+            self.send_webhook(content, game_id, meta, webhook_map_path=webhook_map_path, filter_label=filter_label, custom_message=custom_message)
             if self.webhook_only:
                 print("🛑 Webhook-only mode: Skipping email send.")
                 return
@@ -302,14 +310,75 @@ def main():
                        help='Path to JSON file mapping webhook labels to env var names (default: webhook_map.json)')
     parser.add_argument('--webhook-label', default=None, type=str,
                        help='Only send to the webhook with this label from the map (for testing)')
+    parser.add_argument('--custom-message', default=None, type=str,
+                      help='Custom message to introduce the game of the week (appears at the top of the email and webhook)')
     
     args = parser.parse_args()
-    
+
+    # Interactive Vim editing if no custom message is provided
+    custom_message = args.custom_message
+    if custom_message is None:
+        print("No custom message provided. Opening Vim for you to type your introduction message. Save and quit to continue...")
+        import tempfile, os
+        comment_line = "Cette semaine, Plinko a choisi\n"
+        fd, temp_path = tempfile.mkstemp(suffix=".tmp")
+        try:
+            with os.fdopen(fd, 'w') as tf:
+                tf.write(comment_line)
+            editor = os.environ.get('EDITOR', 'vim')
+            if editor == 'vim' or editor.endswith('/vim'):
+                subprocess.call(['vim', '-c', 'set spell spelllang=fr', temp_path])
+            else:
+                subprocess.call([editor, temp_path])
+            with open(temp_path, 'r') as tf:
+                lines = tf.readlines()
+            # Remove comment lines and join
+            message = ''.join([line for line in lines if not line.strip().startswith('#')]).strip()
+            if not message:
+                print("Aucun message saisi. Abandon.")
+                sys.exit(0)
+            print("\nVotre message d'introduction :\n" + '-'*40)
+            print(message)
+            print('-'*40)
+            confirm = input("Est-ce correct ? [y/N]: ").strip().lower()
+            if confirm not in ('o', 'y', 'yes'):
+                print("Abandon. Aucun message envoyé.")
+                sys.exit(0)
+            custom_message = message
+        finally:
+            os.remove(temp_path)
+
     api_secret = os.getenv('CONVERTKIT_API_SECRET')
     if not api_secret:
         print('❌ Error: API secret is required. Set CONVERTKIT_API_SECRET environment variable.')
         sys.exit(1)
     
+    # Interactive webhook selection if no --webhook-label is provided
+    selected_webhook_labels = None
+    if args.webhook_label is None:
+        webhook_map_path = args.webhook_map
+        if not os.path.exists(webhook_map_path):
+            print(f"⚠️  Webhook map file '{webhook_map_path}' not found. Skipping webhook selection.")
+        else:
+            with open(webhook_map_path, "r") as f:
+                try:
+                    webhook_map = json.load(f)
+                except Exception as e:
+                    print(f"⚠️  Failed to parse webhook map JSON: {e}. Skipping webhook selection.")
+                    webhook_map = None
+            if webhook_map:
+                choices = list(webhook_map.keys())
+                selected = questionary.checkbox(
+                    "Sélectionnez les webhooks auxquels envoyer :",
+                    choices=choices
+                ).ask()
+                if not selected:
+                    print("Aucun webhook sélectionné. Abandon.")
+                    sys.exit(0)
+                selected_webhook_labels = selected
+    else:
+        selected_webhook_labels = [args.webhook_label]
+
     sender = NewsletterSender(
         api_secret=api_secret,
         api_url=args.mail_api_url,
@@ -317,7 +386,12 @@ def main():
         webhook_only=args.webhook_only
     )
     
-    sender.run(webhook_map_path=args.webhook_map, filter_label=args.webhook_label, mail_only=args.mail_only)
+    # If selected_webhook_labels is set, send to each label in turn
+    if selected_webhook_labels is not None:
+        for label in selected_webhook_labels:
+            sender.run(webhook_map_path=args.webhook_map, filter_label=label, mail_only=args.mail_only, custom_message=custom_message)
+    else:
+        sender.run(webhook_map_path=args.webhook_map, filter_label=args.webhook_label, mail_only=args.mail_only, custom_message=custom_message)
 
 if __name__ == '__main__':
     main() 

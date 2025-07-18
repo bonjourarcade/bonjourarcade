@@ -75,20 +75,6 @@ function isFirefox() {
     return navigator.userAgent.toLowerCase().includes('firefox');
 }
 
-// Check browser and show warning if needed
-function checkBrowser() {
-    const browserWarningDiv = document.getElementById('browser-warning');
-    if (browserWarningDiv) {
-        if (isFirefox()) {
-            browserWarningDiv.style.display = 'block';
-            browserWarningDiv.innerHTML = `<p><strong>Remarque :</strong> Pour une expérience de jeu optimale, nous vous recommandons d'utiliser un navigateur basé sur Chromium comme Google Chrome, Safari, Microsoft Edge ou Brave. <br><b>Certains jeux peuvent ne pas fonctionner de manière optimale sur Firefox.</b></p>`;
-        } else {
-            // Hide the warning for other browsers if it's not Firefox
-            browserWarningDiv.style.display = 'none';
-        }
-    }
-}
-
 // Check browser when page loads
 window.addEventListener('DOMContentLoaded', checkBrowser);
 async function fetchGameData() {

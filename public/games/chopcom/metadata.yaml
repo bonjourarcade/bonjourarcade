@@ -2,5 +2,8 @@ title: Chopper Command (#19)
 developer: Activision
 year: 1982
 genre: Shooter
+controls:
+  - 🕹️ Move
+  - 1️⃣  Shoot
 #recommended: 
 added: 2025-07-08

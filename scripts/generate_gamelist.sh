@@ -17,14 +17,16 @@ get_core_from_dir() {
         arcade|fbneo) echo "arcade" ;; # Map arcade, fbneo folders to 'arcade' core
         mame) echo "mame2003_plus" ;; # Map mame  to 'mame2003' core
         ATARI2600) echo "atari2600" ;;
-        GBA)      echo "gba" ;;
         GAMEBOY)      echo "gb" ;;
-        SNES) echo "snes" ;; # Map snes, sfc folders to 'snes' core
-        NES)   echo "nes" ;;    # Map nes, fc folders to 'nes' core
-        N64)   echo "n64" ;;
+        GBA)      echo "gba" ;;
         GENESIS|MEGADRIVE) echo "segaMD" ;;
+        GG) echo "segaGG" ;;
+        N64)   echo "n64" ;;
+        NES)   echo "nes" ;;    # Map nes, fc folders to 'nes' core
         PSX) echo "psx" ;;
         SMS) echo "segaMS" ;;
+        SNES) echo "snes" ;; # Map snes, sfc folders to 'snes' core
+        WS) echo "ws" ;; # Wonderswan
         # Add mappings for other systems/cores here
         *)        echo "" ;; # Return empty if no mapping found
     esac

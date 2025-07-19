@@ -20,6 +20,7 @@ Blazing Star
 Boogie Wings
 Bubble Bobble
 Burgertime
+Cardinal Sins
 Castle of Illusion Starring Mickey Mouse
 Castlevania
 Centipede
@@ -57,6 +58,8 @@ Galaga '88
 Galaxy Force 2
 Gauntlet
 Gekirindan
+GG Aleste II
+GG Aleste 3
 Ghouls n Ghosts'
 Giga Wing
 Golden Axe
@@ -75,6 +78,7 @@ Hammerin' Harry
 Hyper Duel
 Ibara
 In the Hunt
+Judgement Silversword
 Juno First # Atari 2600 only for now
 Karateka
 Ketsui

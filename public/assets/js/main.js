@@ -1,4 +1,23 @@
 // --- Tooltip Functions (Global Scope) ---
+function summarizeControls(controls) {
+    if (!controls || !Array.isArray(controls)) return '';
+    const joystickLines = controls.filter(line => String(line).trim().startsWith('🕹️'));
+    if (joystickLines.length >= 2) return '🕹️🕹️';
+    let summary = '';
+    for (let line of controls) {
+        line = String(line).trim();
+        if (!line) continue;
+        let first = line.split(' ')[0];
+        if ([
+            '1️⃣','2️⃣','3️⃣','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣','9️⃣','0️⃣'
+        ].includes(first)) {
+            first = '🔴';
+        }
+        summary += first + ' ';
+    }
+    return summary.trim();
+}
+
 function showTooltipForItem(item) {
     removeTooltip(); // Clear any existing tooltip
     if (!item) return;
@@ -35,6 +54,20 @@ function showTooltipForItem(item) {
             table.appendChild(row);
         }
     });
+    // Add summarized controls row if present
+    if (game.controls && summarizeControls(game.controls)) {
+        hasData = true;
+        const row = document.createElement('tr');
+        const labelCell = document.createElement('td');
+        labelCell.innerHTML = `<strong>Contrôles:</strong>`;
+        labelCell.className = 'meta-label';
+        const valueCell = document.createElement('td');
+        valueCell.textContent = summarizeControls(game.controls);
+        valueCell.className = 'meta-value';
+        row.appendChild(labelCell);
+        row.appendChild(valueCell);
+        table.appendChild(row);
+    }
     if (hasData) {
         tooltip.appendChild(table);
         document.body.appendChild(tooltip);
@@ -305,6 +338,19 @@ function populateFeaturedGame(game) {
             metaTable.appendChild(row);
         }
     });
+    // Add summarized controls row if present
+    if (game.controls && summarizeControls(game.controls)) {
+        const row = document.createElement('tr');
+        const labelCell = document.createElement('td');
+        labelCell.innerHTML = `<strong>Contrôles:</strong>`;
+        labelCell.className = 'meta-label';
+        const valueCell = document.createElement('td');
+        valueCell.textContent = summarizeControls(game.controls);
+        valueCell.className = 'meta-value';
+        row.appendChild(labelCell);
+        row.appendChild(valueCell);
+        metaTable.appendChild(row);
+    }
     if (metaTable.children.length > 0) {
         contentContainer.appendChild(metaTable);
     }

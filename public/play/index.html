@@ -107,6 +107,8 @@
         <span class="arrow">←</span>
         <span>MENU</span>
     </div>
+    <!-- Controls Overlay (desktop only) -->
+    <div id="controls-overlay" style="display:none;position:fixed;top:52px;left:10px;z-index:1999;background:rgba(0,0,0,0.85);color:#fff;padding:8px 14px 8px 12px;border-radius:6px;font-size:18px;font-family:sans-serif;box-shadow:0 2px 8px #0005;min-width:40px;max-width:220px;line-height:1.5;pointer-events:none;"></div>
 
     <div id="game-container">
         <div id="game"><p style="text-align: center; padding-top: 50px;">Initializing...</p></div>
@@ -141,6 +143,25 @@
         // Function to detect if the device is mobile
         function isMobileDevice() {
             return /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+        // Summarize controls (same logic as main menu/newsletter)
+        function summarizeControls(controls) {
+            if (!controls || !Array.isArray(controls)) return '';
+            const joystickLines = controls.filter(line => String(line).trim().startsWith('🕹️'));
+            if (joystickLines.length >= 2) return '🕹️🕹️';
+            let summary = '';
+            for (let line of controls) {
+                line = String(line).trim();
+                if (!line) continue;
+                let first = line.split(' ')[0];
+                if ([
+                    '1️⃣','2️⃣','3️⃣','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣','9️⃣','0️⃣'
+                ].includes(first)) {
+                    first = '🔴';
+                }
+                summary += first + ' ';
+            }
+            return summary.trim();
         }
 
         // --- Logic for the Single Game Launcher Page (using JSON Controls) ---
@@ -240,6 +261,19 @@
 
                 // Step 5: Set the Page Title
                 document.title = selectedGame.title || gameId; // Use game title or fallback to ID
+                // Show controls overlay (desktop only)
+                const controlsOverlay = document.getElementById('controls-overlay');
+                if (controlsOverlay) {
+                    if (!isMobileDevice() && selectedGame.controls && Array.isArray(selectedGame.controls) && selectedGame.controls.length > 0) {
+                        // Build overlay HTML: 'Controls' on first line, then each control line
+                        let html = '<div style="font-weight:bold;font-size:15px;margin-bottom:2px;">Controls</div>';
+                        html += selectedGame.controls.map(line => `<div>${line}</div>`).join('');
+                        controlsOverlay.innerHTML = html;
+                        controlsOverlay.style.display = 'block';
+                    } else {
+                        controlsOverlay.style.display = 'none';
+                    }
+                }
 
                 // Step 6: Set the Core EJS Variables Globally (used by EmulatorJS loader)
                 console.log(`Setting EJS Vars - Core: ${selectedGame.core}, ROM: ${selectedGame.romPath}`);

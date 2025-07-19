@@ -53,7 +53,32 @@ class NewsletterSender:
         week = now.isocalendar()[1]
         plinko_seed = f"{now.year}{week:02d}"
         self.plinko_url = f"https://felx.cc/plinko/{plinko_seed}"
-        
+
+    def summarize_controls(self, controls):
+        """
+        Summarize the controls array from metadata:
+        - Only show the emoji for each control (first emoji per line)
+        - Replace any number-in-square emoji (1️⃣, 2️⃣, etc) with 🔴
+        - If two lines start with a joystick emoji, show 🕹️🕹️
+        """
+        if not controls or not isinstance(controls, list):
+            return ''
+        joystick_lines = [line for line in controls if str(line).strip().startswith('🕹️')]
+        if len(joystick_lines) >= 2:
+            return '🕹️🕹️'
+        summary = ''
+        for line in controls:
+            line = str(line).strip()
+            if not line:
+                continue
+            # Extract the first emoji (or character)
+            first = line.split()[0]
+            # Replace number-in-square emoji with 🔴
+            if first in ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '0️⃣']:
+                first = '🔴'
+            summary += first + ' '
+        return summary.strip()
+
     def read_game_of_the_week(self):
         """Read the current game of the week from the file."""
         try:
@@ -95,6 +120,7 @@ class NewsletterSender:
         developer = meta.get('developer', 'Inconnu')
         year = meta.get('year', 'Inconnue')
         genre = meta.get('genre', 'Non spécifié')
+        controls = self.summarize_controls(meta.get('controls'))
         description = clean_title
         subject = f'🕹️ Jeu de la semaine - {title}'
         # Insert custom message if provided
@@ -107,6 +133,7 @@ class NewsletterSender:
         <li><b>Développeur :</b> {developer}</li>
         <li><b>Année :</b> {year}</li>
         <li><b>Genre :</b> {genre}</li>
+        <li><b>Contrôles :</b> {controls}</li>
         </ul>
         <div style="text-align:center;margin:24px 0;">
             <a href="{play_url}" style="display:inline-block;background:#fffd37;color:#111;padding:18px 36px;border-radius:6px;text-decoration:none;font-weight:bold;font-size:1.3em;margin-right:18px;">🕹️ Jouer maintenant</a>
@@ -184,6 +211,7 @@ class NewsletterSender:
         developer = meta.get('developer', 'Inconnu')
         year = meta.get('year', 'Inconnue')
         genre = meta.get('genre', 'Non spécifié')
+        controls = self.summarize_controls(meta.get('controls'))
         # Insert custom message if provided
         custom_text = f"{custom_message}\n\n" if custom_message else ''
         # Message template with {b} for bold, now includes plinko link
@@ -192,6 +220,7 @@ class NewsletterSender:
 {{b}}Développeur :{{b}} {developer}
 {{b}}Année :{{b}} {year}
 {{b}}Genre :{{b}} {genre}
+{{b}}Contrôles :{{b}} {controls}
 {{b}}Image :{{b}} {cover_url}
 🎲 {{b}}Tirage Plinko :{{b}} {self.plinko_url}
 

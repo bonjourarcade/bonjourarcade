@@ -266,8 +266,13 @@
                 if (controlsOverlay) {
                     if (!isMobileDevice() && selectedGame.controls && Array.isArray(selectedGame.controls) && selectedGame.controls.length > 0) {
                         // Build overlay HTML: 'Controls' on first line, then each control line
-                        let html = '<div style="font-weight:bold;font-size:15px;margin-bottom:2px;">Controls</div>';
+                        let html = '<div style="font-weight:bold;font-size:15px;margin-bottom:2px;">Contrôles</div>';
                         html += selectedGame.controls.map(line => `<div>${line}</div>`).join('');
+                        if (selectedGame.to_start) {
+                            // Replace '->' with a better looking right arrow
+                            let toStartDisplay = selectedGame.to_start.replace(/->/g, '→');
+                          html += '<div style="margin-top:10px;font-size:15px;"><span style="font-weight:bold;">Pour commencer:</span><br>' + toStartDisplay + '</div>';
+                        }
                         controlsOverlay.innerHTML = html;
                         controlsOverlay.style.display = 'block';
                     } else {

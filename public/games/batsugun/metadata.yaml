@@ -3,8 +3,9 @@ developer: Toaplan
 year: 1993
 genre: Shooter
 controls:
-  - 🕹️ Move
-  - 1️⃣  Shoot
-  - 2️⃣  Bomb
+  - 🕹️ Bouger
+  - 1️⃣  Tirer
+  - 2️⃣  Bombe
+to_start: Insert Coin -> Start
 #recommended: 
 added: 2025-07-14

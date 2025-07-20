@@ -2,3 +2,7 @@ title: Joust (#12)
 developer: Williams Electronics
 year: 1982
 genre: Action
+controls:
+  - 🕹️ Déplacer
+  - 1️⃣  Flap
+to_start: Insert Coin -> Start

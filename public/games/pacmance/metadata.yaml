@@ -1,3 +1,6 @@
 title: Pac-Man Championship Edition (#8)
 genre: Maze
 year: 2020
+controls:
+  - 🕹️ Déplacer
+to_start: Start

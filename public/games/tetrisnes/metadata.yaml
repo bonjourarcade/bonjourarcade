@@ -4,3 +4,8 @@ year: 1989
 genre: Puzzle
 hide: no
 recommended: Félix Léger
+controls:
+  - 🕹️ Déplacer
+  - 1️⃣  Tourner ↪️
+  - 2️⃣  Tourner ↩️
+to_start: Start

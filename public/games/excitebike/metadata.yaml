@@ -3,3 +3,8 @@ developer: Nintendo
 year: 1984
 genre: Racing
 recommended: Frédérik Charest
+controls:
+  - 🕹️ Conduire
+  - 1️⃣  Turbo
+  - 2️⃣  Gaz
+to_start: Start

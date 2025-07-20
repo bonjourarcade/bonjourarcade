@@ -4,3 +4,8 @@ year: 1993
 genre: Beat 'em up
 #recommended: 
 added: 2025-07-01
+controls:
+  - 🕹️ Déplacer
+  - 1️⃣  Frapper
+  - 2️⃣  Sauter
+to_start: Insert Coin -> Start

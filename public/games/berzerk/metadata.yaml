@@ -2,3 +2,7 @@ title: Berzerk (#5)
 developer: Stern Electronics
 year: 1980
 genre: Maze shooter
+controls:
+  - 🕹️ Déplacer
+  - 1️⃣  Tirer
+to_start: Insert Coin -> Start

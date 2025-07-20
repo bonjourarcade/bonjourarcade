@@ -2,3 +2,7 @@ title: Gyruss (#2)
 developer: Konami
 year: 1983
 genre: Shoot 'em up
+controls:
+  - 🕹️ Déplacer
+  - 1️⃣  Tirer
+to_start: Insert Coin -> Start

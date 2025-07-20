@@ -2,3 +2,8 @@ title: Contra (#11)
 year: 1987
 developer: Konami
 genre: Run 'n gun
+controls:
+  - 🕹️ Déplacer
+  - 1️⃣  Tirer
+  - 2️⃣  Sauter
+to_start: Start

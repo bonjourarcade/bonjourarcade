@@ -5,3 +5,11 @@ genre: Racing
 recommended: Olivier P
 added: 2025-06-17
 hide: yes
+disable_score: true
+controls:
+  - 🕹️ Conduire
+  - 1️⃣  Accélérer
+  - 2️⃣  Freiner
+  - 3️⃣ Item
+  - 4️⃣ Sauter
+to_start: Start

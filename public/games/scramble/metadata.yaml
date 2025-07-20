@@ -2,3 +2,8 @@ title: Scramble (#6)
 developer: Konami
 year: 1981
 genre: Shoot 'em up
+controls:
+  - 🕹️ Déplacer
+  - 1️⃣  Tirer
+  - 2️⃣  Bombe
+to_start: Insert Coin -> Start

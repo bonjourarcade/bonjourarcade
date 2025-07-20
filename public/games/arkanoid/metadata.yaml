@@ -2,4 +2,8 @@ title: Arkanoid (#4)
 developer: Taito
 year: 1986
 genre: Block breaker
+controls:
+  - 🕹️ Bouger
+  - 1️⃣  Tirer
+to_start: Insert Coin -> Start
 recommended: Amélie Ferland

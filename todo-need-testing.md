@@ -1,5 +1,11 @@
 - The Simpsons (2players)
-
+- VS Castlevania
+- Pulstar
+- Botanic
+- Congo Bongo
+- Motos
+- Rally-X
+- Fast Lane
 
 # Note sure about these
 19XX

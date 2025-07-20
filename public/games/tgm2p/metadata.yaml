@@ -3,3 +3,9 @@ developer: Arika
 year: 2000
 genre: Puzzle
 recommended: Félix Léger
+controls:
+  - 🕹️ Déplacer
+  - 1️⃣  Tourner ↪️
+  - 2️⃣  Tourner ↩️
+  - 3️⃣  Tourner ↪️
+to_start: Insert Coin -> Start

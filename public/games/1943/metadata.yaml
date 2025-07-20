@@ -2,3 +2,8 @@ title: '1943: The Battle of Midway (#7)'
 developer: Capcom
 year: 1987
 genre: Shoot 'em up
+controls:
+  - 🕹️Déplacer
+  - 1️⃣  Tirer
+  - 2️⃣  Spécial
+to_start: Insert Coin -> Start

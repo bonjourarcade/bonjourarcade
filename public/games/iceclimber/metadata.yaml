@@ -4,3 +4,8 @@ year: 1985
 genre: Platform
 #recommended: 
 added: 2025-06-19
+controls:
+  - 🕹️ Déplacer
+  - 1️⃣  Marteau
+  - 2️⃣  Sauter
+to_start: Start

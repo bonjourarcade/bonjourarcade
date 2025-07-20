@@ -2,3 +2,6 @@ title: Pac-Man (#3)
 developer: Namco
 year: 1980
 genre: Maze
+controls:
+  - 🕹️ Déplacer
+to_start: Insert Coin -> Start

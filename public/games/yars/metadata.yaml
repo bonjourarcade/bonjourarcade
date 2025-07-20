@@ -4,3 +4,7 @@ year: 1982
 genre: Fixed shooter
 #recommended: 
 added: 2025-06-25
+controls:
+  - 🕹️ Déplacer
+  - 1️⃣  Tirer
+to_start: Tirer

@@ -3,5 +3,8 @@ developer: Sega
 year: 1992
 genre: Platform
 #recommended: 
-#added: 
-hide: yes
+added: 2025-07-20
+controls:
+  - 🕹️ Déplacer
+  - 1️⃣  Sauter/Dash
+to_start: Start

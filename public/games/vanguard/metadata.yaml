@@ -3,3 +3,10 @@ developer: SNK
 year: 1981
 genre: Scrolling shooter
 recommended: Sandrine Faust
+controls:
+  - 🕹️ Déplacer
+  - 1️⃣ Tirer ←
+  - 2️⃣ Tirer →
+  - 3️⃣ Tirer ↑
+  - 4️⃣ Tirer ↓
+to_start: Insert Coin -> Start

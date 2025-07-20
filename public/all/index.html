@@ -146,6 +146,7 @@
     </style>
 </head>
 <body>
+    <button id="back-home-btn" style="margin-bottom: 1.5rem; padding: 0.6rem 1.2rem; font-size: 1rem; border-radius: 6px; border: none; background: #222; color: #fff; cursor: pointer; font-family: sans-serif; box-shadow: 0 2px 6px rgba(0,0,0,0.08);">← Retour Accueil</button>
     <div class="header-content">
         <div class="header-left">
             <div>
@@ -165,6 +166,10 @@
 
     <script src="/assets/js/banner.js"></script>
     <script>
+        // Back to home button
+        document.getElementById('back-home-btn').addEventListener('click', function() {
+            window.location.href = '/index.html';
+        });
         // Theme management
         function initTheme() {
             const savedTheme = localStorage.getItem('theme');

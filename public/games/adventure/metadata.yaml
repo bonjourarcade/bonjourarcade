@@ -2,6 +2,10 @@ title: Adventure
 developer: Warren Robinett
 year: 1980
 genre: Adventure
+controls:
+  - 🕹️ Déplacer
+  - 1️⃣  Ramasser
+to_start: Start
 recommended: Fred Blanchet
 added: 2025-06-18
 disable_score: true

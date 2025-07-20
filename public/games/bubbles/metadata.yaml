@@ -2,3 +2,6 @@ title: Bubbles (#13)
 developer: Williams Electronics
 year: 1982
 genre: Action
+controls:
+#  - 🕹️ Déplacer
+to_start: Insert Coin -> Start

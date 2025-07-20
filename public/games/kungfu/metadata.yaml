@@ -4,3 +4,8 @@ year: 1985
 genre: Beat 'em up
 #recommended: 
 added: 2025-06-11
+controls:
+  - 🕹️ Déplacer
+  - 1️⃣  Coup de pied
+  - 2️⃣  Coup de poing
+to_start: Start

@@ -397,6 +397,9 @@ def main():
                     webhook_map = None
             if webhook_map:
                 choices = list(webhook_map.keys())
+                # Add ConvertKit Email as a selectable option
+                MAILING_LIST_LABEL = "ConvertKit Email"
+                choices.insert(0, MAILING_LIST_LABEL)
                 selected = questionary.checkbox(
                     "Sélectionnez les webhooks auxquels envoyer :",
                     choices=choices
@@ -417,10 +420,33 @@ def main():
     
     # If selected_webhook_labels is set, send to each label in turn
     if selected_webhook_labels is not None:
-        for label in selected_webhook_labels:
-            sender.run(webhook_map_path=args.webhook_map, filter_label=label, mail_only=args.mail_only, custom_message=custom_message)
+        MAILING_LIST_LABEL = "ConvertKit Email"
+        # If ConvertKit Email is selected, send the email
+        if MAILING_LIST_LABEL in selected_webhook_labels:
+            sender.run(
+                webhook_map_path=args.webhook_map,
+                filter_label=None,  # No filter, so email is sent
+                mail_only=True,     # Only send email in this run
+                custom_message=custom_message
+            )
+            # Remove it from the list so it's not treated as a webhook
+            selected_webhook_labels = [lbl for lbl in selected_webhook_labels if lbl != MAILING_LIST_LABEL]
+        # Only send to webhooks if any remain
+        if selected_webhook_labels:
+            for label in selected_webhook_labels:
+                sender.run(
+                    webhook_map_path=args.webhook_map,
+                    filter_label=label,
+                    mail_only=args.mail_only,
+                    custom_message=custom_message
+                )
     else:
-        sender.run(webhook_map_path=args.webhook_map, filter_label=args.webhook_label, mail_only=args.mail_only, custom_message=custom_message)
+        sender.run(
+            webhook_map_path=args.webhook_map,
+            filter_label=args.webhook_label,
+            mail_only=args.mail_only,
+            custom_message=custom_message
+        )
 
 if __name__ == '__main__':
     main() 

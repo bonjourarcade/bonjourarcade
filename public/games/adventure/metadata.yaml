@@ -5,7 +5,7 @@ genre: Adventure
 controls:
   - 🕹️ Déplacer
   - 1️⃣  Déposer
-to_start: Start
+to_start: Reset (Start)
 recommended: Fred Blanchet
 added: 2025-06-18
 disable_score: true

@@ -120,6 +120,30 @@
             color: #f4f4f4;
         }
     </style>
+    <style>
+    .game-meta-tooltip {
+        z-index: 9999 !important;
+        position: fixed !important;
+        pointer-events: none;
+        background: rgba(24, 24, 24, 0.92) !important;
+        color: #fff !important;
+        border-radius: 10px;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.28);
+        padding: 18px 22px;
+        min-width: 180px;
+        max-width: 340px;
+        font-size: 1.08em;
+        font-family: inherit;
+        opacity: 0.98;
+        transition: opacity 0.15s;
+    }
+    .game-meta-table .meta-label {
+        color: #fff !important;
+    }
+    .game-meta-table .meta-value {
+        color: #fff !important;
+    }
+    </style>
 </head>
 <body>
     <div class="header-content">
@@ -212,8 +236,10 @@
         fetch('/gamelist.json')
             .then(res => res.json())
             .then(data => {
-                // Store the games data globally
-                gamesData = data.previousGames;
+                // Combine gameOfTheWeek and previousGames
+                let gamesData = [];
+                if (data.gameOfTheWeek) gamesData.push(data.gameOfTheWeek);
+                if (Array.isArray(data.previousGames)) gamesData = gamesData.concat(data.previousGames);
 
                 // Sort games alphabetically by title
                 gamesData.sort((a, b) => {
@@ -224,6 +250,8 @@
                 gamesData.forEach(game => {
                     const div = document.createElement('div');
                     div.className = 'game';
+                    // Attach game data for tooltip
+                    div._gameData = game;
 
                     let coverSrc = game.coverArt || '/assets/images/placeholder_thumb.png';
 
@@ -245,6 +273,15 @@
                     div.querySelector('a').addEventListener('click', function(e) {
                         sessionStorage.setItem('referrerAllGames', '1');
                     });
+
+                    // --- Tooltip event listeners ---
+                    div.addEventListener('mouseenter', (e) => {
+                        showTooltipForItem(div);
+                    });
+                    div.addEventListener('mouseleave', (e) => {
+                        removeTooltip();
+                    });
+
                     container.appendChild(div);
                 });
             })
@@ -252,6 +289,100 @@
                 console.error('Error loading games.json:', err);
                 document.getElementById('gameGrid').textContent = "Échec du chargement des données de jeu.";
             });
+    </script>
+    <script>
+    // --- Tooltip Functions (adapted from main.js) ---
+    function summarizeControls(controls) {
+        if (!controls || !Array.isArray(controls)) return '';
+        const joystickLines = controls.filter(line => String(line).trim().startsWith('🕹️'));
+        if (joystickLines.length >= 2) return '🕹️🕹️';
+        let summary = '';
+        for (let line of controls) {
+            line = String(line).trim();
+            if (!line) continue;
+            let first = line.split(' ')[0];
+            if ([
+                '1️⃣','2️⃣','3️⃣','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣','9️⃣','0️⃣'
+            ].includes(first)) {
+                first = '🔴';
+            }
+            summary += first + ' ';
+        }
+        return summary.trim();
+    }
+
+    function showTooltipForItem(item) {
+        removeTooltip(); // Clear any existing tooltip
+        if (!item) return;
+        let game = item._gameData;
+        if (!game) return;
+        const tooltip = document.createElement('div');
+        tooltip.id = 'game-meta-tooltip';
+        tooltip.className = 'game-meta-tooltip';
+        const fields = [
+            { label: 'Développeur', key: 'developer' },
+            { label: 'Année', key: 'year' },
+            { label: 'Système', key: 'system' },
+            { label: 'Genre', key: 'genre' },
+            { label: 'Recommandé par', key: 'recommended' },
+            { label: 'Ajouté', key: 'added' }
+        ];
+        let hasData = false;
+        const table = document.createElement('table');
+        table.className = 'game-meta-table';
+        fields.forEach(field => {
+            if (game[field.key]) {
+                hasData = true;
+                const row = document.createElement('tr');
+                const labelCell = document.createElement('td');
+                labelCell.innerHTML = `<strong>${field.label}:</strong>`;
+                labelCell.className = 'meta-label';
+                const valueCell = document.createElement('td');
+                valueCell.textContent = game[field.key];
+                valueCell.className = 'meta-value';
+                row.appendChild(labelCell);
+                row.appendChild(valueCell);
+                table.appendChild(row);
+            }
+        });
+        if (game.controls && summarizeControls(game.controls)) {
+            hasData = true;
+            const row = document.createElement('tr');
+            const labelCell = document.createElement('td');
+            labelCell.innerHTML = `<strong>Contrôles:</strong>`;
+            labelCell.className = 'meta-label';
+            const valueCell = document.createElement('td');
+            valueCell.textContent = summarizeControls(game.controls);
+            valueCell.className = 'meta-value';
+            row.appendChild(labelCell);
+            row.appendChild(valueCell);
+            table.appendChild(row);
+        }
+        if (hasData) {
+            tooltip.appendChild(table);
+            document.body.appendChild(tooltip);
+            // Position tooltip near the item (fixed coordinates)
+            const rect = item.getBoundingClientRect();
+            const tooltipRect = tooltip.getBoundingClientRect();
+            let left = rect.right + 8;
+            let top = rect.top;
+            if (left + tooltipRect.width > window.innerWidth) {
+                left = rect.left - tooltipRect.width - 8;
+            }
+            if (top + tooltipRect.height > window.innerHeight) {
+                top = window.innerHeight - tooltipRect.height - 8;
+            }
+            tooltip.style.left = `${left}px`;
+            tooltip.style.top = `${top}px`;
+        }
+    }
+
+    function removeTooltip() {
+        const tooltip = document.getElementById('game-meta-tooltip');
+        if (tooltip) tooltip.remove();
+    }
+    // Optional: Remove tooltip on click anywhere
+    document.addEventListener('click', removeTooltip);
     </script>
 </body>
 </html>

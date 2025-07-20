@@ -121,6 +121,7 @@ find "$ROMS_DIR" -maxdepth 2 -type f -not -path "*/\.*" | while read -r rom_file
     added="" # Initialize added field
     hide="yes" # Default to hiding games even with no metadata
     disable_score="false" # Default to false
+    to_start="" # Initialize to_start field
 
     # Check if there's a corresponding game directory with metadata
     game_dir="$GAMES_DIR/$game_id/"
@@ -140,6 +141,7 @@ find "$ROMS_DIR" -maxdepth 2 -type f -not -path "*/\.*" | while read -r rom_file
             added=$(echo "$metadata_json" | jq -r '.added // ""') # Extract added field
             hide=$(echo "$metadata_json" | jq -r '.hide // ""') # Use metadata hide value if present
             disable_score=$(echo "$metadata_json" | jq -r '.disable_score // false') # Extract disable_score, default false
+            to_start=$(echo "$metadata_json" | jq -r '.to_start // ""') # Extract to_start field
             # Extract controls as JSON array if present
             controls_json=$(echo "$metadata_json" | jq -c '.controls // null')
         else
@@ -191,7 +193,8 @@ find "$ROMS_DIR" -maxdepth 2 -type f -not -path "*/\.*" | while read -r rom_file
               --arg saveState "${save_state:-}" \
               --argjson disable_score "$disable_score" \
               --argjson controls "$controls_json" \
-              '{id: $id, title: $title, developer: $developer, year: $year, genre: $genre, recommended: $recommended, added: $added, hide: $hide, coverArt: $coverArt, pageUrl: $pageUrl, core: $core, romPath: $romPath, saveState: $saveState, disable_score: $disable_score, controls: $controls}')
+              --arg to_start "$to_start" \
+              '{id: $id, title: $title, developer: $developer, year: $year, genre: $genre, recommended: $recommended, added: $added, hide: $hide, coverArt: $coverArt, pageUrl: $pageUrl, core: $core, romPath: $romPath, saveState: $saveState, disable_score: $disable_score, controls: $controls, to_start: $to_start}')
 
     # --- Check if Featured / Add to List ---
     if [ "$game_id" = "$FEATURED_GAME_ID" ]; then

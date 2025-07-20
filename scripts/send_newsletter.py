@@ -320,7 +320,8 @@ Bonne semaine ! ☀️
         print("📤 Sending email...")
         success = self.send_email(content)
         if success:
-            print("🎉 Newsletter sent successfully!")
+            if not self.dry_run:
+                print("🎉 Newsletter sent successfully!")
         else:
             print("💥 Failed to send newsletter")
             sys.exit(1)
@@ -347,6 +348,30 @@ def main():
     # Interactive Vim editing if no custom message is provided
     custom_message = args.custom_message
     if custom_message is None:
+        # Step 1: Show game-of-the-week and metadata.yaml content, ask for confirmation
+        game_id = None
+        meta = None
+        try:
+            with open('game-of-the-week', 'r') as f:
+                game_id = f.read().strip()
+        except Exception as e:
+            print(f"Erreur lors de la lecture de game-of-the-week: {e}")
+            sys.exit(1)
+        meta_path = f'public/games/{game_id}/metadata.yaml'
+        try:
+            with open(meta_path, 'r') as f:
+                meta_content = f.read()
+        except Exception as e:
+            print(f"Erreur lors de la lecture de {meta_path}: {e}")
+            sys.exit(1)
+        print("\n=== Confirmation du jeu de la semaine ===")
+        print(f"game-of-the-week: {game_id}")
+        print(f"Contenu de {meta_path} :\n{'-'*40}\n{meta_content}\n{'-'*40}")
+        confirm = input("Est-ce le bon jeu et la bonne fiche metadata ? [y/N]: ").strip().lower()
+        if confirm not in ('o', 'y', 'yes'):
+            print("Abandon. Aucun message envoyé.")
+            sys.exit(0)
+        # Step 2: Open Vim for custom message
         print("No custom message provided. Opening Vim for you to type your introduction message. Save and quit to continue...")
         import tempfile, os
         comment_line = "Cette semaine, Plinko a choisi\n"

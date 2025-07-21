@@ -2,6 +2,12 @@ title: Out Run
 developer: Sega
 year: 1986
 genre: Driving
+controls:
+  - 🕹️ Diriger
+  - 1️⃣  Accélérer
+  - 2️⃣  Freiner
+  - 3️⃣ Changer vitesse
+to_start: Insert Coin -> Start
 #recommended: 
 #added: 
 hide: yes

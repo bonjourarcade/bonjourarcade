@@ -8,7 +8,7 @@ try:
 except ImportError:
     use_tqdm = False
 
-MAX_SIZE = 1 * 1024 * 1024  # 1MB in bytes
+MAX_SIZE = 500 * 1024  # 500KB in bytes
 TARGET_WIDTH = 800  # fallback width for resizing if needed
 
 
@@ -16,7 +16,7 @@ def shrink_png(filepath):
     """Shrink PNG file to be under 1MB, overwriting the original."""
     orig_size = os.path.getsize(filepath)
     if orig_size <= MAX_SIZE:
-        print(f"OK: {filepath} is already under 1MB ({orig_size // 1024} KB)")
+        print(f"OK: {filepath} is already under 500KB ({orig_size // 1024} KB)")
         return
 
     print(f"Shrinking: {filepath} ({orig_size // 1024} KB)")
@@ -38,7 +38,7 @@ def shrink_png(filepath):
             print(f"  -> Resized to {width}x{height}, {new_size // 1024} KB")
             img = img_resized
         if new_size > MAX_SIZE:
-            print(f"  !! Could not shrink {filepath} below 1MB (final size: {new_size // 1024} KB)")
+            print(f"  !! Could not shrink {filepath} below 500KB (final size: {new_size // 1024} KB)")
         else:
             print(f"  -> Final size: {new_size // 1024} KB")
 

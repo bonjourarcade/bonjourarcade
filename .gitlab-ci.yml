@@ -11,6 +11,8 @@ pages:
     - python3 -m venv /tmp/yq-env                      # Create a virtual environment
     - . /tmp/yq-env/bin/activate                       # Activate the virtual environment
     - pip3 install yq                                  # Install the Python-based yq
+    - pip3 install Pillow                              # Install dependencies for PNG shrinking
+    - python3 scripts/shrink_large_pngs.py             # Shrink large PNGs before deploy
   script:
     - bash scripts/generate_gamelist.sh
     - cp plinko-gamelist.txt public/plinko/gamelist.txt

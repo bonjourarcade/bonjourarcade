@@ -1,14 +1,3 @@
-- The Simpsons (2players)
-- VS Castlevania
-- Pulstar
-- Botanic
-- Congo Bongo
-- Motos
-- Rally-X
-- Fast Lane
-- Xenocrisis
-- Black Belt SMS
-
 # Note sure about these
 19XX
 Air Duel (is it too boring?)

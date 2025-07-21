@@ -346,30 +346,35 @@
                 // Step 9: Fetch Controls JSON based on Core
                 const coreName = window.EJS_core;
                 const controlsJsonPath = `/config/controls_${coreName}.json`; // Path to control JSON file
-                console.log(`Attempting to fetch controls: ${controlsJsonPath}`);
-                try {
-                    const controlsResponse = await fetch(controlsJsonPath);
-                    if (!controlsResponse.ok) {
-                         // Handle file not found gracefully - use defaults
-                         if (controlsResponse.status === 404) {
-                              console.warn(`Controls file not found: ${controlsJsonPath}. Using EmulatorJS default controls.`);
-                              window.EJS_defaultControls = { "0":{}, "1":{}, "2":{}, "3":{} }; // Use default empty controls (valid JSON)
-                         } else {
-                              // Throw error for other HTTP issues
-                              throw new Error(`Failed to fetch controls file (Status: ${controlsResponse.status})`);
-                         }
-                    } else {
-                        // Parse JSON and assign directly
-                        const controlsData = await controlsResponse.json();
-                        if (!controlsData) throw new Error(`Controls file '${controlsJsonPath}' loaded but contained invalid JSON.`);
-                        window.EJS_defaultControls = controlsData; // Assign fetched object
-                        console.log(`Controls assigned successfully for core: ${coreName}`);
-                    }
-                } catch (controlsError) {
-                     // Handle fetch/parse errors specifically for controls JSON
-                     console.error(`Error loading or parsing controls from ${controlsJsonPath}:`, controlsError);
-                     console.warn("Using EmulatorJS default controls due to controls loading error.");
-                     window.EJS_defaultControls = { "0":{}, "1":{}, "2":{}, "3":{} }; // Fallback to default empty controls
+                // Only fetch global controls if not set by per-game config
+                if (typeof window.EJS_defaultControls === 'undefined') {
+                  console.log(`Attempting to fetch controls: ${controlsJsonPath}`);
+                  try {
+                      const controlsResponse = await fetch(controlsJsonPath);
+                      if (!controlsResponse.ok) {
+                           // Handle file not found gracefully - use defaults
+                           if (controlsResponse.status === 404) {
+                                console.warn(`Controls file not found: ${controlsJsonPath}. Using EmulatorJS default controls.`);
+                                window.EJS_defaultControls = { "0":{}, "1":{}, "2":{}, "3":{} }; // Use default empty controls (valid JSON)
+                           } else {
+                                // Throw error for other HTTP issues
+                                throw new Error(`Failed to fetch controls file (Status: ${controlsResponse.status})`);
+                           }
+                      } else {
+                          // Parse JSON and assign directly
+                          const controlsData = await controlsResponse.json();
+                          if (!controlsData) throw new Error(`Controls file '${controlsJsonPath}' loaded but contained invalid JSON.`);
+                          window.EJS_defaultControls = controlsData; // Assign fetched object
+                          console.log(`Controls assigned successfully for core: ${coreName}`);
+                      }
+                  } catch (controlsError) {
+                       // Handle fetch/parse errors specifically for controls JSON
+                       console.error(`Error loading or parsing controls from ${controlsJsonPath}:`, controlsError);
+                       console.warn("Using EmulatorJS default controls due to controls loading error.");
+                       window.EJS_defaultControls = { "0":{}, "1":{}, "2":{}, "3":{} }; // Fallback to default empty controls
+                  }
+                } else {
+                  console.log('Using EJS_defaultControls from per-game config.json');
                 }
 
                 // Step 10: Load the main EmulatorJS engine (loader.js)

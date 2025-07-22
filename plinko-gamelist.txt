@@ -4,7 +4,6 @@ Alien Soldier
 Alien Syndrome
 Armed Police Batrider
 Asteroids Deluxe
-Astérix
 Atomic Runner
 B-Wings #Famicom
 Ballon Fight
@@ -13,21 +12,22 @@ Battle Chopper
 Battle City
 Battle Garegga
 Battletoads
-Biker Mice from Mars
 Bird Week
+Black Belt
 Blades of Steel
 Blazing Star
+Botanic
 Boogie Wings
 Bubble Bobble
+Boxy Boy
 Burgertime
 Cardinal Sins
 Castle of Illusion Starring Mickey Mouse
-Castlevania
+Castlevania (VS)
 Centipede
 Choplifter # downloaded, chplftb (bootleg)
 Circus Charlie
 Combat School
-Comix Zone
 Contra Hard Corps
 Cosmic Cop
 Darius Gaiden #Saturn
@@ -36,16 +36,17 @@ DoDonPachi Dai-Fukkatsu
 Dogyuun
 Dolphin #Atari 2600
 Donkey Kong
-Doom
 Double Dragon II: The Revenge # Arcade
 Dragon Breed
 ESP Ra. De.
 Elevator Action Returns
+Enduro Racer
 Espgaluda
 Espgaluda II
 Exed Exes
 Fantasy
 Fantasy Zone II - The Tears of Opa-Opa
+Fast Lane
 Fever SOS
 Fire Shark #Same Same Same
 Firepower 2000
@@ -55,14 +56,12 @@ Frogger
 Frontier Force
 Gain Ground
 Galaga '88
-Galaxy Force 2
 Gauntlet
 Gekirindan
 GG Aleste II
 GG Aleste 3
 Ghouls n Ghosts'
 Giga Wing
-Golden Axe
 Golden Axe II: Revenge of Death Adder
 Gradius
 Gradius 2
@@ -84,7 +83,6 @@ Karateka
 Ketsui
 Kid Niki Radical Ninja
 Kingdom Grandprix
-Kirby's Adventure
 Kung Fu #NES
 League Bowling
 Legend of Hero Tonma
@@ -123,11 +121,13 @@ Parodius Da!
 Pengo
 Pinball #NES
 Pitfall II
+Pole Position
 Power Strike II
 Predator II
 Progear
 Puzzle Bobble
 Puzzle Uo Poko
+Puzznic
 Pyoro 64
 Q*Bert
 QIX #bright NES hack
@@ -156,7 +156,7 @@ Sonic The Hedgehog 2
 SonSon
 Sorcer Striker
 Space Harrier
-Space Invader
+Space Invaders
 Spelunker
 Stampede #Atari 2600
 Star Wars Arcade
@@ -173,6 +173,7 @@ Tapper #Root Beer
 Tempest
 Tetris The Absolute The Grand Master 2 Plus
 The Legend of Kage #Already supported
+The Simpsons
 Thunder Blade
 Thunder Force II
 Thunder Force III
@@ -185,12 +186,10 @@ Twin Cobra
 Twin Cobra II
 Ultimate Mortal Kombat 3
 Undeadline #already downloaded!
-Uniracers
 Vimana
 Vulgus
 Warpman
 Wild Guns
-Windjammers
 Wonder Boy
 Wonder Boy III Monster Lair
 World of Illusion

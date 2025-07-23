@@ -9,3 +9,4 @@ controls:
 to_start: Insert Coin -> Start
 recommended: David Gagné
 added: 2025-07-21
+disable_score: true

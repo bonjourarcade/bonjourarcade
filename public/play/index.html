@@ -423,6 +423,36 @@
         });
     </script>
     <script src="../assets/js/screensaver.js"></script>
+    <script>
+    // --- Custom screensaver cycling for play/index.html only ---
+    (function() {
+      // Wait for screensaver.js to be loaded and DOM ready
+      function cycleScreensaver() {
+        let cycleActive = false;
+        function toggleScreensaver() {
+          if (cycleActive) {
+            if (window.screensaverActive && typeof stopScreensaver === 'function') {
+              stopScreensaver();
+            }
+          } else {
+            if (!window.screensaverActive && typeof startScreensaver === 'function') {
+              startScreensaver();
+            }
+          }
+          cycleActive = !cycleActive;
+        }
+        // Start with the current state
+        setInterval(toggleScreensaver, 10 * 60 * 1000); // 10 minutes
+      }
+      if (document.readyState === 'complete' || document.readyState === 'interactive') {
+        setTimeout(cycleScreensaver, 1000);
+      } else {
+        document.addEventListener('DOMContentLoaded', function() {
+          setTimeout(cycleScreensaver, 1000);
+        });
+      }
+    })();
+    </script>
     <div id="screensaver-overlay" class="screensaver-overlay">
         <img id="screensaver-image" class="screensaver-image" src="" alt="Screensaver Image">
         <img id="screensaver-logo" class="screensaver-logo" src="" alt="BonjourArcade Logo">

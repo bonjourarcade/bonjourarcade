@@ -97,5 +97,46 @@
         
         <button id="randomize-button" onclick="randomizeBoard();">Randomize Games</button>
         <a href="gamelist.txt" target="_blank" rel="noopener" id="plinko-gamelist-btn">View Plinko Game List</a>
+        <div id="seed-nav-buttons" style="position:fixed;top:80px;left:24px;z-index:2100;display:flex;gap:8px;"></div>
+        <button id="menu-btn" style="position:fixed;top:24px;left:50%;transform:translateX(-50%);z-index:2100;background:#333;color:#fff;font-size:1.1em;padding:10px 22px;border-radius:8px;border:none;box-shadow:0 2px 8px #0003;cursor:pointer;">Menu</button>
+        <script>
+        function isIntegerSeed(seed) {
+            return /^\d+$/.test(seed);
+        }
+        function getSeedFromURL() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('seed');
+        }
+        function setSeedInURL(newSeed) {
+            const urlParams = new URLSearchParams(window.location.search);
+            urlParams.set('seed', newSeed);
+            window.location.search = urlParams.toString();
+        }
+        function setupSeedNavButtons() {
+            const seed = getSeedFromURL();
+            const navDiv = document.getElementById('seed-nav-buttons');
+            navDiv.innerHTML = '';
+            if (seed && isIntegerSeed(seed)) {
+                const prevBtn = document.createElement('button');
+                prevBtn.textContent = 'Previous Seed';
+                prevBtn.style.cssText = 'padding:8px 14px;font-size:1em;border-radius:6px;border:none;background:#444;color:#fff;cursor:pointer;';
+                prevBtn.onclick = function() {
+                    setSeedInURL((parseInt(seed, 10) - 1).toString());
+                };
+                navDiv.appendChild(prevBtn);
+                const nextBtn = document.createElement('button');
+                nextBtn.textContent = 'Next Seed';
+                nextBtn.style.cssText = 'padding:8px 14px;font-size:1em;border-radius:6px;border:none;background:#444;color:#fff;cursor:pointer;';
+                nextBtn.onclick = function() {
+                    setSeedInURL((parseInt(seed, 10) + 1).toString());
+                };
+                navDiv.appendChild(nextBtn);
+            }
+        }
+        setupSeedNavButtons();
+        document.getElementById('menu-btn').onclick = function() {
+            window.location.href = '/';
+        };
+        </script>
     </body>
 </html>

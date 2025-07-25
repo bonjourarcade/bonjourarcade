@@ -1,9 +1,9 @@
 {
     "0": {
-        "0": {"value": "x", "value2": "BUTTON_1"},
-        "8": {"value": "c", "value2": "BUTTON_2"},
-        "9": {"value": "v", "value2": "BUTTON_3"},
-        "1": {"value": "z", "value2": "BUTTON_4"},
+        "0": {"value": "z", "value2": "BUTTON_3"},
+        "8": {"value": "x", "value2": "RIGHT_TOP_SHOULDER"},
+        "9": {"value": "v", "value2": "BUTTON_4"},
+        "1": {"value": "c", "value2": "BUTTON_4"},
         "2": {"value": "space", "value2": "SELECT"},
         "3": {"value": "enter", "value2": "START"},
         "4": {"value": "up arrow", "value2": "DPAD_UP"},
@@ -27,7 +27,7 @@
         "24": {"value": "1"},
         "25": {"value": "2"},
         "26": {"value": "3"},
-        "27": {"value": "0"},
+        "27": {"value": "0", "value2": "LEFT_TOP_SHOULDER"},
         "28": {"value": ""},
         "29": {"value": "subtract"}
     },

@@ -745,6 +745,18 @@ function draw() {
     // Only update engine if a particle has been dropped
     if (particleDropped) {
         Engine.update(engine);
+        // After physics update, round all particle positions and velocities
+        for (var i = 0; i < particles.length; i++) {
+            var body = particles[i].body;
+            if (body) {
+                body.position.x = roundTo(body.position.x);
+                body.position.y = roundTo(body.position.y);
+                body.velocity.x = roundTo(body.velocity.x);
+                body.velocity.y = roundTo(body.velocity.y);
+                body.angle = roundTo(body.angle);
+                body.angularVelocity = roundTo(body.angularVelocity);
+            }
+        }
     }
 
     //spawnParticles(); // This function is no longer needed
@@ -950,4 +962,8 @@ function windowResized() {
             randomizeButton.style.display = 'block'; // Show randomize button on resize
         }
     }
+}
+
+function roundTo(val, decimals = 6) {
+  return Math.round(val * 10 ** decimals) / 10 ** decimals;
 }

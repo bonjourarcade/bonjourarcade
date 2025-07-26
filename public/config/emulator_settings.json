@@ -1,6 +1,5 @@
 {
   "EJS_defaultOptions": {
-    "save-state-location": "browser",
     "mame2003-plus_neogeo_bios": "unibios40",
     "mame2003-plus_skip_disclaimer": "enabled",
     "mame2003-plus_skip_warnings": "enabled"

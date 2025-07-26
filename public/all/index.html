@@ -119,6 +119,26 @@
             background-color: #664d00;
             color: #f4f4f4;
         }
+        .game-new {
+            border: 2.5px solid #ff9800 !important;
+            box-shadow: 0 0 0 3px #fff6, 0 2px 8px #ff980055;
+            position: relative;
+        }
+        .new-badge {
+            position: absolute;
+            top: 7px;
+            left: 7px;
+            background: linear-gradient(90deg, #ff9800, #ffc107);
+            color: #fff;
+            font-weight: bold;
+            font-size: 0.82em;
+            padding: 2px 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px #ff980055;
+            z-index: 2;
+            letter-spacing: 1px;
+            pointer-events: none;
+        }
     </style>
     <style>
     .game-meta-tooltip {
@@ -268,9 +288,17 @@
                         }
                     }
 
+                    // Add special border and badge if new_flag is true
+                    if (game.new_flag === 'true') {
+                        div.classList.add('game-new');
+                    }
+
                     div.innerHTML = `
                         <a href="${game.pageUrl}" class="game-link">
-                            <div class="game-cover"><img src="${coverSrc}" alt="${game.title}"></div>
+                            <div class="game-cover" style="position:relative;">
+                                ${game.new_flag === 'true' ? '<span class="new-badge">NOUVEAU</span>' : ''}
+                                <img src="${coverSrc}" alt="${game.title}">
+                            </div>
                             <div class="game-title">${game.title}</div>
                         </a>
                     `;

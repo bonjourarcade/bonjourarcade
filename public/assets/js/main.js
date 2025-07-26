@@ -304,6 +304,7 @@ function populateFeaturedGame(game) {
     const gameLink = document.createElement('a');
     // Use pageUrl from JSON (should point to /play?game=...)
     gameLink.href = game.pageUrl || ('/play?game=' + game.id);
+    gameLink.style.position = 'relative';
 
     // Featured Image (uses game.coverArt only now)
     const img = document.createElement('img');
@@ -312,6 +313,19 @@ function populateFeaturedGame(game) {
     img.src = coverSrc;
     img.alt = game.title || 'Featured Game';
     gameLink.appendChild(img);
+
+    // Add new badge if new_flag is true
+    if (game.new_flag === 'true') {
+        const badge = document.createElement('span');
+        badge.className = 'new-badge';
+        badge.textContent = 'NOUVEAU';
+        badge.style.position = 'absolute';
+        badge.style.top = '7px';
+        badge.style.left = '7px';
+        gameLink.classList.add('featured-game-new');
+        gameLink.appendChild(badge);
+    }
+
     contentContainer.appendChild(gameLink); // Add linked game image
 
     // Add metadata fields if present (as a table)
@@ -488,9 +502,15 @@ function populatePreviousGames(games) {
             gameItem.classList.add('rom-missing');
         }
 
+        // Add new border if new_flag is true
+        if (game.new_flag === 'true') {
+            gameItem.classList.add('game-new');
+        }
+
         const link = document.createElement('a');
         // Use pageUrl from JSON (should point to /play.html?game=...)
         link.href = game.pageUrl || '#';
+        link.style.position = 'relative';
 
         const img = document.createElement('img');
         let coverSrc = game.coverArt || '/assets/images/placeholder_thumb.png';
@@ -506,6 +526,17 @@ function populatePreviousGames(games) {
         img.src = coverSrc;
         img.alt = game.title || 'Game Cover';
         img.loading = 'lazy'; // Lazy load images
+
+        // Add new badge if new_flag is true
+        if (game.new_flag === 'true') {
+            const badge = document.createElement('span');
+            badge.className = 'new-badge';
+            badge.textContent = 'NOUVEAU';
+            badge.style.position = 'absolute';
+            badge.style.top = '7px';
+            badge.style.left = '7px';
+            link.appendChild(badge);
+        }
 
         const title = document.createElement('p');
         title.className = 'game-title';

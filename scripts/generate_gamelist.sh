@@ -144,11 +144,34 @@ find "$ROMS_DIR" -maxdepth 2 -type f -not -path "*/\.*" | while read -r rom_file
             to_start=$(echo "$metadata_json" | jq -r '.to_start // ""') # Extract to_start field
             # Extract controls as JSON array if present
             controls_json=$(echo "$metadata_json" | jq -c '.controls // null')
+            new_flag=$(echo "$metadata_json" | jq -r '.new // empty')
         else
             echo "  - metadata.yaml found but failed to parse. Using default title ($game_id)."
+            new_flag=""
         fi
     else
         echo "  - No metadata.yaml found. Using default title ($game_id) and hiding this game (hide:yes)."
+        new_flag=""
+    fi
+
+    # Check if the game should be marked as new by date
+    is_new_by_date=""
+    if [ -n "$added" ]; then
+      # Convert added date to seconds since epoch
+      added_epoch=$(date -j -f "%Y-%m-%d" "$added" +%s 2>/dev/null || date -d "$added" +%s 2>/dev/null)
+      now_epoch=$(date +%s)
+      if [ -n "$added_epoch" ]; then
+        diff_days=$(( (now_epoch - added_epoch) / 86400 ))
+        if [ "$diff_days" -lt 14 ]; then
+          is_new_by_date="true"
+        fi
+      fi
+    fi
+    # Determine final new_flag
+    if [ "$new_flag" = "true" ] || [ "$is_new_by_date" = "true" ]; then
+      new_flag="true"
+    else
+      new_flag=""
     fi
 
     # --- Determine Cover Art ---
@@ -194,7 +217,8 @@ find "$ROMS_DIR" -maxdepth 2 -type f -not -path "*/\.*" | while read -r rom_file
               --argjson disable_score "$disable_score" \
               --argjson controls "$controls_json" \
               --arg to_start "$to_start" \
-              '{id: $id, title: $title, developer: $developer, year: $year, genre: $genre, recommended: $recommended, added: $added, hide: $hide, coverArt: $coverArt, pageUrl: $pageUrl, core: $core, romPath: $romPath, saveState: $saveState, disable_score: $disable_score, controls: $controls, to_start: $to_start}')
+              --arg new_flag "$new_flag" \
+              '{id: $id, title: $title, developer: $developer, year: $year, genre: $genre, recommended: $recommended, added: $added, hide: $hide, coverArt: $coverArt, pageUrl: $pageUrl, core: $core, romPath: $romPath, saveState: $saveState, disable_score: $disable_score, controls: $controls, to_start: $to_start, new_flag: $new_flag}')
 
     # --- Check if Featured / Add to List ---
     if [ "$game_id" = "$FEATURED_GAME_ID" ]; then

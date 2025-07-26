@@ -1,0 +1,13 @@
+title: Adventures of Lolo 2
+developer: HAL Laboratory
+year: 1990
+genre: Puzzle, Action
+#controls:
+#  - 🕹️ Déplacer
+#  - 1️⃣  Tirer
+#  - 2️⃣  Bombe
+#to_start: Insert Coin -> Start
+#recommended: 
+#added: 
+disable_score: true
+hide: yes

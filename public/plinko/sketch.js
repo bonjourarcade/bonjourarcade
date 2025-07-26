@@ -248,7 +248,31 @@ function displaySeedInfo() {
             `;
             document.body.appendChild(seedInfo);
         }
-        seedInfo.textContent = seed;
+        // Show seed
+        let infoText = seed;
+        // If seed matches yyyyww, show the Monday date
+        const match = seed.match(/^(\d{4})(\d{2})$/);
+        if (match) {
+            const year = parseInt(match[1], 10);
+            const week = parseInt(match[2], 10);
+            // Calculate Monday of ISO week
+            function getMondayOfISOWeek(week, year) {
+                const simple = new Date(year, 0, 1 + (week - 1) * 7);
+                const dow = simple.getDay();
+                const ISOweekStart = simple;
+                if (dow <= 4)
+                    ISOweekStart.setDate(simple.getDate() - simple.getDay() + 1);
+                else
+                    ISOweekStart.setDate(simple.getDate() + 8 - simple.getDay());
+                return ISOweekStart;
+            }
+            const monday = getMondayOfISOWeek(week, year);
+            const yyyy = monday.getFullYear();
+            const mm = String(monday.getMonth() + 1).padStart(2, '0');
+            const dd = String(monday.getDate()).padStart(2, '0');
+            infoText += `\n${yyyy}-${mm}-${dd} (Monday)`;
+        }
+        seedInfo.textContent = infoText;
     } else if (seedInfo) {
         seedInfo.remove();
     }

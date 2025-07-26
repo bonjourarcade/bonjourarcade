@@ -242,7 +242,7 @@
             .then(res => res.json())
             .then(data => {
                 // Combine gameOfTheWeek and previousGames
-                let gamesData = [];
+                gamesData = [];
                 if (data.gameOfTheWeek) gamesData.push(data.gameOfTheWeek);
                 if (Array.isArray(data.previousGames)) gamesData = gamesData.concat(data.previousGames);
 

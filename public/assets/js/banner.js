@@ -83,14 +83,14 @@
   }
 
   // Firefox warning banner
-  const isFirefox = navigator.userAgent.toLowerCase().includes('firefox');
-  if (isFirefox) {
-    insertBanner(
-      'bonjourarcade-firefox-banner',
-      "Remarque : Pour une expérience de jeu optimale, nous vous recommandons d'utiliser un navigateur basé sur Chromium comme Google Chrome, Safari, Microsoft Edge ou Brave. Certains jeux peuvent ne pas fonctionner de manière optimale sur Firefox.",
-      'background: #ff9800; color: #222; font-size: 1em; letter-spacing: normal; font-weight: bold; pointer-events: none;'
-    );
-  }
+  // const isFirefox = navigator.userAgent.toLowerCase().includes('firefox');
+  // if (isFirefox) {
+  //   insertBanner(
+  //     'bonjourarcade-firefox-banner',
+  //     "Remarque : Pour une expérience de jeu optimale, nous vous recommandons d'utiliser un navigateur basé sur Chromium comme Google Chrome, Safari, Microsoft Edge ou Brave. Certains jeux peuvent ne pas fonctionner de manière optimale sur Firefox.",
+  //     'background: #ff9800; color: #222; font-size: 1em; letter-spacing: normal; font-weight: bold; pointer-events: none;'
+  //   );
+  // }
 
   // Update on resize
   window.addEventListener('resize', function() {

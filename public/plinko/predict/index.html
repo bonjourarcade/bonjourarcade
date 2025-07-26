@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=768, initial-scale=1.0">
+  <title>Plinko Game Predictions</title>
+  <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+  <style>
+    body {
+      font-family: 'Open Sans', Arial, sans-serif;
+      background: #181c2a;
+      color: #fff;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 500px;
+      margin: 40px auto;
+      background: #23284a;
+      border-radius: 12px;
+      box-shadow: 0 4px 24px #0008;
+      padding: 32px 24px 24px 24px;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 24px;
+      font-size: 2em;
+      color: #6cf;
+    }
+    label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 8px;
+    }
+    input[type="week"] {
+      font-size: 1.1em;
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: none;
+      margin-bottom: 16px;
+      background: #181c2a;
+      color: #fff;
+    }
+    .result {
+      margin: 18px 0 24px 0;
+      padding: 16px;
+      background: #1a1e33;
+      border-radius: 8px;
+      font-size: 1.1em;
+      min-height: 48px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 24px;
+      background: #23284a;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    th, td {
+      padding: 10px 8px;
+      text-align: left;
+    }
+    th {
+      background: #2e345c;
+      color: #6cf;
+    }
+    tr:nth-child(even) {
+      background: #1a1e33;
+    }
+    .not-found {
+      color: #f88;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Plinko Game Predictions</h1>
+    <label for="week-picker">Select a week:</label>
+    <input type="date" id="week-picker" />
+    <div class="result" id="prediction-result">Select a week to see the prediction.</div>
+    <h2>Upcoming Weeks</h2>
+    <table id="future-table">
+      <thead>
+        <tr><th>Seed (yyyyww)</th><th>Game</th></tr>
+      </thead>
+      <tbody id="future-tbody">
+        <tr><td colspan="2">Loading...</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <script>
+    // Helper: get yyyyww from date input (YYYY-MM-DD)
+    function dateToSeed(dateStr) {
+      if (!dateStr) return null;
+      const date = new Date(dateStr);
+      // ISO week calculation
+      const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+      const dayNum = d.getUTCDay() || 7;
+      d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+      const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+      const weekNum = Math.ceil((((d - yearStart) / 86400000) + 1)/7);
+      return d.getUTCFullYear() + String(weekNum).padStart(2, '0');
+    }
+
+    // Fetch and parse YAML
+    let predictions = {};
+    fetch('predictions.yaml')
+      .then(r => r.text())
+      .then(yamlText => {
+        predictions = jsyaml.load(yamlText) || {};
+        renderFutureTable();
+      });
+
+    // Handle date picker
+    const weekPicker = document.getElementById('week-picker');
+    const resultDiv = document.getElementById('prediction-result');
+    weekPicker.addEventListener('input', function() {
+      const seed = dateToSeed(this.value);
+      if (!seed) {
+        resultDiv.textContent = 'Select a week to see the prediction.';
+        return;
+      }
+      if (predictions[seed]) {
+        resultDiv.innerHTML = `<b>Seed:</b> ${seed}<br><b>Game:</b> ${predictions[seed]}`;
+      } else {
+        resultDiv.innerHTML = `<b>Seed:</b> ${seed}<br><span class="not-found">No game prediction for this week.</span>`;
+        // Add the button
+        const btn = document.createElement('button');
+        btn.textContent = 'Check yourself';
+        btn.style.marginTop = '12px';
+        btn.style.padding = '8px 16px';
+        btn.style.fontSize = '1em';
+        btn.style.borderRadius = '6px';
+        btn.style.border = 'none';
+        btn.style.background = '#6cf';
+        btn.style.color = '#23284a';
+        btn.style.fontWeight = 'bold';
+        btn.style.cursor = 'pointer';
+        btn.addEventListener('click', function() {
+          window.location.href = `/plinko?seed=${seed}`;
+        });
+        resultDiv.appendChild(document.createElement('br'));
+        resultDiv.appendChild(btn);
+      }
+    });
+
+    // Render future table
+    function renderFutureTable() {
+      const tbody = document.getElementById('future-tbody');
+      tbody.innerHTML = '';
+      // Sort seeds ascending
+      const seeds = Object.keys(predictions).sort();
+      if (seeds.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="2">No predictions found.</td></tr>';
+        return;
+      }
+      const now = new Date();
+      const currentSeed = getCurrentSeed(now);
+      for (const seed of seeds) {
+        // Only show current or future weeks
+        if (seed >= currentSeed) {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${seed}</td><td>${predictions[seed]}</td>`;
+          tbody.appendChild(tr);
+        }
+      }
+    }
+    // Helper: get current yyyyww seed
+    function getCurrentSeed(date) {
+      // ISO week calculation
+      const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+      const dayNum = d.getUTCDay() || 7;
+      d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+      const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+      const weekNum = Math.ceil((((d - yearStart) / 86400000) + 1)/7);
+      return d.getUTCFullYear() + String(weekNum).padStart(2, '0');
+    }
+  </script>
+</body>
+</html> 

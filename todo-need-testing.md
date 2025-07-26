@@ -1,4 +1,7 @@
 Space Cadet?
+Revenge of the Gator
+Pokemon Pinball
+Pokemon Pinball Ruby & Sapphire
 
 # Note sure about these
 19XX

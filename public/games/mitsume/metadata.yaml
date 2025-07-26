@@ -1,0 +1,12 @@
+title: Mitsume Ga Tooru
+developer: Natsume
+year: 1991
+genre: Platform
+controls:
+  - 🕹️ Déplacer
+  - 1️⃣  Tirer
+  - 2️⃣  Sauter
+#to_start: Insert Coin -> Start
+#recommended: 
+added: 2025-07-26
+disable_score: true

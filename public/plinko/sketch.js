@@ -196,7 +196,7 @@ function setup() {
     
     // Initialize seed and seeded random
     currentSeed = getSeedFromURL();
-    seededRandom = createSeededRandom(currentSeed);
+    seededRandom = createSeededRandom(currentSeed || 'defaultseed');
     
     // Display the seed information
     displaySeedInfo();
@@ -226,8 +226,8 @@ function setup() {
  * Displays seed information on the page.
  */
 function displaySeedInfo() {
-    const urlParams = new URLSearchParams(window.location.search);
-    let seed = urlParams.get('seed');
+    // Always use getSeedFromURL to ensure a valid seed
+    let seed = getSeedFromURL();
     let seedInfo = document.getElementById('seed-info');
     if (seed) {
         if (!seedInfo) {

@@ -1,0 +1,13 @@
+title: Balloon Fight
+developer: Nintendo
+year: 1985
+genre: Action, Platform
+#controls:
+#  - 🕹️ Déplacer
+#  - 1️⃣  Tirer
+#  - 2️⃣  Bombe
+#to_start: Insert Coin -> Start
+#recommended: 
+#added: 
+disable_score: true
+hide: yes

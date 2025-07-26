@@ -1,0 +1,13 @@
+title: Cardinal Sins
+developer: 2004
+year: M-Kai
+genre: Shooter
+#controls:
+#  - 🕹️ Déplacer
+#  - 1️⃣  Tirer
+#  - 2️⃣  Bombe
+#to_start: Insert Coin -> Start
+#recommended: 
+#added: 
+disable_score: true
+hide: yes

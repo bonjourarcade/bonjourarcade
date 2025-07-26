@@ -1,0 +1,13 @@
+title: Dick Tracy
+developer: Realtime Associates
+year: 1990
+genre: Platform, Action
+controls:
+  - 🕹️ Déplacer
+  - 1️⃣  Tirer
+  - 2️⃣  Sauter
+#to_start: Insert Coin -> Start
+#recommended: 
+#added: 
+disable_score: true
+hide: yes

@@ -1,0 +1,13 @@
+title: Contra Hard Corps
+developer: Konami
+year: 1994
+genre: Run 'n gun
+#controls:
+#  - 🕹️ Déplacer
+#  - 1️⃣  Tirer
+#  - 2️⃣  Bombe
+#to_start: Insert Coin -> Start
+#recommended: 
+#added: 
+disable_score: true
+hide: yes

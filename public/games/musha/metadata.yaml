@@ -1,0 +1,13 @@
+title: M.U.S.H.A.
+developer: Compile
+year: 1990
+genre: Shooter
+#controls:
+#  - 🕹️ Déplacer
+#  - 1️⃣  Tirer
+#  - 2️⃣  Bombe
+#to_start: Insert Coin -> Start
+#recommended: 
+#added: 
+disable_score: true
+hide: yes

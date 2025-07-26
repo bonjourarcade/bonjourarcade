@@ -126,10 +126,10 @@
       if (predictions[seed]) {
         resultDiv.innerHTML = `<b>Seed:</b> ${seed}<br><b>Game:</b> ${predictions[seed]}`;
       } else {
-        resultDiv.innerHTML = `<b>Seed:</b> ${seed}<br><span class="not-found">No game prediction for this week.</span>`;
+        resultDiv.innerHTML = `<b>Seed:</b> ${seed}<br>`;
         // Add the button
         const btn = document.createElement('button');
-        btn.textContent = 'Check yourself';
+        btn.textContent = ' See for yourself!';
         btn.style.marginTop = '12px';
         btn.style.padding = '8px 16px';
         btn.style.fontSize = '1em';

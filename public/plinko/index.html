@@ -93,6 +93,7 @@
         <div id="game-container">
             <!-- The p5.js canvas will be created here -->
         </div>
+        <div id="next-seed-btn-container"></div>
         <h1 id="score">&nbsp;</h1>
         
         <button id="randomize-button" onclick="randomizeBoard();">Randomize Games</button>
@@ -111,6 +112,20 @@
             const urlParams = new URLSearchParams(window.location.search);
             urlParams.set('seed', newSeed);
             window.location.search = urlParams.toString();
+        }
+        function getCurrentSeed(date) {
+            // ISO week calculation
+            const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+            const dayNum = d.getUTCDay() || 7;
+            d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+            const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+            const weekNum = Math.ceil((((d - yearStart) / 86400000) + 1)/7);
+            return d.getUTCFullYear() + String(weekNum).padStart(2, '0');
+        }
+        function getNextSeed() {
+            const now = new Date();
+            now.setDate(now.getDate() + 7); // add 7 days for next week
+            return getCurrentSeed(now);
         }
         function setupSeedNavButtons() {
             const seed = getSeedFromURL();
@@ -137,6 +152,19 @@
         document.getElementById('menu-btn').onclick = function() {
             window.location.href = '/';
         };
+        // Add next seed button if no seed is specified
+        (function showNextSeedButtonIfNoSeed() {
+            const seed = getSeedFromURL();
+            if (!seed) {
+                const btn = document.createElement('button');
+                btn.textContent = 'Go to Next Seed';
+                btn.style.cssText = 'margin: 24px 0 0 0; font-size:1.1em; padding:12px 28px; border-radius:8px; border:none; background:#6cf; color:#23284a; font-weight:bold; cursor:pointer; display:block;';
+                btn.onclick = function() {
+                    window.location.href = '/plinko?seed=' + getNextSeed();
+                };
+                document.getElementById('next-seed-btn-container').appendChild(btn);
+            }
+        })();
         </script>
     </body>
 </html>

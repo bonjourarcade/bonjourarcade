@@ -1,6 +1,6 @@
-title: Castle of Illusion Starring Mickey Mouse
+title: The Disney Collection
 developer: Sega
-year: 1990
+year: 1996
 genre: Platform
 #controls:
 #  - 🕹️ Déplacer
@@ -11,6 +11,5 @@ genre: Platform
 #recommended: 
 
 disable_score: true
-hide: yes
 
 added: 2025-07-27

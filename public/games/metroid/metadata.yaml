@@ -1,14 +1,15 @@
-title: Blaster Master
-developer: Tokai Engineering, Sunsoft
-year: 1988
+title: Metroid
+developer: Nintendo R&D1, Intelligent Systems
+year: 1987
 genre: Shooter, Platform
 controls:
   - 🕹️ Déplacer
   - 1️⃣  Tirer
   - 2️⃣  Sauter
-  - Select: Sortir du véhicule
-to_start: Insert Coin -> Start
+
+#to_start: Insert Coin -> Start
 #recommended: 
+
 disable_score: true
 hide: yes
 

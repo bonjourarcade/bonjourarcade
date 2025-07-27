@@ -846,16 +846,3 @@ body.theme-dark #game-of-the-week.game-item--selected {
     position: relative;
     transition: box-shadow 0.2s, border 0.2s;
 }
-.featured-game-new .new-badge {
-    left: 0 !important;
-    right: auto !important;
-    min-width: 90px;
-    margin: 0 !important;
-    padding-left: 0.7em;
-    padding-right: 0.7em;
-}
-.featured-game-new img {
-    margin: 0 !important;
-    padding: 0 !important;
-    display: block;
-}

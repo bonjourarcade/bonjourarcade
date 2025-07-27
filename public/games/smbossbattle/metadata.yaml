@@ -1,0 +1,14 @@
+title: SmokeMonster's Boss Battle VGM
+developer: SmokeMonster (ft. barfood)
+year: 2021
+genre: Music player
+#controls:
+#  - 🕹️ Déplacer
+#  - 1️⃣  Tirer
+#  - 2️⃣  Bombe
+to_start: Insert Coin -> Start
+#recommended: 
+disable_score: true
+hide: yes
+
+added: 2025-07-26

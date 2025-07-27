@@ -1,14 +1,13 @@
-title: 
-developer: 
-year: 
-genre: 
+title: Lag Test
+developer: M2
+year: 2020
+genre: Service
 #controls:
 #  - 🕹️ Déplacer
 #  - 1️⃣  Tirer
 #  - 2️⃣  Bombe
-#to_start: Insert Coin -> Start
 #recommended: 
 disable_score: true
 hide: yes
 
-added: 
+added: 2025-07-26

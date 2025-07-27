@@ -1,5 +1,7 @@
 Space Cadet?
 Gun-Nac
+Name That Tune
+Quackshot!
 
 # Note sure about these
 19XX

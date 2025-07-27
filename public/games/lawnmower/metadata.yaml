@@ -1,0 +1,14 @@
+title: Lawn Mower
+developer: Shiru
+year: 2011
+genre: Action
+#controls:
+#  - 🕹️ Déplacer
+#  - 1️⃣  Tirer
+#  - 2️⃣  Bombe
+to_start: Insert Coin -> Start
+#recommended: 
+disable_score: true
+hide: yes
+
+added: 2025-07-26

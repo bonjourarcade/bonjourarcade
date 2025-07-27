@@ -1,7 +1,7 @@
-title: 
-developer: 
-year: 
-genre: 
+title: Super Spy Hunter
+developer: Tokai Engineering
+year: 1991
+genre: Shooter, Racing
 #controls:
 #  - 🕹️ Déplacer
 #  - 1️⃣  Tirer
@@ -13,4 +13,4 @@ genre:
 disable_score: true
 hide: yes
 
-added: DATE_PLACEHOLDER
+added: 2025-07-27

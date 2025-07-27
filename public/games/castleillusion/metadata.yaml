@@ -1,7 +1,7 @@
-title: 
-developer: 
-year: 
-genre: 
+title: Castle of Illusion Starring Mickey Mouse
+developer: Sega
+year: 1990
+genre: Platform
 #controls:
 #  - 🕹️ Déplacer
 #  - 1️⃣  Tirer
@@ -11,6 +11,5 @@ genre:
 #recommended: 
 
 disable_score: true
-hide: yes
 
-added: DATE_PLACEHOLDER
+added: 2025-07-27

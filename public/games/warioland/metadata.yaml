@@ -1,0 +1,15 @@
+title: "Wario Land: Super Mario Land 3 DX"
+developer: Nintendo, korxo
+year: 1994, 2023
+genre: Platform
+controls:
+  - 🕹️ Déplacer
+  - 1️⃣  Charger
+  - 2️⃣  Sauter
+
+#to_start: Insert Coin -> Start
+#recommended: 
+
+disable_score: true
+
+added: 2025-07-27

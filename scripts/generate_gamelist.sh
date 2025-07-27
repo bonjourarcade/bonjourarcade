@@ -26,6 +26,7 @@ get_core_from_dir() {
         PSX) echo "psx" ;;
         SMS) echo "segaMS" ;;
         SNES) echo "snes" ;; # Map snes, sfc folders to 'snes' core
+        VB) echo "vb" ;; # VirtualBoy
         WS) echo "ws" ;; # Wonderswan
         # Add mappings for other systems/cores here
         *)        echo "" ;; # Return empty if no mapping found

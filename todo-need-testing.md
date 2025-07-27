@@ -2,6 +2,9 @@ Space Cadet?
 Gun-Nac
 Name That Tune
 Quackshot!
+ZPF
+Wings of Wor
+Eliminate Down
 
 # Note sure about these
 19XX

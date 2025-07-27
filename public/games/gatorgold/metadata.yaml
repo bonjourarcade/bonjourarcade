@@ -1,0 +1,16 @@
+title: Revenge of the Gator Gold
+developer: HAL Laboratory, MojoDodo
+year: 1989, 2023
+genre: Pinball
+#controls:
+#  - 🕹️ Déplacer
+#  - 1️⃣  Tirer
+#  - 2️⃣  Bombe
+
+#to_start: Insert Coin -> Start
+#recommended: 
+
+disable_score: true
+hide: yes
+
+added: 2025-07-27

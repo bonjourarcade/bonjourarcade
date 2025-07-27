@@ -6,6 +6,7 @@ controls:
   - 🕹️ Déplacer
   - 1️⃣  Tirer
   - 2️⃣  Sauter
+  - Select: Sortir du véhicule
 to_start: Insert Coin -> Start
 #recommended: 
 disable_score: true

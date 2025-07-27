@@ -1,0 +1,15 @@
+title: Pokémon Pinball
+developer: Jupiter, HAL Laboratory
+year: 1999
+genre: Pinball
+#controls:
+#  - 🕹️ Déplacer
+#  - 1️⃣  Tirer
+#  - 2️⃣  Bombe
+
+#to_start: Insert Coin -> Start
+#recommended: 
+
+disable_score: true
+
+added: 2025-07-27

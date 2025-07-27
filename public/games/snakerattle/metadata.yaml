@@ -1,7 +1,7 @@
-title: 
-developer: 
-year: 
-genre: 
+title: Snake Rattle n Roll
+developer: Rare
+year: 1990
+genre: Action, Platform
 #controls:
 #  - 🕹️ Déplacer
 #  - 1️⃣  Tirer
@@ -13,4 +13,4 @@ genre:
 disable_score: true
 hide: yes
 
-added: DATE_PLACEHOLDER
+added: 2025-07-27

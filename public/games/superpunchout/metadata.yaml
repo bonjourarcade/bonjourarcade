@@ -1,7 +1,7 @@
-title: 
-developer: 
-year: 
-genre: 
+title: Super Punch-Out!!
+developer: Nintendo R&D3
+year: 1994
+genre: Sporta, Fighting
 #controls:
 #  - 🕹️ Déplacer
 #  - 1️⃣  Tirer
@@ -11,6 +11,5 @@ genre:
 #recommended: 
 
 disable_score: true
-hide: yes
 
-added: DATE_PLACEHOLDER
+added: 2025-07-27

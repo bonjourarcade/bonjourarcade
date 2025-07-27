@@ -1,0 +1,15 @@
+title: Mega Man 2
+developer: Capcom
+year: 1988
+genre: Platform, Shooter
+controls:
+  - 🕹️ Déplacer
+  - 1️⃣  Tirer
+  - 2️⃣  Sauter
+
+#to_start: Insert Coin -> Start
+#recommended: 
+
+disable_score: true
+
+added: 2025-07-27

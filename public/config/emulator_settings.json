@@ -2,7 +2,8 @@
   "EJS_defaultOptions": {
     "mame2003-plus_neogeo_bios": "unibios40",
     "mame2003-plus_skip_disclaimer": "enabled",
-    "mame2003-plus_skip_warnings": "enabled"
+    "mame2003-plus_skip_warnings": "enabled",
+    "ff-ratio": "8.0"
   },
   "EJS_backgroundBlur": true,
   "EJS_disableAutoLang": true,

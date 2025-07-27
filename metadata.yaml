@@ -6,7 +6,7 @@ genre:
 #  - 🕹️ Déplacer
 #  - 1️⃣  Tirer
 #  - 2️⃣  Bombe
-to_start: Insert Coin -> Start
+#to_start: Insert Coin -> Start
 #recommended: 
 disable_score: true
 hide: yes

@@ -302,14 +302,14 @@ function populateFeaturedGame(game) {
 
     // Create link container for the image
     const gameLink = document.createElement('a');
+    // Use pageUrl from JSON (should point to /play?game=...)
     gameLink.href = game.pageUrl || ('/play?game=' + game.id);
     gameLink.style.position = 'relative';
-    gameLink.style.display = 'inline-block';
 
     // Featured Image (uses game.coverArt only now)
     const img = document.createElement('img');
     img.id = 'featured-game-img';
-    const coverSrc = game.coverArt || '/assets/images/placeholder_thumb.png';
+    const coverSrc = game.coverArt || '/assets/images/placeholder_thumb.png'; // Use coverArt or default
     img.src = coverSrc;
     img.alt = game.title || 'Featured Game';
     gameLink.appendChild(img);
@@ -319,9 +319,11 @@ function populateFeaturedGame(game) {
         const badge = document.createElement('span');
         badge.className = 'new-badge';
         badge.textContent = 'NOUVEAU';
+        badge.style.position = 'absolute';
+        badge.style.top = '7px';
+        badge.style.left = '7px';
         gameLink.classList.add('featured-game-new');
-        // Insert badge as first child so it overlays the left of the image
-        gameLink.insertBefore(badge, img);
+        gameLink.appendChild(badge);
     }
 
     contentContainer.appendChild(gameLink); // Add linked game image

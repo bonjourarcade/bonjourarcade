@@ -1,0 +1,15 @@
+title: Metal Slug 2
+developer: SNK
+year: 1998
+genre: Run 'n Gun
+#controls:
+#  - 🕹️ Déplacer
+#  - 1️⃣  Tirer
+#  - 2️⃣  Bombe
+
+#to_start: Insert Coin -> Start
+#recommended: 
+
+disable_score: true
+
+added: 2025-07-29

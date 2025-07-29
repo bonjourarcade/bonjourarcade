@@ -34,8 +34,8 @@
     "1": {
         "0": {"value": "", "value2": "BUTTON_1"},
         "8": {"value": "", "value2": "BUTTON_2"},
-        "9": {"value": "", "value2": "BUTTON_3"},
-        "1": {"value": "", "value2": "BUTTON_4"},
+        "9": {"value": "", "value2": "BUTTON_4"},
+        "1": {"value": "", "value2": "BUTTON_3"},
         "2": {"value": "", "value2": "SELECT"},
         "3": {"value": "", "value2": "START"},
         "4": {"value": "", "value2": "DPAD_UP"},

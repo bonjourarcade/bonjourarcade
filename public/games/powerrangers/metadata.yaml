@@ -1,0 +1,15 @@
+title: Mighty Morphin Power Rangers
+developer: Natsume
+year: 1994
+genre: Beat 'em Up
+#controls:
+#  - 🕹️ Déplacer
+#  - 1️⃣  Tirer
+#  - 2️⃣  Bombe
+
+#to_start: Insert Coin -> Start
+#recommended: 
+
+disable_score: true
+
+added: 2025-07-29

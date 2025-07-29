@@ -1,13 +1,16 @@
-title: SNES Tester
-developer: Nintendo
-year: 1992
+title: 240p Suite (SNES)
+developer: Artemio
+year: 2024
 genre: Service
 #controls:
 #  - 🕹️ Déplacer
 #  - 1️⃣  Tirer
 #  - 2️⃣  Bombe
+
 #to_start: Insert Coin -> Start
 #recommended: 
-#added: 
+
 disable_score: true
 hide: yes
+
+added: 2025-07-29

@@ -25,6 +25,7 @@ get_core_from_dir() {
         N64)   echo "n64" ;;
         NES)   echo "nes" ;;    # Map nes, fc folders to 'nes' core
         PSX) echo "psx" ;;
+        S32X) echo "sega32x" ;;
         SMS) echo "segaMS" ;;
         SNES) echo "snes" ;; # Map snes, sfc folders to 'snes' core
         VB) echo "vb" ;; # VirtualBoy

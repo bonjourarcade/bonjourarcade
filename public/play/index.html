@@ -123,6 +123,49 @@
     <script src="/assets/js/banner.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <script>
+        function downloadFile(url, filename) {
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        function basename(path) {
+            return path.split('/').pop().split('\\').pop();
+        }
+
+        // Custom buttons
+        window.EJS_Buttons = {
+          playPause: true,
+          restart: true,
+          mute: true,
+          settings: true,
+          fullscreen: true,
+          saveState: true,
+          loadState: true,
+          screenRecord: true,
+          gamepad: true,
+          cheat: false,
+          volume: true,
+          saveSavFiles: false,
+          loadSavFiles: false,
+          quickSave: true,
+          quickLoad: true,
+          screenshot: true,
+          cacheManager: true,
+          customDownload: {
+              visible: true,
+              displayName: "Download this game",
+              icon: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/><path d="M12,19L16,15H13V11H11V15H8L12,19Z"/></svg>',
+              callback: () => {
+                  downloadFile(window.EJS_gameUrl,
+                    basename(window.EJS_gameUrl));
+              }
+          },
+          exitEmulation: false
+        };
+
         // Feature: Redirect to homepage at 5 AM local time
         function checkAndRedirectAt5AM() {
             const now = new Date();

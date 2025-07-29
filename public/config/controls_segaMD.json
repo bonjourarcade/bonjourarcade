@@ -32,10 +32,10 @@
         "29": {"value": "subtract"}
     },
     "1": {
-        "0": {"value": "", "value2": "BUTTON_1"},
-        "8": {"value": "", "value2": "BUTTON_2"},
-        "9": {"value": "", "value2": "BUTTON_3"},
-        "1": {"value": "", "value2": "BUTTON_4"},
+        "0": {"value": "", "value2": "BUTTON_3"},
+        "8": {"value": "", "value2": "BUTTON_4"},
+        "9": {"value": "", "value2": "BUTTON_2"},
+        "1": {"value": "", "value2": "BUTTON_1"},
         "2": {"value": "", "value2": "SELECT"},
         "3": {"value": "", "value2": "START"},
         "4": {"value": "", "value2": "DPAD_UP"},

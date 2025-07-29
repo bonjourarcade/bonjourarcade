@@ -21,6 +21,7 @@ get_core_from_dir() {
         GBA)      echo "gba" ;;
         GENESIS|MEGADRIVE) echo "segaMD" ;;
         GG) echo "segaGG" ;;
+        JAGUAR) echo "jaguar" ;;
         N64)   echo "n64" ;;
         NES)   echo "nes" ;;    # Map nes, fc folders to 'nes' core
         PSX) echo "psx" ;;

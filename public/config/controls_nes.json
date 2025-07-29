@@ -27,7 +27,7 @@
         "24": {"value": "1"},
         "25": {"value": "2"},
         "26": {"value": "3"},
-        "27": {"value": "0"},
+        "27": {"value": "0", "value2": "LEFT_TOP_SHOULDER"},
         "28": {"value": ""},
         "29": {"value": "subtract"}
     },

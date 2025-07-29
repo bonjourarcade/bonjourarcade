@@ -1,14 +1,16 @@
-title: Genesis 6-button Tester
-developer: Hugues Johnson
-year: 2020
+title: 240p Test Suite (GEN)
+developer: Artemio
+year: 2024
 genre: Service
 #controls:
 #  - 🕹️ Déplacer
 #  - 1️⃣  Tirer
 #  - 2️⃣  Bombe
+
 #to_start: Insert Coin -> Start
 #recommended: 
+
 disable_score: true
 hide: yes
 
-added: 2025-07-27
+added: 2025-07-29

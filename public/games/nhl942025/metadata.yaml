@@ -1,0 +1,16 @@
+title: NHL '94 2025
+developer: EA, AdamCatalyst
+year: 1994, 2025
+genre: Sports
+#controls:
+#  - 🕹️ Déplacer
+#  - 1️⃣  Tirer
+#  - 2️⃣  Bombe
+
+#to_start: Insert Coin -> Start
+#recommended: 
+
+disable_score: true
+hide: yes
+
+added: 2025-07-30

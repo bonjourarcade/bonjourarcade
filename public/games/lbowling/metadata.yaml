@@ -2,10 +2,9 @@ title: League Bowling
 developer: SNK
 year: 1990
 genre: Sports
-#controls:
-#  - 🕹️ Déplacer
-#  - 1️⃣  Tirer
-#  - 2️⃣  Bombe
+controls:
+  - 🕹️ Déplacer
+  - 1️⃣  Lancer
 
 to_start: Insert Coin -> Start
 #recommended: 

@@ -1,0 +1,16 @@
+title: Zombie Nation
+developer: KaZe, Live Planning
+year: 1990
+genre: Shooter, Horror
+#controls:
+#  - 🕹️ Déplacer
+#  - 1️⃣  Tirer
+#  - 2️⃣  Bombe
+
+#to_start: Insert Coin -> Start
+#recommended: 
+
+disable_score: true
+hide: yes
+
+added: 2025-07-30

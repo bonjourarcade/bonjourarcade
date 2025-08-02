@@ -1,7 +1,7 @@
-title: The Disney Collection
-developer: Sega
-year: 1996
-genre: Platform, Compilation
+title: Carrier Air Wing
+developer: Capcom
+year: 1990
+genre: Shooter
 #controls:
 #  - 🕹️ Déplacer
 #  - 1️⃣  Tirer
@@ -11,5 +11,6 @@ genre: Platform, Compilation
 #recommended: 
 
 disable_score: true
+hide: yes
 
-added: 2025-07-27
+added: 2025-08-02

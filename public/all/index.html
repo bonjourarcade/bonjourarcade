@@ -154,7 +154,7 @@
         }
         .search-input {
             flex: 1;
-            max-width: 400px;
+            max-width: 600px;
             padding: 0.75rem 1rem;
             border: 2px solid var(--border-color);
             border-radius: 8px;
@@ -215,11 +215,16 @@
     </style>
 </head>
 <body>
-    <button id="back-home-btn" style="margin-bottom: 1.5rem; padding: 0.6rem 1.2rem; font-size: 1rem; border-radius: 6px; border: none; background: #222; color: #fff; cursor: pointer; font-family: sans-serif; box-shadow: 0 2px 6px rgba(0,0,0,0.08);">← Retour Accueil</button>
-    
-    <div class="search-container">
-        <input type="text" id="search-input" class="search-input" placeholder="Rechercher un jeu... (appuyez sur / pour rechercher)">
-        <span class="search-info" id="search-info"></span>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <button id="back-home-btn" style="padding: 0.6rem 1.2rem; font-size: 1rem; border-radius: 6px; border: none; background: #222; color: #fff; cursor: pointer; font-family: sans-serif; box-shadow: 0 2px 6px rgba(0,0,0,0.08);">← Retour Accueil</button>
+        
+        <div class="search-container" style="margin-bottom: 0; flex: 1; max-width: 600px; margin-left: 2rem; margin-right: 2rem;">
+            <input type="text" id="search-input" class="search-input" placeholder="Rechercher un jeu... (appuyez sur / pour rechercher)">
+            <span class="search-info" id="search-info"></span>
+        </div>
+        
+        <button id="theme-toggle" class="theme-toggle" style="margin-right: 1rem;">🌙</button>
+        <button id="random-game-btn" class="random-game-btn">Jouer à un jeu aléatoire</button>
     </div>
     
     <div class="header-content">
@@ -228,9 +233,7 @@
                 <h1>Tu as trouvé la cachette secrète de jeux!</h1>
                 <h2>Lequel vas-tu essayer en premier?</h2>
             </div>
-            <button id="theme-toggle" class="theme-toggle">🌙</button>
         </div>
-        <button id="random-game-btn" class="random-game-btn">Jouer à un jeu aléatoire</button>
     </div>
 
     <div id="browser-warning" class="browser-warning">

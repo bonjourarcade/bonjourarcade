@@ -95,14 +95,27 @@
     // Helper: get yyyyww from date input (YYYY-MM-DD)
     function dateToSeed(dateStr) {
       if (!dateStr) return null;
-      const date = new Date(dateStr);
-      // ISO week calculation
-      const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-      const dayNum = d.getUTCDay() || 7;
-      d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-      const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
-      const weekNum = Math.ceil((((d - yearStart) / 86400000) + 1)/7);
-      return d.getUTCFullYear() + String(weekNum).padStart(2, '0');
+      const date = new Date(dateStr + 'T00:00:00');
+      
+      // Get the day of the week (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
+      const dayOfWeek = date.getDay();
+      
+      // Calculate days to add to get to Thursday of the same week
+      // Monday = 1, Tuesday = 2, Wednesday = 3, Thursday = 4, Friday = 5, Saturday = 6, Sunday = 0
+      const daysToThursday = (4 - dayOfWeek + 7) % 7;
+      
+      // Get Thursday of the same week
+      const thursday = new Date(date);
+      thursday.setDate(date.getDate() + daysToThursday);
+      
+      // Get January 1st of the year containing that Thursday
+      const yearStart = new Date(thursday.getFullYear(), 0, 1);
+      
+      // Calculate the week number
+      const daysDiff = Math.floor((thursday - yearStart) / (1000 * 60 * 60 * 24));
+      const weekNum = Math.floor(daysDiff / 7) + 1;
+      
+      return thursday.getFullYear() + String(weekNum).padStart(2, '0');
     }
 
     // Fetch and parse YAML
@@ -123,28 +136,31 @@
         resultDiv.textContent = 'Select a week to see the prediction.';
         return;
       }
+      
+      // Always show the seed and game info
       if (predictions[seed]) {
         resultDiv.innerHTML = `<b>Seed:</b> ${seed}<br><b>Game:</b> ${predictions[seed]}`;
       } else {
         resultDiv.innerHTML = `<b>Seed:</b> ${seed}<br>`;
-        // Add the button
-        const btn = document.createElement('button');
-        btn.textContent = ' See for yourself!';
-        btn.style.marginTop = '12px';
-        btn.style.padding = '8px 16px';
-        btn.style.fontSize = '1em';
-        btn.style.borderRadius = '6px';
-        btn.style.border = 'none';
-        btn.style.background = '#6cf';
-        btn.style.color = '#23284a';
-        btn.style.fontWeight = 'bold';
-        btn.style.cursor = 'pointer';
-        btn.addEventListener('click', function() {
-          window.location.href = `/plinko?seed=${seed}`;
-        });
-        resultDiv.appendChild(document.createElement('br'));
-        resultDiv.appendChild(btn);
       }
+      
+      // Always add the button to check plinko
+      const btn = document.createElement('button');
+      btn.textContent = 'Check Plinko for this seed';
+      btn.style.marginTop = '12px';
+      btn.style.padding = '8px 16px';
+      btn.style.fontSize = '1em';
+      btn.style.borderRadius = '6px';
+      btn.style.border = 'none';
+      btn.style.background = '#6cf';
+      btn.style.color = '#23284a';
+      btn.style.fontWeight = 'bold';
+      btn.style.cursor = 'pointer';
+      btn.addEventListener('click', function() {
+        window.location.href = `/plinko?seed=${seed}`;
+      });
+      resultDiv.appendChild(document.createElement('br'));
+      resultDiv.appendChild(btn);
     });
 
     // Render future table
@@ -170,13 +186,24 @@
     }
     // Helper: get current yyyyww seed
     function getCurrentSeed(date) {
-      // ISO week calculation
-      const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-      const dayNum = d.getUTCDay() || 7;
-      d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-      const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
-      const weekNum = Math.ceil((((d - yearStart) / 86400000) + 1)/7);
-      return d.getUTCFullYear() + String(weekNum).padStart(2, '0');
+      // Get the day of the week (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
+      const dayOfWeek = date.getDay();
+      
+      // Calculate days to add to get to Thursday of the same week
+      const daysToThursday = (4 - dayOfWeek + 7) % 7;
+      
+      // Get Thursday of the same week
+      const thursday = new Date(date);
+      thursday.setDate(date.getDate() + daysToThursday);
+      
+      // Get January 1st of the year containing that Thursday
+      const yearStart = new Date(thursday.getFullYear(), 0, 1);
+      
+      // Calculate the week number
+      const daysDiff = Math.floor((thursday - yearStart) / (1000 * 60 * 60 * 24));
+      const weekNum = Math.floor(daysDiff / 7) + 1;
+      
+      return thursday.getFullYear() + String(weekNum).padStart(2, '0');
     }
   </script>
 </body>

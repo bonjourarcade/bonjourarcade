@@ -144,6 +144,50 @@
             letter-spacing: 1px;
             pointer-events: none;
         }
+        
+        /* Search functionality styles */
+        .search-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .search-input {
+            flex: 1;
+            max-width: 400px;
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            background: var(--card-bg);
+            color: var(--text-color);
+            transition: border-color 0.3s, background-color 0.3s;
+        }
+        .search-input:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+        }
+        .search-input::placeholder {
+            color: #999;
+        }
+        .search-info {
+            font-size: 0.9rem;
+            color: #666;
+            margin-left: 1rem;
+        }
+        body.theme-dark .search-info {
+            color: #aaa;
+        }
+        .no-results {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+            font-style: italic;
+        }
+        body.theme-dark .no-results {
+            color: #aaa;
+        }
     </style>
     <style>
     .game-meta-tooltip {
@@ -172,6 +216,12 @@
 </head>
 <body>
     <button id="back-home-btn" style="margin-bottom: 1.5rem; padding: 0.6rem 1.2rem; font-size: 1rem; border-radius: 6px; border: none; background: #222; color: #fff; cursor: pointer; font-family: sans-serif; box-shadow: 0 2px 6px rgba(0,0,0,0.08);">← Retour Accueil</button>
+    
+    <div class="search-container">
+        <input type="text" id="search-input" class="search-input" placeholder="Rechercher un jeu... (appuyez sur / pour rechercher)">
+        <span class="search-info" id="search-info"></span>
+    </div>
+    
     <div class="header-content">
         <div class="header-left">
             <div>
@@ -191,10 +241,15 @@
 
     <script src="/assets/js/banner.js"></script>
     <script>
+        // Store all games data globally
+        let gamesData = [];
+        let filteredGamesData = [];
+        
         // Back to home button
         document.getElementById('back-home-btn').addEventListener('click', function() {
             window.location.href = '/index.html';
         });
+        
         // Theme management
         function initTheme() {
             const savedTheme = localStorage.getItem('theme');
@@ -222,8 +277,111 @@
             }
         }
 
-        // Store all games data globally so we can access it for the random button
-        let gamesData = [];
+        // Search functionality
+        function filterGames(searchTerm) {
+            if (!searchTerm) {
+                filteredGamesData = gamesData;
+                updateSearchInfo();
+                renderGames(filteredGamesData);
+                return;
+            }
+            
+            const term = searchTerm.toLowerCase();
+            
+            // Filter by title and ID for better search results (include hidden games)
+            filteredGamesData = gamesData.filter(game => {
+                // Check game title
+                let displayTitle = game.title;
+                if (!displayTitle || displayTitle === game.id) {
+                    displayTitle = capitalizeFirst(game.id);
+                }
+                const titleMatch = displayTitle.toLowerCase().includes(term);
+                
+                // Check game ID
+                const idMatch = game.id && game.id.toLowerCase().includes(term);
+                
+                // Check developer if available
+                const developerMatch = game.developer && game.developer.toLowerCase().includes(term);
+                
+                // Check genre if available
+                const genreMatch = game.genre && game.genre.toLowerCase().includes(term);
+                
+                return titleMatch || idMatch || developerMatch || genreMatch;
+            });
+            
+            updateSearchInfo();
+            renderGames(filteredGamesData);
+        }
+        
+        function updateSearchInfo() {
+            const searchInfo = document.getElementById('search-info');
+            if (filteredGamesData.length === gamesData.length) {
+                searchInfo.textContent = '';
+            } else {
+                searchInfo.textContent = `${filteredGamesData.length} jeu${filteredGamesData.length > 1 ? 'x' : ''} trouvé${filteredGamesData.length > 1 ? 's' : ''}`;
+            }
+        }
+        
+        function capitalizeFirst(str) {
+            if (!str) return '';
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+        
+        function renderGames(games) {
+            const container = document.getElementById('gameGrid');
+            container.innerHTML = '';
+            
+            if (games.length === 0) {
+                container.innerHTML = '<div class="no-results">Aucun jeu ne correspond à votre recherche</div>';
+                return;
+            }
+            
+            games.forEach(game => {
+                const div = document.createElement('div');
+                div.className = 'game';
+                div._gameData = game;
+
+                let coverSrc = game.coverArt || '/assets/images/placeholder_thumb.png';
+
+                // Use thumbnail version if available
+                if (coverSrc && coverSrc !== '/assets/images/placeholder_thumb.png') {
+                    const lastDotIndex = coverSrc.lastIndexOf('.');
+                    if (lastDotIndex !== -1) {
+                        coverSrc = coverSrc.substring(0, lastDotIndex) + '_thumb' + coverSrc.substring(lastDotIndex);
+                    }
+                }
+
+                // Add special border and badge if new_flag is true
+                if (game.new_flag === 'true') {
+                    div.classList.add('game-new');
+                }
+
+                div.innerHTML = `
+                    <a href="${game.pageUrl}" class="game-link">
+                        <div class="game-cover" style="position:relative;">
+                            ${game.new_flag === 'true' ? '<span class="new-badge">NOUVEAU</span>' : ''}
+                            <img src="${coverSrc}" alt="${game.title}">
+                        </div>
+                        <div class="game-title">${game.title}</div>
+                    </a>
+                `;
+                
+                // Add click handler to set referrer flag
+                div.querySelector('a').addEventListener('click', function(e) {
+                    sessionStorage.setItem('referrerAllGames', '1');
+                });
+
+                // Tooltip event listeners
+                div.addEventListener('mouseenter', (e) => {
+                    showTooltipForItem(div);
+                });
+                div.addEventListener('mouseleave', (e) => {
+                    removeTooltip();
+                });
+
+                container.appendChild(div);
+            });
+        }
 
         // Function to select a random game from the list
         function playRandomGame() {
@@ -234,6 +392,15 @@
                 window.location.href = randomGame.pageUrl;
             } else {
                 console.error('No games available to select from');
+            }
+        }
+
+        // Focus search function
+        function focusSearch() {
+            const searchInput = document.getElementById('search-input');
+            if (searchInput) {
+                searchInput.focus();
+                searchInput.select();
             }
         }
 
@@ -256,10 +423,37 @@
         // Add event listeners
         document.getElementById('random-game-btn').addEventListener('click', playRandomGame);
         document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+        
+        // Search input event listener
+        document.getElementById('search-input').addEventListener('input', (e) => {
+            filterGames(e.target.value);
+        });
+        
+        // Keyboard event listener for "/" key
+        document.addEventListener('keydown', function(e) {
+            // If search is focused, handle Escape key
+            if (document.activeElement === document.getElementById('search-input')) {
+                if (e.key === 'Escape') {
+                    const searchInput = document.getElementById('search-input');
+                    searchInput.value = '';
+                    searchInput.blur();
+                    filterGames('');
+                    e.preventDefault();
+                }
+                return;
+            }
+            
+            // Focus search bar on "/" key
+            if (e.key === '/' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+                focusSearch();
+                e.preventDefault();
+            }
+        });
 
         // Initialize theme and check browser when page loads
         window.addEventListener('DOMContentLoaded', () => {
             initTheme();
+            checkBrowser();
         });
 
         // Fetch and render games
@@ -275,53 +469,12 @@
                 gamesData.sort((a, b) => {
                     return a.title.localeCompare(b.title);
                 });
-
-                const container = document.getElementById('gameGrid');
-                gamesData.forEach(game => {
-                    const div = document.createElement('div');
-                    div.className = 'game';
-                    // Attach game data for tooltip
-                    div._gameData = game;
-
-                    let coverSrc = game.coverArt || '/assets/images/placeholder_thumb.png';
-
-                    // Use thumbnail version if available
-                    if (coverSrc && coverSrc !== '/assets/images/placeholder_thumb.png') {
-                        const lastDotIndex = coverSrc.lastIndexOf('.');
-                        if (lastDotIndex !== -1) {
-                            coverSrc = coverSrc.substring(0, lastDotIndex) + '_thumb' + coverSrc.substring(lastDotIndex);
-                        }
-                    }
-
-                    // Add special border and badge if new_flag is true
-                    if (game.new_flag === 'true') {
-                        div.classList.add('game-new');
-                    }
-
-                    div.innerHTML = `
-                        <a href="${game.pageUrl}" class="game-link">
-                            <div class="game-cover" style="position:relative;">
-                                ${game.new_flag === 'true' ? '<span class="new-badge">NOUVEAU</span>' : ''}
-                                <img src="${coverSrc}" alt="${game.title}">
-                            </div>
-                            <div class="game-title">${game.title}</div>
-                        </a>
-                    `;
-                    // Add click handler to set referrer flag
-                    div.querySelector('a').addEventListener('click', function(e) {
-                        sessionStorage.setItem('referrerAllGames', '1');
-                    });
-
-                    // --- Tooltip event listeners ---
-                    div.addEventListener('mouseenter', (e) => {
-                        showTooltipForItem(div);
-                    });
-                    div.addEventListener('mouseleave', (e) => {
-                        removeTooltip();
-                    });
-
-                    container.appendChild(div);
-                });
+                
+                // Initialize filtered games with all games
+                filteredGamesData = gamesData;
+                
+                // Render all games initially
+                renderGames(gamesData);
             })
             .catch(err => {
                 console.error('Error loading games.json:', err);

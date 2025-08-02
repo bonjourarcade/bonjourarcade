@@ -73,6 +73,67 @@
             margin-bottom: 0;
             text-align: center;
         }
+        /* Leaderboard styling */
+        #leaderboard-container {
+            position: fixed !important;
+            top: 140px !important;
+            right: 10px !important;
+            background-color: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 12px !important;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            z-index: 1999;
+            display: none; /* Hidden by default, will be shown by JS */
+            flex-direction: column;
+            max-width: 280px;
+            max-height: 350px;
+            overflow-y: auto;
+            font-family: sans-serif;
+            font-size: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        #leaderboard-container h3 {
+            margin: 0 0 8px 0;
+            font-size: 14px;
+            text-align: center;
+            color: #ffd700;
+        }
+        .leaderboard-entry {
+            display: flex;
+            align-items: center;
+            margin-bottom: 6px;
+            padding: 4px;
+            border-radius: 4px;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        .leaderboard-rank {
+            font-weight: bold;
+            color: #ffd700;
+            margin-right: 8px;
+            min-width: 20px;
+        }
+        .leaderboard-player {
+            flex: 1;
+            margin-right: 8px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .leaderboard-score {
+            font-weight: bold;
+            color: #00ff00;
+        }
+        .leaderboard-loading {
+            text-align: center;
+            color: #ccc;
+            font-style: italic;
+        }
+        .leaderboard-error {
+            text-align: center;
+            color: #ff6b6b;
+            font-style: italic;
+        }
         /* Menu button styling */
         #menu-button {
             position: fixed !important;
@@ -118,6 +179,14 @@
     <div id="qr-code-container">
         <div id="qr-code"></div>
         <p>Classements</p>
+    </div>
+
+    <!-- Leaderboard Container -->
+    <div id="leaderboard-container">
+        <h3>🏆 Meilleurs Scores</h3>
+        <div id="leaderboard-content">
+            <div class="leaderboard-loading">Chargement...</div>
+        </div>
     </div>
 
     <script src="/assets/js/banner.js"></script>
@@ -268,6 +337,171 @@
                 }
             }
 
+            // Leaderboard fetching logic
+            async function fetchLeaderboard(gameId) {
+                const leaderboardContainer = document.getElementById('leaderboard-container');
+                const leaderboardContent = document.getElementById('leaderboard-content');
+                
+                if (!leaderboardContainer || !leaderboardContent) return;
+
+                // Show loading state
+                leaderboardContent.innerHTML = '<div class="leaderboard-loading">Chargement...</div>';
+                
+                try {
+                    // Check if we're on localhost and use mock data
+                    const isLocalhost = window.location.hostname === 'localhost' || 
+                                      window.location.hostname === '127.0.0.1' || 
+                                      window.location.hostname.includes('localhost');
+                    
+                    let data;
+                    
+                    if (isLocalhost) {
+                        // Use mock data for localhost
+                        console.log('Using mock leaderboard data for localhost');
+                        data = {
+                            result: {
+                                success: true,
+                                scores: generateMockScores(gameId)
+                            }
+                        };
+                    } else {
+                        // Use real API for production
+                        const response = await fetch('https://us-central1-alloarcade.cloudfunctions.net/listGameScores', {
+                            method: 'POST',
+                            headers: {
+                                'accept': '*/*',
+                                'accept-language': 'en-CA,en;q=0.9,fr-CA;q=0.8,fr;q=0.7,en-GB;q=0.6,en-US;q=0.5',
+                                'cache-control': 'no-cache',
+                                'content-type': 'application/json',
+                                'firebase-instance-id-token': 'd81DC0UGvyC6i41_okOipa:APA91bHNG-8qmIvzgyCLGKg54RBFwRyB2hx6QEcZ2BJUHcbmcvilEJnpCQscmrnOgpVrFlurW4Fg6b0Lkzs_Lzgl53iECK6E8-pPLVN_yHC8_beMww7Blxg',
+                                'origin': 'https://alloarcade.web.app',
+                                'pragma': 'no-cache',
+                                'priority': 'u=1, i',
+                                'referer': 'https://alloarcade.web.app/',
+                                'sec-ch-ua': '"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"',
+                                'sec-ch-ua-mobile': '?0',
+                                'sec-ch-ua-platform': '"Windows"',
+                                'sec-fetch-dest': 'empty',
+                                'sec-fetch-mode': 'cors',
+                                'sec-fetch-site': 'cross-site',
+                                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36'
+                            },
+                            body: JSON.stringify({
+                                data: {
+                                    timeRange: "all",
+                                    gameId: gameId
+                                }
+                            })
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+
+                        data = await response.json();
+                    }
+                    
+                    if (!data.result || !data.result.success || !data.result.scores) {
+                        throw new Error('Invalid response format');
+                    }
+
+                    // Get best score for each unique player
+                    const playerBestScores = new Map();
+                    
+                    data.result.scores.forEach(score => {
+                        const userId = score.userId;
+                        const currentBest = playerBestScores.get(userId);
+                        
+                        if (!currentBest || score.score > currentBest.score) {
+                            playerBestScores.set(userId, {
+                                player: score.player,
+                                score: score.score,
+                                rank: score.rank
+                            });
+                        }
+                    });
+
+                    // Convert to array and sort by score (highest first)
+                    const sortedScores = Array.from(playerBestScores.values())
+                        .sort((a, b) => b.score - a.score)
+                        .slice(0, 10); // Show top 10 players
+
+                    if (sortedScores.length === 0) {
+                        leaderboardContent.innerHTML = '<div class="leaderboard-loading">Aucun score trouvé</div>';
+                        return;
+                    }
+
+                    // Build leaderboard HTML
+                    let leaderboardHTML = '';
+                    sortedScores.forEach((score, index) => {
+                        const rank = index + 1;
+                        const rankEmoji = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `${rank}.`;
+                        
+                        leaderboardHTML += `
+                            <div class="leaderboard-entry">
+                                <div class="leaderboard-rank">${rankEmoji}</div>
+                                <div class="leaderboard-player">${score.player}</div>
+                                <div class="leaderboard-score">${score.score.toLocaleString()}</div>
+                            </div>
+                        `;
+                    });
+
+                    leaderboardContent.innerHTML = leaderboardHTML;
+                    
+                    // Show leaderboard container on desktop
+                    if (!isMobileDevice()) {
+                        leaderboardContainer.style.display = 'flex';
+                    }
+
+                } catch (error) {
+                    console.error('Error fetching leaderboard:', error);
+                    leaderboardContent.innerHTML = '<div class="leaderboard-error">Erreur de chargement</div>';
+                }
+            }
+
+            // Mock data generator function
+            function generateMockScores(gameId) {
+                const mockPlayers = [
+                    { name: "Félix L", userId: "user1" },
+                    { name: "Marie C", userId: "user2" },
+                    { name: "Jean P", userId: "user3" },
+                    { name: "Sophie M", userId: "user4" },
+                    { name: "Pierre D", userId: "user5" },
+                    { name: "Alice R", userId: "user6" },
+                    { name: "Thomas B", userId: "user7" },
+                    { name: "Emma L", userId: "user8" }
+                ];
+
+                // Generate different score ranges based on game type
+                let baseScore = 1000;
+                if (gameId.includes('shmup') || gameId.includes('shoot')) {
+                    baseScore = 50000;
+                } else if (gameId.includes('puzzle')) {
+                    baseScore = 5000;
+                } else if (gameId.includes('platform')) {
+                    baseScore = 15000;
+                }
+
+                return mockPlayers.map((player, index) => ({
+                    rank: index + 1,
+                    id: `mock_${player.userId}_${Date.now()}`,
+                    userId: player.userId,
+                    player: player.name,
+                    photoURL: `https://via.placeholder.com/96/cccccc/666666?text=${player.name.charAt(0)}`,
+                    score: Math.floor(baseScore * (1 + Math.random() * 5) * (1 - index * 0.1)),
+                    game: gameId,
+                    date: {
+                        _seconds: Math.floor(Date.now() / 1000) - Math.floor(Math.random() * 86400 * 30), // Random date within last 30 days
+                        _nanoseconds: Math.floor(Math.random() * 1000000000)
+                    },
+                    verified: true,
+                    screenshotUrl: `https://via.placeholder.com/300x200/333333/ffffff?text=Screenshot`
+                }));
+            }
+
+            // Fetch leaderboard data
+            fetchLeaderboard(gameId);
+
             try {
                 // Step 2: Fetch the master game list
                 const listResponse = await fetch('/gamelist.json'); // Fetch from site root
@@ -294,7 +528,9 @@
                 // --- Hide leaderboard button if disable_score is true ---
                 if (selectedGame.disable_score === true || selectedGame.disable_score === "true") {
                     const qrCodeContainer = document.getElementById('qr-code-container');
+                    const leaderboardContainer = document.getElementById('leaderboard-container');
                     if (qrCodeContainer) qrCodeContainer.style.display = 'none';
+                    if (leaderboardContainer) leaderboardContainer.style.display = 'none';
                 }
 
                 // Step 4: Check if the ROM or Core info for this game is missing

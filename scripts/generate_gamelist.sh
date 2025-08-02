@@ -96,6 +96,11 @@ rm -f "$temp_game_ids" "$temp_duplicates"
 
 # --- Scan ROM files to generate game list ---
 
+# Count total files for progress bar
+echo "Counting ROM files..."
+total_files=$(find "$ROMS_DIR" -maxdepth 2 -type f -not -path "*/\.*" | wc -l)
+current_file=0
+
 # Create a temp file to store all the games data
 temp_games_file=$(mktemp)
 echo "[]" > "$temp_games_file"
@@ -103,6 +108,8 @@ echo "[]" > "$temp_games_file"
 # Create a temp file to store featured game data
 temp_featured_file=$(mktemp)
 echo "null" > "$temp_featured_file"
+
+echo "Processing $total_files ROM files..."
 
 find "$ROMS_DIR" -maxdepth 2 -type f -not -path "*/\.*" | while read -r rom_file; do
     # Extract game_id from filename (remove extension)
@@ -112,6 +119,25 @@ find "$ROMS_DIR" -maxdepth 2 -type f -not -path "*/\.*" | while read -r rom_file
     if [ "$rom_subdir" = "bios" ]; then
       continue
     fi
+    
+    # Update progress bar
+    current_file=$((current_file + 1))
+    progress_percent=$((current_file * 100 / total_files))
+    progress_bar_length=30
+    filled_length=$((progress_percent * progress_bar_length / 100))
+    empty_length=$((progress_bar_length - filled_length))
+    
+    # Create progress bar string
+    progress_bar=""
+    for ((i=0; i<filled_length; i++)); do
+        progress_bar="${progress_bar}█"
+    done
+    for ((i=0; i<empty_length; i++)); do
+        progress_bar="${progress_bar}░"
+    done
+    
+    # Print progress with carriage return to overwrite the same line
+    printf "\r[%s] %d%% (%d/%d) Processing: %s" "$progress_bar" "$progress_percent" "$current_file" "$total_files" "$game_id"
     core=$(get_core_from_dir "$rom_subdir")
     page_url="${LAUNCHER_PAGE}?game=${game_id}"
 
@@ -234,6 +260,9 @@ find "$ROMS_DIR" -maxdepth 2 -type f -not -path "*/\.*" | while read -r rom_file
     fi
 
 done
+
+# Complete the progress bar with a newline
+echo ""
 
 # Add the SHMUPS entry to the previous games list
 shmups_json=$(jq -n \

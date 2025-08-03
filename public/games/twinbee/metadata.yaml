@@ -1,0 +1,16 @@
+title: TwinBee
+developer: Konami
+year: 1986
+genre: Shooter
+#controls:
+#  - 🕹️ Déplacer
+#  - 1️⃣  Tirer
+#  - 2️⃣  Bombe
+
+#to_start: Insert Coin -> Start
+#recommended: 
+
+disable_score: true
+hide: yes
+
+added: 2025-08-03

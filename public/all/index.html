@@ -501,22 +501,22 @@
     <div id="header-container" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
         <button id="back-home-btn" style="padding: 0.6rem 1.2rem; font-size: 1rem; border-radius: 6px; border: none; background: #222; color: #fff; cursor: pointer; font-family: sans-serif; box-shadow: 0 2px 6px rgba(0,0,0,0.08);">← Retour Accueil</button>
         
+        <div class="search-container" style="margin-bottom: 0; flex: 1; min-width: 250px; max-width: 600px; margin-left: 0; margin-right: 0;">
+            <select id="search-type" style="padding: 0.75rem 0.5rem; border: 2px solid var(--border-color); border-radius: 8px 0 0 8px; font-size: 1rem; background: var(--card-bg); color: var(--text-color); border-right: none; cursor: pointer;">
+                <option value="title">Titre</option>
+                <option value="genre">Genre</option>
+            </select>
+            <input type="text" id="search-input" class="search-input" placeholder="Rechercher par titre..." style="border-radius: 0 8px 8px 0; border-left: none;">
+            <select id="genre-select" style="display: none; padding: 0.75rem 1rem; border: 2px solid var(--border-color); border-radius: 0 8px 8px 0; font-size: 1rem; background: var(--card-bg); color: var(--text-color); border-left: none; cursor: pointer;">
+                <option value="">Sélectionner un genre...</option>
+            </select>
+            <span class="search-info" id="search-info"></span>
+        </div>
+        
         <div id="header-buttons" style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
             <button id="theme-toggle" class="theme-toggle" style="margin-right: 0;">🌙</button>
             <button id="random-game-btn" class="random-game-btn">Jouer à un jeu aléatoire</button>
         </div>
-    </div>
-    
-    <div class="search-container" style="margin-bottom: 1.5rem; flex: 1; min-width: 250px; max-width: 600px; margin-left: 0; margin-right: 0;">
-        <select id="search-type" style="padding: 0.75rem 0.5rem; border: 2px solid var(--border-color); border-radius: 8px 0 0 8px; font-size: 1rem; background: var(--card-bg); color: var(--text-color); border-right: none; cursor: pointer;">
-            <option value="title">Titre</option>
-            <option value="genre">Genre</option>
-        </select>
-        <input type="text" id="search-input" class="search-input" placeholder="Rechercher par titre..." style="border-radius: 0 8px 8px 0; border-left: none;">
-        <select id="genre-select" style="display: none; padding: 0.75rem 1rem; border: 2px solid var(--border-color); border-radius: 0 8px 8px 0; font-size: 1rem; background: var(--card-bg); color: var(--text-color); border-left: none; cursor: pointer;">
-            <option value="">Sélectionner un genre...</option>
-        </select>
-        <span class="search-info" id="search-info"></span>
     </div>
     
     <div id="header-content" class="header-content">

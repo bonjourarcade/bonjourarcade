@@ -3,6 +3,10 @@
 # Script to generate thumbnail versions of game cover images using ImageMagick.
 # This script should be run from the project root.
 
+# Color codes for output
+PURPLE='\033[0;35m'
+NC='\033[0m' # No Color
+
 GAMELIST_PATH="public/gamelist.json"
 THUMB_WIDTH=150
 
@@ -34,8 +38,34 @@ if [ -z "$IMAGE_PATHS" ]; then
     exit 0
 fi
 
+# Count total images for progress bar
+TOTAL_IMAGES=$(echo "$IMAGE_PATHS" | wc -l)
 PROCESSED_COUNT=0
 FAILED_COUNT=0
+
+echo "Found $TOTAL_IMAGES images to process..."
+
+# Function to update progress bar
+update_progress() {
+    local current=$1
+    local total=$2
+    local width=50
+    local percentage=$((current * 100 / total))
+    local filled=$((current * width / total))
+    local empty=$((width - filled))
+    
+    # Create progress bar string
+    local bar=""
+    for ((i=0; i<filled; i++)); do
+        bar="${bar}█"
+    done
+    for ((i=0; i<empty; i++)); do
+        bar="${bar}░"
+    done
+    
+    # Print progress bar (carriage return to overwrite same line)
+    printf "\r${PURPLE}[%s] %d%% (%d/%d)${NC}" "$bar" "$percentage" "$current" "$total"
+}
 
 while IFS= read -r relative_path; do
     # Remove leading slash if it's an absolute path from web root
@@ -52,8 +82,9 @@ while IFS= read -r relative_path; do
     fi
 
     if [ ! -f "$full_image_path" ]; then
-        echo "Warning: Original image not found: $full_image_path. Skipping."
         FAILED_COUNT=$((FAILED_COUNT+1))
+        PROCESSED_COUNT=$((PROCESSED_COUNT+1))
+        update_progress $PROCESSED_COUNT $TOTAL_IMAGES
         continue
     fi
 
@@ -68,20 +99,26 @@ while IFS= read -r relative_path; do
     # Generate thumbnail using ImageMagick's magick command
     # -resize: Resizes the image to the given width, maintaining aspect ratio.
     #          > prevents upsizing if original is smaller.
-    if magick "$full_image_path" -resize "${THUMB_WIDTH}x>" "$thumbnail_path"; then
-        echo "Generated thumbnail: $thumbnail_path"
+    if magick "$full_image_path" -resize "${THUMB_WIDTH}x>" "$thumbnail_path" 2>/dev/null; then
         PROCESSED_COUNT=$((PROCESSED_COUNT+1))
     else
-        echo "Error processing $full_image_path with ImageMagick." >&2
         FAILED_COUNT=$((FAILED_COUNT+1))
     fi
+    
+    # Update progress bar
+    update_progress $PROCESSED_COUNT $TOTAL_IMAGES
 
 done <<< "$IMAGE_PATHS"
+
+# Complete the progress bar with a newline
+echo ""
 
 echo "Thumbnail generation complete. Processed: ${PROCESSED_COUNT}, Failed: ${FAILED_COUNT}"
 
 if [ "$FAILED_COUNT" -gt 0 ]; then
+    echo "⚠️  Thumbnail generation completed with ${FAILED_COUNT} failures."
     exit 1 # Indicate failure if any images failed to process
 else
+    echo "✅ Thumbnail generation completed successfully!"
     exit 0
 fi 

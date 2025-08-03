@@ -1,6 +1,10 @@
 #!/bin/sh
 set -e
 
+# --- Color codes for output ---
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
 # --- Configuration ---
 # Make sure this script uses sh compatibility for Mac OS and Alpine
 
@@ -137,7 +141,7 @@ find "$ROMS_DIR" -maxdepth 2 -type f -not -path "*/\.*" | while read -r rom_file
     done
     
     # Print progress with carriage return to overwrite the same line
-    printf "\r[%s] %d%% (%d/%d) Processing: %s" "$progress_bar" "$progress_percent" "$current_file" "$total_files" "$game_id"
+    printf "\r${BLUE}[%s] %d%% (%d/%d) Processing: %s${NC}" "$progress_bar" "$progress_percent" "$current_file" "$total_files" "$game_id"
     core=$(get_core_from_dir "$rom_subdir")
     page_url="${LAUNCHER_PAGE}?game=${game_id}"
 
@@ -331,5 +335,4 @@ echo "$json_output" | jq '.' > "$OUTPUT_FILE"
 # Clean up temporary files
 rm -f "$temp_json_file" "$temp_games_file" "$temp_featured_file"
 
-# Generate thumbnails
-bash scripts/generate_thumbnails.sh
+echo "✅ Gamelist generation completed successfully!"

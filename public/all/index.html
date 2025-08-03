@@ -1051,7 +1051,7 @@
             filterGames(e.target.value);
         });
 
-        // Keyboard event listener for "/" key
+        // Keyboard event listener for "/" key and arrow keys
         document.addEventListener('keydown', function(e) {
             // If search is focused, handle Escape key
             if (document.activeElement === document.getElementById('search-input')) {
@@ -1062,6 +1062,29 @@
                     filterGames('');
                     e.preventDefault();
                 }
+                return;
+            }
+            
+            // Handle arrow key scrolling
+            if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+                const scrollAmount = 300; // Pixels to scroll (increased by 4x)
+                const currentScrollY = window.scrollY;
+                
+                if (e.key === 'ArrowUp') {
+                    // Scroll up
+                    window.scrollTo({
+                        top: Math.max(0, currentScrollY - scrollAmount),
+                        behavior: 'smooth'
+                    });
+                } else if (e.key === 'ArrowDown') {
+                    // Scroll down
+                    window.scrollTo({
+                        top: currentScrollY + scrollAmount,
+                        behavior: 'smooth'
+                    });
+                }
+                
+                e.preventDefault();
                 return;
             }
             

@@ -1,0 +1,15 @@
+title: Alex Kidd in Miracle World
+developer: Sega
+year: 1986
+genre: Platform
+#controls:
+#  - 🕹️ Déplacer
+#  - 1️⃣  Tirer
+#  - 2️⃣  Bombe
+
+#to_start: Insert Coin -> Start
+#recommended: 
+
+disable_score: true
+
+added: 2025-08-03

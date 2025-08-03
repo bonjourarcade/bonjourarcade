@@ -1,0 +1,16 @@
+title: Puyo Puyo Tsu
+developer: Compile
+year: 1984
+genre: Puzzle
+#controls:
+#  - 🕹️ Déplacer
+#  - 1️⃣  Tirer
+#  - 2️⃣  Bombe
+
+#to_start: Insert Coin -> Start
+#recommended: 
+
+disable_score: true
+hide: yes
+
+added: 2025-08-02

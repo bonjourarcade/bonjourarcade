@@ -573,9 +573,9 @@
                 if (gameLink) {
                     const gameElement = gameLink.closest('.game');
                     if (gameElement) {
-                        // Scroll to the game with smooth animation
+                        // Jump to the game instantly
                         gameElement.scrollIntoView({ 
-                            behavior: 'smooth', 
+                            behavior: 'auto', 
                             block: 'center' 
                         });
                         

@@ -8,7 +8,7 @@ try:
 except ImportError:
     use_tqdm = False
 
-MAX_SIZE = 500 * 1024  # 500KB in bytes
+MAX_SIZE = 100 * 1024  # 500KB in bytes
 TARGET_WIDTH = 800  # fallback width for resizing if needed
 
 

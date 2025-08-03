@@ -289,8 +289,11 @@ done
 
 # Combine results
 echo -e "${BLUE}🔗 Combining results...${NC}"
-COMBINED_GAMES="[]"
 FEATURED_GAME="null"
+
+# Create temporary files for combining results
+COMBINED_GAMES_FILE="$TEMP_DIR/combined_games.json"
+echo "[]" > "$COMBINED_GAMES_FILE"
 
 for output_dir in "${WORKER_OUTPUTS[@]}"; do
     if [ -d "$output_dir" ]; then
@@ -307,8 +310,9 @@ for output_dir in "${WORKER_OUTPUTS[@]}"; do
                     if [ "$game_id" = "$FEATURED_GAME_ID" ]; then
                         FEATURED_GAME="$game_json"
                     else
-                        # Add to combined games array
-                        COMBINED_GAMES=$(echo "$COMBINED_GAMES" | jq --argjson game "$game_json" '. += [$game]')
+                        # Add to combined games array using temporary file to avoid argument list too long
+                        jq --argjson game "$game_json" '. += [$game]' "$COMBINED_GAMES_FILE" > "$TEMP_DIR/temp_combined.json"
+                        mv "$TEMP_DIR/temp_combined.json" "$COMBINED_GAMES_FILE"
                     fi
                 else
                     echo -e "${YELLOW}⚠️  Warning: Invalid JSON from worker: $game_file${NC}"
@@ -317,6 +321,9 @@ for output_dir in "${WORKER_OUTPUTS[@]}"; do
         done
     fi
 done
+
+# Read the combined games from file
+COMBINED_GAMES=$(cat "$COMBINED_GAMES_FILE")
 
 # Add the SHMUPS entry
 shmups_json=$(jq -n \
@@ -334,7 +341,10 @@ shmups_json=$(jq -n \
     --arg saveState "" \
     '{id: $id, title: $title, developer: $developer, year: $year, genre: $genre, recommended: $recommended, hide: $hide, coverArt: $coverArt, pageUrl: $pageUrl, core: $core, romPath: $romPath, saveState: $saveState}')
 
-COMBINED_GAMES=$(echo "$COMBINED_GAMES" | jq --argjson shmups "$shmups_json" '. += [$shmups]')
+# Add SHMUPS to combined games using file-based approach
+jq --argjson shmups "$shmups_json" '. += [$shmups]' "$COMBINED_GAMES_FILE" > "$TEMP_DIR/temp_combined.json"
+mv "$TEMP_DIR/temp_combined.json" "$COMBINED_GAMES_FILE"
+COMBINED_GAMES=$(cat "$COMBINED_GAMES_FILE")
 
 # Create final JSON output
 if [ "$FEATURED_GAME" != "null" ]; then

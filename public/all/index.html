@@ -26,13 +26,17 @@
             background: var(--background);
             color: var(--text-color);
             margin: 0;
-            padding: 2rem;
+            padding: 1rem;
             transition: background-color 0.3s, color 0.3s;
+            overflow-x: hidden; /* Prevent horizontal scrollbar */
         }
         .grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
             gap: 1rem;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
         }
         .game {
             background: var(--card-bg);
@@ -43,6 +47,27 @@
             transition: transform 0.2s, background-color 0.3s;
             border: 1px solid var(--border-color);
             /* Remove flex and aspect-ratio from .game */
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        /* Responsive game card adjustments */
+        @media (max-width: 480px) {
+            .game {
+                border-radius: 6px;
+            }
+            
+            .game-title {
+                padding: 0.4rem;
+                font-size: 0.9rem;
+            }
+            
+            .new-badge {
+                font-size: 0.7em;
+                padding: 1px 8px;
+                top: 5px;
+                left: 5px;
+            }
         }
         .game-cover {
             aspect-ratio: 0.73;
@@ -188,6 +213,264 @@
         body.theme-dark .no-results {
             color: #aaa;
         }
+        
+        /* Mobile responsive fixes */
+        @media (max-width: 768px) {
+            body {
+                padding: 0.5rem;
+            }
+            
+            .search-container {
+                flex: 1 1 100% !important;
+                min-width: 0 !important;
+                max-width: none !important;
+                margin: 0 !important;
+                width: 100% !important;
+            }
+            
+            .search-input {
+                width: 100%;
+                max-width: none;
+                box-sizing: border-box;
+            }
+            
+            .random-game-btn {
+                font-size: 0.9rem;
+                padding: 0.6rem 1rem;
+                white-space: nowrap;
+                min-width: auto;
+                width: auto;
+            }
+            
+            .theme-toggle {
+                font-size: 0.8rem;
+                padding: 0.4rem 0.8rem;
+                min-width: auto;
+                width: auto;
+            }
+            
+            #back-home-btn {
+                font-size: 0.9rem;
+                padding: 0.5rem 1rem;
+                white-space: nowrap;
+                min-width: auto;
+                width: auto;
+            }
+            
+            #header-container {
+                gap: 0.5rem !important;
+                margin-bottom: 1rem !important;
+            }
+            
+            #header-buttons {
+                gap: 0.3rem !important;
+            }
+        }
+        
+        /* Extra small mobile devices */
+        @media (max-width: 480px) {
+            body {
+                padding: 0.3rem;
+            }
+            
+            .search-container {
+                margin-bottom: 0.8rem !important;
+            }
+            
+            .random-game-btn {
+                font-size: 0.8rem;
+                padding: 0.5rem 0.8rem;
+            }
+            
+            .theme-toggle {
+                font-size: 0.7rem;
+                padding: 0.3rem 0.6rem;
+            }
+            
+            #back-home-btn {
+                font-size: 0.8rem;
+                padding: 0.4rem 0.8rem;
+            }
+            
+            /* Ensure header text wraps properly */
+            .header-content h1 {
+                font-size: 1.2rem;
+                line-height: 1.3;
+                word-break: break-word;
+                overflow-wrap: break-word;
+            }
+            
+            .header-content h2 {
+                font-size: 1rem;
+                line-height: 1.3;
+                word-break: break-word;
+                overflow-wrap: break-word;
+            }
+        }
+        
+        /* Very small screens */
+        @media (max-width: 360px) {
+            .header-content h1 {
+                font-size: 1.1rem;
+            }
+            
+            .header-content h2 {
+                font-size: 0.9rem;
+            }
+        }
+        
+        /* Smooth transitions for show/hide */
+        #header-container, #header-content {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        
+        #header-container[style*="display: none"], #header-content[style*="display: none"] {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        
+        /* Prevent layout shifts and scrollbar appearance */
+        html, body {
+            overflow-x: hidden;
+            width: 100%;
+            max-width: 100vw;
+        }
+        
+        /* Ensure grid layout remains stable */
+        .grid {
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+            display: block;
+        }
+        
+        /* Section headers styling */
+        .section-header {
+            margin: 1rem 0 0.5rem 0;
+            padding: 0.3rem 0;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            background: var(--background);
+            z-index: 10;
+        }
+        
+        .section-header h2 {
+            margin: 0;
+            font-size: 3rem;
+            font-weight: bold;
+            color: var(--text-color);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+        
+        .section-games {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 0.8rem;
+            margin-bottom: 0.5rem;
+            width: 100%;
+        }
+        
+        /* Responsive section adjustments */
+        @media (max-width: 768px) {
+            .section-header {
+                margin: 0.8rem 0 0.4rem 0;
+                padding: 0.2rem 0;
+            }
+            
+            .section-header h2 {
+                font-size: 2.2rem;
+                letter-spacing: 2px;
+            }
+            
+            .section-games {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+                gap: 12px;
+                margin-bottom: 0.3rem;
+                width: 100%;
+            }
+        }
+        
+        /* Prevent any horizontal overflow */
+        * {
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+        
+        /* Ensure header content doesn't overflow */
+        .header-content {
+            width: 100%;
+            max-width: 100%;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            hyphens: auto;
+        }
+        
+        .header-content h1,
+        .header-content h2 {
+            width: 100%;
+            max-width: 100%;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            hyphens: auto;
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* Responsive grid adjustments - match main index.html */
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+                gap: 15px;
+                width: 100%;
+                max-width: 100%;
+            }
+        }
+        
+        /* Fix banner spacer styling */
+        #bonjourarcade-banner-spacer {
+            background: transparent !important;
+            border: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+            display: block !important;
+            max-width: 100vw !important;
+            overflow: hidden !important;
+        }
+        
+        /* Ensure banner doesn't cause visual artifacts */
+        .bonjourarcade-banner {
+            background: #3460e5 !important;
+            border: none !important;
+            margin: 0 !important;
+            padding: 12px 0 !important;
+            width: 100% !important;
+            max-width: 100vw !important;
+            overflow: hidden !important;
+        }
+        
+        /* Container constraints */
+        #header-container,
+        .search-container,
+        #header-content,
+        #browser-warning,
+        #gameGrid {
+            width: 100% !important;
+            max-width: 100% !important;
+            overflow: hidden !important;
+            box-sizing: border-box !important;
+        }
+        
+        /* Hide tooltips on mobile devices */
+        @media (max-width: 768px) {
+            .game-meta-tooltip {
+                display: none !important;
+                opacity: 0 !important;
+                visibility: hidden !important;
+            }
+        }
     </style>
     <style>
     .game-meta-tooltip {
@@ -215,19 +498,28 @@
     </style>
 </head>
 <body>
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+    <div id="header-container" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
         <button id="back-home-btn" style="padding: 0.6rem 1.2rem; font-size: 1rem; border-radius: 6px; border: none; background: #222; color: #fff; cursor: pointer; font-family: sans-serif; box-shadow: 0 2px 6px rgba(0,0,0,0.08);">← Retour Accueil</button>
         
-        <div class="search-container" style="margin-bottom: 0; flex: 1; max-width: 600px; margin-left: 2rem; margin-right: 2rem;">
-            <input type="text" id="search-input" class="search-input" placeholder="Rechercher un jeu... (appuyez sur / pour rechercher)">
-            <span class="search-info" id="search-info"></span>
+        <div id="header-buttons" style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
+            <button id="theme-toggle" class="theme-toggle" style="margin-right: 0;">🌙</button>
+            <button id="random-game-btn" class="random-game-btn">Jouer à un jeu aléatoire</button>
         </div>
-        
-        <button id="theme-toggle" class="theme-toggle" style="margin-right: 1rem;">🌙</button>
-        <button id="random-game-btn" class="random-game-btn">Jouer à un jeu aléatoire</button>
     </div>
     
-    <div class="header-content">
+    <div class="search-container" style="margin-bottom: 1.5rem; flex: 1; min-width: 250px; max-width: 600px; margin-left: 0; margin-right: 0;">
+        <select id="search-type" style="padding: 0.75rem 0.5rem; border: 2px solid var(--border-color); border-radius: 8px 0 0 8px; font-size: 1rem; background: var(--card-bg); color: var(--text-color); border-right: none; cursor: pointer;">
+            <option value="title">Titre</option>
+            <option value="genre">Genre</option>
+        </select>
+        <input type="text" id="search-input" class="search-input" placeholder="Rechercher par titre..." style="border-radius: 0 8px 8px 0; border-left: none;">
+        <select id="genre-select" style="display: none; padding: 0.75rem 1rem; border: 2px solid var(--border-color); border-radius: 0 8px 8px 0; font-size: 1rem; background: var(--card-bg); color: var(--text-color); border-left: none; cursor: pointer;">
+            <option value="">Sélectionner un genre...</option>
+        </select>
+        <span class="search-info" id="search-info"></span>
+    </div>
+    
+    <div id="header-content" class="header-content">
         <div class="header-left">
             <div>
                 <h1>Tu as trouvé la cachette secrète de jeux!</h1>
@@ -286,34 +578,67 @@
                 filteredGamesData = gamesData;
                 updateSearchInfo();
                 renderGames(filteredGamesData);
+                showHeaderElements(); // Show header elements when search is cleared
+                showSectionHeaders(); // Show section headers when search is cleared
                 return;
             }
             
+            const searchType = document.getElementById('search-type').value;
             const term = searchTerm.toLowerCase();
             
-            // Filter by title and ID for better search results (include hidden games)
+            // Filter based on search type
             filteredGamesData = gamesData.filter(game => {
-                // Check game title
-                let displayTitle = game.title;
-                if (!displayTitle || displayTitle === game.id) {
-                    displayTitle = capitalizeFirst(game.id);
+                if (searchType === 'title') {
+                    // Search only by title
+                    let displayTitle = game.title;
+                    if (!displayTitle || displayTitle === game.id) {
+                        displayTitle = capitalizeFirst(game.id);
+                    }
+                    return displayTitle.toLowerCase().includes(term);
+                } else if (searchType === 'genre') {
+                    // Search only by genre (exact match from dropdown, case insensitive)
+                    // Check if any of the comma-separated genres match
+                    if (game.genre) {
+                        const individualGenres = game.genre.split(',').map(g => g.trim().toLowerCase());
+                        return individualGenres.includes(term.toLowerCase());
+                    }
+                    return false;
                 }
-                const titleMatch = displayTitle.toLowerCase().includes(term);
-                
-                // Check game ID
-                const idMatch = game.id && game.id.toLowerCase().includes(term);
-                
-                // Check developer if available
-                const developerMatch = game.developer && game.developer.toLowerCase().includes(term);
-                
-                // Check genre if available
-                const genreMatch = game.genre && game.genre.toLowerCase().includes(term);
-                
-                return titleMatch || idMatch || developerMatch || genreMatch;
+                return false;
             });
             
             updateSearchInfo();
             renderGames(filteredGamesData);
+            hideHeaderElements(); // Hide header elements when searching
+            hideSectionHeaders(); // Hide section headers when searching
+        }
+        
+        function showHeaderElements() {
+            const headerContainer = document.getElementById('header-container');
+            const headerContent = document.getElementById('header-content');
+            if (headerContainer) headerContainer.style.display = 'flex';
+            if (headerContent) headerContent.style.display = 'block';
+        }
+        
+        function hideHeaderElements() {
+            const headerContainer = document.getElementById('header-container');
+            const headerContent = document.getElementById('header-content');
+            if (headerContainer) headerContainer.style.display = 'none';
+            if (headerContent) headerContent.style.display = 'none';
+        }
+        
+        function showSectionHeaders() {
+            const sectionHeaders = document.querySelectorAll('.section-header');
+            sectionHeaders.forEach(header => {
+                header.style.display = 'block';
+            });
+        }
+        
+        function hideSectionHeaders() {
+            const sectionHeaders = document.querySelectorAll('.section-header');
+            sectionHeaders.forEach(header => {
+                header.style.display = 'none';
+            });
         }
         
         function updateSearchInfo() {
@@ -339,51 +664,204 @@
                 return;
             }
             
-            games.forEach(game => {
-                const div = document.createElement('div');
-                div.className = 'game';
-                div._gameData = game;
-
-                let coverSrc = game.coverArt || '/assets/images/placeholder_thumb.png';
-
-                // Use thumbnail version if available
-                if (coverSrc && coverSrc !== '/assets/images/placeholder_thumb.png') {
-                    const lastDotIndex = coverSrc.lastIndexOf('.');
-                    if (lastDotIndex !== -1) {
-                        coverSrc = coverSrc.substring(0, lastDotIndex) + '_thumb' + coverSrc.substring(lastDotIndex);
-                    }
-                }
-
-                // Add special border and badge if new_flag is true
-                if (game.new_flag === 'true') {
-                    div.classList.add('game-new');
-                }
-
-                div.innerHTML = `
-                    <a href="${game.pageUrl}" class="game-link">
-                        <div class="game-cover" style="position:relative;">
-                            ${game.new_flag === 'true' ? '<span class="new-badge">NOUVEAU</span>' : ''}
-                            <img src="${coverSrc}" alt="${game.title}">
-                        </div>
-                        <div class="game-title">${game.title}</div>
-                    </a>
-                `;
+            // Check if we're in search mode (no sections when searching)
+            const searchInput = document.getElementById('search-input');
+            const genreSelect = document.getElementById('genre-select');
+            const isSearching = (searchInput && searchInput.value) || (genreSelect && genreSelect.value);
+            
+            if (isSearching) {
+                // Simple grid layout for search results (no sections)
+                const searchGrid = document.createElement('div');
+                searchGrid.className = 'section-games';
+                searchGrid.style.width = '100%';
+                searchGrid.style.display = 'grid';
                 
-                // Add click handler to set referrer flag
-                div.querySelector('a').addEventListener('click', function(e) {
-                    sessionStorage.setItem('referrerAllGames', '1');
+                // Responsive grid template columns
+                if (window.innerWidth <= 768) {
+                    searchGrid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(100px, 1fr))';
+                    searchGrid.style.gap = '12px';
+                    searchGrid.style.marginBottom = '0.3rem';
+                } else {
+                    searchGrid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(150px, 1fr))';
+                    searchGrid.style.gap = '0.8rem';
+                    searchGrid.style.marginBottom = '0.5rem';
+                }
+                
+                // Sort games alphabetically for search results
+                games.sort((a, b) => {
+                    let titleA = a.title;
+                    let titleB = b.title;
+                    if (!titleA || titleA === a.id) titleA = capitalizeFirst(a.id);
+                    if (!titleB || titleB === b.id) titleB = capitalizeFirst(b.id);
+                    return titleA.localeCompare(titleB);
                 });
+                
+                // Render all games in the search grid
+                games.forEach(game => {
+                    const div = document.createElement('div');
+                    div.className = 'game';
+                    div._gameData = game;
 
-                // Tooltip event listeners
-                div.addEventListener('mouseenter', (e) => {
-                    showTooltipForItem(div);
-                });
-                div.addEventListener('mouseleave', (e) => {
-                    removeTooltip();
-                });
+                    let coverSrc = game.coverArt || '/assets/images/placeholder_thumb.png';
 
-                container.appendChild(div);
-            });
+                    // Use thumbnail version if available
+                    if (coverSrc && coverSrc !== '/assets/images/placeholder_thumb.png') {
+                        const lastDotIndex = coverSrc.lastIndexOf('.');
+                        if (lastDotIndex !== -1) {
+                            coverSrc = coverSrc.substring(0, lastDotIndex) + '_thumb' + coverSrc.substring(lastDotIndex);
+                        }
+                    }
+
+                    // Add special border and badge if new_flag is true
+                    if (game.new_flag === 'true') {
+                        div.classList.add('game-new');
+                    }
+
+                    div.innerHTML = `
+                        <a href="${game.pageUrl}" class="game-link">
+                            <div class="game-cover" style="position:relative;">
+                                ${game.new_flag === 'true' ? '<span class="new-badge">NOUVEAU</span>' : ''}
+                                <img src="${coverSrc}" alt="${game.title}">
+                            </div>
+                            <div class="game-title">${game.title}</div>
+                        </a>
+                    `;
+                    
+                    // Add click handler to set referrer flag
+                    div.querySelector('a').addEventListener('click', function(e) {
+                        sessionStorage.setItem('referrerAllGames', '1');
+                    });
+
+                    // Tooltip event listeners - only on non-mobile devices
+                    if (!isMobileDevice()) {
+                        div.addEventListener('mouseenter', (e) => {
+                            showTooltipForItem(div);
+                        });
+                        div.addEventListener('mouseleave', (e) => {
+                            removeTooltip();
+                        });
+                    }
+
+                    searchGrid.appendChild(div);
+                });
+                
+                container.appendChild(searchGrid);
+            } else {
+                // Original sectioned layout for browsing (when not searching)
+                // Group games by first letter
+                const gamesByLetter = {};
+                games.forEach(game => {
+                    let displayTitle = game.title;
+                    if (!displayTitle || displayTitle === game.id) {
+                        displayTitle = capitalizeFirst(game.id);
+                    }
+                    const firstChar = displayTitle.charAt(0).toUpperCase();
+                    
+                    // Group numbers into "#" category
+                    let category = firstChar;
+                    if (/[0-9]/.test(firstChar)) {
+                        category = '#';
+                    }
+                    
+                    if (!gamesByLetter[category]) {
+                        gamesByLetter[category] = [];
+                    }
+                    gamesByLetter[category].push(game);
+                });
+                
+                // Sort letters alphabetically, but put "#" at the beginning
+                const sortedLetters = Object.keys(gamesByLetter).sort((a, b) => {
+                    if (a === '#') return -1;
+                    if (b === '#') return 1;
+                    return a.localeCompare(b);
+                });
+                
+                // Render each section
+                sortedLetters.forEach(letter => {
+                    // Create section header
+                    const sectionHeader = document.createElement('div');
+                    sectionHeader.className = 'section-header';
+                    sectionHeader.innerHTML = `<h2>${letter}</h2>`;
+                    container.appendChild(sectionHeader);
+                    
+                    // Create section container with full width
+                    const sectionContainer = document.createElement('div');
+                    sectionContainer.className = 'section-games';
+                    sectionContainer.style.width = '100%';
+                    sectionContainer.style.display = 'grid';
+                    
+                    // Responsive grid template columns
+                    if (window.innerWidth <= 768) {
+                        sectionContainer.style.gridTemplateColumns = 'repeat(auto-fill, minmax(100px, 1fr))';
+                        sectionContainer.style.gap = '12px';
+                        sectionContainer.style.marginBottom = '0.3rem';
+                    } else {
+                        sectionContainer.style.gridTemplateColumns = 'repeat(auto-fill, minmax(150px, 1fr))';
+                        sectionContainer.style.gap = '0.8rem';
+                        sectionContainer.style.marginBottom = '0.5rem';
+                    }
+                    
+                    // Sort games within each section alphabetically
+                    gamesByLetter[letter].sort((a, b) => {
+                        let titleA = a.title;
+                        let titleB = b.title;
+                        if (!titleA || titleA === a.id) titleA = capitalizeFirst(a.id);
+                        if (!titleB || titleB === b.id) titleB = capitalizeFirst(b.id);
+                        return titleA.localeCompare(titleB);
+                    });
+                    
+                    // Render games in this section
+                    gamesByLetter[letter].forEach(game => {
+                        const div = document.createElement('div');
+                        div.className = 'game';
+                        div._gameData = game;
+
+                        let coverSrc = game.coverArt || '/assets/images/placeholder_thumb.png';
+
+                        // Use thumbnail version if available
+                        if (coverSrc && coverSrc !== '/assets/images/placeholder_thumb.png') {
+                            const lastDotIndex = coverSrc.lastIndexOf('.');
+                            if (lastDotIndex !== -1) {
+                                coverSrc = coverSrc.substring(0, lastDotIndex) + '_thumb' + coverSrc.substring(lastDotIndex);
+                            }
+                        }
+
+                        // Add special border and badge if new_flag is true
+                        if (game.new_flag === 'true') {
+                            div.classList.add('game-new');
+                        }
+
+                        div.innerHTML = `
+                            <a href="${game.pageUrl}" class="game-link">
+                                <div class="game-cover" style="position:relative;">
+                                    ${game.new_flag === 'true' ? '<span class="new-badge">NOUVEAU</span>' : ''}
+                                    <img src="${coverSrc}" alt="${game.title}">
+                                </div>
+                                <div class="game-title">${game.title}</div>
+                            </a>
+                        `;
+                        
+                        // Add click handler to set referrer flag
+                        div.querySelector('a').addEventListener('click', function(e) {
+                            sessionStorage.setItem('referrerAllGames', '1');
+                        });
+
+                        // Tooltip event listeners - only on non-mobile devices
+                        if (!isMobileDevice()) {
+                            div.addEventListener('mouseenter', (e) => {
+                                showTooltipForItem(div);
+                            });
+                            div.addEventListener('mouseleave', (e) => {
+                                removeTooltip();
+                            });
+                        }
+
+                        sectionContainer.appendChild(div);
+                    });
+                    
+                    container.appendChild(sectionContainer);
+                });
+            }
         }
 
         // Function to select a random game from the list
@@ -396,6 +874,12 @@
             } else {
                 console.error('No games available to select from');
             }
+        }
+
+        // Check if device is mobile
+        function isMobileDevice() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+                   window.innerWidth <= 768;
         }
 
         // Focus search function
@@ -432,6 +916,60 @@
             filterGames(e.target.value);
         });
         
+        // Search type dropdown event listener
+        document.getElementById('search-type').addEventListener('change', (e) => {
+            const searchInput = document.getElementById('search-input');
+            const genreSelect = document.getElementById('genre-select');
+            const searchType = e.target.value;
+            
+            // Update placeholder text and show/hide appropriate input
+            if (searchType === 'title') {
+                searchInput.placeholder = 'Rechercher par titre...';
+                searchInput.style.display = 'block';
+                genreSelect.style.display = 'none';
+                searchInput.value = '';
+                genreSelect.value = '';
+            } else if (searchType === 'genre') {
+                searchInput.style.display = 'none';
+                genreSelect.style.display = 'block';
+                searchInput.value = '';
+                genreSelect.value = '';
+                
+                // Populate genre select with unique genres from gamesData (case-insensitive deduplication and comma splitting)
+                const genreMap = new Map();
+                gamesData.forEach(game => {
+                    if (game.genre) {
+                        // Split genres by comma and trim whitespace
+                        const individualGenres = game.genre.split(',').map(g => g.trim());
+                        individualGenres.forEach(subGenre => {
+                            if (subGenre) { // Ensure subGenre is not empty after trimming
+                                const lowerSubGenre = subGenre.toLowerCase();
+                                if (!genreMap.has(lowerSubGenre)) {
+                                    genreMap.set(lowerSubGenre, subGenre); // Keep original case for display
+                                }
+                            }
+                        });
+                    }
+                });
+                const uniqueGenres = Array.from(genreMap.values()).sort();
+                genreSelect.innerHTML = '<option value="">Sélectionner un genre...</option>';
+                uniqueGenres.forEach(genre => {
+                    const option = document.createElement('option');
+                    option.value = genre;
+                    option.textContent = genre;
+                    genreSelect.appendChild(option);
+                });
+            }
+            
+            // Clear any existing search results
+            filterGames('');
+        });
+        
+        // Genre select event listener
+        document.getElementById('genre-select').addEventListener('change', (e) => {
+            filterGames(e.target.value);
+        });
+
         // Keyboard event listener for "/" key
         document.addEventListener('keydown', function(e) {
             // If search is focused, handle Escape key
@@ -575,8 +1113,10 @@
         const tooltip = document.getElementById('game-meta-tooltip');
         if (tooltip) tooltip.remove();
     }
-    // Optional: Remove tooltip on click anywhere
-    document.addEventListener('click', removeTooltip);
+    // Optional: Remove tooltip on click anywhere - only on non-mobile devices
+    if (!isMobileDevice()) {
+        document.addEventListener('click', removeTooltip);
+    }
     </script>
 </body>
 </html>

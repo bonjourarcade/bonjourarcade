@@ -346,26 +346,33 @@ jq --argjson shmups "$shmups_json" '. += [$shmups]' "$COMBINED_GAMES_FILE" > "$T
 mv "$TEMP_DIR/temp_combined.json" "$COMBINED_GAMES_FILE"
 COMBINED_GAMES=$(cat "$COMBINED_GAMES_FILE")
 
-# Create final JSON output
+# Create final JSON output using file-based approach
+FINAL_JSON_FILE="$TEMP_DIR/final_output.json"
+
 if [ "$FEATURED_GAME" != "null" ]; then
-    FINAL_JSON=$(jq -n \
-        --argjson featured "$FEATURED_GAME" \
-        --argjson games "$COMBINED_GAMES" \
-        '{gameOfTheWeek: $featured, previousGames: $games}')
+    # Create featured game file
+    echo "$FEATURED_GAME" > "$TEMP_DIR/featured_game.json"
+    
+    # Create final JSON with featured game
+    jq -n \
+        --slurpfile featured "$TEMP_DIR/featured_game.json" \
+        --slurpfile games "$COMBINED_GAMES_FILE" \
+        '{gameOfTheWeek: $featured[0], previousGames: $games[0]}' > "$FINAL_JSON_FILE"
 else
-    FINAL_JSON=$(jq -n \
-        --argjson games "$COMBINED_GAMES" \
-        '{gameOfTheWeek: {id: null, title: "N/A", coverArt: "/assets/images/placeholder_thumb.png", pageUrl: "#", core: null, romPath: null}, previousGames: $games}')
+    # Create final JSON without featured game
+    jq -n \
+        --slurpfile games "$COMBINED_GAMES_FILE" \
+        '{gameOfTheWeek: {id: null, title: "N/A", coverArt: "/assets/images/placeholder_thumb.png", pageUrl: "#", core: null, romPath: null}, previousGames: $games[0]}' > "$FINAL_JSON_FILE"
 fi
 
 # Write final output
-echo "$FINAL_JSON" | jq '.' > "$OUTPUT_FILE"
+jq '.' "$FINAL_JSON_FILE" > "$OUTPUT_FILE"
 
 # Clean up
 rm -rf "$TEMP_DIR"
 
 # Final check for featured game
-featured_id_check=$(echo "$FINAL_JSON" | jq -r '.gameOfTheWeek.id')
+featured_id_check=$(jq -r '.gameOfTheWeek.id' "$OUTPUT_FILE")
 if [ "$featured_id_check" = "null" ] || [ "$featured_id_check" != "$FEATURED_GAME_ID" ]; then
     echo -e "${YELLOW}⚠️  Warning: Featured game '$FEATURED_GAME_ID' was not found or processed correctly.${NC}"
 fi

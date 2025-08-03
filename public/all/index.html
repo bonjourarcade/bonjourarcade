@@ -545,6 +545,58 @@
             window.location.href = '/index.html';
         });
         
+        // Function to scroll to a specific game
+        function scrollToGame(gameId) {
+            if (!gameId) return;
+            
+            // Wait for games to be rendered
+            setTimeout(() => {
+                // Find the game element by its link href
+                const gameLink = document.querySelector(`a[href="/play?game=${gameId}"]`);
+                if (gameLink) {
+                    const gameElement = gameLink.closest('.game');
+                    if (gameElement) {
+                        // Scroll to the game with smooth animation
+                        gameElement.scrollIntoView({ 
+                            behavior: 'smooth', 
+                            block: 'center' 
+                        });
+                        
+                        // Add a prominent animation effect
+                        gameElement.style.backgroundColor = 'rgba(76, 175, 80, 0.15)';
+                        gameElement.style.boxShadow = '0 0 25px rgba(76, 175, 80, 0.5), 0 0 50px rgba(76, 175, 80, 0.3)';
+                        gameElement.style.transform = 'scale(1.05)';
+                        gameElement.style.transition = 'background-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease';
+                        
+                        // Add a pulsing animation
+                        let pulseCount = 0;
+                        const maxPulses = 3;
+                        const pulseInterval = setInterval(() => {
+                            pulseCount++;
+                            if (pulseCount <= maxPulses) {
+                                // Pulse effect
+                                gameElement.style.transform = 'scale(1.08)';
+                                gameElement.style.boxShadow = '0 0 35px rgba(76, 175, 80, 0.7), 0 0 70px rgba(76, 175, 80, 0.4)';
+                                
+                                setTimeout(() => {
+                                    gameElement.style.transform = 'scale(1.05)';
+                                    gameElement.style.boxShadow = '0 0 25px rgba(76, 175, 80, 0.5), 0 0 50px rgba(76, 175, 80, 0.3)';
+                                }, 300);
+                            } else {
+                                clearInterval(pulseInterval);
+                                // Final fade out
+                                setTimeout(() => {
+                                    gameElement.style.backgroundColor = '';
+                                    gameElement.style.boxShadow = '';
+                                    gameElement.style.transform = '';
+                                }, 1000);
+                            }
+                        }, 600);
+                    }
+                }
+            }, 100);
+        }
+        
         // Theme management
         function initTheme() {
             const savedTheme = localStorage.getItem('theme');
@@ -728,9 +780,10 @@
                         </a>
                     `;
                     
-                    // Add click handler to set referrer flag
+                    // Add click handler to set referrer flag and store game ID for back navigation
                     div.querySelector('a').addEventListener('click', function(e) {
                         sessionStorage.setItem('referrerAllGames', '1');
+                        sessionStorage.setItem('lastPlayedGame', game.id);
                     });
 
                     // Tooltip event listeners - only on non-mobile devices
@@ -842,9 +895,10 @@
                             </a>
                         `;
                         
-                        // Add click handler to set referrer flag
+                        // Add click handler to set referrer flag and store game ID for back navigation
                         div.querySelector('a').addEventListener('click', function(e) {
                             sessionStorage.setItem('referrerAllGames', '1');
+                            sessionStorage.setItem('lastPlayedGame', game.id);
                         });
 
                         // Tooltip event listeners - only on non-mobile devices
@@ -871,6 +925,7 @@
                 const randomIndex = Math.floor(Math.random() * gamesData.length);
                 const randomGame = gamesData[randomIndex];
                 sessionStorage.setItem('referrerAllGames', '1');
+                sessionStorage.setItem('lastPlayedGame', randomGame.id);
                 window.location.href = randomGame.pageUrl;
             } else {
                 console.error('No games available to select from');
@@ -1107,6 +1162,31 @@
         window.addEventListener('DOMContentLoaded', () => {
             initTheme();
             checkBrowser();
+            
+            // Check if we should scroll to a specific game (from URL parameter or session storage)
+            const urlParams = new URLSearchParams(window.location.search);
+            let scrollToGameId = urlParams.get('scrollTo');
+            
+            // If no URL parameter, check session storage for last played game
+            if (!scrollToGameId) {
+                scrollToGameId = sessionStorage.getItem('lastPlayedGame');
+                if (scrollToGameId) {
+                    // Clear the stored game ID
+                    sessionStorage.removeItem('lastPlayedGame');
+                }
+            }
+            
+            if (scrollToGameId) {
+                // Remove the parameter from URL without reloading
+                urlParams.delete('scrollTo');
+                const newUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
+                window.history.replaceState({}, '', newUrl);
+                
+                // Scroll to the game after games are loaded
+                setTimeout(() => {
+                    scrollToGame(scrollToGameId);
+                }, 500);
+            }
         });
 
         // Fetch and render games

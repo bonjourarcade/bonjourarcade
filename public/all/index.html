@@ -989,7 +989,50 @@
                 focusSearch();
                 e.preventDefault();
             }
+            
+            // Jump to section on letter key press
+            if (!e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
+                const key = e.key.toLowerCase();
+                
+                // Check if it's a letter (a-z) or number (0-9)
+                if ((key >= 'a' && key <= 'z') || (key >= '0' && key <= '9')) {
+                    jumpToSection(key);
+                    e.preventDefault();
+                }
+            }
         });
+        
+        // Function to jump to a specific section
+        function jumpToSection(letter) {
+            // Convert number to '#' for number section
+            const sectionLetter = /[0-9]/.test(letter) ? '#' : letter.toUpperCase();
+            
+            // Find the section header
+            const sectionHeaders = document.querySelectorAll('.section-header h2');
+            let targetSection = null;
+            
+            sectionHeaders.forEach(header => {
+                if (header.textContent === sectionLetter) {
+                    targetSection = header.closest('.section-header');
+                }
+            });
+            
+            if (targetSection) {
+                // Scroll to the section with smooth animation
+                targetSection.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start' 
+                });
+                
+                // Add a brief highlight effect
+                targetSection.style.backgroundColor = 'rgba(76, 175, 80, 0.1)';
+                targetSection.style.transition = 'background-color 0.3s ease';
+                
+                setTimeout(() => {
+                    targetSection.style.backgroundColor = '';
+                }, 1000);
+            }
+        }
 
         // Initialize theme and check browser when page loads
         window.addEventListener('DOMContentLoaded', () => {

@@ -623,7 +623,8 @@
         function hideHeaderElements() {
             const headerContainer = document.getElementById('header-container');
             const headerContent = document.getElementById('header-content');
-            if (headerContainer) headerContainer.style.display = 'none';
+            // Keep header container visible (contains back button, search, theme toggle, random button)
+            // Only hide the header content (title text)
             if (headerContent) headerContent.style.display = 'none';
         }
         

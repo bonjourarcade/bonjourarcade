@@ -1010,10 +1010,13 @@
             // Find the section header
             const sectionHeaders = document.querySelectorAll('.section-header h2');
             let targetSection = null;
+            let targetSectionContainer = null;
             
             sectionHeaders.forEach(header => {
                 if (header.textContent === sectionLetter) {
                     targetSection = header.closest('.section-header');
+                    // Find the next sibling which should be the section-games container
+                    targetSectionContainer = targetSection.nextElementSibling;
                 }
             });
             
@@ -1029,8 +1032,17 @@
                     header.style.backgroundColor = '';
                     header.style.boxShadow = '';
                 });
+                document.querySelectorAll('.section-games').forEach(container => {
+                    container.style.backgroundColor = '';
+                    container.style.boxShadow = '';
+                });
+                document.querySelectorAll('.game').forEach(game => {
+                    game.style.backgroundColor = '';
+                    game.style.boxShadow = '';
+                    game.style.transform = '';
+                });
                 
-                // Add a prominent highlight effect
+                // Add a prominent highlight effect to the section header
                 targetSection.style.backgroundColor = 'rgba(76, 175, 80, 0.2)';
                 targetSection.style.boxShadow = '0 0 20px rgba(76, 175, 80, 0.3)';
                 targetSection.style.transition = 'background-color 0.3s ease, box-shadow 0.3s ease';
@@ -1043,12 +1055,48 @@
                     sectionTitle.style.transition = 'color 0.3s ease, text-shadow 0.3s ease';
                 }
                 
+                // Highlight the section games container
+                if (targetSectionContainer && targetSectionContainer.classList.contains('section-games')) {
+                    targetSectionContainer.style.backgroundColor = 'rgba(76, 175, 80, 0.05)';
+                    targetSectionContainer.style.boxShadow = 'inset 0 0 20px rgba(76, 175, 80, 0.1)';
+                    targetSectionContainer.style.transition = 'background-color 0.3s ease, box-shadow 0.3s ease';
+                    
+                    // Highlight each game in the section
+                    const games = targetSectionContainer.querySelectorAll('.game');
+                    games.forEach((game, index) => {
+                        // Stagger the animation for a wave effect
+                        setTimeout(() => {
+                            game.style.backgroundColor = 'rgba(76, 175, 80, 0.1)';
+                            game.style.boxShadow = '0 0 15px rgba(76, 175, 80, 0.2)';
+                            game.style.transform = 'scale(1.02)';
+                            game.style.transition = 'background-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease';
+                        }, index * 50); // 50ms delay between each game
+                    });
+                }
+                
                 setTimeout(() => {
+                    // Remove highlights from section header
                     targetSection.style.backgroundColor = '';
                     targetSection.style.boxShadow = '';
                     if (sectionTitle) {
                         sectionTitle.style.color = '';
                         sectionTitle.style.textShadow = '';
+                    }
+                    
+                    // Remove highlights from section games container
+                    if (targetSectionContainer && targetSectionContainer.classList.contains('section-games')) {
+                        targetSectionContainer.style.backgroundColor = '';
+                        targetSectionContainer.style.boxShadow = '';
+                        
+                        // Remove highlights from each game
+                        const games = targetSectionContainer.querySelectorAll('.game');
+                        games.forEach((game, index) => {
+                            setTimeout(() => {
+                                game.style.backgroundColor = '';
+                                game.style.boxShadow = '';
+                                game.style.transform = '';
+                            }, index * 30); // Faster removal
+                        });
                     }
                 }, 1500);
             }

@@ -1024,13 +1024,33 @@
                     block: 'start' 
                 });
                 
-                // Add a brief highlight effect
-                targetSection.style.backgroundColor = 'rgba(76, 175, 80, 0.1)';
-                targetSection.style.transition = 'background-color 0.3s ease';
+                // Clear any existing highlights
+                document.querySelectorAll('.section-header').forEach(header => {
+                    header.style.backgroundColor = '';
+                    header.style.boxShadow = '';
+                });
+                
+                // Add a prominent highlight effect
+                targetSection.style.backgroundColor = 'rgba(76, 175, 80, 0.2)';
+                targetSection.style.boxShadow = '0 0 20px rgba(76, 175, 80, 0.3)';
+                targetSection.style.transition = 'background-color 0.3s ease, box-shadow 0.3s ease';
+                
+                // Also highlight the section title
+                const sectionTitle = targetSection.querySelector('h2');
+                if (sectionTitle) {
+                    sectionTitle.style.color = '#2e7d32';
+                    sectionTitle.style.textShadow = '0 0 10px rgba(46, 125, 50, 0.5)';
+                    sectionTitle.style.transition = 'color 0.3s ease, text-shadow 0.3s ease';
+                }
                 
                 setTimeout(() => {
                     targetSection.style.backgroundColor = '';
-                }, 1000);
+                    targetSection.style.boxShadow = '';
+                    if (sectionTitle) {
+                        sectionTitle.style.color = '';
+                        sectionTitle.style.textShadow = '';
+                    }
+                }, 1500);
             }
         }
 

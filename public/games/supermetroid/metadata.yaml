@@ -1,0 +1,16 @@
+title: Super Metroid
+developer: Intelligent Systems, Nintendo R&D1
+year: 1994
+genre: Adventure, Platform, Shooter
+#controls:
+#  - 🕹️ Déplacer
+#  - 1️⃣  Tirer
+#  - 2️⃣  Bombe
+
+#to_start: Insert Coin -> Start
+#recommended: 
+
+disable_score: true
+hide: yes
+
+added: 2025-08-03

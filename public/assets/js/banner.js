@@ -69,12 +69,12 @@
   const isLocal = localHosts.includes(window.location.hostname) || window.location.hostname.endsWith('.local');
   if (isLocal) {
     insertBanner('bonjourarcade-staging-banner', 'STAGING / LOCAL ENVIRONMENT', 'cursor:pointer; pointer-events:auto;');
-    // Add click-to-hide for staging banner
+    // Add hover-to-hide for staging banner
     setTimeout(() => {
       const banner = document.getElementById('bonjourarcade-staging-banner');
       if (banner) {
-        banner.title = 'Cliquez pour masquer';
-        banner.addEventListener('click', function() {
+        banner.title = 'Survolez pour masquer';
+        banner.addEventListener('mouseenter', function() {
           banner.style.display = 'none';
           updateBannerSpacer();
         });

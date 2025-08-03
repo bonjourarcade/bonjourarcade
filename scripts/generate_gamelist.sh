@@ -229,25 +229,32 @@ find "$ROMS_DIR" -maxdepth 2 -type f -not -path "*/\.*" | while read -r rom_file
     fi
 
     # --- Create JSON object ---
-    game_json=$(jq -n \
-              --arg id "$game_id" \
-              --arg title "${title:-$game_id}" \
-              --arg developer "$developer" \
-              --arg year "$year" \
-              --arg genre "$genre" \
-              --arg recommended "$recommended" \
-              --arg added "$added" \
-              --arg hide "$hide" \
-              --arg coverArt "$cover_art_abs" \
-              --arg pageUrl "$page_url" \
-              --arg core "${core:-null}" \
-              --arg romPath "${rom_path:-null}" \
-              --arg saveState "${save_state:-}" \
-              --argjson disable_score "$disable_score" \
-              --argjson controls "$controls_json" \
-              --arg to_start "$to_start" \
-              --arg new_flag "$new_flag" \
-              '{id: $id, title: $title, developer: $developer, year: $year, genre: $genre, recommended: $recommended, added: $added, hide: $hide, coverArt: $coverArt, pageUrl: $pageUrl, core: $core, romPath: $romPath, saveState: $saveState, disable_score: $disable_score, controls: $controls, to_start: $to_start, new_flag: $new_flag}')
+    # Use temporary file to avoid "Argument list too long" error
+    temp_json_input=$(mktemp)
+    cat > "$temp_json_input" << EOF
+{
+  "id": "$game_id",
+  "title": "${title:-$game_id}",
+  "developer": "$developer",
+  "year": "$year",
+  "genre": "$genre",
+  "recommended": "$recommended",
+  "added": "$added",
+  "hide": "$hide",
+  "coverArt": "$cover_art_abs",
+  "pageUrl": "$page_url",
+  "core": "${core:-null}",
+  "romPath": "${rom_path:-null}",
+  "saveState": "${save_state:-}",
+  "disable_score": $disable_score,
+  "controls": $controls_json,
+  "to_start": "$to_start",
+  "new_flag": "$new_flag"
+}
+EOF
+
+    game_json=$(cat "$temp_json_input" | jq -c '.')
+    rm -f "$temp_json_input"
 
     # --- Check if Featured / Add to List ---
     if [ "$game_id" = "$FEATURED_GAME_ID" ]; then

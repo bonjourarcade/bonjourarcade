@@ -19,10 +19,27 @@ then
 fi
 
 # --- Check for gamelist.json ---
-if [ ! -f "$GAMELIST_PATH" ]; then
-    echo "Error: gamelist.json not found at $GAMELIST_PATH"
-    exit 1
-fi
+MAX_RETRIES=10
+RETRY_DELAY=2
+
+for ((retry=1; retry<=MAX_RETRIES; retry++)); do
+    if [ -f "$GAMELIST_PATH" ]; then
+        break
+    fi
+    
+    if [ $retry -eq 1 ]; then
+        echo "Waiting for gamelist.json to be generated..."
+    else
+        echo "Retry $retry/$MAX_RETRIES: Waiting for gamelist.json..."
+    fi
+    
+    if [ $retry -eq $MAX_RETRIES ]; then
+        echo "Error: gamelist.json not found at $GAMELIST_PATH after $MAX_RETRIES retries"
+        exit 1
+    fi
+    
+    sleep $RETRY_DELAY
+done
 
 echo "Starting thumbnail generation..."
 

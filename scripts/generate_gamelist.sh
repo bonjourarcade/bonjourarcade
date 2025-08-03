@@ -263,7 +263,11 @@ EOF
     else
         # Append game to games array in temp file
         temp_games=$(cat "$temp_games_file")
-        echo "$temp_games" | jq --argjson game "$game_json" '. += [$game]' > "$temp_games_file"
+        # Use temporary file to avoid "Argument list too long" error
+        temp_game_input=$(mktemp)
+        echo "$game_json" > "$temp_game_input"
+        echo "$temp_games" | jq --slurpfile game "$temp_game_input" '. += $game' > "$temp_games_file"
+        rm -f "$temp_game_input"
     fi
 
 done
@@ -289,19 +293,31 @@ shmups_json=$(jq -n \
 
 # Append the SHMUPS entry to the temporary games file
 temp_games=$(cat "$temp_games_file")
-echo "$temp_games" | jq --argjson shmups "$shmups_json" '. += [$shmups]' > "$temp_games_file"
+# Use temporary file to avoid "Argument list too long" error
+temp_shmups_input=$(mktemp)
+echo "$shmups_json" > "$temp_shmups_input"
+echo "$temp_games" | jq --slurpfile shmups "$temp_shmups_input" '. += $shmups' > "$temp_games_file"
+rm -f "$temp_shmups_input"
 
 # --- Combine the data from temporary files to create final JSON ---
 games_list=$(cat "$temp_games_file")
 featured_game=$(cat "$temp_featured_file")
 
+# Use temporary files to avoid "Argument list too long" error
+temp_games_input=$(mktemp)
+temp_featured_input=$(mktemp)
+echo "$games_list" > "$temp_games_input"
+echo "$featured_game" > "$temp_featured_input"
+
 if [ "$featured_game" != "null" ]; then
-    json_output=$(jq --argjson featured "$featured_game" --argjson games "$games_list" \
-                 '{gameOfTheWeek: $featured, previousGames: $games}' < "$temp_json_file")
+    json_output=$(jq --slurpfile featured "$temp_featured_input" --slurpfile games "$temp_games_input" \
+                 '{gameOfTheWeek: $featured[0], previousGames: $games[0]}' < "$temp_json_file")
 else
-    json_output=$(jq --argjson games "$games_list" \
-                 '.previousGames = $games' < "$temp_json_file")
+    json_output=$(jq --slurpfile games "$temp_games_input" \
+                 '.previousGames = $games[0]' < "$temp_json_file")
 fi
+
+rm -f "$temp_games_input" "$temp_featured_input"
 
 # --- Final Check for Featured Game ---
 featured_id_check=$(echo "$json_output" | jq -r '.gameOfTheWeek.id')

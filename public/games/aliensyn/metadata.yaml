@@ -1,13 +1,11 @@
-title: Alien Syndrome
+title: Alien Syndrome (#23)
 developer: Sega
 year: 1987
 genre: Shooter
-#controls:
-#  - 🕹️ Déplacer
-#  - 1️⃣  Tirer
-#  - 2️⃣  Bombe
+controls:
+  - 🕹️ Déplacer
+  - 1️⃣  Tirer
 
-#to_start: Insert Coin -> Start
-#recommended: 
+to_start: Insert Coin -> Start
 
 added: 2025-08-01

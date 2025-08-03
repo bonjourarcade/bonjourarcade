@@ -7,7 +7,6 @@
 PURPLE='\033[0;35m'
 NC='\033[0m' # No Color
 
-GAMELIST_PATH="public/gamelist.json"
 THUMB_WIDTH=150
 
 # --- Check for ImageMagick (convert command) ---
@@ -18,40 +17,34 @@ then
     exit 1
 fi
 
-# --- Check for gamelist.json ---
-MAX_RETRIES=10
-RETRY_DELAY=2
-
-for ((retry=1; retry<=MAX_RETRIES; retry++)); do
-    if [ -f "$GAMELIST_PATH" ]; then
-        break
-    fi
-    
-    if [ $retry -eq 1 ]; then
-        echo "Waiting for gamelist.json to be generated..."
-    else
-        echo "Retry $retry/$MAX_RETRIES: Waiting for gamelist.json..."
-    fi
-    
-    if [ $retry -eq $MAX_RETRIES ]; then
-        echo "Error: gamelist.json not found at $GAMELIST_PATH after $MAX_RETRIES retries"
-        exit 1
-    fi
-    
-    sleep $RETRY_DELAY
-done
-
 echo "Starting thumbnail generation..."
 
-# Extract coverArt paths from gamelist.json
-# Using jq for reliable JSON parsing. If jq is not available, a simpler grep/sed might be used,
-# but jq is highly recommended for robustness in CI/CD.
-# On Alpine: apk add jq
-# On macOS: brew install jq
-IMAGE_PATHS=$(jq -r '.gameOfTheWeek.coverArt, (.previousGames[]?.coverArt) | select(. != null)' "$GAMELIST_PATH" | sort -u)
+# Find all cover images by scanning the games directory structure
+# This makes the thumbnail generation independent of gamelist.json
+GAMES_DIR="public/games"
+IMAGE_PATHS=""
+
+# Find all cover.png files in game directories
+if [ -d "$GAMES_DIR" ]; then
+    IMAGE_PATHS=$(find "$GAMES_DIR" -name "cover.png" -type f | sort)
+fi
+
+# Also include the default placeholder and any other static images
+DEFAULT_COVER="public/assets/images/placeholder_thumb.png"
+if [ -f "$DEFAULT_COVER" ]; then
+    IMAGE_PATHS="$IMAGE_PATHS
+$DEFAULT_COVER"
+fi
+
+# Add any other static cover images
+SHMUPS_COVER="public/assets/shmups.jpg"
+if [ -f "$SHMUPS_COVER" ]; then
+    IMAGE_PATHS="$IMAGE_PATHS
+$SHMUPS_COVER"
+fi
 
 if [ -z "$IMAGE_PATHS" ]; then
-    echo "No cover images found in gamelist.json to process."
+    echo "No cover images found to process."
     exit 0
 fi
 

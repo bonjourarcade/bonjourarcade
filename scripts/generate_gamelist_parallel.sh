@@ -169,7 +169,8 @@ while IFS= read -r rom_file; do
         now_epoch=$(date +%s)
         if [ -n "$added_epoch" ]; then
             diff_days=$(( (now_epoch - added_epoch) / 86400 ))
-            if [ "$diff_days" -lt 14 ]; then
+            # DAYS_NEW is 7 here
+            if [ "$diff_days" -lt 7 ]; then
                 is_new_by_date="true"
             fi
         fi

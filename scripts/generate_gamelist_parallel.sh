@@ -189,6 +189,9 @@ while IFS= read -r rom_file; do
 
     if [ -f "$expected_cover_file" ]; then
         cover_art_abs="/games/$game_id/cover.png"
+    else
+        # Write warning to a file to avoid interleaved output in parallel processing
+        echo "WARNING: cover.png not found for game: $game_id" >> "$OUTPUT_DIR/missing_covers.log"
     fi
 
     # --- Use save state if exists ---
@@ -290,6 +293,26 @@ done
 
 # Combine results
 echo -e "${BLUE}🔗 Combining results...${NC}"
+
+# Display missing cover warnings
+echo -e "${BLUE}🔍 Checking for missing cover images...${NC}"
+MISSING_COVERS_FOUND=false
+for output_dir in "${WORKER_OUTPUTS[@]}"; do
+    if [ -f "$output_dir/missing_covers.log" ]; then
+        if [ "$MISSING_COVERS_FOUND" = false ]; then
+            echo -e "${YELLOW}⚠️  Missing cover.png files:${NC}"
+            MISSING_COVERS_FOUND=true
+        fi
+        cat "$output_dir/missing_covers.log" | while read -r warning; do
+            echo -e "${YELLOW}   $warning${NC}"
+        done
+    fi
+done
+
+if [ "$MISSING_COVERS_FOUND" = false ]; then
+    echo -e "${GREEN}✅ All games have cover.png files${NC}"
+fi
+
 FEATURED_GAME="null"
 
 # Create temporary files for combining results

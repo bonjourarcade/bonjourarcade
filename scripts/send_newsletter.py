@@ -376,7 +376,7 @@ def main():
         # Step 2: Open Vim for custom message
         print("No custom message provided. Opening Vim for you to type your introduction message. Save and quit to continue...")
         import tempfile, os
-        comment_line = "Cette semaine, Plinko a choisi\n"
+        comment_line = "Annonce du jeu de la semaine!\n\n"
         fd, temp_path = tempfile.mkstemp(suffix=".tmp")
         try:
             with os.fdopen(fd, 'w') as tf:
@@ -467,7 +467,7 @@ def main():
                 sender.run(
                     webhook_map_path=args.webhook_map,
                     filter_label=label,
-                    mail_only=args.mail_only,
+                    mail_only=True,  # Always mail_only=True for webhook runs to prevent duplicate emails
                     custom_message=custom_message
                 )
     else:

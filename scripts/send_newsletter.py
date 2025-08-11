@@ -316,15 +316,17 @@ Bonne semaine ! ☀️
             if self.webhook_only:
                 print("🛑 Webhook-only mode: Skipping email send.")
                 return
-        # Send email
-        print("📤 Sending email...")
-        success = self.send_email(content)
-        if success:
-            if not self.dry_run:
+        # Send email (but respect dry_run flag)
+        if not self.dry_run:
+            print("📤 Sending email...")
+            success = self.send_email(content)
+            if success:
                 print("🎉 Newsletter sent successfully!")
+            else:
+                print("💥 Failed to send newsletter")
+                sys.exit(1)
         else:
-            print("💥 Failed to send newsletter")
-            sys.exit(1)
+            print("🛑 DRY RUN MODE: Skipping email send.")
 
 def main():
     parser = argparse.ArgumentParser(description='Send BonjourArcade newsletter')
@@ -446,14 +448,17 @@ def main():
     # If selected_webhook_labels is set, send to each label in turn
     if selected_webhook_labels is not None:
         MAILING_LIST_LABEL = "ConvertKit Email"
-        # If ConvertKit Email is selected, send the email
+        # If ConvertKit Email is selected, send the email (but respect dry_run)
         if MAILING_LIST_LABEL in selected_webhook_labels:
-            sender.run(
-                webhook_map_path=args.webhook_map,
-                filter_label=None,  # No filter, so email is sent
-                mail_only=True,     # Only send email in this run
-                custom_message=custom_message
-            )
+            if not args.dry_run:
+                sender.run(
+                    webhook_map_path=args.webhook_map,
+                    filter_label=None,  # No filter, so email is sent
+                    mail_only=True,     # Only send email in this run
+                    custom_message=custom_message
+                )
+            else:
+                print("🛑 DRY RUN MODE: Skipping ConvertKit email send.")
             # Remove it from the list so it's not treated as a webhook
             selected_webhook_labels = [lbl for lbl in selected_webhook_labels if lbl != MAILING_LIST_LABEL]
         # Only send to webhooks if any remain
@@ -466,12 +471,18 @@ def main():
                     custom_message=custom_message
                 )
     else:
-        sender.run(
-            webhook_map_path=args.webhook_map,
-            filter_label=args.webhook_label,
-            mail_only=args.mail_only,
-            custom_message=custom_message
-        )
+        # In non-interactive mode, respect dry_run and webhook_only flags
+        if args.dry_run:
+            print("🛑 DRY RUN MODE: Skipping ConvertKit email send.")
+        elif not args.webhook_only:
+            sender.run(
+                webhook_map_path=args.webhook_map,
+                filter_label=args.webhook_label,
+                mail_only=args.mail_only,
+                custom_message=custom_message
+            )
+        else:
+            print("🛑 Webhook-only mode: Skipping email send.")
 
 if __name__ == '__main__':
     main() 

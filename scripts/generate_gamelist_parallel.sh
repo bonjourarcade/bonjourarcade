@@ -11,7 +11,6 @@ NC='\033[0m' # No Color
 GAMES_DIR="public/games"
 ROMS_DIR="public/roms"
 OUTPUT_FILE="public/gamelist.json"
-FEATURED_ID_FILE="game-of-the-week"
 DEFAULT_COVER="assets/images/placeholder_thumb.png"
 LAUNCHER_PAGE="/play"
 
@@ -65,10 +64,21 @@ if ! command -v find &> /dev/null; then
     exit 1
 fi
 
-# --- Read Featured Game ID ---
-if [ ! -f "$FEATURED_ID_FILE" ]; then echo "Error: $FEATURED_ID_FILE not found."; exit 1; fi
-FEATURED_GAME_ID=$(cat "$FEATURED_ID_FILE")
-if [ -z "$FEATURED_GAME_ID" ]; then echo "Error: $FEATURED_ID_FILE is empty."; exit 1; fi
+# --- Read Featured Game ID from predictions.yaml ---
+echo -e "${BLUE}🔍 Getting current week's game from predictions.yaml...${NC}"
+if ! command -v python3 &> /dev/null; then
+    echo "Error: python3 is required to read predictions.yaml"
+    exit 1
+fi
+
+# Get the current week's game ID using the Python helper
+FEATURED_GAME_ID=$(python3 scripts/get_current_week_game.py)
+if [ $? -ne 0 ] || [ -z "$FEATURED_GAME_ID" ]; then
+    echo "Error: Failed to get current week's game from predictions.yaml"
+    exit 1
+fi
+
+echo -e "${GREEN}✅ Current week's game: $FEATURED_GAME_ID${NC}"
 
 # --- Create worker script ---
 create_worker_script() {

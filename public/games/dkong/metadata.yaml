@@ -10,6 +10,10 @@ genre: Platform
 #to_start: Insert Coin -> Start
 #recommended: 
 
+# Message d'annonce personnalisé pour la newsletter
+# Ce message apparaîtra en haut de l'email et des webhooks
+announcement_message: 🦍 Préparez-vous à affronter le roi des gorilles dans ce classique absolu du jeu d'arcade !
+
 disable_score: true
 
 added: 2025-08-03

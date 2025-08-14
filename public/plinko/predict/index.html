@@ -84,10 +84,10 @@
     <h2>Upcoming Weeks</h2>
     <table id="future-table">
       <thead>
-        <tr><th>Seed (yyyyww)</th><th>Game</th></tr>
+        <tr><th>Seed (yyyyww)</th><th>Date (Monday)</th><th>Game</th></tr>
       </thead>
       <tbody id="future-tbody">
-        <tr><td colspan="2">Loading...</td></tr>
+        <tr><td colspan="3">Loading...</td></tr>
       </tbody>
     </table>
   </div>
@@ -170,7 +170,7 @@
       // Sort seeds ascending
       const seeds = Object.keys(predictions).sort();
       if (seeds.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="2">No predictions found.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="3">No predictions found.</td></tr>';
         return;
       }
       const now = new Date();
@@ -179,7 +179,8 @@
         // Only show current or future weeks
         if (seed >= currentSeed) {
           const tr = document.createElement('tr');
-          tr.innerHTML = `<td>${seed}</td><td>${predictions[seed]}</td>`;
+          const date = seedToDate(seed);
+          tr.innerHTML = `<td>${seed}</td><td>${date}</td><td>${predictions[seed]}</td>`;
           tbody.appendChild(tr);
         }
       }
@@ -204,6 +205,33 @@
       const weekNum = Math.floor(daysDiff / 7) + 1;
       
       return thursday.getFullYear() + String(weekNum).padStart(2, '0');
+    }
+
+    // Helper: get Monday date from yyyyww seed
+    function seedToDate(seed) {
+      if (!seed || seed.length !== 6) return 'Invalid seed';
+      
+      const year = parseInt(seed.substring(0, 4));
+      const week = parseInt(seed.substring(4, 6));
+      
+      // Get January 1st of the year
+      const yearStart = new Date(year, 0, 1);
+      
+      // Calculate days to add to get to the first Thursday of the year
+      const firstThursday = new Date(yearStart);
+      const daysToFirstThursday = (4 - yearStart.getDay() + 7) % 7;
+      firstThursday.setDate(yearStart.getDate() + daysToFirstThursday);
+      
+      // Calculate Monday of the target week
+      const targetMonday = new Date(firstThursday);
+      targetMonday.setDate(firstThursday.getDate() + (week - 1) * 7 - 3); // -3 to go from Thursday to Monday
+      
+      // Format the date as YYYY-MM-DD
+      const yearStr = targetMonday.getFullYear();
+      const monthStr = String(targetMonday.getMonth() + 1).padStart(2, '0');
+      const dayStr = String(targetMonday.getDate()).padStart(2, '0');
+      
+      return `${yearStr}-${monthStr}-${dayStr}`;
     }
   </script>
 </body>

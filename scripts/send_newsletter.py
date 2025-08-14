@@ -5,6 +5,9 @@ Newsletter Email Sender for BonjourArcade
 This script reads the current game of the week and sends a newsletter email
 to subscribers using ConvertKit API and to one or more webhooks (e.g., Google Chat, Discord).
 
+The announcement message is automatically read from the game's metadata.yaml file
+under the 'announcement_message' field. You can also override it with --custom-message.
+
 Requirements:
 - requests library: pip install requests
 - ConvertKit account and API credentials
@@ -13,15 +16,16 @@ Requirements:
 - Set the corresponding environment variables for webhook URLs
 
 Usage:
-    python send_newsletter.py [--dry-run] [--mail-api-url URL] [--mail-only] [--webhook-only] [--webhook-map webhook_map.json] [--webhook-label LABEL]
+    python send_newsletter.py [--dry-run] [--mail-api-url URL] [--mail-only] [--webhook-only] [--webhook-map webhook_map.json] [--webhook-label LABEL] [--custom-message MESSAGE]
 
 Options:
-    --mail-api-url   Override the ConvertKit API URL for sending email (default: https://api.convertkit.com/v3)
-    --mail-only      Only send the email (no webhooks)
-    --webhook-only   Only send to webhooks (no email)
-    --webhook-map    Path to JSON file mapping webhook labels to env var names
-    --webhook-label  Only send to the webhook with this label from the map
-    --dry-run        Show what would be sent without actually sending
+    --mail-api-url      Override the ConvertKit API URL for sending email (default: https://api.convertkit.com/v3)
+    --mail-only         Only send the email (no webhooks)
+    --webhook-only      Only send to webhooks (no email)
+    --webhook-map       Path to JSON file mapping webhook labels to env var names
+    --webhook-label     Only send to the webhook with this label from the map
+    --custom-message    Override the announcement message from metadata.yaml
+    --dry-run           Show what would be sent without actually sending
 """
 
 import json
@@ -33,8 +37,6 @@ from datetime import datetime, timedelta
 from pathlib import Path
 import re
 import yaml
-import tempfile
-import subprocess
 import questionary
 
 # Configuration - Only keep what's needed
@@ -42,17 +44,263 @@ DEFAULT_API_URL = 'https://api.convertkit.com/v3'
 BASE_URL = 'https://bonjourarcade-f11f7f.gitlab.io'
 
 class NewsletterSender:
-    def __init__(self, api_secret, api_url=DEFAULT_API_URL, dry_run=False, webhook_only=False):
+    def __init__(self, api_secret, api_url=DEFAULT_API_URL, dry_run=False, webhook_only=False, week_seed=None):
         self.api_secret = api_secret
         self.api_url = api_url
         self.dry_run = dry_run
         self.webhook_only = webhook_only
-        # Compute plinko_url once for the instance
-        from datetime import datetime
-        now = datetime.now()
-        week = now.isocalendar()[1]
-        plinko_seed = f"{now.year}{week:02d}"
+        # Compute plinko_url based on week seed or current week
+        if week_seed:
+            plinko_seed = week_seed
+        else:
+            from datetime import datetime
+            now = datetime.now()
+            week = now.isocalendar()[1]
+            plinko_seed = f"{now.year}{week:02d}"
         self.plinko_url = f"https://felx.cc/plinko/{plinko_seed}"
+
+    def get_previous_week_seed(self, current_seed=None):
+        """Calculate the previous week's seed in YYYYWW format."""
+        if current_seed:
+            # Parse the current seed to get year and week
+            try:
+                year = int(current_seed[:4])
+                week = int(current_seed[4:])
+                # Go back one week
+                if week == 1:
+                    # If it's week 1, go to last week of previous year
+                    prev_year = year - 1
+                    # Calculate the last week of the previous year
+                    # This is a simplified approach - in reality, the last week might be 52 or 53
+                    prev_week = 52
+                else:
+                    prev_year = year
+                    prev_week = week - 1
+                return f"{prev_year}{prev_week:02d}"
+            except (ValueError, IndexError):
+                print(f"⚠️  Warning: Invalid seed format '{current_seed}', using current week calculation")
+                pass
+        
+        # Fallback to current week calculation
+        now = datetime.now()
+        # Go back one week
+        previous_week = now - timedelta(weeks=1)
+        week = previous_week.isocalendar()[1]
+        return f"{previous_week.year}{week:02d}"
+
+    def get_game_from_seed(self, seed):
+        """Get the game title that would be selected for a given seed using the predictions.yaml file."""
+        try:
+            # Read the predictions.yaml file to get the game for this seed
+            predictions_path = 'public/plinko/predict/predictions.yaml'
+            if not os.path.exists(predictions_path):
+                print(f"⚠️  Warning: predictions.yaml not found, cannot determine previous week's game")
+                return None
+                
+            with open(predictions_path, 'r') as f:
+                predictions = yaml.safe_load(f)
+            
+            if not predictions:
+                print(f"⚠️  Warning: predictions.yaml is empty or invalid")
+                return None
+            
+            # Look up the game title for this seed
+            # YAML parser converts string keys to integers, so we need to convert the seed to int
+            try:
+                seed_int = int(seed)
+                game_title = predictions.get(seed_int)
+            except ValueError:
+                # If seed is not a valid integer, try as string
+                game_title = predictions.get(seed)
+            
+            if not game_title:
+                print(f"⚠️  Warning: No prediction found for seed {seed}")
+                return None
+            
+            print(f"🎯 For seed {seed}, predicted game: {game_title}")
+            return game_title
+            
+        except Exception as e:
+            print(f"⚠️  Warning: Could not determine previous week's game: {e}")
+            return None
+
+    def find_game_id_by_title(self, game_title):
+        """Find a game ID in the gamelist that matches the given title."""
+        try:
+            gamelist_path = 'public/gamelist.json'
+            if not os.path.exists(gamelist_path):
+                print(f"⚠️  Warning: gamelist.json not found, cannot search for game title")
+                return None
+                
+            with open(gamelist_path, 'r') as f:
+                gamelist = json.load(f)
+            
+            # Search through all games for a title match
+            all_games = []
+            if gamelist.get('gameOfTheWeek') and gamelist['gameOfTheWeek'].get('id'):
+                all_games.append(gamelist['gameOfTheWeek'])
+            if gamelist.get('previousGames'):
+                all_games.extend(gamelist['previousGames'])
+            
+            # Try exact match first
+            for game in all_games:
+                if game.get('title') == game_title:
+                    return game.get('id')
+            
+            # Try case-insensitive match
+            for game in all_games:
+                if game.get('title', '').lower() == game_title.lower():
+                    return game.get('id')
+            
+            # Try partial match (in case titles have slight differences)
+            for game in all_games:
+                game_title_lower = game.get('title', '').lower()
+                search_title_lower = game_title.lower()
+                if search_title_lower in game_title_lower or game_title_lower in search_title_lower:
+                    print(f"🔍 Found partial match: '{game.get('title')}' for '{game_title}'")
+                    return game.get('id')
+            
+            print(f"⚠️  Warning: No game found with title: {game_title}")
+            return None
+            
+        except Exception as e:
+            print(f"⚠️  Warning: Error searching for game title: {e}")
+            return None
+
+    def get_top_scores(self, game_id, top_count=3):
+        """Fetch the top scores for a given game from the leaderboard API."""
+        try:
+            # API endpoint for fetching game scores
+            api_url = 'https://us-central1-alloarcade.cloudfunctions.net/listGameScores'
+            
+            # Request payload
+            payload = {
+                'data': {
+                    'timeRange': 'all',
+                    'gameId': game_id
+                }
+            }
+            
+            # Headers (simplified version)
+            headers = {
+                'Content-Type': 'application/json',
+                'User-Agent': 'BonjourArcade-Newsletter/1.0'
+            }
+            
+            if self.dry_run:
+                print(f"[DRY RUN] Would fetch leaderboard for game: {game_id}")
+                # Return mock data for dry run
+                return [
+                    {
+                        'player': 'Joueur Test 1',
+                        'score': 50000,
+                        'rank': 1
+                    },
+                    {
+                        'player': 'Joueur Test 2',
+                        'score': 45000,
+                        'rank': 2
+                    },
+                    {
+                        'player': 'Joueur Test 3',
+                        'score': 40000,
+                        'rank': 3
+                    }
+                ]
+            
+            # Make the API request
+            response = requests.post(api_url, json=payload, headers=headers, timeout=10)
+            response.raise_for_status()
+            
+            data = response.json()
+            
+            if not data.get('result', {}).get('success'):
+                print(f"⚠️  Warning: Leaderboard API returned unsuccessful response for {game_id}")
+                return None
+            
+            scores = data['result'].get('scores', [])
+            if not scores:
+                print(f"ℹ️  No scores found for game {game_id}")
+                return None
+            
+            # Get best score for each unique player (similar to the logic in play/index.html)
+            player_best_scores = {}
+            
+            for score in scores:
+                user_id = score.get('userId')
+                current_best = player_best_scores.get(user_id)
+                
+                if not current_best or score.get('score', 0) > current_best.get('score', 0):
+                    player_best_scores[user_id] = {
+                        'player': score.get('player', 'Joueur Inconnu'),
+                        'score': score.get('score', 0),
+                        'rank': score.get('rank', 0)
+                    }
+            
+            # Convert to array and sort by score (highest first)
+            sorted_scores = sorted(player_best_scores.values(), key=lambda x: x.get('score', 0), reverse=True)
+            
+            # Return top N scores
+            top_scores = sorted_scores[:top_count]
+            
+            # Add rank information
+            for i, score in enumerate(top_scores):
+                score['rank'] = i + 1
+            
+            return top_scores
+            
+        except requests.exceptions.RequestException as e:
+            print(f"⚠️  Warning: Could not fetch leaderboard for {game_id}: {e}")
+            return None
+        except Exception as e:
+            print(f"⚠️  Warning: Error processing leaderboard data for {game_id}: {e}")
+            return None
+
+    def get_last_week_highlight(self):
+        """Get information about the highest score from last week's game."""
+        try:
+            # Get previous week's seed based on current week
+            # Extract current seed from plinko_url
+            current_seed = self.plinko_url.split('/')[-1]
+            prev_week_seed = self.get_previous_week_seed(current_seed)
+            print(f"🔍 Looking for previous week's game (seed: {prev_week_seed})...")
+            
+            # Get the game title for that seed from predictions.yaml
+            prev_game_title = self.get_game_from_seed(prev_week_seed)
+            if not prev_game_title:
+                print("⚠️  Could not determine previous week's game")
+                return None
+            
+            print(f"🎮 Previous week's game: {prev_game_title}")
+            
+            # Find the corresponding game ID in the gamelist
+            prev_game_id = self.find_game_id_by_title(prev_game_title)
+            if not prev_game_id:
+                print(f"⚠️  Could not find game ID for title: {prev_game_title}")
+                return None
+            
+            print(f"🆔 Found game ID: {prev_game_id}")
+            
+            # Get the top scores for that game
+            top_scores = self.get_top_scores(prev_game_id, top_count=3)
+            if not top_scores:
+                print("⚠️  Could not fetch top scores for previous week's game")
+                return None
+            
+            print(f"🏆 Top scores found:")
+            for score in top_scores:
+                medal = "🥇" if score['rank'] == 1 else "🥈" if score['rank'] == 2 else "🥉"
+                print(f"  {medal} {score['player']}: {score['score']:,}")
+            
+            return {
+                'game_id': prev_game_id,
+                'game_title': prev_game_title,
+                'top_scores': top_scores
+            }
+            
+        except Exception as e:
+            print(f"⚠️  Warning: Error getting last week's highlight: {e}")
+            return None
 
     def summarize_controls(self, controls):
         """
@@ -79,20 +327,70 @@ class NewsletterSender:
             summary += first + ' '
         return summary.strip()
 
-    def read_game_of_the_week(self):
-        """Read the current game of the week from the file."""
+    def read_game_of_the_week(self, week_seed=None):
+        """Read the game of the week from predictions.yaml using the specified seed or current week's seed."""
         try:
-            with open('game-of-the-week', 'r') as f:
-                game_id = f.read().strip()
+            # Use provided seed or get current week's seed
+            if week_seed:
+                seed = week_seed
+                print(f"🎯 Using specified week seed: {seed}")
+            else:
+                now = datetime.now()
+                week = now.isocalendar()[1]
+                seed = f"{now.year}{week:02d}"
+                print(f"🎯 Using current week seed: {seed}")
+            
+            # Get the game title for the seed
+            game_title = self.get_game_from_seed(seed)
+            if not game_title:
+                print(f"Error: Could not find game prediction for seed: {seed}")
+                sys.exit(1)
+            
+            # Find the corresponding game ID in the gamelist
+            game_id = self.find_game_id_by_title(game_title)
+            if not game_id:
+                print(f"Error: Could not find game ID for title: {game_title}")
+                sys.exit(1)
             
             return game_id
             
-        except FileNotFoundError as e:
-            print(f"Error: Could not find required file: {e}")
+        except Exception as e:
+            print(f"Error: Could not determine game of the week: {e}")
             sys.exit(1)
-        except json.JSONDecodeError as e:
-            print(f"Error: Invalid JSON in gamelist.json: {e}")
-            sys.exit(1)
+
+    def get_current_week_game_title(self):
+        """Get the current week's game title from predictions.yaml."""
+        try:
+            # Get current week's seed
+            now = datetime.now()
+            week = now.isocalendar()[1]
+            current_seed = f"{now.year}{week:02d}"
+            
+            # Get the game title for the current seed
+            game_title = self.get_game_from_seed(current_seed)
+            if not game_title:
+                print(f"Error: Could not find game prediction for current week (seed: {current_seed})")
+                return None
+            
+            return game_title
+            
+        except Exception as e:
+            print(f"Error: Could not determine current week's game title: {e}")
+            return None
+
+    def get_week_game_by_seed(self, seed):
+        """Get the game title for a specific week seed from predictions.yaml."""
+        try:
+            game_title = self.get_game_from_seed(seed)
+            if not game_title:
+                print(f"Error: Could not find game prediction for seed: {seed}")
+                return None
+            
+            return game_title
+            
+        except Exception as e:
+            print(f"Error: Could not determine game for seed {seed}: {e}")
+            return None
     
     def read_game_metadata(self, game_id):
         """Read metadata from public/games/{gameid}/metadata.yaml."""
@@ -108,7 +406,7 @@ class NewsletterSender:
             print(f"Error: Invalid YAML in metadata file for game {game_id}: {e}")
             sys.exit(1)
     
-    def create_email_content(self, game_id, meta, custom_message=None):
+    def create_email_content(self, game_id, meta, custom_message=None, last_week_highlight=None):
         from datetime import datetime
         import re
         cover_url = f'{BASE_URL}/games/{game_id}/cover.png'
@@ -123,26 +421,53 @@ class NewsletterSender:
         controls = self.summarize_controls(meta.get('controls'))
         description = clean_title
         subject = f'🕹️ Jeu de la semaine - {title}'
-        # Insert custom message if provided
-        custom_html = f'<div style="margin-bottom:18px;font-size:1.1em;">{custom_message}</div>' if custom_message else ''
+        
+        # Create last week's highlight section if available
+        last_week_html = ''
+        if last_week_highlight:
+            # Create the top scores list with medals
+            scores_list = ''
+            for score in last_week_highlight['top_scores']:
+                medal = "🥇" if score['rank'] == 1 else "🥈" if score['rank'] == 2 else "🥉"
+                scores_list += f'<li style="margin:8px 0;"><strong>{medal} {score["player"]}</strong>: {score["score"]:,} points</li>'
+            
+            last_week_html = f'''
+        <div style="background:#f8f9fa;border-left:4px solid #007bff;padding:16px;margin:18px 0;border-radius:4px;">
+            <h3 style="margin:0 0 12px 0;color:#007bff;">🏆 Top scores de la semaine dernière sur {last_week_highlight['game_title']}</h3>
+            <ul style="margin:0;padding-left:20px;font-size:1.1em;">
+                {scores_list}
+            </ul>
+        </div>'''
+        
+        # Get announcement message from metadata, fallback to custom_message if provided
+        announcement_message = meta.get('announcement_message', '') or custom_message or ''
+        custom_html = f'<div style="margin-bottom:18px;font-size:1.1em;">{announcement_message}</div>' if announcement_message else ''
         html_content = f'''
         <html><body>
+        <h1 style="color:#333;text-align:center;margin-bottom:30px;">🎮 Annonce du jeu de la semaine!</h1>
+        
+        {last_week_html}
+        
+        <div style="background:#f0f8ff;border:2px solid #007bff;border-radius:8px;padding:20px;margin:20px 0;">
+            <h2 style="color:#007bff;margin-top:0;">🎯 Jeu de la semaine : {clean_title}</h2>
+            <ul style="margin:0;padding-left:20px;font-size:1.1em;">
+                <li><b>Développeur :</b> {developer}</li>
+                <li><b>Année :</b> {year}</li>
+                <li><b>Genre :</b> {genre}</li>
+                <li><b>Contrôles :</b> {controls}</li>
+                <li><b>Image :</b> <a href="{cover_url}">{cover_url}</a></li>
+                <li><b>Tirage Plinko :</b> <a href="{self.plinko_url}">{self.plinko_url}</a></li>
+                <li><b>Classements :</b> <a href="{leaderboard_url}">{leaderboard_url}</a></li>
+            </ul>
+        </div>
+        
         {custom_html}
-        <ul>
-        <li><b>Titre :</b> {clean_title}</li>
-        <li><b>Développeur :</b> {developer}</li>
-        <li><b>Année :</b> {year}</li>
-        <li><b>Genre :</b> {genre}</li>
-        <li><b>Contrôles :</b> {controls}</li>
-        </ul>
-        <div style="text-align:center;margin:24px 0;">
-            <a href="{play_url}" style="display:inline-block;background:#fffd37;color:#111;padding:18px 36px;border-radius:6px;text-decoration:none;font-weight:bold;font-size:1.3em;margin-right:18px;">🕹️ Jouer maintenant</a>
-            <a href="{leaderboard_url}" style="display:inline-block;background:#007bff;color:#fff;padding:18px 36px;border-radius:6px;text-decoration:none;font-weight:bold;font-size:1.3em;">🏆 Classements</a>
+        
+        <div style="text-align:center;margin:30px 0;">
+            <a href="{play_url}" style="background:#007bff;color:white;padding:15px 30px;text-decoration:none;border-radius:5px;font-size:18px;font-weight:bold;">🎮 Jouer maintenant !</a>
         </div>
-        <img src="{cover_url}" alt="Couverture de {clean_title}" style="max-width:320px;width:100%;border-radius:8px;display:block;margin:0 auto 16px auto;">
-        <div style="text-align:center;margin:8px 0 24px 0;font-size:1em;">
-            <a href="{self.plinko_url}" style="color:#007bff;text-decoration:underline;">🎲 Voir le tirage plinko</a>
-        </div>
+        
+        <p style="text-align:center;color:#666;font-style:italic;">Bonne semaine ! ☀️</p>
         </body></html>
         '''
         return {
@@ -187,7 +512,7 @@ class NewsletterSender:
                 print(f"Response: {e.response.text}")
             return False
     
-    def send_webhook(self, content, game_id, meta, webhook_map_path=None, filter_label=None, custom_message=None):
+    def send_webhook(self, content, game_id, meta, webhook_map_path=None, filter_label=None, custom_message=None, last_week_highlight=None):
         """Send a plaintext version of the newsletter to one or more webhooks, using a JSON map of label:{env,type}. Optionally filter by label."""
         import requests
         import os
@@ -212,20 +537,37 @@ class NewsletterSender:
         year = meta.get('year', 'Inconnue')
         genre = meta.get('genre', 'Non spécifié')
         controls = self.summarize_controls(meta.get('controls'))
-        # Insert custom message if provided
-        custom_text = f"{custom_message}\n\n" if custom_message else ''
-        # Message template with {b} for bold, now includes plinko link
+        
+        # Create last week's highlight text if available
+        last_week_text = ''
+        if last_week_highlight:
+            # Create the top scores list with medals
+            scores_list = ''
+            for score in last_week_highlight['top_scores']:
+                medal = "🥇" if score['rank'] == 1 else "🥈" if score['rank'] == 2 else "🥉"
+                scores_list += f"{medal} {score['player']}: {score['score']:,} points\n"
+            
+            last_week_text = f"""
+Top scores de la semaine dernière sur {last_week_highlight['game_title']} :
+{scores_list}"""
+        
+        # Get announcement message from metadata, fallback to custom_message if provided
+        announcement_message = meta.get('announcement_message', '') or custom_message or ''
+        custom_text = f"{announcement_message}\n\n" if announcement_message else ''
+        # Message template with {b} for bold, now includes plinko link and last week's highlight
         message_template = f"""
+Annonce du jeu de la semaine!
+{last_week_text}
 {custom_text}{{b}}Jeu de la semaine :{{b}} {title}
 {{b}}Développeur :{{b}} {developer}
 {{b}}Année :{{b}} {year}
 {{b}}Genre :{{b}} {genre}
 {{b}}Contrôles :{{b}} {controls}
 {{b}}Image :{{b}} {cover_url}
-🎲 {{b}}Tirage Plinko :{{b}} {self.plinko_url}
+{{b}}Tirage Plinko :{{b}} {self.plinko_url}
+{{b}}Classements :{{b}} {leaderboard_url}
 
 🕹️ {{b}}Faites-en l'essai :{{b}} {play_url}
-🏆 {{b}}Classements :{{b}} {leaderboard_url}
 
 Bonne semaine ! ☀️
 """.strip()
@@ -289,12 +631,19 @@ Bonne semaine ! ☀️
         if not sent_any:
             print("⚠️  No webhook messages sent (no valid URLs found).")
 
-    def run(self, webhook_map_path=None, filter_label=None, mail_only=False, custom_message=None):
+    def run(self, webhook_map_path=None, filter_label=None, mail_only=False, custom_message=None, week_seed=None):
+        """
+        Run the newsletter process with the following safety rules:
+        - If webhook_only=True: Skip email sending completely, skip webhook sending
+        - If mail_only=True: Skip email sending completely, but still send webhooks
+        - If dry_run=True: Skip email sending completely
+        - Only send email if ALL safety checks pass
+        """
         print('📧 Starting newsletter email process...')
         
         # Read game data
         print("📖 Reading game of the week...")
-        game_id = self.read_game_of_the_week()
+        game_id = self.read_game_of_the_week(week_seed)
         print(f'✅ Game of the week: {game_id}')
         
         # Read metadata
@@ -304,18 +653,43 @@ Bonne semaine ! ☀️
         for k, v in meta.items():
             print(f'  - {k}: {v}')
         
+        # Get last week's highlight
+        print("🏆 Getting last week's highlight...")
+        last_week_highlight = self.get_last_week_highlight()
+        if last_week_highlight:
+            print(f"✅ Last week's highlight: Top {len(last_week_highlight['top_scores'])} scores on {last_week_highlight['game_title']}")
+        else:
+            print("ℹ️  No last week's highlight available")
+        
         # Generate email content
         print("✍️  Generating email content...")
-        content = self.create_email_content(game_id, meta, custom_message=custom_message)
+        content = self.create_email_content(game_id, meta, custom_message=custom_message, last_week_highlight=last_week_highlight)
         print(f'🔗 Plinko link for this week: {self.plinko_url}')
         print(f'✅ Email content ready: {content["subject"]}')
         
-        # Send webhook unless mail_only is set
-        if not mail_only:
-            self.send_webhook(content, game_id, meta, webhook_map_path=webhook_map_path, filter_label=filter_label, custom_message=custom_message)
-            if self.webhook_only:
-                print("🛑 Webhook-only mode: Skipping email send.")
-                return
+        # Always send webhook (unless webhook_only is set)
+        if not self.webhook_only:
+            self.send_webhook(content, game_id, meta, webhook_map_path=webhook_map_path, filter_label=filter_label, custom_message=custom_message, last_week_highlight=last_week_highlight)
+        
+        # If webhook_only is set, skip email
+        if self.webhook_only:
+            print("🛑 Webhook-only mode: Skipping email send.")
+            return
+        
+        # If mail_only is set, skip email
+        if mail_only:
+            if self.dry_run:
+                # In dry-run mode, show HTML preview even for mail-only
+                print("🛑 Mail-only mode: Skipping email send (webhook processing only).")
+                print("\n" + "="*50)
+                print("📧 EMAIL HTML PREVIEW (DRY RUN - MAIL ONLY)")
+                print("="*50)
+                print(content['content'])
+                print("="*50)
+            else:
+                print("🛑 Mail-only mode: Skipping email send (webhook processing only).")
+            return
+        
         # Send email (but respect dry_run flag)
         if not self.dry_run:
             print("📤 Sending email...")
@@ -327,6 +701,13 @@ Bonne semaine ! ☀️
                 sys.exit(1)
         else:
             print("🛑 DRY RUN MODE: Skipping email send.")
+            # Print HTML content for preview when ConvertKit is selected
+            if not self.webhook_only:
+                print("\n" + "="*50)
+                print("📧 EMAIL HTML PREVIEW (DRY RUN)")
+                print("="*50)
+                print(content['content'])
+                print("="*50)
 
 def main():
     parser = argparse.ArgumentParser(description='Send BonjourArcade newsletter')
@@ -343,66 +724,14 @@ def main():
     parser.add_argument('--webhook-label', default=None, type=str,
                        help='Only send to the webhook with this label from the map (for testing)')
     parser.add_argument('--custom-message', default=None, type=str,
-                      help='Custom message to introduce the game of the week (appears at the top of the email and webhook)')
+                      help='Override the announcement message from metadata.yaml (appears at the top of the email and webhook)')
+    parser.add_argument('--week-seed', default=None, type=str,
+                      help='Specific week seed (YYYYWW format) to use instead of current week (useful for testing or past weeks)')
     
     args = parser.parse_args()
 
-    # Interactive Vim editing if no custom message is provided
+    # Use custom message from command line if provided, otherwise it will be read from metadata
     custom_message = args.custom_message
-    if custom_message is None:
-        # Step 1: Show game-of-the-week and metadata.yaml content, ask for confirmation
-        game_id = None
-        meta = None
-        try:
-            with open('game-of-the-week', 'r') as f:
-                game_id = f.read().strip()
-        except Exception as e:
-            print(f"Erreur lors de la lecture de game-of-the-week: {e}")
-            sys.exit(1)
-        meta_path = f'public/games/{game_id}/metadata.yaml'
-        try:
-            with open(meta_path, 'r') as f:
-                meta_content = f.read()
-        except Exception as e:
-            print(f"Erreur lors de la lecture de {meta_path}: {e}")
-            sys.exit(1)
-        print("\n=== Confirmation du jeu de la semaine ===")
-        print(f"game-of-the-week: {game_id}")
-        print(f"Contenu de {meta_path} :\n{'-'*40}\n{meta_content}\n{'-'*40}")
-        confirm = input("Est-ce le bon jeu et la bonne fiche metadata ? [y/N]: ").strip().lower()
-        if confirm not in ('o', 'y', 'yes'):
-            print("Abandon. Aucun message envoyé.")
-            sys.exit(0)
-        # Step 2: Open Vim for custom message
-        print("No custom message provided. Opening Vim for you to type your introduction message. Save and quit to continue...")
-        import tempfile, os
-        comment_line = "Annonce du jeu de la semaine!\n\n"
-        fd, temp_path = tempfile.mkstemp(suffix=".tmp")
-        try:
-            with os.fdopen(fd, 'w') as tf:
-                tf.write(comment_line)
-            editor = os.environ.get('EDITOR', 'vim')
-            if editor == 'vim' or editor.endswith('/vim'):
-                subprocess.call(['vim', '-c', 'set spell spelllang=fr', temp_path])
-            else:
-                subprocess.call([editor, temp_path])
-            with open(temp_path, 'r') as tf:
-                lines = tf.readlines()
-            # Remove comment lines and join
-            message = ''.join([line for line in lines if not line.strip().startswith('#')]).strip()
-            if not message:
-                print("Aucun message saisi. Abandon.")
-                sys.exit(0)
-            print("\nVotre message d'introduction :\n" + '-'*40)
-            print(message)
-            print('-'*40)
-            confirm = input("Est-ce correct ? [y/N]: ").strip().lower()
-            if confirm not in ('o', 'y', 'yes'):
-                print("Abandon. Aucun message envoyé.")
-                sys.exit(0)
-            custom_message = message
-        finally:
-            os.remove(temp_path)
 
     api_secret = os.getenv('CONVERTKIT_API_SECRET')
     if not api_secret:
@@ -442,7 +771,8 @@ def main():
         api_secret=api_secret,
         api_url=args.mail_api_url,
         dry_run=args.dry_run,
-        webhook_only=args.webhook_only
+        webhook_only=args.webhook_only,
+        week_seed=args.week_seed
     )
     
     # If selected_webhook_labels is set, send to each label in turn
@@ -455,10 +785,19 @@ def main():
                     webhook_map_path=args.webhook_map,
                     filter_label=None,  # No filter, so email is sent
                     mail_only=True,     # Only send email in this run
-                    custom_message=custom_message
+                    custom_message=custom_message,
+                    week_seed=args.week_seed
                 )
             else:
                 print("🛑 DRY RUN MODE: Skipping ConvertKit email send.")
+                # Still run the sender to show HTML preview
+                sender.run(
+                    webhook_map_path=args.webhook_map,
+                    filter_label=None,
+                    mail_only=True,
+                    custom_message=custom_message,
+                    week_seed=args.week_seed
+                )
             # Remove it from the list so it's not treated as a webhook
             selected_webhook_labels = [lbl for lbl in selected_webhook_labels if lbl != MAILING_LIST_LABEL]
         # Only send to webhooks if any remain
@@ -468,7 +807,8 @@ def main():
                     webhook_map_path=args.webhook_map,
                     filter_label=label,
                     mail_only=True,  # Always mail_only=True for webhook runs to prevent duplicate emails
-                    custom_message=custom_message
+                    custom_message=custom_message,
+                    week_seed=args.week_seed
                 )
     else:
         # In non-interactive mode, respect dry_run and webhook_only flags
@@ -479,7 +819,8 @@ def main():
                 webhook_map_path=args.webhook_map,
                 filter_label=args.webhook_label,
                 mail_only=args.mail_only,
-                custom_message=custom_message
+                custom_message=custom_message,
+                week_seed=args.week_seed
             )
         else:
             print("🛑 Webhook-only mode: Skipping email send.")

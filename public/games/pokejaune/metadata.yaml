@@ -1,0 +1,17 @@
+title: Pokémon Version Jaune
+developer: Game Freak
+year: 1998
+genre: Role-Playing, Adventure
+#controls:
+#  - 🕹️ Déplacer
+#  - 1️⃣  Tirer
+#  - 2️⃣  Bombe
+
+#to_start: Insert Coin -> Start
+#recommended: 
+
+announcement_message: 
+
+disable_score: true
+
+added: 2025-08-14

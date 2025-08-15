@@ -53,40 +53,91 @@ def get_game_from_seed(seed):
         return None
 
 def find_game_id_by_title(game_title):
-    """Find a game ID in the gamelist that matches the given title."""
+    """Find a game ID in the games directory that matches the given title."""
     try:
-        gamelist_path = 'public/gamelist.json'
-        if not os.path.exists(gamelist_path):
-            print(f"Error: gamelist.json not found at {gamelist_path}", file=sys.stderr)
+        games_dir = 'public/games'
+        if not os.path.exists(games_dir):
+            print(f"Error: games directory not found at {games_dir}", file=sys.stderr)
             return None
+        
+        # Search through all game directories for a title match
+        for game_dir in os.listdir(games_dir):
+            game_path = os.path.join(games_dir, game_dir)
+            if not os.path.isdir(game_path):
+                continue
+                
+            metadata_file = os.path.join(game_path, 'metadata.yaml')
+            if not os.path.exists(metadata_file):
+                continue
             
-        with open(gamelist_path, 'r') as f:
-            gamelist = json.load(f)
+            try:
+                with open(metadata_file, 'r') as f:
+                    metadata = yaml.safe_load(f)
+                
+                if metadata and metadata.get('title') == game_title:
+                    return game_dir
+                    
+            except Exception as e:
+                # Skip files that can't be parsed
+                continue
         
-        # Search through all games for a title match
-        all_games = []
-        if gamelist.get('gameOfTheWeek') and gamelist['gameOfTheWeek'].get('id'):
-            all_games.append(gamelist['gameOfTheWeek'])
-        if gamelist.get('previousGames'):
-            all_games.extend(gamelist['previousGames'])
+        # If no exact match found, try case-insensitive match
+        for game_dir in os.listdir(games_dir):
+            game_path = os.path.join(games_dir, game_dir)
+            if not os.path.isdir(game_path):
+                continue
+                
+            metadata_file = os.path.join(game_path, 'metadata.yaml')
+            if not os.path.exists(metadata_file):
+                continue
+            
+            try:
+                with open(metadata_file, 'r') as f:
+                    metadata = yaml.safe_load(f)
+                
+                if metadata and metadata.get('title', '').lower() == game_title.lower():
+                    return game_dir
+                    
+            except Exception as e:
+                # Skip files that can't be parsed
+                continue
         
-        # Try exact match first
-        for game in all_games:
-            if game.get('title') == game_title:
-                return game.get('id')
-        
-        # Try case-insensitive match
-        for game in all_games:
-            if game.get('title', '').lower() == game_title.lower():
-                return game.get('id')
-        
-        # Try partial match (in case titles have slight differences)
-        for game in all_games:
-            game_title_lower = game.get('title', '').lower()
-            search_title_lower = game_title.lower()
-            if search_title_lower in game_title_lower or game_title_lower in search_title_lower:
-                print(f"Warning: Found partial match: '{game.get('title')}' for '{game_title}'", file=sys.stderr)
-                return game.get('id')
+        # If still no match, try more precise partial matching
+        # Only match if the search title is a significant part of the game title
+        for game_dir in os.listdir(games_dir):
+            game_path = os.path.join(games_dir, game_dir)
+            if not os.path.isdir(game_path):
+                continue
+                
+            metadata_file = os.path.join(game_path, 'metadata.yaml')
+            if not os.path.exists(metadata_file):
+                continue
+            
+            try:
+                with open(metadata_file, 'r') as f:
+                    metadata = yaml.safe_load(f)
+                
+                if metadata and metadata.get('title'):
+                    game_title_lower = metadata['title'].lower()
+                    search_title_lower = game_title.lower()
+                    
+                    # Only consider it a match if the search title contains significant words
+                    # or if the game title contains the search title as a major component
+                    search_words = search_title_lower.split()
+                    if len(search_words) >= 2:
+                        # For multi-word titles, require at least 2 words to match
+                        matching_words = sum(1 for word in search_words if word in game_title_lower)
+                        if matching_words >= 2:
+                            print(f"Warning: Found partial match: '{metadata['title']}' for '{game_title}'", file=sys.stderr)
+                            return game_dir
+                    elif search_title_lower in game_title_lower and len(search_title_lower) > 3:
+                        # For single words, require them to be substantial (>3 chars) and contained in game title
+                        print(f"Warning: Found partial match: '{metadata['title']}' for '{game_title}'", file=sys.stderr)
+                        return game_dir
+                    
+            except Exception as e:
+                # Skip files that can't be parsed
+                continue
         
         print(f"Error: No game found with title: {game_title}", file=sys.stderr)
         return None

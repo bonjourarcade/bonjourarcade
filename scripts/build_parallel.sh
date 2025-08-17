@@ -32,21 +32,141 @@ trap cleanup SIGINT SIGTERM
 
 # Start gamelist generation in background (using parallel version)
 echo -e "${BLUE}🔄 Starting parallel gamelist generation...${NC}"
-bash scripts/generate_gamelist_parallel.sh &
+GAMELIST_START_TIME=$(date +%s)
+bash scripts/generate_gamelist_parallel.sh > /tmp/gamelist_output.log 2>&1 &
 GAMELIST_PID=$!
 
 # Start thumbnail generation in background
 echo -e "${PURPLE}🖼️  Starting thumbnail generation...${NC}"
-bash scripts/generate_thumbnails.sh &
+THUMBNAILS_START_TIME=$(date +%s)
+bash scripts/generate_thumbnails.sh > /tmp/thumbnails_output.log 2>&1 &
 THUMBNAILS_PID=$!
 
+echo -e "${CYAN}⏳ Both processes are now running in parallel...${NC}"
+echo -e "${CYAN}   • Gamelist generation PID: $GAMELIST_PID${NC}"
+echo -e "${CYAN}   • Thumbnail generation PID: $THUMBNAILS_PID${NC}"
+echo ""
+
+# Function to show real-time progress bar
+show_progress() {
+    local gamelist_pid=$1
+    local thumbnails_pid=$2
+    
+    local progress_stage=0
+    local progress_bar_width=50
+    local total_stages=6  # Total number of stages we can detect
+    
+    # Wait a moment for processes to start and generate initial output
+    sleep 2
+    
+    # Check if processes are still running
+    while kill -0 $gamelist_pid 2>/dev/null || kill -0 $thumbnails_pid 2>/dev/null; do
+        # Try to extract progress from gamelist output
+        if [ -f /tmp/gamelist_output.log ]; then
+            # Detect progress stages based on output
+            local current_stage=0
+            
+            if grep -q "Starting parallel gamelist generation" /tmp/gamelist_output.log; then
+                current_stage=1
+            fi
+            if grep -q "Getting current week's game from predictions.yaml" /tmp/gamelist_output.log; then
+                current_stage=2
+            fi
+            if grep -q "Scanning ROM files" /tmp/gamelist_output.log; then
+                current_stage=3
+            fi
+            if grep -q "Starting.*worker processes" /tmp/gamelist_output.log; then
+                current_stage=4
+            fi
+            if grep -q "Waiting for workers to complete" /tmp/gamelist_output.log; then
+                current_stage=5
+            fi
+            if grep -q "Combining results" /tmp/gamelist_output.log; then
+                current_stage=6
+            fi
+            
+            # Update progress if we found a new stage
+            if [ $current_stage -gt $progress_stage ]; then
+                progress_stage=$current_stage
+            fi
+            
+            # Calculate percentage
+            local percentage=$((progress_stage * 100 / total_stages))
+            local filled=$((percentage * progress_bar_width / 100))
+            local empty=$((progress_bar_width - filled))
+            
+            # Create progress bar
+            local bar=""
+            for ((i=0; i<filled; i++)); do
+                bar="${bar}█"
+            done
+            for ((i=0; i<empty; i++)); do
+                bar="${bar}░"
+            done
+            
+            # Show progress bar with status
+            echo -ne "\r${CYAN}[${bar}] ${percentage}% (Stage ${progress_stage}/${total_stages})${NC}"
+            
+            # Show thumbnail status
+            if kill -0 $thumbnails_pid 2>/dev/null; then
+                echo -ne " | ${PURPLE}⏳ Thumbnails${NC}"
+            else
+                echo -ne " | ${GREEN}✅ Thumbnails${NC}"
+            fi
+            
+            # Clear the line for next update
+            echo -ne "                    "
+            echo -ne "\r"
+        else
+            # Show simple status while waiting for output file
+            echo -ne "\r${CYAN}⏳ Starting processes...${NC}"
+            if kill -0 $thumbnails_pid 2>/dev/null; then
+                echo -ne " | ${PURPLE}⏳ Thumbnails${NC}"
+            else
+                echo -ne " | ${GREEN}✅ Thumbnails${NC}"
+            fi
+            echo -ne "                    "
+            echo -ne "\r"
+        fi
+        
+        sleep 1
+    done
+    
+    echo ""  # New line after progress
+}
+
+# Show progress while waiting
+echo -e "${CYAN}📊 Progress:${NC}"
+show_progress $GAMELIST_PID $THUMBNAILS_PID
+
 # Wait for both processes to complete
-echo -e "${CYAN}⏳ Waiting for both processes to complete...${NC}"
 wait $GAMELIST_PID
 GAMELIST_EXIT_CODE=$?
+GAMELIST_END_TIME=$(date +%s)
+GAMELIST_DURATION=$((GAMELIST_END_TIME - GAMELIST_START_TIME))
 
 wait $THUMBNAILS_PID
 THUMBNAILS_EXIT_CODE=$?
+THUMBNAILS_END_TIME=$(date +%s)
+THUMBNAILS_DURATION=$((THUMBNAILS_END_TIME - THUMBNAILS_START_TIME))
+
+# Show output from both processes
+echo ""
+echo -e "${PURPLE}📋 Thumbnail Generation Output:${NC}"
+cat /tmp/thumbnails_output.log
+
+echo ""
+echo -e "${BLUE}📋 Gamelist Generation Output:${NC}"
+cat /tmp/gamelist_output.log
+
+# Clean up temp files
+rm -f /tmp/thumbnails_output.log /tmp/gamelist_output.log
+
+echo ""
+echo -e "${CYAN}⏱️  Timing Information:${NC}"
+echo -e "   • ${BLUE}Gamelist generation: ${GAMELIST_DURATION}s${NC}"
+echo -e "   • ${PURPLE}Thumbnail generation: ${THUMBNAILS_DURATION}s${NC}"
+echo -e "   • ${CYAN}Total build time: $((GAMELIST_END_TIME - THUMBNAILS_START_TIME))s${NC}"
 
 # Check exit codes
 if [ $GAMELIST_EXIT_CODE -eq 0 ] && [ $THUMBNAILS_EXIT_CODE -eq 0 ]; then

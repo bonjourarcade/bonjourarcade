@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 set -e
 
 # --- Color codes for output ---
@@ -71,14 +71,68 @@ if ! command -v python3 &> /dev/null; then
     exit 1
 fi
 
-# Get the current week's game ID using the Python helper
-FEATURED_GAME_ID=$(python3 scripts/get_current_week_game.py)
-if [ $? -ne 0 ] || [ -z "$FEATURED_GAME_ID" ]; then
+# Get the current week's game title using the Python helper
+FEATURED_GAME_TITLE=$(python3 scripts/get_current_week_game.py)
+if [ $? -ne 0 ] || [ -z "$FEATURED_GAME_TITLE" ]; then
     echo "Error: Failed to get current week's game from predictions.yaml"
     exit 1
 fi
 
-echo -e "${GREEN}✅ Current week's game: $FEATURED_GAME_ID${NC}"
+echo -e "${GREEN}✅ Current week's game: $FEATURED_GAME_TITLE${NC}"
+
+# Function to find game ID by title
+find_game_id_by_title() {
+    local search_title="$1"
+    local games_dir="$2"
+    
+    # Search through all game directories for a title match
+    for game_dir in "$games_dir"/*/; do
+        if [ -d "$game_dir" ]; then
+            game_id=$(basename "$game_dir")
+            metadata_file="${game_dir}metadata.yaml"
+            
+            if [ -f "$metadata_file" ]; then
+                # Try to parse YAML and extract title
+                title=$(yq '.title // ""' "$metadata_file" 2>/dev/null | tr -d '"' | tr -d '\n' || echo "")
+                
+                if [ "$title" = "$search_title" ]; then
+                    echo "$game_id"
+                    return 0
+                fi
+            fi
+        fi
+    done
+    
+    # If no exact match found, try case-insensitive match
+    for game_dir in "$games_dir"/*/; do
+        if [ -d "$game_dir" ]; then
+            game_id=$(basename "$game_dir")
+            metadata_file="${game_dir}metadata.yaml"
+            
+            if [ -f "$metadata_file" ]; then
+                title=$(yq '.title // ""' "$metadata_file" 2>/dev/null | tr -d '"' | tr -d '\n' || echo "")
+                
+                if [ "$(echo "$title" | tr '[:upper:]' '[:lower:]')" = "$(echo "$search_title" | tr '[:upper:]' '[:lower:]')" ]; then
+                    echo "$game_id"
+                    return 0
+                fi
+            fi
+        fi
+    done
+    
+    echo ""
+    return 1
+}
+
+# Find the game ID for the featured game title
+FEATURED_GAME_ID=$(find_game_id_by_title "$FEATURED_GAME_TITLE" "$GAMES_DIR")
+if [ -z "$FEATURED_GAME_ID" ]; then
+    echo -e "${YELLOW}⚠️  Warning: Could not find game ID for title: $FEATURED_GAME_TITLE${NC}"
+    echo -e "${YELLOW}⚠️  Featured game will be set to null${NC}"
+    FEATURED_GAME_ID=""
+else
+    echo -e "${GREEN}✅ Found game ID: $FEATURED_GAME_ID for title: $FEATURED_GAME_TITLE${NC}"
+fi
 
 # --- Create worker script ---
 create_worker_script() {
@@ -341,7 +395,7 @@ for output_dir in "${WORKER_OUTPUTS[@]}"; do
                     # Extract game ID to check if it's the featured game
                     game_id=$(echo "$game_json" | jq -r '.id // empty')
                     
-                    if [ "$game_id" = "$FEATURED_GAME_ID" ]; then
+                        if [ -n "$FEATURED_GAME_ID" ] && [ "$game_id" = "$FEATURED_GAME_ID" ]; then
                         FEATURED_GAME="$game_json"
                     else
                         # Add to combined games array using temporary file to avoid argument list too long
@@ -383,7 +437,7 @@ COMBINED_GAMES=$(cat "$COMBINED_GAMES_FILE")
 # Create final JSON output using file-based approach
 FINAL_JSON_FILE="$TEMP_DIR/final_output.json"
 
-if [ "$FEATURED_GAME" != "null" ]; then
+if [ "$FEATURED_GAME" != "null" ] && [ -n "$FEATURED_GAME_ID" ]; then
     # Create featured game file
     echo "$FEATURED_GAME" > "$TEMP_DIR/featured_game.json"
     
@@ -406,9 +460,13 @@ jq '.' "$FINAL_JSON_FILE" > "$OUTPUT_FILE"
 rm -rf "$TEMP_DIR"
 
 # Final check for featured game
-featured_id_check=$(jq -r '.gameOfTheWeek.id' "$OUTPUT_FILE")
-if [ "$featured_id_check" = "null" ] || [ "$featured_id_check" != "$FEATURED_GAME_ID" ]; then
-    echo -e "${YELLOW}⚠️  Warning: Featured game '$FEATURED_GAME_ID' was not found or processed correctly.${NC}"
+if [ -n "$FEATURED_GAME_ID" ]; then
+    featured_id_check=$(jq -r '.gameOfTheWeek.id' "$OUTPUT_FILE")
+    if [ "$featured_id_check" = "null" ] || [ "$featured_id_check" != "$FEATURED_GAME_ID" ]; then
+        echo -e "${YELLOW}⚠️  Warning: Featured game '$FEATURED_GAME_ID' was not found or processed correctly.${NC}"
+    fi
+else
+    echo -e "${YELLOW}⚠️  No featured game was set for this week.${NC}"
 fi
 
 echo -e "${GREEN}✅ Parallel gamelist generation completed successfully!${NC}"

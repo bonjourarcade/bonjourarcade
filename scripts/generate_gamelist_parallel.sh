@@ -9,10 +9,19 @@ NC='\033[0m' # No Color
 
 # --- Configuration ---
 GAMES_DIR="public/games"
-ROMS_DIR="public/roms"
+ROMS_DIR="roms"
 OUTPUT_FILE="public/gamelist.json"
 DEFAULT_COVER="assets/images/placeholder_thumb.png"
 LAUNCHER_PAGE="/play"
+
+# Check if we're in local testing mode
+if [ "$LOCAL_TESTING" = "true" ]; then
+    echo "🔧 Local testing mode enabled - using local ROM paths"
+    USE_LOCAL_PATHS=true
+else
+    echo "🌐 Production mode - using GitLab URLs"
+    USE_LOCAL_PATHS=false
+fi
 
 # Determine number of CPU cores to use
 if command -v nproc >/dev/null 2>&1; then
@@ -179,7 +188,17 @@ while IFS= read -r rom_file; do
     # Extract game_id from filename (remove extension)
     game_id=$(basename "$rom_file" | sed 's/\.[^.]*$//')
     rom_subdir=$(basename "$(dirname "$rom_file")")
-    rom_path="/$(echo "$rom_file" | sed 's|public/||')" # Web path
+    # Generate ROM path based on testing mode
+    rom_filename=$(basename "$rom_file")
+    rom_subdir=$(basename "$(dirname "$rom_file")")
+    
+    if [ "$USE_LOCAL_PATHS" = "true" ]; then
+        # Local testing mode - use local paths
+        rom_path="/roms/${rom_subdir}/${rom_filename}"
+    else
+        # Production mode - use GitLab URLs
+        rom_path="https://gitlab.com/bonjourarcade/bonjourarcade/-/raw/main/roms/${rom_subdir}/${rom_filename}"
+    fi
     
     if [ "$rom_subdir" = "bios" ]; then
         continue
@@ -344,8 +363,8 @@ for i in $(seq 1 $NUM_WORKERS); do
     mkdir -p "$OUTPUT_DIR"
     WORKER_OUTPUTS+=("$OUTPUT_DIR")
     
-    # Start worker in background
-    "$WORKER_SCRIPT" "$GAMES_DIR" "$ROMS_DIR" "$DEFAULT_COVER" "$LAUNCHER_PAGE" "$FEATURED_GAME_ID" "$BATCH_FILE" "$OUTPUT_DIR" &
+    # Start worker in background with environment variable
+    USE_LOCAL_PATHS="$USE_LOCAL_PATHS" "$WORKER_SCRIPT" "$GAMES_DIR" "$ROMS_DIR" "$DEFAULT_COVER" "$LAUNCHER_PAGE" "$FEATURED_GAME_ID" "$BATCH_FILE" "$OUTPUT_DIR" &
     WORKER_PIDS+=($!)
 done
 

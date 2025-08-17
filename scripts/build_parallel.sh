@@ -15,8 +15,17 @@ PURPLE='\033[0;35m'
 CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
-echo -e "${CYAN}🚀 Starting parallel build process...${NC}"
-echo -e "${CYAN}📋 Generating gamelist.json and thumbnails simultaneously...${NC}"
+# Check if we're being called from another script
+if [ -n "$CALLED_FROM_SCRIPT" ]; then
+    echo -e "${CYAN}🚀 Starting parallel build process (called from script)...${NC}"
+    echo -e "${CYAN}📋 Generating gamelist.json and thumbnails simultaneously...${NC}"
+    # Disable progress bar when called from another script
+    DISABLE_PROGRESS=true
+else
+    echo -e "${CYAN}🚀 Starting parallel build process...${NC}"
+    echo -e "${CYAN}📋 Generating gamelist.json and thumbnails simultaneously...${NC}"
+    DISABLE_PROGRESS=false
+fi
 
 # Function to handle cleanup on exit
 cleanup() {
@@ -135,9 +144,17 @@ show_progress() {
     echo ""  # New line after progress
 }
 
-# Show progress while waiting
-echo -e "${CYAN}📊 Progress:${NC}"
-show_progress $GAMELIST_PID $THUMBNAILS_PID
+# Show progress while waiting (only if not called from another script)
+if [ "$DISABLE_PROGRESS" != "true" ]; then
+    echo -e "${CYAN}📊 Progress:${NC}"
+    show_progress $GAMELIST_PID $THUMBNAILS_PID
+else
+    echo -e "${CYAN}⏳ Waiting for processes to complete...${NC}"
+    # Simple wait without progress bar
+    while kill -0 $GAMELIST_PID 2>/dev/null || kill -0 $THUMBNAILS_PID 2>/dev/null; do
+        sleep 2
+    done
+fi
 
 # Wait for both processes to complete
 wait $GAMELIST_PID

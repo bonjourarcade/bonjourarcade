@@ -176,14 +176,12 @@ echo ""
 echo -e "${BLUE}📋 Gamelist Generation Output:${NC}"
 cat /tmp/gamelist_output.log
 
-# Clean up temp files
-rm -f /tmp/thumbnails_output.log /tmp/gamelist_output.log
+# Clean up temp files (only if not called from another script)
+if [ -z "$CALLED_FROM_SCRIPT" ]; then
+    rm -f /tmp/thumbnails_output.log /tmp/gamelist_output.log
+fi
 
-echo ""
-echo -e "${CYAN}⏱️  Timing Information:${NC}"
-echo -e "   • ${BLUE}Gamelist generation: ${GAMELIST_DURATION}s${NC}"
-echo -e "   • ${PURPLE}Thumbnail generation: ${THUMBNAILS_DURATION}s${NC}"
-echo -e "   • ${CYAN}Total build time: $((GAMELIST_END_TIME - THUMBNAILS_START_TIME))s${NC}"
+
 
 # Check exit codes
 if [ $GAMELIST_EXIT_CODE -eq 0 ] && [ $THUMBNAILS_EXIT_CODE -eq 0 ]; then

@@ -398,7 +398,7 @@ function populateFeaturedGame(game) {
             handleGameClick(featuredGameSection);
         });
     }
-    // MARKER FOR COPY HTML TO SHMUPS
+    
 }
 
 /**
@@ -546,22 +546,7 @@ function populatePreviousGames(games) {
         if (!displayTitle || displayTitle === game.id) {
             displayTitle = capitalizeFirst(game.id);
         }
-        // Special case: SHMUPS marker
-        if (displayTitle === 'SHMUPS') {
-            // Replace the <p> with an <img> for the logo
-            const shmupsLogo = document.createElement('img');
-            shmupsLogo.src = '/assets/images/shmups-logo.png';
-            shmupsLogo.alt = 'SHMUPS';
-            shmupsLogo.className = 'shmups-logo-title';
-            shmupsLogo.style.width = '100%';
-            shmupsLogo.style.height = 'auto';
-            shmupsLogo.style.display = 'block';
-            shmupsLogo.style.margin = '0 auto';
-            title.textContent = '';
-            title.appendChild(shmupsLogo);
-        } else {
-            title.textContent = displayTitle;
-        }
+        title.textContent = displayTitle;
 
         link.appendChild(img);
         link.appendChild(title);

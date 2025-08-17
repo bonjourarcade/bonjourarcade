@@ -147,6 +147,12 @@ else
     echo "   Using Google Cloud Storage URLs for production"
 fi
 
+# Count total games that will be processed
+echo "   Counting ROM files..."
+TOTAL_GAMES=$(find roms/* -type f 2>/dev/null | wc -l | tr -d ' ')
+echo "   Found $TOTAL_GAMES ROM files to process"
+echo ""
+
 # Run the build process and capture output cleanly
 echo "   Starting parallel build process..."
 echo "   (This may take a few minutes for large ROM collections)"
@@ -158,6 +164,9 @@ rm -f /tmp/gamelist_output.log /tmp/thumbnails_output.log
 # Set flag to disable progress bar when called from script
 export CALLED_FROM_SCRIPT=true
 
+# Capture build start time
+BUILD_START_TIME=$(date +%s)
+
 if bash scripts/build_parallel.sh; then
     echo ""
     echo -e "${GREEN}✅ Build completed successfully${NC}"
@@ -167,6 +176,13 @@ else
     echo -e "${RED}❌ Build failed${NC}"
     exit 1
 fi
+
+# Calculate and display build timing
+BUILD_END_TIME=$(date +%s)
+BUILD_DURATION=$((BUILD_END_TIME - BUILD_START_TIME))
+echo ""
+echo -e "${CYAN}⏱️  Build completed in ${BUILD_DURATION}s${NC}"
+echo ""
 
 echo ""
 
@@ -205,6 +221,24 @@ else
     echo ""
 fi
 
-# Start the server
+# Start the server in foreground (suppress only Python's startup messages)
 echo -e "${BLUE}🌐 Starting HTTP server...${NC}"
-cd public && python3 -m http.server 8000
+
+# Start the server and capture its exit code
+cd public
+python3 -m http.server 8000 >/dev/null 2>&1
+echo "   Python server command completed"
+SERVER_EXIT_CODE=$?
+echo "   Server exit code: $SERVER_EXIT_CODE"
+
+# Handle server exit gracefully
+if [ $SERVER_EXIT_CODE -eq 0 ]; then
+    echo -e "${GREEN}✅ Server stopped normally${NC}"
+elif [ $SERVER_EXIT_CODE -eq 130 ] || [ $SERVER_EXIT_CODE -eq 143 ]; then
+    echo -e "${YELLOW}🛑 Server stopped by user (Ctrl+C)${NC}"
+else
+    echo -e "${YELLOW}⚠️  Server stopped with exit code: $SERVER_EXIT_CODE${NC}"
+fi
+
+# Always exit successfully since the build completed
+exit 0

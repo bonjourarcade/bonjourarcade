@@ -432,27 +432,6 @@ done
 # Read the combined games from file
 COMBINED_GAMES=$(cat "$COMBINED_GAMES_FILE")
 
-# Add the SHMUPS entry
-shmups_json=$(jq -n \
-    --arg id "shmups" \
-    --arg title "SHMUPS" \
-    --arg developer "" \
-    --arg year "" \
-    --arg genre "" \
-    --arg recommended "" \
-    --arg hide "no" \
-    --arg coverArt "/assets/shmups.jpg" \
-    --arg pageUrl "https://felx.cc/s" \
-    --arg core "null" \
-    --arg romPath "null" \
-    --arg saveState "" \
-    '{id: $id, title: $title, developer: $developer, year: $year, genre: $genre, recommended: $recommended, hide: $hide, coverArt: $coverArt, pageUrl: $pageUrl, core: $core, romPath: $romPath, saveState: $saveState}')
-
-# Add SHMUPS to combined games using file-based approach
-jq --argjson shmups "$shmups_json" '. += [$shmups]' "$COMBINED_GAMES_FILE" > "$TEMP_DIR/temp_combined.json"
-mv "$TEMP_DIR/temp_combined.json" "$COMBINED_GAMES_FILE"
-COMBINED_GAMES=$(cat "$COMBINED_GAMES_FILE")
-
 # Create final JSON output using file-based approach
 FINAL_JSON_FILE="$TEMP_DIR/final_output.json"
 

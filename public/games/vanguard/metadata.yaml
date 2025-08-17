@@ -1,12 +1,4 @@
 title: Vanguard
 developer: SNK
 year: 1981
-genre: Shooter
-recommended: Sandrine Faust
-controls:
-  - 🕹️ Déplacer
-  - 1️⃣ Tirer ←
-  - 2️⃣ Tirer →
-  - 3️⃣ Tirer ↑
-  - 4️⃣ Tirer ↓
-to_start: Insert Coin -> Start
+genre: scrolling shooter

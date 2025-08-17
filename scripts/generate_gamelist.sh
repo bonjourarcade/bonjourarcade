@@ -362,30 +362,6 @@ done
 # Complete the progress bar with a newline
 echo ""
 
-# Add the SHMUPS entry to the previous games list
-shmups_json=$(jq -n \
-              --arg id "shmups" \
-              --arg title "SHMUPS" \
-              --arg developer "" \
-              --arg year "" \
-              --arg genre "" \
-              --arg recommended "" \
-              --arg hide "no" \
-              --arg coverArt "/assets/shmups.jpg" \
-              --arg pageUrl "https://felx.cc/s" \
-              --arg core "null" \
-              --arg romPath "null" \
-              --arg saveState "" \
-              '{id: $id, title: $title, developer: $developer, year: $year, genre: $genre, recommended: $recommended, hide: $hide, coverArt: $coverArt, pageUrl: $pageUrl, core: $core, romPath: $romPath, saveState: $saveState}')
-
-# Append the SHMUPS entry to the temporary games file
-temp_games=$(cat "$temp_games_file")
-# Use temporary file to avoid "Argument list too long" error
-temp_shmups_input=$(mktemp)
-echo "$shmups_json" > "$temp_shmups_input"
-echo "$temp_games" | jq --slurpfile shmups "$temp_shmups_input" '. += $shmups' > "$temp_games_file"
-rm -f "$temp_shmups_input"
-
 # --- Combine the data from temporary files to create final JSON ---
 games_list=$(cat "$temp_games_file")
 featured_game=$(cat "$temp_featured_file")

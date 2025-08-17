@@ -1,0 +1,16 @@
+title: ESP Ra. De.
+developer: CAVE
+year: 1998
+genre: Shooter
+#controls:
+#  - 🕹️ Déplacer
+#  - 1️⃣  Tirer
+#  - 2️⃣  Bombe
+
+#to_start: Insert Coin -> Start
+#recommended: 
+
+disable_score: true
+hide: yes
+
+added: 2025-07-31

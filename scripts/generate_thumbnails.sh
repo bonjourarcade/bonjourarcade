@@ -36,12 +36,7 @@ if [ -f "$DEFAULT_COVER" ]; then
 $DEFAULT_COVER"
 fi
 
-# Add any other static cover images
-SHMUPS_COVER="public/assets/shmups.jpg"
-if [ -f "$SHMUPS_COVER" ]; then
-    IMAGE_PATHS="$IMAGE_PATHS
-$SHMUPS_COVER"
-fi
+
 
 if [ -z "$IMAGE_PATHS" ]; then
     echo "No cover images found to process."

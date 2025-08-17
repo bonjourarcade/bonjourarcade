@@ -3,6 +3,16 @@
 
 image: alpine
 
+upload_to_gcs:
+  stage: deploy
+  image: google/cloud-sdk:latest
+  script:
+    - echo "Setting up Google Cloud credentials..."
+    - gcloud auth activate-service-account --key-file=$GCLOUD_SERVICE_KEY
+    - gsutil rsync -mrd roms gs://bonjourarcade-roms
+  only:
+    - main
+
 pages:
   stage: deploy
   before_script:

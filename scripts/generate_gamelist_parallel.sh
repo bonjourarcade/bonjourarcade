@@ -196,8 +196,8 @@ while IFS= read -r rom_file; do
         # Local testing mode - use local paths
         rom_path="/roms/${rom_subdir}/${rom_filename}"
     else
-        # Production mode - use GitLab URLs
-        rom_path="https://gitlab.com/bonjourarcade/bonjourarcade/-/raw/main/roms/${rom_subdir}/${rom_filename}"
+        # Production mode - use Google Cloud Storage URLs
+        rom_path="https://storage.googleapis.com/bonjourarcade-roms/${rom_subdir}/${rom_filename}"
     fi
     
     if [ "$rom_subdir" = "bios" ]; then

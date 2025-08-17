@@ -15,7 +15,7 @@
 # 
 # USAGE:
 #   ./dev.sh                     # Start with local testing mode (default)
-#   ./dev.sh --production        # Start with production GitLab URLs
+#   ./dev.sh --production        # Start with production Google Cloud Storage URLs
 #   ./dev.sh --help              # Show this help message
 # 
 # FEATURES:
@@ -24,6 +24,7 @@
 #   - Parallel processing for fast build generation
 #   - Local server startup at http://localhost:8000
 #   - Easy switching between local and production modes
+#   - Production mode uses Google Cloud Storage CDN (no CORS issues)
 #   - Comprehensive error checking and user feedback
 # 
 # REQUIREMENTS:
@@ -48,12 +49,12 @@ show_help() {
     echo "Usage: $0 [OPTIONS]"
     echo ""
     echo "Options:"
-    echo "  --production    Use production GitLab URLs instead of local paths"
-    echo "  --help          Show this help message"
-    echo ""
-    echo "Examples:"
-    echo "  ./dev.sh        # Start with local testing mode (default)"
-    echo "  ./dev.sh --production # Start with production GitLab URLs"
+echo "  --production    Use production Google Cloud Storage URLs instead of local paths"
+echo "  --help          Show this help message"
+echo ""
+echo "Examples:"
+echo "  ./dev.sh        # Start with local testing mode (default)"
+echo "  ./dev.sh --production # Start with production Google Cloud Storage URLs"
     echo ""
     echo "Local testing mode will:"
 echo "  1. Generate gamelist.json with local ROM paths (/roms/...)"
@@ -62,7 +63,7 @@ echo "  3. Start local server at http://localhost:8000"
 echo "  4. Allow testing ROMs from local filesystem"
 echo ""
 echo "Production mode will:"
-echo "  1. Generate gamelist.json with GitLab URLs"
+echo "  1. Generate gamelist.json with Google Cloud Storage URLs"
 echo "  2. Generate thumbnails for all games"
 echo "  3. Start local server at http://localhost:8000"
 echo "  4. Test with production ROM URLs (requires internet)"
@@ -99,7 +100,7 @@ if [ "$LOCAL_TESTING" = "true" ]; then
     echo ""
 else
     echo -e "${YELLOW}🌐 Production Mode Enabled${NC}"
-    echo "   ROMs will be loaded from GitLab URLs"
+    echo "   ROMs will be loaded from Google Cloud Storage URLs"
     echo "   This requires internet connection"
     echo ""
 fi
@@ -143,7 +144,7 @@ if [ "$LOCAL_TESTING" = "true" ]; then
     echo "   Using local ROM paths for testing"
 else
     unset LOCAL_TESTING
-    echo "   Using GitLab URLs for production"
+    echo "   Using Google Cloud Storage URLs for production"
 fi
 
 # Run the build process and capture output cleanly
@@ -169,7 +170,19 @@ fi
 
 echo ""
 
+# --- Show sample ROM paths ---
+echo -e "${BLUE}🔍 Sample ROM paths from generated gamelist:${NC}"
+if [ "$LOCAL_TESTING" = "true" ]; then
+    echo "   (Local testing mode - using /roms/ paths)"
+else
+    echo "   (Production mode - using Google Cloud Storage URLs)"
+fi
 
+# Show compact sample of ROM paths
+echo ""
+grep '"romPath"' public/gamelist.json | head -5 | sed 's/.*"romPath": "\([^"]*\)".*/   • \1/'
+echo "   ... (showing first 5 ROMs)"
+echo ""
 
 # --- Start server ---
 echo -e "${BLUE}🚀 Starting local server...${NC}"
@@ -186,7 +199,8 @@ if [ "$LOCAL_TESTING" = "true" ]; then
 else
     echo -e "${YELLOW}💡 Production Testing Tips:${NC}"
     echo "   - Test games at: http://localhost:8000/play?game=<game_id>"
-    echo "   - ROMs load from GitLab URLs"
+    echo "   - ROMs load from Google Cloud Storage CDN"
+    echo "   - No CORS issues - fast, reliable loading"
     echo "   - Internet connection required"
     echo ""
 fi

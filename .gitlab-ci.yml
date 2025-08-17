@@ -9,7 +9,7 @@ upload_to_gcs:
   script:
     - echo "Setting up Google Cloud credentials..."
     - gcloud auth activate-service-account --key-file=$GCLOUD_SERVICE_KEY
-    - gsutil rsync -mrd roms gs://bonjourarcade-roms
+    - gsutil -m rsync -rd roms gs://bonjourarcade-roms
   only:
     - main
 

@@ -2,8 +2,7 @@
 
 Thank you for playing! :)
 
-- `game-of-the-week`: Set this to decide what is the game of the week
-  (must fit game_id from `public/games`)
+- **Game of the Week**: Automatically selected each week using the plinko system
 - `metadata.yaml`: Template metadata file that could go in
   `public/games/<game_id>/`
 
@@ -41,3 +40,10 @@ EmulatorJS](https://emulatorjs.org/docs4devs/control-mapping).
 Create a state file by clicking on the "floppy" button from the
 emulator. Then move and rename this file to
 `public/games/<game_id>/save.state`.
+
+# Game of the Week System
+
+The game of the week is automatically selected using:
+- **Plinko System**: Weekly seeds (YYYYWW format) determine game selection
+- **Predictions**: Games are pre-selected in `public/plinko/predict/predictions.yaml`
+- **Automatic**: No manual file editing required

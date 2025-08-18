@@ -450,21 +450,49 @@ class NewsletterSender:
         
         <div style="background:#f0f8ff;border:2px solid #007bff;border-radius:8px;padding:20px;margin:20px 0;">
             <h2 style="color:#007bff;margin-top:0;">🎯 Jeu de la semaine : {clean_title}</h2>
-            <ul style="margin:0;padding-left:20px;font-size:1.1em;">
-                <li><b>Développeur :</b> {developer}</li>
-                <li><b>Année :</b> {year}</li>
-                <li><b>Genre :</b> {genre}</li>
-                <li><b>Contrôles :</b> {controls}</li>
-                <li><b>Image :</b> <a href="{cover_url}">{cover_url}</a></li>
-                <li><b>Tirage Plinko :</b> <a href="{self.plinko_url}">{self.plinko_url}</a></li>
-                <li><b>Classements :</b> <a href="{leaderboard_url}">{leaderboard_url}</a></li>
-            </ul>
+            
+            <!-- Description du jeu -->
+            <div style="margin-bottom:20px;font-size:1.1em;line-height:1.6;">
+                {announcement_message}
+            </div>
+            
+            <!-- Layout responsive en deux colonnes -->
+            <div style="display:flex;flex-direction:row;gap:20px;align-items:flex-start;">
+                <div style="flex:1;min-width:0;">
+                    <ul style="margin:0;padding-left:20px;font-size:1.1em;">
+                        <li><b>Développeur :</b> {developer}</li>
+                        <li><b>Année :</b> {year}</li>
+                        <li><b>Genre :</b> {genre}</li>
+                        <li><b>Contrôles :</b> {controls}</li>
+                        <li><b>Tirage Plinko :</b> <a href="{self.plinko_url}">{self.plinko_url}</a></li>
+                    </ul>
+                </div>
+                <div style="flex:1;min-width:0;text-align:center;">
+                    <img src="{cover_url}" alt="Cover de {clean_title}" style="max-width:100%;height:auto;border-radius:8px;box-shadow:0 4px 8px rgba(0,0,0,0.1);" />
+                </div>
+            </div>
+            
+            <!-- Media query pour mobile -->
+            <style>
+                @media (max-width: 600px) {{
+                    .game-section {{
+                        flex-direction: column !important;
+                    }}
+                    .game-section > div {{
+                        flex: none !important;
+                        width: 100% !important;
+                        margin-bottom: 15px;
+                    }}
+                    .game-section > div:last-child {{
+                        margin-bottom: 0;
+                    }}
+                }}
+            </style>
         </div>
         
-        {custom_html}
-        
         <div style="text-align:center;margin:30px 0;">
-            <a href="{play_url}" style="background:#007bff;color:white;padding:15px 30px;text-decoration:none;border-radius:5px;font-size:18px;font-weight:bold;">🎮 Jouer maintenant !</a>
+            <a href="{play_url}" style="background:#007bff;color:white;padding:15px 30px;text-decoration:none;border-radius:5px;font-size:18px;font-weight:bold;margin-right:15px;display:inline-block;margin-bottom:10px;">🎮 Jouer maintenant !</a>
+            <a href="{leaderboard_url}" style="background:#ffc107;color:#212529;padding:15px 30px;text-decoration:none;border-radius:5px;font-size:18px;font-weight:bold;display:inline-block;margin-bottom:10px;">🏆 Classements</a>
         </div>
         
         <p style="text-align:center;color:#666;font-style:italic;">Bonne semaine ! ☀️</p>
@@ -486,7 +514,7 @@ class NewsletterSender:
             return True
         
         from datetime import datetime, timedelta, timezone
-        send_at = (datetime.now(timezone.utc) + timedelta(minutes=1)).isoformat(timespec='seconds').replace('+00:00', 'Z')
+        send_at = (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat(timespec='seconds').replace('+00:00', 'Z')
         
         data = {
             'api_secret': self.api_secret,
@@ -634,10 +662,10 @@ Bonne semaine ! ☀️
     def run(self, webhook_map_path=None, filter_label=None, mail_only=False, custom_message=None, week_seed=None):
         """
         Run the newsletter process with the following safety rules:
-        - If webhook_only=True: Skip email sending completely, skip webhook sending
-        - If mail_only=True: Skip email sending completely, but still send webhooks
-        - If dry_run=True: Skip email sending completely
-        - Only send email if ALL safety checks pass
+        - If webhook_only=True: Send webhooks (respecting filter_label) and skip email
+        - If mail_only=True: Send only the email (no webhooks)
+        - If neither flag is set: Send both webhooks and email
+        - If dry_run=True: Skip ConvertKit API call, but still generate and preview content
         """
         print('📧 Starting newsletter email process...')
         
@@ -667,29 +695,29 @@ Bonne semaine ! ☀️
         print(f'🔗 Plinko link for this week: {self.plinko_url}')
         print(f'✅ Email content ready: {content["subject"]}')
         
-        # Always send webhook (unless webhook_only is set)
-        if not self.webhook_only:
-            self.send_webhook(content, game_id, meta, webhook_map_path=webhook_map_path, filter_label=filter_label, custom_message=custom_message, last_week_highlight=last_week_highlight)
-        
-        # If webhook_only is set, skip email
+        # Webhook-only: send webhooks and exit before email
         if self.webhook_only:
+            self.send_webhook(
+                content, game_id, meta,
+                webhook_map_path=webhook_map_path,
+                filter_label=filter_label,
+                custom_message=custom_message,
+                last_week_highlight=last_week_highlight
+            )
             print("🛑 Webhook-only mode: Skipping email send.")
             return
         
-        # If mail_only is set, skip email
-        if mail_only:
-            if self.dry_run:
-                # In dry-run mode, show HTML preview even for mail-only
-                print("🛑 Mail-only mode: Skipping email send (webhook processing only).")
-                print("\n" + "="*50)
-                print("📧 EMAIL HTML PREVIEW (DRY RUN - MAIL ONLY)")
-                print("="*50)
-                print(content['content'])
-                print("="*50)
-            else:
-                print("🛑 Mail-only mode: Skipping email send (webhook processing only).")
-            return
+        # If not mail-only, send webhooks (normal case: both)
+        if not mail_only:
+            self.send_webhook(
+                content, game_id, meta,
+                webhook_map_path=webhook_map_path,
+                filter_label=filter_label,
+                custom_message=custom_message,
+                last_week_highlight=last_week_highlight
+            )
         
+        # Mail-only: do NOT return early; proceed to email sending only
         # Send email (but respect dry_run flag)
         if not self.dry_run:
             print("📤 Sending email...")
@@ -702,12 +730,11 @@ Bonne semaine ! ☀️
         else:
             print("🛑 DRY RUN MODE: Skipping email send.")
             # Print HTML content for preview when ConvertKit is selected
-            if not self.webhook_only:
-                print("\n" + "="*50)
-                print("📧 EMAIL HTML PREVIEW (DRY RUN)")
-                print("="*50)
-                print(content['content'])
-                print("="*50)
+            print("\n" + "="*50)
+            print("📧 EMAIL HTML PREVIEW (DRY RUN)")
+            print("="*50)
+            print(content['content'])
+            print("="*50)
 
 def main():
     parser = argparse.ArgumentParser(description='Send BonjourArcade newsletter')
@@ -740,7 +767,7 @@ def main():
     
     # Interactive webhook selection if no --webhook-label is provided
     selected_webhook_labels = None
-    if args.webhook_label is None:
+    if args.webhook_label is None and not args.mail_only:
         webhook_map_path = args.webhook_map
         if not os.path.exists(webhook_map_path):
             print(f"⚠️  Webhook map file '{webhook_map_path}' not found. Skipping webhook selection.")
@@ -764,8 +791,11 @@ def main():
                     print("Aucun webhook sélectionné. Abandon.")
                     sys.exit(0)
                 selected_webhook_labels = selected
-    else:
+    elif args.webhook_label is not None:
         selected_webhook_labels = [args.webhook_label]
+    elif args.mail_only:
+        # In mail-only mode, we don't need webhook selection
+        selected_webhook_labels = None
 
     sender = NewsletterSender(
         api_secret=api_secret,
@@ -778,52 +808,52 @@ def main():
     # If selected_webhook_labels is set, send to each label in turn
     if selected_webhook_labels is not None:
         MAILING_LIST_LABEL = "ConvertKit Email"
-        # If ConvertKit Email is selected, send the email (but respect dry_run)
+        # If ConvertKit Email is selected, send ONLY the email
         if MAILING_LIST_LABEL in selected_webhook_labels:
-            if not args.dry_run:
-                sender.run(
-                    webhook_map_path=args.webhook_map,
-                    filter_label=None,  # No filter, so email is sent
-                    mail_only=True,     # Only send email in this run
-                    custom_message=custom_message,
-                    week_seed=args.week_seed
-                )
-            else:
-                print("🛑 DRY RUN MODE: Skipping ConvertKit email send.")
-                # Still run the sender to show HTML preview
-                sender.run(
-                    webhook_map_path=args.webhook_map,
-                    filter_label=None,
-                    mail_only=True,
-                    custom_message=custom_message,
-                    week_seed=args.week_seed
-                )
-            # Remove it from the list so it's not treated as a webhook
-            selected_webhook_labels = [lbl for lbl in selected_webhook_labels if lbl != MAILING_LIST_LABEL]
-        # Only send to webhooks if any remain
-        if selected_webhook_labels:
-            for label in selected_webhook_labels:
-                sender.run(
-                    webhook_map_path=args.webhook_map,
-                    filter_label=label,
-                    mail_only=True,  # Always mail_only=True for webhook runs to prevent duplicate emails
-                    custom_message=custom_message,
-                    week_seed=args.week_seed
-                )
-    else:
-        # In non-interactive mode, respect dry_run and webhook_only flags
-        if args.dry_run:
-            print("🛑 DRY RUN MODE: Skipping ConvertKit email send.")
-        elif not args.webhook_only:
             sender.run(
                 webhook_map_path=args.webhook_map,
-                filter_label=args.webhook_label,
-                mail_only=args.mail_only,
+                filter_label=None,
+                mail_only=True,     # Email only
                 custom_message=custom_message,
                 week_seed=args.week_seed
             )
-        else:
-            print("🛑 Webhook-only mode: Skipping email send.")
+            # Remove it from the list so it's not treated as a webhook
+            selected_webhook_labels = [lbl for lbl in selected_webhook_labels if lbl != MAILING_LIST_LABEL]
+        
+        # Send each selected webhook as webhook-only runs
+        for label in selected_webhook_labels or []:
+            # For each webhook, run in webhook-only mode so no email is sent
+            sender.webhook_only = True
+            sender.run(
+                webhook_map_path=args.webhook_map,
+                filter_label=label,
+                mail_only=False,
+                custom_message=custom_message,
+                week_seed=args.week_seed
+            )
+            # Reset webhook_only flag for safety
+            sender.webhook_only = args.webhook_only
+    else:
+        # In non-interactive mode, respect flags
+        if args.dry_run:
+            print("🛑 DRY RUN MODE: Skipping ConvertKit email send.")
+        if args.webhook_only:
+            sender.run(
+                webhook_map_path=args.webhook_map,
+                filter_label=args.webhook_label,
+                mail_only=False,
+                custom_message=custom_message,
+                week_seed=args.week_seed
+            )
+        elif args.mail_only or (not args.webhook_label and not args.webhook_only):
+            # Default to email only if no webhook label is specified and not webhook-only
+            sender.run(
+                webhook_map_path=args.webhook_map,
+                filter_label=None,
+                mail_only=True,
+                custom_message=custom_message,
+                week_seed=args.week_seed
+            )
 
 if __name__ == '__main__':
     main() 

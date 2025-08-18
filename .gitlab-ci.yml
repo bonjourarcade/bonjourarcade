@@ -12,6 +12,9 @@ upload_to_gcs:
     - gsutil -m rsync -rd roms gs://bonjourarcade-roms
   only:
     - main
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - changes: roms/
 
 pages:
   stage: deploy
@@ -34,3 +37,4 @@ pages:
     expire_in: 1 week
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - changes: public/

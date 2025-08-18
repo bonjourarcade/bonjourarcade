@@ -523,6 +523,7 @@
                 <option value="title">Titre</option>
                 <option value="genre">Genre</option>
                 <option value="developer">Développeur</option>
+                <option value="new">Nouveaux jeux</option>
             </select>
             <input type="text" id="search-input" class="search-input" placeholder="Rechercher par titre..." style="border-radius: 0 8px 8px 0; border-left: none;">
             <select id="genre-select" style="display: none; padding: 0.75rem 1rem; border: 2px solid var(--border-color); border-radius: 0 8px 8px 0; font-size: 1rem; background: var(--card-bg); color: var(--text-color); border-left: none; cursor: pointer;">
@@ -530,6 +531,10 @@
             </select>
             <select id="developer-select" style="display: none; padding: 0.75rem 1rem; border: 2px solid var(--border-color); border-radius: 0 8px 8px 0; font-size: 1rem; background: var(--card-bg); color: var(--text-color); border-left: none; cursor: pointer;">
                 <option value="">Sélectionner un développeur...</option>
+            </select>
+            <select id="new-select" style="display: none; padding: 0.75rem 1rem; border: 2px solid var(--border-color); border-radius: 0 8px 8px 0; font-size: 1rem; background: var(--card-bg); color: var(--text-color); border-left: none; cursor: pointer;">
+                <option value="">Tous les jeux</option>
+                <option value="new">Nouveaux jeux uniquement</option>
             </select>
             <span class="search-info" id="search-info"></span>
         </div>
@@ -684,6 +689,12 @@
                         return individualDevelopers.includes(term.toLowerCase());
                     }
                     return false;
+                } else if (searchType === 'new') {
+                    // Search only by new flag
+                    if (term === 'new') {
+                        return game.new_flag === 'true';
+                    }
+                    return false;
                 }
                 return false;
             });
@@ -750,7 +761,8 @@
             const searchInput = document.getElementById('search-input');
             const genreSelect = document.getElementById('genre-select');
             const developerSelect = document.getElementById('developer-select');
-            const isSearching = (searchInput && searchInput.value) || (genreSelect && genreSelect.value) || (developerSelect && developerSelect.value);
+            const newSelect = document.getElementById('new-select');
+            const isSearching = (searchInput && searchInput.value) || (genreSelect && genreSelect.value) || (developerSelect && developerSelect.value) || (newSelect && newSelect.value);
             
             if (isSearching) {
                 // Simple grid layout for search results (no sections)
@@ -1015,6 +1027,7 @@
             const searchInput = document.getElementById('search-input');
             const genreSelect = document.getElementById('genre-select');
             const developerSelect = document.getElementById('developer-select');
+            const newSelect = document.getElementById('new-select');
             const searchType = e.target.value;
             
             // Update placeholder text and show/hide appropriate input
@@ -1023,16 +1036,20 @@
                 searchInput.style.display = 'block';
                 genreSelect.style.display = 'none';
                 developerSelect.style.display = 'none';
+                newSelect.style.display = 'none';
                 searchInput.value = '';
                 genreSelect.value = '';
                 developerSelect.value = '';
+                newSelect.value = '';
             } else if (searchType === 'genre') {
                 searchInput.style.display = 'none';
                 genreSelect.style.display = 'block';
                 developerSelect.style.display = 'none';
+                newSelect.style.display = 'none';
                 searchInput.value = '';
                 genreSelect.value = '';
                 developerSelect.value = '';
+                newSelect.value = '';
                 
                 // Populate genre select with unique genres from gamesData (case-insensitive deduplication and comma splitting)
                 const genreMap = new Map();
@@ -1062,9 +1079,11 @@
                 searchInput.style.display = 'none';
                 genreSelect.style.display = 'none';
                 developerSelect.style.display = 'block';
+                newSelect.style.display = 'none';
                 searchInput.value = '';
                 genreSelect.value = '';
                 developerSelect.value = '';
+                newSelect.value = '';
                 
                 // Populate developer select with unique developers from gamesData (case-insensitive deduplication and comma splitting)
                 const developerMap = new Map();
@@ -1090,6 +1109,15 @@
                     option.textContent = developer;
                     developerSelect.appendChild(option);
                 });
+            } else if (searchType === 'new') {
+                searchInput.style.display = 'none';
+                genreSelect.style.display = 'none';
+                developerSelect.style.display = 'none';
+                newSelect.style.display = 'block';
+                searchInput.value = '';
+                genreSelect.value = '';
+                developerSelect.value = '';
+                newSelect.value = '';
             }
             
             // Clear any existing search results
@@ -1103,6 +1131,11 @@
 
         // Developer select event listener
         document.getElementById('developer-select').addEventListener('change', (e) => {
+            filterGames(e.target.value);
+        });
+
+        // New select event listener
+        document.getElementById('new-select').addEventListener('change', (e) => {
             filterGames(e.target.value);
         });
 

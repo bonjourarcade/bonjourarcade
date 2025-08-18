@@ -1,9 +1,4 @@
 title: Arkanoid
-developer: Taito
+developer: Atlus, Taito
 year: 1986
-genre: Block breaker
-controls:
-  - 🕹️ Bouger
-  - 1️⃣  Tirer
-to_start: Insert Coin -> Start
-recommended: Amélie Ferland
+genre: Block breaker, Action

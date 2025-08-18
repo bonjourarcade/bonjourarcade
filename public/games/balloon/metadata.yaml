@@ -3,12 +3,12 @@ developer: Nintendo
 year: 1985
 genre: Action, Platform
 announcement_message: "🎈 Plongez dans l'univers coloré de Balloon Fight, un classique Nintendo de 1985 qui a marqué l'ère NES ! Dans ce jeu d'action frénétique, vous incarnez un héros qui doit éclater des ballons flottants tout en évitant les ennemis volants. Utilisez votre hélicoptère personnel pour naviguer dans les airs, collectez des bonus et survivez le plus longtemps possible. Le jeu propose deux modes passionnants : le mode normal avec ses niveaux progressifs et le mode Balloon Trip, un mode survie sans fin où vous devez voler le plus loin possible en évitant les obstacles. Cette aventure aérienne légendaire a inspiré de nombreux jeux de plateforme à venir."
-#controls:
-#  - 🕹️ Déplacer
-#  - 1️⃣  Tirer
-#  - 2️⃣  Bombe
+controls:
+  - 🕹️ Déplacer
+  - 1️⃣  Voler (auto)
+  - 2️⃣  Voler
 #to_start: Insert Coin -> Start
 #recommended: 
-#added: 
-disable_score: true
-hide: yes
+added: 2025-08-17
+#disable_score: true
+#hide: yes

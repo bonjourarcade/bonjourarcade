@@ -240,8 +240,8 @@
         // Feature: Redirect to homepage at 5 AM local time
         function checkAndRedirectAt5AM() {
             const now = new Date();
-            if (now.getHours() === 5 && window.screensaverActive) {
-                console.log("It's 5 AM local time and screensaver is active. Redirecting to homepage.");
+            if (now.getHours() === 5) {
+                console.log("It's 5 AM local time. Redirecting to homepage.");
                 window.location.href = "/index.html";
             }
         }
@@ -249,10 +249,10 @@
         // Set up interval to check every hour (3,600,000 milliseconds)
         setInterval(checkAndRedirectAt5AM, 3600000);
 
-        // Hide screensaver timer on play page
-        if (window.setScreensaverTimerVisibility) {
-            window.setScreensaverTimerVisibility(false);
-        }
+        // Hide screensaver timer on play page (disabled since screensaver is disabled)
+        // if (window.setScreensaverTimerVisibility) {
+        //     window.setScreensaverTimerVisibility(false);
+        // }
 
         // Function to detect if the device is mobile
         function isMobileDevice() {
@@ -686,12 +686,12 @@
         // Using DOMContentLoaded ensures the #game-container element exists
         document.addEventListener('DOMContentLoaded', loadSelectedGame);
 
-        // Initialize screensaver after game is loaded
-        if (window.initScreensaver) {
-            document.addEventListener('DOMContentLoaded', () => {
-                window.initScreensaver();
-            });
-        }
+        // Disable screensaver functionality on play page to prevent gameplay interference
+        // if (window.initScreensaver) {
+        //     document.addEventListener('DOMContentLoaded', () => {
+        //         window.initScreensaver();
+        //     });
+        // }
 
         // Menu button referrer logic
         document.getElementById('menu-button').addEventListener('click', function() {
@@ -703,8 +703,10 @@
             }
         });
     </script>
-    <script src="../assets/js/screensaver.js"></script>
-    <script>
+    <!-- Screensaver functionality disabled on play page to prevent gameplay interference -->
+    <!-- <script src="../assets/js/screensaver.js"></script> -->
+    <!-- Screensaver cycling disabled on play page to prevent gameplay interference -->
+    <!-- <script>
     // --- Custom screensaver cycling for play/index.html only ---
     (function() {
       // Wait for screensaver.js to be loaded and DOM ready
@@ -720,7 +722,7 @@
               startScreensaver();
             }
           }
-          cycleActive = !cycleActive;
+          cycleActive = !cycleCycle;
         }
         // Start with the current state
         setInterval(toggleScreensaver, 10 * 60 * 1000); // 10 minutes
@@ -733,10 +735,11 @@
         });
       }
     })();
-    </script>
-    <div id="screensaver-overlay" class="screensaver-overlay">
+    </script> -->
+    <!-- Screensaver overlay removed on play page to prevent gameplay interference -->
+    <!-- <div id="screensaver-overlay" class="screensaver-overlay">
         <img id="screensaver-image" class="screensaver-image" src="" alt="Screensaver Image">
         <img id="screensaver-logo" class="screensaver-logo" src="" alt="BonjourArcade Logo">
-    </div>
+    </div> -->
 </body>
 </html>

@@ -1,7 +1,7 @@
-title: Mega Man 2
+title: "Mega Man 2: The Power Fighters"
 developer: Capcom
-year: 1988
-genre: Platform, Shooter
+year: 1996
+genre: Fighting
 controls:
   - 🕹️ Déplacer
   - 1️⃣  Tirer
@@ -12,5 +12,5 @@ controls:
 
 disable_score: true
 
-added: 2025-07-27
+added: 2025-08-19
 hide: yes

@@ -1,7 +1,7 @@
-title: "Super Street Fighter II: The New Challengers"
-developer: Capcom
+title: Slap Fight MD
+developer: M.N.M Software, Toaplan
 year: 1993
-genre: Fighting
+genre: Shooter
 #controls:
 #  - 🕹️ Déplacer
 #  - 1️⃣  Tirer
@@ -15,4 +15,4 @@ announcement_message:
 disable_score: true
 hide: yes
 
-added: 2025-08-19
+added: 2025-08-20

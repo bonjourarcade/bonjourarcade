@@ -1,6 +1,6 @@
-title: "Super Street Fighter II: The New Challengers"
+title: Street Fighter
 developer: Capcom
-year: 1993
+year: 1987
 genre: Fighting
 #controls:
 #  - 🕹️ Déplacer
@@ -15,4 +15,4 @@ announcement_message:
 disable_score: true
 hide: yes
 
-added: 2025-08-19
+added: 2025-08-20

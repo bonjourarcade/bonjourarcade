@@ -53,6 +53,7 @@ get_core_from_dir() {
         JAGUAR) echo "jaguar" ;;
         N64)   echo "n64" ;;
         NES)   echo "nes" ;;
+        PCENGINE) echo "pce" ;;
         PSX) echo "psx" ;;
         S32X) echo "sega32x" ;;
         SMS) echo "segaMS" ;;
@@ -171,6 +172,7 @@ get_core_from_dir() {
         JAGUAR) echo "jaguar" ;;
         N64)   echo "n64" ;;
         NES)   echo "nes" ;;
+        PCENGINE) echo "pce" ;;
         PSX) echo "psx" ;;
         S32X) echo "sega32x" ;;
         SMS) echo "segaMS" ;;

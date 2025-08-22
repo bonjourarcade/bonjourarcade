@@ -13,6 +13,16 @@ MAX_SIZE = 100 * 1024  # 100KB in bytes (matching your original script)
 TARGET_WIDTH = 800  # fallback width for resizing if needed
 
 
+def is_ci_environment():
+    """Detect if we're running in a CI/CD environment."""
+    ci_vars = [
+        'CI', 'TRAVIS', 'CIRCLECI', 'GITHUB_ACTIONS', 'GITLAB_CI', 
+        'JENKINS_URL', 'BUILD_ID', 'DRONE', 'SEMAPHORE', 'APPVEYOR',
+        'BITBUCKET_BUILD_NUMBER', 'TEAMCITY_VERSION', 'BAMBOO_BUILDKEY'
+    ]
+    return any(os.environ.get(var) for var in ci_vars)
+
+
 def shrink_png(filepath):
     """Shrink PNG file to be under MAX_SIZE, overwriting the original."""
     try:
@@ -60,31 +70,45 @@ def main():
     
     print(f"Found {len(png_files)} PNG files to process")
     
-    # Determine optimal number of processes
-    # Use fewer processes than CPU cores to avoid overwhelming the system
-    num_processes = max(1, min(mp.cpu_count() - 1, len(png_files)))
-    print(f"Using {num_processes} processes for parallel processing")
+    # Check if we're in CI/CD environment
+    if is_ci_environment():
+        print("CI/CD environment detected - using single-process mode for reliability")
+        # Process files sequentially in CI/CD
+        results = []
+        for png_file in png_files:
+            result = shrink_png(png_file)
+            results.append(result)
+            print(result)  # Print each result immediately for CI/CD visibility
+    else:
+        # Use multiprocessing for local development
+        # Determine optimal number of processes
+        # Use fewer processes than CPU cores to avoid overwhelming the system
+        num_processes = max(1, min(mp.cpu_count() - 1, len(png_files)))
+        print(f"Local environment detected - using {num_processes} processes for parallel processing")
+        
+        # Process files in parallel
+        with mp.Pool(processes=num_processes) as pool:
+            if use_tqdm:
+                # Use tqdm for progress tracking
+                results = list(tqdm(
+                    pool.imap(shrink_png, png_files),
+                    total=len(png_files),
+                    desc="Processing PNGs"
+                ))
+            else:
+                results = pool.map(shrink_png, png_files)
     
-    # Process files in parallel
-    with mp.Pool(processes=num_processes) as pool:
-        if use_tqdm:
-            # Use tqdm for progress tracking
-            results = list(tqdm(
-                pool.imap(shrink_png, png_files),
-                total=len(png_files),
-                desc="Processing PNGs"
-            ))
-        else:
-            results = pool.map(shrink_png, png_files)
-    
-    # Print results
-    for result in results:
-        print(result)
-    
-    print(f"\nCompleted processing {len(png_files)} files using {num_processes} processes")
+    print(f"\nCompleted processing {len(png_files)} files")
+    if not is_ci_environment():
+        print(f"Used {'parallel' if num_processes > 1 else 'single'}-process mode")
 
 
 if __name__ == "__main__":
-    # Set multiprocessing start method for better compatibility
-    mp.set_start_method('spawn', force=True)
+    # Only set multiprocessing start method for local development
+    if not is_ci_environment():
+        try:
+            mp.set_start_method('spawn', force=True)
+        except RuntimeError:
+            # If already set, continue
+            pass
     main()

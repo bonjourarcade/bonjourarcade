@@ -8,7 +8,7 @@ controls:
   - 1️⃣  Étoile
   - 2️⃣  Sauter
 #recommended: 
-disable_score: true
+enable_score: false
 hide: yes
 
 added: 2025-07-27

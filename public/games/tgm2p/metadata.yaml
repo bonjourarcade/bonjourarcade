@@ -9,4 +9,4 @@ controls:
   - 2️⃣  Tourner ↩️
   - 3️⃣  Tourner ↪️
 to_start: Insert Coin -> Start
-disable_score: false
+enable_score: true

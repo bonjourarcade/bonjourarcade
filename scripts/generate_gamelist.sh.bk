@@ -237,7 +237,7 @@ find "$ROMS_DIR" -maxdepth 2 -type f -not -path "*/\.*" | while read -r rom_file
     recommended="" # Initialize recommended field
     added="" # Initialize added field
     hide="yes" # Default to hiding games even with no metadata
-    disable_score="true" # Default to true
+    enable_score="false" # Default to false
     to_start="" # Initialize to_start field
 
     # Check if there's a corresponding game directory with metadata
@@ -257,7 +257,7 @@ find "$ROMS_DIR" -maxdepth 2 -type f -not -path "*/\.*" | while read -r rom_file
             recommended=$(echo "$metadata_json" | jq -r '.recommended // ""') # Extract recommended field
             added=$(echo "$metadata_json" | jq -r '.added // ""') # Extract added field
             hide=$(echo "$metadata_json" | jq -r '.hide // ""') # Use metadata hide value if present
-            disable_score=$(echo "$metadata_json" | jq -r '.disable_score // true') # Extract disable_score, default true
+            enable_score=$(echo "$metadata_json" | jq -r '.enable_score // false') # Extract enable_score, default false
             to_start=$(echo "$metadata_json" | jq -r '.to_start // ""') # Extract to_start field
             # Extract controls as JSON array if present
             controls_json=$(echo "$metadata_json" | jq -c '.controls // null')
@@ -334,7 +334,7 @@ find "$ROMS_DIR" -maxdepth 2 -type f -not -path "*/\.*" | while read -r rom_file
   "core": "${core:-null}",
   "romPath": "${rom_path:-null}",
   "saveState": "${save_state:-}",
-  "disable_score": $disable_score,
+  "enable_score": $enable_score,
   "controls": $controls_json,
   "to_start": "$to_start",
   "new_flag": "$new_flag"

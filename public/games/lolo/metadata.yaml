@@ -4,7 +4,7 @@ year: 1989
 genre: Puzzle
 recommended: Marie-Caroline Vincent
 added: 2025-06-05
-disable_score: true
+enable_score: false
 controls:
   - 🕹️ Déplacer
   - 2️⃣  Tirer

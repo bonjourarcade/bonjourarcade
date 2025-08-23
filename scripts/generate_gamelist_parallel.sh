@@ -217,7 +217,7 @@ while IFS= read -r rom_file; do
     recommended=""
     added=""
     hide="yes"
-    disable_score="true"
+    enable_score="false"
     to_start=""
 
     # Check if there's a corresponding game directory with metadata
@@ -236,7 +236,7 @@ while IFS= read -r rom_file; do
             recommended=$(echo "$metadata_json" | jq -r '.recommended // ""')
             added=$(echo "$metadata_json" | jq -r '.added // ""')
             hide=$(echo "$metadata_json" | jq -r '.hide // ""')
-            disable_score=$(echo "$metadata_json" | jq -r '.disable_score // true')
+            enable_score=$(echo "$metadata_json" | jq -r '.enable_score // false')
             to_start=$(echo "$metadata_json" | jq -r '.to_start // ""')
             controls_json=$(echo "$metadata_json" | jq -c '.controls // null')
             new_flag=$(echo "$metadata_json" | jq -r '.new // empty')
@@ -301,11 +301,11 @@ while IFS= read -r rom_file; do
         --arg core "${core:-null}" \
         --arg romPath "${rom_path:-null}" \
         --arg saveState "${save_state:-}" \
-        --argjson disable_score "$disable_score" \
+        --argjson enable_score "$enable_score" \
         --argjson controls "$controls_json" \
         --arg to_start "$to_start" \
         --arg new_flag "$new_flag" \
-        '{id: $id, title: $title, developer: $developer, year: $year, genre: $genre, recommended: $recommended, added: $added, hide: $hide, coverArt: $coverArt, pageUrl: $pageUrl, core: $core, romPath: $romPath, saveState: $saveState, disable_score: $disable_score, controls: $controls, to_start: $to_start, new_flag: $new_flag}' 2>/dev/null || echo "{}")
+        '{id: $id, title: $title, developer: $developer, year: $year, genre: $genre, recommended: $recommended, added: $added, hide: $hide, coverArt: $coverArt, pageUrl: $pageUrl, core: $core, romPath: $romPath, saveState: $saveState, enable_score: $enable_score, controls: $controls, to_start: $to_start, new_flag: $new_flag}' 2>/dev/null || echo "{}")
 
     # Only output valid JSON
     if echo "$game_json" | jq -e . >/dev/null 2>&1; then

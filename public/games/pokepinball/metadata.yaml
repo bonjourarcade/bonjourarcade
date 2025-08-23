@@ -10,6 +10,6 @@ genre: Pinball
 #to_start: Insert Coin -> Start
 #recommended: 
 
-disable_score: true
+enable_score: false
 
 added: 2025-07-27

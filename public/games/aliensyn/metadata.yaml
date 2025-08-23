@@ -9,4 +9,4 @@ controls:
 to_start: Insert Coin -> Start
 
 added: 2025-08-01
-disable_score: false
+enable_score: true

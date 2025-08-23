@@ -10,7 +10,7 @@ controls:
 #to_start: Insert Coin -> Start
 #recommended: 
 
-disable_score: true
+enable_score: false
 
 added: 2025-08-19
 hide: yes

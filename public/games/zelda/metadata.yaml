@@ -9,5 +9,5 @@ genre: Action, Adventure
 #to_start: Insert Coin -> Start
 #recommended: 
 #added: 
-disable_score: true
+enable_score: false
 added: 2025-07-27

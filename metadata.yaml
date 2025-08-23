@@ -10,9 +10,11 @@ genre:
 #to_start: Insert Coin -> Start
 #recommended: 
 
+# Message d'annonce personnalisé pour la newsletter
+# Ce message apparaîtra en haut de l'email et des webhooks
 announcement_message: 
 
-disable_score: true
+enable_score: false
 hide: yes
 
 added: DATE_PLACEHOLDER

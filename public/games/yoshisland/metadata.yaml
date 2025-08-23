@@ -3,4 +3,4 @@ developer: Nintendo
 year: 1995
 genre: Platform
 recommended: Pascal Bonaldo
-disable_score: true
+enable_score: false

@@ -9,5 +9,5 @@ genre: Platform
 #to_start: Insert Coin -> Start
 #recommended: 
 added: 2025-07-26
-disable_score: true
+enable_score: false
 added: 2025-07-27

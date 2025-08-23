@@ -9,4 +9,4 @@ controls:
   - 1️⃣  Coup de pied
   - 2️⃣  Coup de poing
 to_start: Start
-disable_score: false
+enable_score: true

@@ -5,4 +5,4 @@ genre: Fighting
 #recommended: 
 #added: 
 hide: yes
-disable_score: true
+enable_score: false

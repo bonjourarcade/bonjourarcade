@@ -2,4 +2,4 @@ title: DoDonPachi
 developer: CAVE
 year: 1997
 genre: Shooter
-disable_score: false
+enable_score: true

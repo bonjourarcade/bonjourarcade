@@ -12,7 +12,7 @@ genre: Compilation
 
 announcement_message: 
 
-disable_score: true
+enable_score: false
 hide: yes
 
 added: 2025-08-19

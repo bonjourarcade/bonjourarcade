@@ -10,4 +10,4 @@ controls:
   - 2️⃣  Sauter
   - 3️⃣ Grenade
 to_start: Insert Coin -> Start
-disable_score: false
+enable_score: true

@@ -4,4 +4,4 @@ year: 1995
 genre: Platform
 recommended: Sven Tremblay
 hide: yes
-disable_score: true
+enable_score: false

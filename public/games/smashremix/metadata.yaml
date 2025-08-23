@@ -1,0 +1,20 @@
+title: Super Smash Bros. Remix
+developer: HAL Laboratory, Smash Remix Team
+year: 1999, 2019
+genre: Fighting
+#controls:
+#  - 🕹️ Déplacer
+#  - 1️⃣  Tirer
+#  - 2️⃣  Bombe
+
+#to_start: Insert Coin -> Start
+#recommended: 
+
+# Message d'annonce personnalisé pour la newsletter
+# Ce message apparaîtra en haut de l'email et des webhooks
+announcement_message: 
+
+enable_score: false
+hide: yes
+
+added: DATE_PLACEHOLDER

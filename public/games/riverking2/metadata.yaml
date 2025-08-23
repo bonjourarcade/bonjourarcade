@@ -1,0 +1,18 @@
+title: Legend of the River King 2
+developer: Natsume, Victor Interactive Software
+year: 2001
+genre: Role-Playing
+#controls:
+#  - 🕹️ Déplacer
+#  - 1️⃣  Tirer
+#  - 2️⃣  Bombe
+
+#to_start: Insert Coin -> Start
+#recommended: 
+
+announcement_message: 
+
+disable_score: true
+hide: yes
+
+added: 2025-08-22

@@ -39,3 +39,6 @@ pages:
       changes: 
         - public/**/*
         - plinko-gamelist.txt
+        - scripts/build_parallel.sh
+        - scripts/generate_gamelist_parallel.sh
+        - scripts/generate_thumbnails.sh

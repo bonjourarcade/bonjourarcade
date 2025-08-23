@@ -161,19 +161,27 @@ echo -e "${BLUE}🔧 Created temporary directory: $TEMP_DIR${NC}"
 # Process ROM files in batches
 echo -e "${BLUE}🚀 Starting batch processing...${NC}"
 
-# Split files into batches
-BATCH_SIZE=$((TOTAL_FILES / NUM_WORKERS + 1))
+# Check if we're running locally (not in CI/CD)
+if [ "$CI" != "true" ] && [ "$GITHUB_ACTIONS" != "true" ] && [ "$GITLAB_CI" != "true" ]; then
+    echo -e "${BLUE}🚀 Local mode detected - processing batches in parallel...${NC}"
+    BATCH_WORKERS=$NUM_WORKERS
+else
+    echo -e "${BLUE}🏭 CI/CD mode detected - using reduced parallel processing (3 workers)...${NC}"
+    BATCH_WORKERS=3  # Reduced from 6 to 3 for CI/CD safety
+fi
+
+# Calculate batch size based on actual workers we'll use
+BATCH_SIZE=$((TOTAL_FILES / BATCH_WORKERS + 1))
 echo -e "${BLUE}🔧 Processing in batches of ~$BATCH_SIZE files${NC}"
 
-# Create batch files
-BATCH_FILES=()
-for i in $(seq 1 $NUM_WORKERS); do
+# Create batches
+for i in $(seq 1 $BATCH_WORKERS); do
     BATCH_FILE="$TEMP_DIR/batch_$i.txt"
     BATCH_FILES+=("$BATCH_FILE")
 done
 
 # Distribute files across batches
-echo "$ROM_FILES" | awk -v num_workers="$NUM_WORKERS" -v temp_dir="$TEMP_DIR" '
+echo "$ROM_FILES" | awk -v num_workers="$BATCH_WORKERS" -v temp_dir="$TEMP_DIR" '
     BEGIN { batch_num = 1 }
     {
         batch_file = temp_dir "/batch_" batch_num ".txt"
@@ -184,15 +192,6 @@ echo "$ROM_FILES" | awk -v num_workers="$NUM_WORKERS" -v temp_dir="$TEMP_DIR" '
 # Process each batch
 echo "[" > "$TEMP_DIR/processed_games.json"
 first_batch=true
-
-# Check if we're running locally (not in CI/CD)
-if [ "$CI" != "true" ] && [ "$GITHUB_ACTIONS" != "true" ] && [ "$GITLAB_CI" != "true" ]; then
-    echo -e "${BLUE}🚀 Local mode detected - processing batches in parallel...${NC}"
-    BATCH_WORKERS=$NUM_WORKERS
-else
-    echo -e "${BLUE}🏭 CI/CD mode detected - using reduced parallel processing (3 workers)...${NC}"
-    BATCH_WORKERS=3  # Reduced from 6 to 3 for CI/CD safety
-fi
 
 # Start all batches in background
 BATCH_PIDS=()

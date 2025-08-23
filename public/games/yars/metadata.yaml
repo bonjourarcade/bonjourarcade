@@ -8,3 +8,4 @@ controls:
   - 🕹️ Déplacer
   - 1️⃣  Tirer
 to_start: Tirer
+disable_score: false

@@ -5,3 +5,4 @@ genre: Action
 controls:
 #  - 🕹️ Déplacer
 to_start: Insert Coin -> Start
+disable_score: false

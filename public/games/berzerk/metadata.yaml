@@ -6,3 +6,4 @@ controls:
   - 🕹️ Déplacer
   - 1️⃣  Tirer
 to_start: Insert Coin -> Start
+disable_score: false

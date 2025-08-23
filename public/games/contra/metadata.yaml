@@ -7,3 +7,4 @@ controls:
   - 1️⃣  Tirer
   - 2️⃣  Sauter
 to_start: Start
+disable_score: false

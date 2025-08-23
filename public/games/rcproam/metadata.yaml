@@ -9,3 +9,4 @@ controls:
 to_start: Start
 #recommended: 
 added: 2025-07-21
+disable_score: false

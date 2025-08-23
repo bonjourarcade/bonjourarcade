@@ -5,3 +5,4 @@ controls:
   - 🕹️ Déplacer
   - 1️⃣  Plus vite
 to_start: Start
+disable_score: false

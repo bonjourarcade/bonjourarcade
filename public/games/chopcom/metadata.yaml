@@ -8,3 +8,4 @@ controls:
 to_start: Reset (Start)
 #recommended: 
 added: 2025-07-08
+disable_score: false

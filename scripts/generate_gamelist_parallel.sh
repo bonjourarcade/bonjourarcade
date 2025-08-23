@@ -217,7 +217,7 @@ while IFS= read -r rom_file; do
     recommended=""
     added=""
     hide="yes"
-    disable_score="false"
+    disable_score="true"
     to_start=""
 
     # Check if there's a corresponding game directory with metadata
@@ -236,7 +236,7 @@ while IFS= read -r rom_file; do
             recommended=$(echo "$metadata_json" | jq -r '.recommended // ""')
             added=$(echo "$metadata_json" | jq -r '.added // ""')
             hide=$(echo "$metadata_json" | jq -r '.hide // ""')
-            disable_score=$(echo "$metadata_json" | jq -r '.disable_score // false')
+            disable_score=$(echo "$metadata_json" | jq -r '.disable_score // true')
             to_start=$(echo "$metadata_json" | jq -r '.to_start // ""')
             controls_json=$(echo "$metadata_json" | jq -c '.controls // null')
             new_flag=$(echo "$metadata_json" | jq -r '.new // empty')

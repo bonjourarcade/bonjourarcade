@@ -465,10 +465,12 @@ fi
 # Create final JSON structure
 if [ "$FEATURED_GAME" != "null" ] && [ -n "$FEATURED_GAME_ID" ]; then
     # Create final JSON with featured game
+    # Remove the featured game from the previousGames list to avoid duplication
     jq -n \
         --argjson featured "$FEATURED_GAME" \
         --slurpfile games "$TEMP_DIR/processed_games.json" \
-        '{gameOfTheWeek: $featured, previousGames: $games[0]}' > "$OUTPUT_FILE"
+        --arg featured_id "$FEATURED_GAME_ID" \
+        '{gameOfTheWeek: $featured, previousGames: ($games[0] | map(select(.id != $featured_id)))}' > "$OUTPUT_FILE"
 else
     # Create final JSON without featured game
     jq -n \

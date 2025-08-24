@@ -441,6 +441,11 @@ class NewsletterSender:
         
         # Get announcement message from metadata, fallback to custom_message if provided
         announcement_message = meta.get('announcement_message', '') or custom_message or ''
+        
+        # Validate that we have an announcement message
+        if not announcement_message.strip():
+            raise ValueError("Announcement message is empty. Cannot create email content without an announcement.")
+        
         custom_html = f'<div style="margin-bottom:18px;font-size:1.1em;">{announcement_message}</div>' if announcement_message else ''
         html_content = f'''
         <html><body>
@@ -581,6 +586,11 @@ Top scores de la semaine dernière sur {last_week_highlight['game_title']} :
         
         # Get announcement message from metadata, fallback to custom_message if provided
         announcement_message = meta.get('announcement_message', '') or custom_message or ''
+        
+        # Validate that we have an announcement message
+        if not announcement_message.strip():
+            raise ValueError("Announcement message is empty. Cannot send webhook without an announcement.")
+        
         custom_text = f"{announcement_message}\n\n" if announcement_message else ''
         # Message template with {b} for bold, now includes plinko link and last week's highlight
         message_template = f"""
@@ -764,6 +774,50 @@ def main():
     if not api_secret:
         print('❌ Error: API secret is required. Set CONVERTKIT_API_SECRET environment variable.')
         sys.exit(1)
+    
+    # EARLY VALIDATION: Check if we have an announcement message before any user interaction
+    if not custom_message:
+        print("🔍 Checking game of the week announcement message...")
+        try:
+            # Create a temporary sender to check the announcement message
+            temp_sender = NewsletterSender(
+                api_secret=api_secret,
+                api_url=args.mail_api_url,
+                dry_run=True,  # Use dry run to avoid any actual sending
+                webhook_only=False,
+                week_seed=args.week_seed
+            )
+            
+            # Read game data and metadata to check announcement
+            game_id = temp_sender.read_game_of_the_week(args.week_seed)
+            meta = temp_sender.read_game_metadata(game_id)
+            
+            announcement_message = meta.get('announcement_message', '')
+            if not announcement_message.strip():
+                print("❌ ERROR: The announcement message for the game of the week is empty!")
+                print("📝 Please add an 'announcement_message' field to the metadata.yaml file")
+                print(f"   File: public/games/{game_id}/metadata.yaml")
+                print("   Or use --custom-message to provide a message via command line.")
+                print("\n🛑 Aborting newsletter send to allow you to write the announcement.")
+                print("\n💡 Example of what to add to metadata.yaml:")
+                print("   announcement_message: \"Ce jeu classique de plateforme vous emmène dans une aventure...\"")
+                print("\n💡 Or run with: --custom-message \"Your announcement text here\"")
+                print("\n📝 The announcement message should describe why this game is special,")
+                print("   what makes it fun, or any interesting facts about it.")
+                print("   This text appears prominently at the top of the newsletter.")
+                print(f"\n📋 Current metadata structure for {game_id}:")
+                for key, value in meta.items():
+                    if key == 'announcement_message':
+                        print(f"   {key}: {'[EMPTY]' if not value else value[:50] + '...' if len(str(value)) > 50 else value}")
+                    else:
+                        print(f"   {key}: {value}")
+                sys.exit(1)
+            
+            print(f"✅ Announcement message found: {announcement_message[:100]}{'...' if len(announcement_message) > 100 else ''}")
+            
+        except Exception as e:
+            print(f"⚠️  Warning: Could not validate announcement message early: {e}")
+            print("   Will check again during the main process...")
     
     # Interactive webhook selection if no --webhook-label is provided
     selected_webhook_labels = None

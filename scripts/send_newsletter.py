@@ -451,8 +451,6 @@ class NewsletterSender:
         <html><body>
         <h1 style="color:#333;text-align:center;margin-bottom:30px;">🎮 Annonce du jeu de la semaine!</h1>
         
-        {last_week_html}
-        
         <div style="background:#f0f8ff;border:2px solid #007bff;border-radius:8px;padding:20px;margin:20px 0;">
             <h2 style="color:#007bff;margin-top:0;">🎯 Jeu de la semaine : {clean_title}</h2>
             
@@ -499,6 +497,8 @@ class NewsletterSender:
             <a href="{play_url}" style="background:#007bff;color:white;padding:15px 30px;text-decoration:none;border-radius:5px;font-size:18px;font-weight:bold;margin-right:15px;display:inline-block;margin-bottom:10px;">🎮 Jouer maintenant !</a>
             <a href="{leaderboard_url}" style="background:#ffc107;color:#212529;padding:15px 30px;text-decoration:none;border-radius:5px;font-size:18px;font-weight:bold;display:inline-block;margin-bottom:10px;">🏆 Classements</a>
         </div>
+        
+        {last_week_html}
         
         <p style="text-align:center;color:#666;font-style:italic;">Bonne semaine ! ☀️</p>
         </body></html>
@@ -595,7 +595,6 @@ Top scores de la semaine dernière sur {last_week_highlight['game_title']} :
         # Message template with {b} for bold, now includes plinko link and last week's highlight
         message_template = f"""
 Annonce du jeu de la semaine!
-{last_week_text}
 {custom_text}{{b}}Jeu de la semaine :{{b}} {title}
 {{b}}Développeur :{{b}} {developer}
 {{b}}Année :{{b}} {year}
@@ -606,6 +605,8 @@ Annonce du jeu de la semaine!
 {{b}}Classements :{{b}} {leaderboard_url}
 
 🕹️ {{b}}Faites-en l'essai :{{b}} {play_url}
+
+{last_week_text}
 
 Bonne semaine ! ☀️
 """.strip()

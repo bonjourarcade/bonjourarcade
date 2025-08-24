@@ -33,7 +33,7 @@ import re
 
 # Configuration
 DEFAULT_AI_SERVICE = 'openai'
-MAX_SENTENCES = 4  # Maximum sentences for announcement messages
+MAX_SENTENCES = 3  # Maximum sentences for announcement messages
 OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions'
 ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages'
 
@@ -283,22 +283,43 @@ Génère maintenant l'annonce pour {game_title} :"""
             return None
 
     def update_metadata_file(self, game_id, announcement):
-        """Update the metadata.yaml file with the new announcement."""
+        """Update the metadata.yaml file with the new announcement, preserving comments and exact values."""
         meta_path = f'public/games/{game_id}/metadata.yaml'
         
         try:
-            # Read current metadata
+            # Read the file line by line to preserve comments and formatting
             with open(meta_path, 'r', encoding='utf-8') as f:
-                meta = yaml.safe_load(f)
+                lines = f.readlines()
             
-            # Update announcement message
-            meta['announcement_message'] = announcement
+            # Find and update the announcement_message line
+            updated = False
+            for i, line in enumerate(lines):
+                if line.strip().startswith('announcement_message:'):
+                    # Preserve the exact indentation
+                    indent = len(line) - len(line.lstrip())
+                    lines[i] = ' ' * indent + f'announcement_message: "{announcement}"\n'
+                    updated = True
+                    break
             
-            # Write back to file
+            # If no existing announcement_message line found, add it at the end
+            if not updated:
+                # Find the last non-empty line to add the announcement
+                last_line_index = len(lines) - 1
+                while last_line_index >= 0 and not lines[last_line_index].strip():
+                    last_line_index -= 1
+                
+                # Add a newline if the last line doesn't end with one
+                if last_line_index >= 0 and not lines[last_line_index].endswith('\n'):
+                    lines[last_line_index] += '\n'
+                
+                # Add the announcement message
+                lines.append(f'announcement_message: "{announcement}"\n')
+            
+            # Write back to file, preserving all original content
             with open(meta_path, 'w', encoding='utf-8') as f:
-                yaml.dump(meta, f, default_flow_style=False, allow_unicode=True, sort_keys=False)
+                f.writelines(lines)
             
-            print(f"✅ Updated {meta_path} with new announcement message")
+            print(f"✅ Updated {meta_path} with new announcement message (preserved comments and formatting)")
             return True
             
         except Exception as e:
@@ -358,8 +379,42 @@ Génère maintenant l'annonce pour {game_title} :"""
             print("❌ Failed to generate announcement")
             sys.exit(1)
         
-        # Validate sentence count
-        sentences = [s.strip() for s in announcement.split('.') if s.strip()]
+        # Validate sentence count with smarter parsing
+        # Use a more sophisticated approach to count actual sentences
+        import re
+        
+        # First, normalize the text to handle common abbreviation patterns
+        normalized_text = announcement
+        
+        # Handle common abbreviation patterns (H.E.R.O., U.S.A., etc.)
+        # Replace periods in acronyms with a temporary marker
+        normalized_text = re.sub(r'\b([A-Z]\.){2,}', lambda m: m.group(0).replace('.', '§'), normalized_text)
+        
+        # Handle other common abbreviations (Mr., Dr., etc.)
+        normalized_text = re.sub(r'\b([A-Z][a-z]\.)', lambda m: m.group(0).replace('.', '§'), normalized_text)
+        
+        # Now split by periods to get sentences
+        raw_parts = normalized_text.split('.')
+        sentences = []
+        
+        for part in raw_parts:
+            part = part.strip()
+            if not part:
+                continue
+            
+            # Restore periods in abbreviations
+            part = part.replace('§', '.')
+            
+            # Check if this looks like a complete sentence
+            if len(part) > 10 and not part.isupper():  # Must be substantial and not just an acronym
+                sentences.append(part)
+            elif len(part) <= 10 and part.isupper():
+                # This is likely an acronym, skip it as a separate sentence
+                continue
+            elif len(part) > 10:
+                # This might be a sentence, include it
+                sentences.append(part)
+        
         sentence_count = len(sentences)
         
         if sentence_count > MAX_SENTENCES:

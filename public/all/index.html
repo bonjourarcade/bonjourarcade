@@ -680,10 +680,7 @@
             filteredGamesData = gamesData.filter(game => {
                 if (searchType === 'title') {
                     // Search only by title
-                    let displayTitle = game.title;
-                    if (!displayTitle || displayTitle === game.id) {
-                        displayTitle = capitalizeFirst(game.id);
-                    }
+                    let displayTitle = getDisplayTitle(game);
                     return displayTitle.toLowerCase().includes(term);
                 } else if (searchType === 'genre') {
                     // Search only by genre (exact match from dropdown, case insensitive)
@@ -761,6 +758,20 @@
             return str.charAt(0).toUpperCase() + str.slice(1);
         }
         
+        function getDisplayTitle(game) {
+            let displayTitle = game.title;
+            if (!displayTitle || displayTitle === game.id) {
+                displayTitle = capitalizeFirst(game.id);
+            }
+            
+            // Add problem indicator if the game has problems
+            if (game.problem === "true") {
+                displayTitle += ' (❌)';
+            }
+            
+            return displayTitle;
+        }
+        
         function renderGames(games) {
             const container = document.getElementById('gameGrid');
             container.innerHTML = '';
@@ -835,7 +846,7 @@
                                 ${game.new_flag === 'true' ? '<span class="new-badge">NOUVEAU</span>' : ''}
                                 <img src="${coverSrc}" alt="${game.title}">
                             </div>
-                            <div class="game-title">${game.title}</div>
+                            <div class="game-title">${getDisplayTitle(game)}</div>
                         </a>
                     `;
                     
@@ -864,10 +875,7 @@
                 // Group games by first letter
                 const gamesByLetter = {};
                 games.forEach(game => {
-                    let displayTitle = game.title;
-                    if (!displayTitle || displayTitle === game.id) {
-                        displayTitle = capitalizeFirst(game.id);
-                    }
+                    let displayTitle = getDisplayTitle(game);
                     const firstChar = displayTitle.charAt(0).toUpperCase();
                     
                     // Group numbers into "#" category
@@ -920,10 +928,8 @@
                     
                     // Sort games within each section alphabetically
                     gamesByLetter[letter].sort((a, b) => {
-                        let titleA = a.title;
-                        let titleB = b.title;
-                        if (!titleA || titleA === a.id) titleA = capitalizeFirst(a.id);
-                        if (!titleB || titleB === b.id) titleB = capitalizeFirst(b.id);
+                        let titleA = getDisplayTitle(a);
+                        let titleB = getDisplayTitle(b);
                         return titleA.localeCompare(titleB);
                     });
                     
@@ -954,7 +960,7 @@
                                     ${game.new_flag === 'true' ? '<span class="new-badge">NOUVEAU</span>' : ''}
                                     <img src="${coverSrc}" alt="${game.title}">
                                 </div>
-                                <div class="game-title">${game.title}</div>
+                                <div class="game-title">${getDisplayTitle(game)}</div>
                             </a>
                         `;
                         

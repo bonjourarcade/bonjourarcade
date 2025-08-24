@@ -358,6 +358,12 @@ function populateFeaturedGame(game) {
     if (!displayTitle || displayTitle === game.id) {
         displayTitle = capitalizeFirst(game.id);
     }
+    
+    // Add problem indicator if the game has problems
+    if (game.problem === "true") {
+        displayTitle += ' (❌)';
+    }
+    
     titleContainer.textContent = displayTitle;
 
     // Add rom-missing class to parent container if needed

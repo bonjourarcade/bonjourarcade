@@ -143,6 +143,16 @@
         .random-game-btn:hover {
             background-color: #45a049;
         }
+        .random-info-text {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 0.2rem;
+            text-align: center;
+            font-style: italic;
+        }
+        body.theme-dark .random-info-text {
+            color: #aaa;
+        }
         .browser-warning {
             background-color: #ffecb3;
             border-left: 4px solid #ff9800;
@@ -541,7 +551,8 @@
         
         <div id="header-buttons" style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
             <button id="theme-toggle" class="theme-toggle" style="margin-right: 0;">🌙</button>
-            <button id="random-game-btn" class="random-game-btn">Jouer à un jeu aléatoire</button>
+            <button id="random-game-btn" class="random-game-btn">🎲 Jeu aléatoire (avec filtres)</button>
+            <div class="random-info-text">Respecte vos filtres actuels</div>
         </div>
     </div>
     
@@ -658,6 +669,7 @@
                 renderGames(filteredGamesData);
                 showHeaderElements(); // Show header elements when search is cleared
                 showSectionHeaders(); // Show section headers when search is cleared
+                updateRandomButtonText(); // Update random button text with filter count
                 return;
             }
             
@@ -703,6 +715,7 @@
             renderGames(filteredGamesData);
             hideHeaderElements(); // Hide header elements when searching
             hideSectionHeaders(); // Hide section headers when searching
+            updateRandomButtonText(); // Update random button text with filter count
         }
         
         function showHeaderElements() {
@@ -971,14 +984,36 @@
 
         // Function to select a random game from the list
         function playRandomGame() {
-            if (gamesData.length > 0) {
-                const randomIndex = Math.floor(Math.random() * gamesData.length);
-                const randomGame = gamesData[randomIndex];
+            // Use filtered games if available, otherwise fall back to all games
+            const gamesToRandomizeFrom = filteredGamesData.length > 0 ? filteredGamesData : gamesData;
+            
+            if (gamesToRandomizeFrom.length > 0) {
+                const randomIndex = Math.floor(Math.random() * gamesToRandomizeFrom.length);
+                const randomGame = gamesToRandomizeFrom[randomIndex];
                 sessionStorage.setItem('referrerAllGames', '1');
                 sessionStorage.setItem('lastPlayedGame', randomGame.id);
                 window.location.href = randomGame.pageUrl;
             } else {
-                console.error('No games available to select from');
+                // Show a message if no games match the current filters
+                alert('Aucun jeu ne correspond à vos filtres actuels pour la sélection aléatoire.');
+            }
+        }
+        
+        // Function to update random button text with current filter count
+        function updateRandomButtonText() {
+            const randomBtn = document.getElementById('random-game-btn');
+            const infoText = document.querySelector('.random-info-text');
+            
+            if (randomBtn && infoText) {
+                const gamesToRandomizeFrom = filteredGamesData.length > 0 ? filteredGamesData : gamesData;
+                const totalGames = gamesData.length;
+                const filteredCount = gamesToRandomizeFrom.length;
+                
+                if (filteredCount === totalGames) {
+                    infoText.textContent = `Respecte vos filtres actuels (${totalGames} jeux)`;
+                } else {
+                    infoText.textContent = `Respecte vos filtres actuels (${filteredCount}/${totalGames} jeux)`;
+                }
             }
         }
 
@@ -1344,6 +1379,9 @@
                 
                 // Render all games initially
                 renderGames(gamesData);
+                
+                // Update random button text with initial count
+                updateRandomButtonText();
             })
             .catch(err => {
                 console.error('Error loading games.json:', err);

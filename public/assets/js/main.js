@@ -219,6 +219,7 @@ async function fetchGameData() {
                     }
                     // populatePreviousGames will handle displaying games if there are any
                 }
+                window.updateRandomButtonInfo(); // Update random button info after search input
             });
         }
 
@@ -233,12 +234,77 @@ async function fetchGameData() {
         const visibleGames = allGames.filter(game => !(game.hide === true || game.hide === 'yes'));
         if (randomBtn && Array.isArray(visibleGames) && visibleGames.length > 0) {
             randomBtn.onclick = () => {
-                const randomIdx = Math.floor(Math.random() * visibleGames.length);
-                const randomGame = visibleGames[randomIdx];
+                // Get current search term to determine which games to randomize from
+                const searchInput = document.getElementById('game-id-input');
+                let gamesToRandomizeFrom = visibleGames;
+                
+                if (searchInput && searchInput.value.trim()) {
+                    const searchTerm = searchInput.value.toLowerCase();
+                    // Check for exact id match first
+                    const exactMatch = visibleGames.find(game => game.id && game.id.toLowerCase() === searchTerm);
+                    if (exactMatch) {
+                        // If exact match exists, just go to that game
+                        window.location.href = exactMatch.pageUrl;
+                        return;
+                    }
+                    
+                    // Filter games by search term for random selection
+                    gamesToRandomizeFrom = visibleGames.filter(game => {
+                        let displayTitle = game.title;
+                        if (!displayTitle || displayTitle === game.id) {
+                            displayTitle = capitalizeFirst(game.id);
+                        }
+                        return displayTitle.toLowerCase().includes(searchTerm);
+                    });
+                }
+                
+                // If no games match the filter, show a message or fall back to all games
+                if (gamesToRandomizeFrom.length === 0) {
+                    alert('Aucun jeu ne correspond à votre recherche pour la sélection aléatoire.');
+                    return;
+                }
+                
+                const randomIdx = Math.floor(Math.random() * gamesToRandomizeFrom.length);
+                const randomGame = gamesToRandomizeFrom[randomIdx];
                 if (randomGame && randomGame.pageUrl) {
                     window.location.href = randomGame.pageUrl;
                 }
             };
+            
+            // Function to update random button info text
+            window.updateRandomButtonInfo = function() {
+                const infoText = document.querySelector('.random-info-text');
+                if (infoText) {
+                    const searchInput = document.getElementById('game-id-input');
+                    let gamesToRandomizeFrom = visibleGames;
+                    
+                    if (searchInput && searchInput.value.trim()) {
+                        const searchTerm = searchInput.value.toLowerCase();
+                        // Check for exact id match first
+                        const exactMatch = visibleGames.find(game => game.id && game.id.toLowerCase() === searchTerm);
+                        if (exactMatch) {
+                            infoText.textContent = `Respecte votre recherche actuelle (1 jeu exact)`;
+                            return;
+                        }
+                        
+                        // Filter games by search term
+                        gamesToRandomizeFrom = visibleGames.filter(game => {
+                            let displayTitle = game.title;
+                            if (!displayTitle || displayTitle === game.id) {
+                                displayTitle = capitalizeFirst(game.id);
+                            }
+                            return displayTitle.toLowerCase().includes(searchTerm);
+                        });
+                        
+                        infoText.textContent = `Respecte votre recherche actuelle (${gamesToRandomizeFrom.length}/${visibleGames.length} jeux)`;
+                    } else {
+                        infoText.textContent = `Respecte votre recherche actuelle (${visibleGames.length} jeux)`;
+                    }
+                }
+            };
+            
+            // Initialize the random button info
+            window.updateRandomButtonInfo();
         }
 
     } catch (error) {

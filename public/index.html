@@ -20,12 +20,25 @@
     <meta property="twitter:image" content="https://bonjourarcade.com/assets/images/bonjourarcade-logo.png">
     
     <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        .random-info-text {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 0.2rem;
+            text-align: center;
+            font-style: italic;
+        }
+        body.theme-dark .random-info-text {
+            color: #aaa;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <header>
             <div class="header-flex">
-                <button id="random-game-btn" class="random-game-btn">Jouer au hasard</button>
+                <button id="random-game-btn" class="random-game-btn">🎲 Jouer au hasard (avec filtres)</button>
+                <div class="random-info-text">Respecte votre recherche actuelle</div>
                 <button id="newsletter-subscribe"
                   class="newsletter-btn">📧 S’abonner au jeu de la
                   semaine</button>

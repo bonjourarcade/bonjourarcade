@@ -786,6 +786,7 @@
             const genreSelect = document.getElementById('genre-select');
             const developerSelect = document.getElementById('developer-select');
             const newSelect = document.getElementById('new-select');
+            const searchType = document.getElementById('search-type').value;
             const isSearching = (searchInput && searchInput.value) || (genreSelect && genreSelect.value) || (developerSelect && developerSelect.value) || (newSelect && newSelect.value);
             
             if (isSearching) {
@@ -810,14 +811,37 @@
                     searchGrid.style.marginBottom = '0.5rem';
                 }
                 
-                // Sort games alphabetically for search results
-                games.sort((a, b) => {
-                    let titleA = a.title;
-                    let titleB = b.title;
-                    if (!titleA || titleA === a.id) titleA = capitalizeFirst(a.id);
-                    if (!titleB || titleB === b.id) titleB = capitalizeFirst(b.id);
-                    return titleA.localeCompare(titleB);
-                });
+                // Sort games based on search type
+                if (searchType === 'new') {
+                    // Sort new games by added date (newest first)
+                    games.sort((a, b) => {
+                        // If both have added dates, compare them
+                        if (a.added && b.added) {
+                            const dateA = new Date(a.added);
+                            const dateB = new Date(b.added);
+                            // Sort newest first (descending order)
+                            return dateB - dateA;
+                        }
+                        // If only one has added date, prioritize it
+                        if (a.added && !b.added) return -1;
+                        if (!a.added && b.added) return 1;
+                        // If neither has added date, fall back to alphabetical
+                        let titleA = a.title;
+                        let titleB = b.title;
+                        if (!titleA || titleA === a.id) titleA = capitalizeFirst(a.id);
+                        if (!titleB || titleB === b.id) titleB = capitalizeFirst(b.id);
+                        return titleA.localeCompare(titleB);
+                    });
+                } else {
+                    // Sort games alphabetically for other search types
+                    games.sort((a, b) => {
+                        let titleA = a.title;
+                        let titleB = b.title;
+                        if (!titleA || titleA === a.id) titleA = capitalizeFirst(a.id);
+                        if (!titleB || titleB === b.id) titleB = capitalizeFirst(b.id);
+                        return titleA.localeCompare(titleB);
+                    });
+                }
                 
                 // Render all games in the search grid
                 games.forEach(game => {
@@ -1167,16 +1191,28 @@
         
         // Genre select event listener
         document.getElementById('genre-select').addEventListener('change', (e) => {
+            // Ensure search type is set to 'genre' when filtering by genre
+            if (e.target.value) {
+                document.getElementById('search-type').value = 'genre';
+            }
             filterGames(e.target.value);
         });
 
         // Developer select event listener
         document.getElementById('developer-select').addEventListener('change', (e) => {
+            // Ensure search type is set to 'developer' when filtering by developer
+            if (e.target.value) {
+                document.getElementById('search-type').value = 'developer';
+            }
             filterGames(e.target.value);
         });
 
         // New select event listener
         document.getElementById('new-select').addEventListener('change', (e) => {
+            // Ensure search type is set to 'new' when filtering new games
+            if (e.target.value === 'new') {
+                document.getElementById('search-type').value = 'new';
+            }
             filterGames(e.target.value);
         });
 

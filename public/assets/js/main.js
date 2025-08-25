@@ -1,4 +1,30 @@
 // --- Tooltip Functions (Global Scope) ---
+
+// Function to map core names to user-friendly system names
+function getSystemName(core) {
+    if (!core) return '';
+    const systemMap = {
+        'arcade': 'Arcade',
+        'mame2003_plus': 'Arcade (MAME)',
+        'atari2600': 'Atari 2600',
+        'gb': 'Game Boy',
+        'gba': 'Game Boy Advance',
+        'segaMD': 'Sega Genesis/Mega Drive',
+        'segaGG': 'Sega Game Gear',
+        'jaguar': 'Atari Jaguar',
+        'n64': 'Nintendo 64',
+        'nes': 'Nintendo Entertainment System',
+        'pce': 'PC Engine/TurboGrafx-16',
+        'psx': 'PlayStation',
+        'sega32x': 'Sega 32X',
+        'segaMS': 'Sega Master System',
+        'snes': 'Super Nintendo',
+        'vb': 'Virtual Boy',
+        'ws': 'WonderSwan'
+    };
+    return systemMap[core] || core;
+}
+
 function summarizeControls(controls) {
     if (!controls || !Array.isArray(controls)) return '';
     const joystickLines = controls.filter(line => String(line).trim().startsWith('🕹️'));
@@ -28,10 +54,14 @@ function showTooltipForItem(item) {
     const tooltip = document.createElement('div');
     tooltip.id = 'game-meta-tooltip';
     tooltip.className = 'game-meta-tooltip';
+    
+    // Get system name from core field
+    const systemName = getSystemName(game.core);
+    
     const fields = [
         { label: 'Developpeur', key: 'developer' },
         { label: 'Année', key: 'year' },
-        { label: 'Système', key: 'system' },
+        { label: 'Système', key: 'system', value: systemName },
         { label: 'Genre', key: 'genre' },
         { label: 'Recommandé par', key: 'recommended' },
         { label: 'Ajouté', key: 'added' }
@@ -40,14 +70,15 @@ function showTooltipForItem(item) {
     const table = document.createElement('table');
     table.className = 'game-meta-table';
     fields.forEach(field => {
-        if (game[field.key]) {
+        let value = field.value !== undefined ? field.value : game[field.key];
+        if (value) {
             hasData = true;
             const row = document.createElement('tr');
             const labelCell = document.createElement('td');
             labelCell.innerHTML = `<strong>${field.label}:</strong>`;
             labelCell.className = 'meta-label';
             const valueCell = document.createElement('td');
-            valueCell.textContent = game[field.key];
+            valueCell.textContent = value;
             valueCell.className = 'meta-value';
             row.appendChild(labelCell);
             row.appendChild(valueCell);

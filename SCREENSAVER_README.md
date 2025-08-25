@@ -45,10 +45,12 @@ The screensaver system automatically loads random games every 5 minutes, creatin
   - 🔄 Screensaver Mode badge (top-left, clickable to return to launcher)
   - Countdown timer showing time until next game
   - ⏹️ Disable Screensaver button (red button below countdown)
+  - ⏭️ Next Game button (green button, enabled after 60 seconds)
 - **Auto-refresh**: Every 2.5 minutes, automatically loads a new random game
 - **Continuous Play**: Endless arcade experience
 - **Easy Return**: Click the 🔄 button to go back to screensaver launcher
 - **Disable Mode**: Click the ⏹️ button to stop screensaver and continue current game
+- **Manual Advance**: Click the ⏭️ button to go to next game (after 60-second cooldown)
 
 ### Exiting Screensaver Mode
 - **Click/Tap the 🔄 button** (top-left) to return to screensaver launcher
@@ -60,6 +62,14 @@ The screensaver system automatically loads random games every 5 minutes, creatin
 ### Button Functions
 - **🔄 Screensaver Mode**: Returns to `/screensaver/` launcher page
 - **⏹️ Disable Screensaver**: Stops screensaver mode but keeps current game running
+- **⏭️ Next Game**: Manually advance to next random game (enabled after 60 seconds)
+
+### Next Game Button Cooldown
+The Next Game button is **disabled for the first 60 seconds** of each game to:
+- Prevent users from skipping games too quickly
+- Ensure each game gets a fair chance to be played
+- Maintain the intended screensaver rhythm
+- Allow users to properly evaluate each game
 
 ## Technical Implementation
 

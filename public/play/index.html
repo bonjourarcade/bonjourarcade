@@ -945,10 +945,12 @@
                     const indicator = document.getElementById('screensaver-indicator');
                     const countdown = document.getElementById('screensaver-countdown');
                     const disableBtn = document.getElementById('disable-screensaver-btn');
+                    const nextGameBtn = document.getElementById('next-game-btn');
                     
                     if (indicator) indicator.remove();
                     if (countdown) countdown.remove();
                     if (disableBtn) disableBtn.remove();
+                    if (nextGameBtn) nextGameBtn.remove();
                     
                     console.log('Screensaver mode disabled - continuing with current game');
                     
@@ -978,12 +980,78 @@
                 
                 document.body.appendChild(disableBtn);
                 
+                // Add a next game button (disabled for first 60 seconds)
+                const nextGameBtn = document.createElement('button');
+                nextGameBtn.id = 'next-game-btn';
+                nextGameBtn.style.cssText = `
+                    position: fixed;
+                    top: 105px;
+                    left: 10px;
+                    background: rgba(100, 200, 100, 0.9);
+                    color: white;
+                    border: none;
+                    padding: 6px 12px;
+                    border-radius: 15px;
+                    font-size: 11px;
+                    font-weight: bold;
+                    z-index: 10000;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                    font-family: sans-serif;
+                `;
+                nextGameBtn.textContent = '⏭️ Next Game (60s)';
+                nextGameBtn.title = 'Go to next random game (available after 60 seconds)';
+                
+                // Initially disable the button
+                nextGameBtn.disabled = true;
+                nextGameBtn.style.opacity = '0.5';
+                nextGameBtn.style.cursor = 'not-allowed';
+                
+                // Add hover effects (only when enabled)
+                nextGameBtn.addEventListener('mouseenter', () => {
+                    if (!nextGameBtn.disabled) {
+                        nextGameBtn.style.background = 'rgba(100, 200, 100, 1)';
+                        nextGameBtn.style.transform = 'scale(1.05)';
+                        nextGameBtn.style.boxShadow = '0 4px 15px rgba(0,0,0,0.4)';
+                    }
+                });
+                
+                nextGameBtn.addEventListener('mouseleave', () => {
+                    if (!nextGameBtn.disabled) {
+                        nextGameBtn.style.background = 'rgba(100, 200, 100, 0.9)';
+                        nextGameBtn.style.transform = 'scale(1)';
+                        nextGameBtn.style.boxShadow = '0 2px 10px rgba(0,0,0,0.3)';
+                    }
+                });
+                
+                // Add click functionality to go to next game
+                nextGameBtn.addEventListener('click', () => {
+                    if (!nextGameBtn.disabled) {
+                        console.log('Manual next game requested');
+                        // Redirect to randomgame to get a new random game
+                        window.location.href = '/randomgame/';
+                    }
+                });
+                
+                document.body.appendChild(nextGameBtn);
+                
                 // Update countdown every second
                 const countdownInterval = setInterval(() => {
                     const now = Date.now();
                     const startTime = parseInt(sessionStorage.getItem('screensaverStartTime') || '0');
                     const elapsed = now - startTime;
                     const remaining = (2.5 * 60 * 1000) - elapsed;
+                    
+                    // Check if 60 seconds have passed to enable next game button
+                    if (elapsed >= 60000 && nextGameBtn.disabled) {
+                        nextGameBtn.disabled = false;
+                        nextGameBtn.style.opacity = '1';
+                        nextGameBtn.style.cursor = 'pointer';
+                        nextGameBtn.textContent = '⏭️ Next Game';
+                        nextGameBtn.title = 'Go to next random game now';
+                        nextGameBtn.style.background = 'rgba(100, 200, 100, 0.9)';
+                    }
                     
                     if (remaining <= 0) {
                         countdown.textContent = 'Refreshing...';
@@ -1030,9 +1098,11 @@
             const indicator = document.getElementById('screensaver-indicator');
             const countdown = document.getElementById('screensaver-countdown');
             const disableBtn = document.getElementById('disable-screensaver-btn');
+            const nextGameBtn = document.getElementById('next-game-btn');
             if (indicator) indicator.remove();
             if (countdown) countdown.remove();
             if (disableBtn) disableBtn.remove();
+            if (nextGameBtn) nextGameBtn.remove();
             
             // Clear screensaver mode
             sessionStorage.removeItem('screensaverMode');

@@ -38,16 +38,18 @@ The screensaver system automatically loads random games every 5 minutes, creatin
 1. Navigate to `/screensaver/` or click the 🔄 button in the footer
 2. Click "Launch Screensaver" button
 3. System automatically loads a random game
-4. Game plays for 5 minutes, then automatically loads a new random game
+4. Game plays for 2.5 minutes, then automatically loads a new random game
 
 ### During Screensaver Mode
 - **Visual Indicators**: 
-  - 🔄 Screensaver Mode badge (top-left)
+  - 🔄 Screensaver Mode badge (top-left, clickable to return to launcher)
   - Countdown timer showing time until next game
-- **Auto-refresh**: Every 5 minutes, automatically loads a new random game
+- **Auto-refresh**: Every 2.5 minutes, automatically loads a new random game
 - **Continuous Play**: Endless arcade experience
+- **Easy Return**: Click the 🔄 button to go back to screensaver launcher
 
 ### Exiting Screensaver Mode
+- **Click/Tap the 🔄 button** (top-left) to return to screensaver launcher
 - **Double-tap** anywhere on the screen (mobile)
 - **Press Escape key** (desktop/mobile)
 - **Manual navigation** to other pages
@@ -63,17 +65,17 @@ The screensaver system automatically loads random games every 5 minutes, creatin
 
 ### Auto-refresh Logic
 ```javascript
-// Refresh every 5 minutes
+// Refresh every 2.5 minutes
 const refreshInterval = setInterval(() => {
     window.location.href = '/randomgame/';
-}, 5 * 60 * 1000);
+}, 2.5 * 60 * 1000);
 ```
 
 ### Countdown Timer
 ```javascript
 // Update countdown every second
 const countdownInterval = setInterval(() => {
-    const remaining = (5 * 60 * 1000) - elapsed;
+    const remaining = (2.5 * 60 * 1000) - elapsed;
     const minutes = Math.floor(remaining / 60000);
     const seconds = Math.floor((remaining % 60000) / 1000);
     countdown.textContent = `Next game in ${minutes}:${seconds.toString().padStart(2, '0')}`;

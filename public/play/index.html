@@ -816,12 +816,12 @@
             if (isScreensaverMode) {
                 console.log('Screensaver mode activated');
                 
-                // Set up automatic refresh every 5 minutes
+                // Set up automatic refresh every 2.5 minutes
                 const refreshInterval = setInterval(() => {
                     console.log('Screensaver mode: Refreshing to new random game');
                     // Redirect to randomgame to get a new random game
                     window.location.href = '/randomgame/';
-                }, 5 * 60 * 1000); // 5 minutes
+                }, 2.5 * 60 * 1000); // 2.5 minutes
                 
                 // Store the interval ID so it can be cleared if needed
                 sessionStorage.setItem('screensaverRefreshInterval', refreshInterval);
@@ -841,9 +841,35 @@
                     font-weight: bold;
                     z-index: 10000;
                     box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-                    pointer-events: none;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
                 `;
                 indicator.textContent = '🔄 Screensaver Mode';
+                indicator.title = 'Click to return to screensaver launcher';
+                
+                // Add mobile touch indicator
+                if ('ontouchstart' in window) {
+                    indicator.textContent = '🔄 Screensaver Mode (Tap to return)';
+                }
+                
+                // Add hover effect
+                indicator.addEventListener('mouseenter', () => {
+                    indicator.style.background = 'rgba(255, 255, 255, 1)';
+                    indicator.style.transform = 'scale(1.05)';
+                    indicator.style.boxShadow = '0 4px 15px rgba(0,0,0,0.3)';
+                });
+                
+                indicator.addEventListener('mouseleave', () => {
+                    indicator.style.background = 'rgba(255, 255, 255, 0.9)';
+                    indicator.style.transform = 'scale(1)';
+                    indicator.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
+                });
+                
+                // Add click functionality to return to screensaver
+                indicator.addEventListener('click', () => {
+                    exitScreensaverMode(true); // true = redirect to screensaver
+                });
+                
                 document.body.appendChild(indicator);
                 
                 // Add a countdown timer
@@ -869,7 +895,7 @@
                     const now = Date.now();
                     const startTime = parseInt(sessionStorage.getItem('screensaverStartTime') || '0');
                     const elapsed = now - startTime;
-                    const remaining = (5 * 60 * 1000) - elapsed;
+                    const remaining = (2.5 * 60 * 1000) - elapsed;
                     
                     if (remaining <= 0) {
                         countdown.textContent = 'Refreshing...';
@@ -904,7 +930,7 @@
             }
         }
         
-        function exitScreensaverMode() {
+        function exitScreensaverMode(redirectToScreensaver = false) {
             // Clear all intervals
             const refreshInterval = sessionStorage.getItem('screensaverRefreshInterval');
             const countdownInterval = sessionStorage.getItem('screensaverCountdownInterval');
@@ -925,6 +951,12 @@
             sessionStorage.removeItem('screensaverStartTime');
             
             console.log('Screensaver mode deactivated');
+            
+            // If redirecting to screensaver, do it immediately
+            if (redirectToScreensaver) {
+                window.location.href = '/screensaver/';
+                return;
+            }
             
             // Show confirmation
             const confirmation = document.createElement('div');

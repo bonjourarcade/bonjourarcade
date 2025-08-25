@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Loading Random Game...</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        .loading-container {
+            text-align: center;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+
+        .game-info {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            margin-top: 20px;
+            max-width: 400px;
+        }
+
+        .error {
+            background: rgba(255,100,100,0.2);
+            border: 1px solid rgba(255,100,100,0.4);
+            color: #ffcccc;
+        }
+
+        .retry-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .retry-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-container">
+        <div class="spinner"></div>
+        <div class="loading-text">Finding a random game...</div>
+        <div id="game-info" class="game-info" style="display: none;">
+            <div id="game-title"></div>
+            <div id="game-system"></div>
+        </div>
+        <div id="error-container" class="game-info error" style="display: none;">
+            <div id="error-message"></div>
+            <button class="retry-btn" onclick="retryRandomGame()">Try Again</button>
+        </div>
+    </div>
+
+    <script>
+        let gameData = [];
+        let currentGame = null;
+
+        async function loadRandomGame() {
+            try {
+                // Show loading state
+                document.getElementById('game-info').style.display = 'none';
+                document.getElementById('error-container').style.display = 'none';
+                
+                // Fetch the game list
+                const response = await fetch('/gamelist.json');
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch game list (Status: ${response.status})`);
+                }
+                
+                const data = await response.json();
+                
+                // Combine gameOfTheWeek and previousGames
+                gameData = [];
+                if (data.gameOfTheWeek) gameData.push(data.gameOfTheWeek);
+                if (Array.isArray(data.previousGames)) gameData = gameData.concat(data.previousGames);
+                
+                if (gameData.length === 0) {
+                    throw new Error('No games available');
+                }
+                
+                // Select a random game
+                const randomIndex = Math.floor(Math.random() * gameData.length);
+                currentGame = gameData[randomIndex];
+                
+                // Show game info briefly
+                document.getElementById('game-title').textContent = currentGame.title || 'Unknown Game';
+                document.getElementById('game-system').textContent = currentGame.system || 'Unknown System';
+                document.getElementById('game-info').style.display = 'block';
+                
+                // Wait a moment to show the game info, then redirect
+                setTimeout(() => {
+                    redirectToGame();
+                }, 1500);
+                
+            } catch (error) {
+                console.error('Error loading random game:', error);
+                document.getElementById('error-message').textContent = `Error: ${error.message}`;
+                document.getElementById('error-container').style.display = 'block';
+            }
+        }
+
+        function redirectToGame() {
+            if (currentGame && currentGame.id) {
+                // Set screensaver mode flag if coming from screensaver
+                if (sessionStorage.getItem('screensaverMode') === 'true') {
+                    sessionStorage.setItem('screensaverMode', 'true');
+                    sessionStorage.setItem('lastRandomGame', currentGame.id);
+                    sessionStorage.setItem('screensaverStartTime', Date.now().toString());
+                }
+                
+                // Redirect to the play page with the random game
+                window.location.href = `/play/?game=${currentGame.id}`;
+            } else {
+                throw new Error('Invalid game data');
+            }
+        }
+
+        function retryRandomGame() {
+            loadRandomGame();
+        }
+
+        // Start loading when page loads
+        document.addEventListener('DOMContentLoaded', loadRandomGame);
+    </script>
+</body>
+</html>

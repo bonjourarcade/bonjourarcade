@@ -553,6 +553,7 @@
             <button id="theme-toggle" class="theme-toggle" style="margin-right: 0;">🌙</button>
             <button id="random-game-btn" class="random-game-btn">🎲 Jeu aléatoire (avec filtres)</button>
             <div class="random-info-text">Respecte vos filtres actuels</div>
+            <button id="screensaver-btn" class="screensaver-btn" style="padding: 0.6rem 1.2rem; font-size: 1rem; border-radius: 6px; border: none; background: linear-gradient(45deg, #ff6b6b, #ee5a24); color: #fff; cursor: pointer; font-family: sans-serif; box-shadow: 0 2px 6px rgba(0,0,0,0.2);">🔄 Mode écran de veille</button>
         </div>
     </div>
     
@@ -1081,6 +1082,9 @@
         // Add event listeners
         document.getElementById('random-game-btn').addEventListener('click', playRandomGame);
         document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+        document.getElementById('screensaver-btn').addEventListener('click', function() {
+            window.location.href = '/screensaver/';
+        });
         
         // Search input event listener
         document.getElementById('search-input').addEventListener('input', (e) => {

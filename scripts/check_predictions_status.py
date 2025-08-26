@@ -7,13 +7,35 @@ This script is used by the generate_gamelist scripts to override hide settings f
 import sys
 import os
 import yaml
-from datetime import datetime
+from datetime import datetime, timedelta
 
 def get_current_week_seed():
     """Get the current week's seed in YYYYWW format."""
     now = datetime.now()
     week = now.isocalendar()[1]
     return f"{now.year}{week:02d}"
+
+def seed_to_date(seed):
+    """Convert a seed (YYYYWW format) to the corresponding Monday date."""
+    try:
+        year = int(str(seed)[:4])
+        week = int(str(seed)[4:])
+        
+        # Get the first day of the year
+        jan1 = datetime(year, 1, 1)
+        
+        # Find the first Monday of the year
+        while jan1.weekday() != 0:  # 0 = Monday
+            jan1 += timedelta(days=1)
+        
+        # Add weeks to get to the target week
+        target_date = jan1 + timedelta(weeks=week-1)
+        
+        return target_date.strftime("%Y-%m-%d")
+        
+    except Exception as e:
+        print(f"Error: Could not convert seed {seed} to date: {e}", file=sys.stderr)
+        return None
 
 def is_game_in_predictions(game_title):
     """Check if a game title exists in predictions.yaml and return its status."""
@@ -103,9 +125,12 @@ def main():
             prediction_info['is_current_week'] = False
             prediction_info['is_past_week'] = False
         
+        # Get the date corresponding to the prediction week
+        prediction_date = seed_to_date(prediction_info['seed'])
+        
         # Output result as JSON-like format for shell script parsing
         if prediction_info['is_current_week'] or prediction_info['is_past_week']:
-            print("SHOW_GAME")
+            print(f"SHOW_GAME|{prediction_date}")
         else:
             print("HIDE_GAME")
             

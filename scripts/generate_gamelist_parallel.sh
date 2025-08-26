@@ -282,10 +282,19 @@ for i in $(seq 1 $BATCH_WORKERS); do
                                 
                                 # Check if game is in predictions and should override hide setting
                                 if [ -n "$title" ]; then
-                                    prediction_status=$(python3 scripts/check_predictions_status.py "$title" 2>/dev/null || echo "NOT_IN_PREDICTIONS")
-                                    if [ "$prediction_status" = "SHOW_GAME" ]; then
+                                    prediction_result=$(python3 scripts/check_predictions_status.py "$title" 2>/dev/null || echo "NOT_IN_PREDICTIONS")
+                                    if [[ "$prediction_result" == SHOW_GAME* ]]; then
                                         hide="no"
                                         echo "     🔍 Overriding hide setting for prediction game: $title (hide: $hide)" >> "$temp_dir/debug.log"
+                                        
+                                        # Override added date with prediction week date if available
+                                        if [[ "$prediction_result" == *"|"* ]]; then
+                                            prediction_date=$(echo "$prediction_result" | cut -d'|' -f2)
+                                            if [ -n "$prediction_date" ]; then
+                                                added="$prediction_date"
+                                                echo "     📅 Overriding added date for prediction game: $title (new date: $added)" >> "$temp_dir/debug.log"
+                                            fi
+                                        fi
                                     fi
                                 fi
                             else
@@ -301,10 +310,19 @@ for i in $(seq 1 $BATCH_WORKERS); do
                             :
                         elif [ -n "$title" ]; then
                             # Check if the title (which might be just the game_id) is in predictions
-                            prediction_status=$(python3 scripts/check_predictions_status.py "$title" 2>/dev/null || echo "NOT_IN_PREDICTIONS")
-                            if [ "$prediction_status" = "SHOW_GAME" ]; then
+                            prediction_result=$(python3 scripts/check_predictions_status.py "$title" 2>/dev/null || echo "NOT_IN_PREDICTIONS")
+                            if [[ "$prediction_result" == SHOW_GAME* ]]; then
                                 hide="no"
                                 echo "     🔍 Overriding hide setting for prediction game without metadata: $title (hide: $hide)" >> "$temp_dir/debug.log"
+                                
+                                # Override added date with prediction week date if available
+                                if [[ "$prediction_result" == *"|"* ]]; then
+                                    prediction_date=$(echo "$prediction_result" | cut -d'|' -f2)
+                                    if [ -n "$prediction_date" ]; then
+                                        added="$prediction_date"
+                                        echo "     📅 Overriding added date for prediction game without metadata: $title (new date: $added)" >> "$temp_dir/debug.log"
+                                    fi
+                                fi
                             fi
                         fi
 

@@ -118,6 +118,9 @@
                 if (data.gameOfTheWeek) gameData.push(data.gameOfTheWeek);
                 if (Array.isArray(data.previousGames)) gameData = gameData.concat(data.previousGames);
                 
+                // Filter out games with problems
+                gameData = gameData.filter(game => game.problem !== "true");
+                
                 if (gameData.length === 0) {
                     throw new Error('No games available');
                 }

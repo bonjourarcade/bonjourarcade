@@ -328,22 +328,7 @@
           exitEmulation: false
         };
 
-        // Feature: Redirect to homepage at 5 AM local time
-        function checkAndRedirectAt5AM() {
-            const now = new Date();
-            if (now.getHours() === 5 && window.screensaverActive) {
-                console.log("It's 5 AM local time and screensaver is active. Redirecting to homepage.");
-                window.location.href = "/index.html";
-            }
-        }
 
-        // Set up interval to check every hour (3,600,000 milliseconds)
-        setInterval(checkAndRedirectAt5AM, 3600000);
-
-        // Hide screensaver timer on play page
-        if (window.setScreensaverTimerVisibility) {
-            window.setScreensaverTimerVisibility(false);
-        }
 
         // Function to detect if the device is mobile
         function isMobileDevice() {
@@ -799,13 +784,6 @@
         // Using DOMContentLoaded ensures the #game-container element exists
         document.addEventListener('DOMContentLoaded', loadSelectedGame);
 
-        // Initialize screensaver after game is loaded
-        if (window.initScreensaver) {
-            document.addEventListener('DOMContentLoaded', () => {
-                window.initScreensaver();
-            });
-        }
-
         // Initialize screensaver mode functionality
         document.addEventListener('DOMContentLoaded', initScreensaverMode);
 
@@ -1099,6 +1077,7 @@
             const countdown = document.getElementById('screensaver-countdown');
             const disableBtn = document.getElementById('disable-screensaver-btn');
             const nextGameBtn = document.getElementById('next-game-btn');
+            
             if (indicator) indicator.remove();
             if (countdown) countdown.remove();
             if (disableBtn) disableBtn.remove();
@@ -1147,7 +1126,7 @@
             document.addEventListener('keydown', removeConfirmation);
             document.addEventListener('touchend', removeConfirmation);
         }
-
+        
         // Menu button referrer logic
         document.getElementById('menu-button').addEventListener('click', function() {
             if (sessionStorage.getItem('referrerAllGames') === '1') {
@@ -1184,40 +1163,5 @@
             }
         });
     </script>
-    <script src="../assets/js/screensaver.js"></script>
-    <script>
-    // --- Custom screensaver cycling for play/index.html only ---
-    (function() {
-      // Wait for screensaver.js to be loaded and DOM ready
-      function cycleScreensaver() {
-        let cycleActive = false;
-        function toggleScreensaver() {
-          if (cycleActive) {
-            if (window.screensaverActive && typeof stopScreensaver === 'function') {
-              stopScreensaver();
-            }
-          } else {
-            if (!window.screensaverActive && typeof startScreensaver === 'function') {
-              startScreensaver();
-            }
-          }
-          cycleActive = !cycleActive;
-        }
-        // Start with the current state
-        setInterval(toggleScreensaver, 10 * 60 * 1000); // 10 minutes
-      }
-      if (document.readyState === 'complete' || document.readyState === 'interactive') {
-        setTimeout(cycleScreensaver, 1000);
-      } else {
-        document.addEventListener('DOMContentLoaded', function() {
-          setTimeout(cycleScreensaver, 1000);
-        });
-      }
-    })();
-    </script>
-    <div id="screensaver-overlay" class="screensaver-overlay">
-        <img id="screensaver-image" class="screensaver-image" src="" alt="Screensaver Image">
-        <img id="screensaver-logo" class="screensaver-logo" src="" alt="BonjourArcade Logo">
-    </div>
 </body>
 </html>

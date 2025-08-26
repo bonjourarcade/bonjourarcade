@@ -88,28 +88,32 @@
             line-height: 1.4;
         }
 
-        .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin-top: 1rem;
+        .loading-container {
+            margin-bottom: 1rem;
         }
 
-        .feature {
-            background: rgba(255,255,255,0.1);
-            padding: 15px;
-            border-radius: 10px;
-            border: 1px solid rgba(255,255,255,0.2);
-        }
-
-        .feature-icon {
-            font-size: 2rem;
+        .loading-text {
+            font-size: 1rem;
+            font-weight: 500;
             margin-bottom: 10px;
+            opacity: 0.9;
         }
 
-        .feature-text {
-            font-size: 0.8rem;
-            opacity: 0.9;
+        .loading-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .loading-progress {
+            height: 100%;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            border-radius: 4px;
+            width: 0%;
+            transition: width 0.1s ease;
         }
 
         @media (max-width: 480px) {
@@ -127,8 +131,12 @@
                 min-width: 180px;
             }
             
-            .features {
-                grid-template-columns: 1fr;
+            .loading-text {
+                font-size: 0.9rem;
+            }
+            
+            .loading-bar {
+                height: 6px;
             }
         }
     </style>
@@ -146,24 +154,27 @@
             <h3>How it works</h3>
             <p>The screensaver will automatically load random games every 2.5 minutes, creating an endless arcade experience. Perfect for parties, waiting rooms, or just discovering new games!</p>
             
-            <div class="features">
-                <div class="feature">
-                    <div class="feature-icon">🎲</div>
-                    <div class="feature-text">Random Games</div>
-                </div>
-                <div class="feature">
-                    <div class="feature-icon">⏰</div>
-                    <div class="feature-text">Auto-refresh</div>
-                </div>
-                <div class="feature">
-                    <div class="feature-icon">📱</div>
-                    <div class="feature-text">Mobile Optimized</div>
+            <div class="loading-container">
+                <div class="loading-text">Launching screensaver...</div>
+                <div class="loading-bar">
+                    <div class="loading-progress"></div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
+        let loadingInterval;
+        let progress = 0;
+        
+        function updateLoadingBar() {
+            const progressElement = document.querySelector('.loading-progress');
+            if (progress < 100) {
+                progress += 10; // Increment by 10% every second (10 seconds total)
+                progressElement.style.width = progress + '%';
+            }
+        }
+
         function launchScreensaver() {
             // Set screensaver mode flag in session storage
             sessionStorage.setItem('screensaverMode', 'true');
@@ -177,12 +188,13 @@
         let autoLaunchTimer;
         
         function startAutoLaunchTimer() {
+            // Start loading bar animation
+            loadingInterval = setInterval(updateLoadingBar, 1000);
+            
+            // Auto-launch after 10 seconds
             autoLaunchTimer = setTimeout(() => {
-                if (confirm('Auto-launch screensaver in 5 seconds? Click OK to continue or Cancel to stay on this page.')) {
-                    setTimeout(() => {
-                        launchScreensaver();
-                    }, 5000);
-                }
+                clearInterval(loadingInterval);
+                launchScreensaver();
             }, 10000);
         }
 
@@ -190,6 +202,9 @@
         function resetAutoLaunchTimer() {
             if (autoLaunchTimer) {
                 clearTimeout(autoLaunchTimer);
+                clearInterval(loadingInterval);
+                progress = 0;
+                document.querySelector('.loading-progress').style.width = '0%';
                 startAutoLaunchTimer();
             }
         }

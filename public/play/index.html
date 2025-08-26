@@ -959,23 +959,28 @@
             submenu.appendChild(nextGameBtn);
             document.body.appendChild(submenu);
             
-            // Toggle submenu on timer button click
-            timerBtn.addEventListener('click', () => {
+            // Toggle submenu on timer button click/touch
+            const toggleSubmenu = () => {
                 const isVisible = submenu.style.display === 'flex';
                 submenu.style.display = isVisible ? 'none' : 'flex';
                 
-                // Add click outside to close functionality
+                // Add click/touch outside to close functionality
                 if (!isVisible) {
                     setTimeout(() => {
                         document.addEventListener('click', closeSubmenu);
+                        document.addEventListener('touchend', closeSubmenu);
                     }, 100);
                 }
-            });
+            };
+            
+            timerBtn.addEventListener('click', toggleSubmenu);
+            timerBtn.addEventListener('touchend', toggleSubmenu);
             
             function closeSubmenu(e) {
                 if (!submenu.contains(e.target) && !timerBtn.contains(e.target)) {
                     submenu.style.display = 'none';
                     document.removeEventListener('click', closeSubmenu);
+                    document.removeEventListener('touchend', closeSubmenu);
                 }
             }
             
@@ -1122,23 +1127,28 @@
             submenu.appendChild(nextGameBtn);
             document.body.appendChild(submenu);
             
-            // Toggle submenu on timer button click
-            timerBtn.addEventListener('click', () => {
+            // Toggle submenu on timer button click/touch
+            const toggleSubmenu = () => {
                 const isVisible = submenu.style.display === 'flex';
                 submenu.style.display = isVisible ? 'none' : 'flex';
                 
-                // Add click outside to close functionality
+                // Add click/touch outside to close functionality
                 if (!isVisible) {
                     setTimeout(() => {
                         document.addEventListener('click', closeSubmenu);
+                        document.addEventListener('touchend', closeSubmenu);
                     }, 100);
                 }
-            });
+            };
+            
+            timerBtn.addEventListener('click', toggleSubmenu);
+            timerBtn.addEventListener('touchend', toggleSubmenu);
             
             function closeSubmenu(e) {
                 if (!submenu.contains(e.target) && !timerBtn.contains(e.target)) {
                     submenu.style.display = 'none';
                     document.removeEventListener('click', closeSubmenu);
+                    document.removeEventListener('touchend', closeSubmenu);
                 }
             }
             

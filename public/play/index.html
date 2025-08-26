@@ -820,19 +820,7 @@
                     createDesktopScreensaverInterface();
                 }
                 
-                // Add escape functionality - double tap to exit screensaver mode
-                let lastTap = 0;
-                document.addEventListener('touchend', (e) => {
-                    const currentTime = new Date().getTime();
-                    const tapLength = currentTime - lastTap;
-                    if (tapLength < 500 && tapLength > 0) {
-                        // Double tap detected
-                        exitScreensaverMode();
-                    }
-                    lastTap = currentTime;
-                });
-                
-                // Also allow escape key to exit
+                // Only allow escape key to exit (no double-tap on mobile)
                 document.addEventListener('keydown', (e) => {
                     if (e.key === 'Escape') {
                         exitScreensaverMode();
@@ -843,38 +831,39 @@
         
         // Create mobile screensaver interface with timer button and submenu
         function createMobileScreensaverInterface() {
-            // Create the main timer button
+            // Create the main timer button - positioned below the game display
             const timerBtn = document.createElement('button');
             timerBtn.id = 'mobile-timer-btn';
             timerBtn.style.cssText = `
                 position: fixed;
-                top: 20px;
+                bottom: 200px;
                 left: 50%;
                 transform: translateX(-50%);
                 background: rgba(0, 0, 0, 0.7);
                 color: white;
                 border: none;
-                padding: 12px 20px;
-                border-radius: 25px;
-                font-size: 14px;
+                padding: 15px 25px;
+                border-radius: 30px;
+                font-size: 16px;
                 font-weight: bold;
                 z-index: 10000;
-                box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+                box-shadow: 0 6px 20px rgba(0,0,0,0.4);
                 cursor: pointer;
                 transition: all 0.2s ease;
                 font-family: sans-serif;
                 backdrop-filter: blur(10px);
                 border: 1px solid rgba(255, 255, 255, 0.2);
+                min-width: 180px;
             `;
             timerBtn.textContent = '⏰ Screensaver';
             document.body.appendChild(timerBtn);
             
-            // Create the submenu container
+            // Create the submenu container - positioned below the timer button
             const submenu = document.createElement('div');
             submenu.id = 'mobile-screensaver-submenu';
             submenu.style.cssText = `
                 position: fixed;
-                top: 80px;
+                bottom: 120px;
                 left: 50%;
                 transform: translateX(-50%);
                 background: rgba(0, 0, 0, 0.9);
@@ -961,10 +950,8 @@
                 }
             });
             
-            // Initially disable the next game button
-            nextGameBtn.disabled = true;
-            nextGameBtn.style.opacity = '0.5';
-            nextGameBtn.style.cursor = 'not-allowed';
+            // Next Game button is always enabled
+            nextGameBtn.innerHTML = '⏭️ Next Game';
             
             // Add buttons to submenu
             submenu.appendChild(backToScreensaverBtn);
@@ -999,21 +986,6 @@
                 const elapsed = now - startTime;
                 const remaining = (2.5 * 60 * 1000) - elapsed;
                 
-                // Check if 60 seconds have passed to enable next game button
-                if (elapsed >= 60000 && nextGameBtn.disabled) {
-                    nextGameBtn.disabled = false;
-                    nextGameBtn.style.opacity = '1';
-                    nextGameBtn.style.cursor = 'pointer';
-                    nextGameBtn.innerHTML = '⏭️ Next Game';
-                    nextGameBtn.style.background = 'rgba(40, 167, 69, 0.9)';
-                } else if (elapsed < 60000) {
-                    // Show countdown on button before it's enabled
-                    const buttonRemaining = 60000 - elapsed;
-                    const buttonMinutes = Math.floor(buttonRemaining / 60000);
-                    const buttonSeconds = Math.floor((buttonRemaining % 60000) / 1000);
-                    nextGameBtn.innerHTML = `⏭️ Next Game (${buttonMinutes}:${buttonSeconds.toString().padStart(2, '0')})`;
-                }
-                
                 if (remaining <= 0) {
                     timerBtn.textContent = '⏰ Refreshing...';
                 } else {
@@ -1027,196 +999,162 @@
             sessionStorage.setItem('screensaverCountdownInterval', countdownInterval);
         }
         
-        // Create desktop screensaver interface (keeping existing functionality)
+        // Create desktop screensaver interface with timer button (replacing old buttons)
         function createDesktopScreensaverInterface() {
-            // Add a visual indicator that screensaver mode is active
-            const indicator = document.createElement('div');
-            indicator.id = 'screensaver-indicator';
-            indicator.style.cssText = `
+            // Create the main timer button - positioned above the Menu button
+            const timerBtn = document.createElement('button');
+            timerBtn.id = 'desktop-timer-btn';
+            timerBtn.style.cssText = `
                 position: fixed;
                 top: 10px;
                 left: 10px;
-                background: rgba(255, 255, 255, 0.9);
-                color: #333;
-                padding: 6px 10px;
-                border-radius: 16px;
-                font-size: 11px;
+                background: rgba(0, 0, 0, 0.8);
+                color: white;
+                border: none;
+                padding: 10px 18px;
+                border-radius: 20px;
+                font-size: 12px;
                 font-weight: bold;
                 z-index: 10000;
-                box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+                box-shadow: 0 4px 15px rgba(0,0,0,0.3);
                 cursor: pointer;
                 transition: all 0.2s ease;
+                font-family: sans-serif;
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                min-width: 140px;
             `;
-            indicator.textContent = '🔄 Screensaver Mode';
-            indicator.title = 'Click to return to screensaver launcher';
+            timerBtn.textContent = '⏰ Screensaver';
+            document.body.appendChild(timerBtn);
             
-            // Add hover effect
-            indicator.addEventListener('mouseenter', () => {
-                indicator.style.background = 'rgba(255, 255, 255, 1)';
-                indicator.style.transform = 'scale(1.05)';
-                indicator.style.boxShadow = '0 4px 15px rgba(0,0,0,0.3)';
-            });
+            // Create the submenu container - positioned below the timer button
+            const submenu = document.createElement('div');
+            submenu.id = 'desktop-screensaver-submenu';
+            submenu.style.cssText = `
+                position: fixed;
+                top: 60px;
+                left: 10px;
+                background: rgba(0, 0, 0, 0.9);
+                border-radius: 15px;
+                padding: 12px;
+                z-index: 10001;
+                display: none;
+                flex-direction: column;
+                gap: 8px;
+                min-width: 180px;
+                backdrop-filter: blur(15px);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            `;
             
-            indicator.addEventListener('mouseleave', () => {
-                indicator.style.background = 'rgba(255, 255, 255, 0.9)';
-                indicator.style.transform = 'scale(1)';
-                indicator.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
-            });
-            
-            // Add click functionality to return to screensaver
-            indicator.addEventListener('click', () => {
+            // Create submenu buttons
+            const backToScreensaverBtn = document.createElement('button');
+            backToScreensaverBtn.style.cssText = `
+                background: rgba(70, 130, 180, 0.9);
+                color: white;
+                border: none;
+                padding: 8px 14px;
+                border-radius: 8px;
+                font-size: 11px;
+                font-weight: bold;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                font-family: sans-serif;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 6px;
+            `;
+            backToScreensaverBtn.innerHTML = '🏠 Back to Screensaver';
+            backToScreensaverBtn.addEventListener('click', () => {
                 exitScreensaverMode(true); // true = redirect to screensaver
             });
             
-            document.body.appendChild(indicator);
-            
-            // Add a countdown timer
-            const countdown = document.createElement('div');
-            countdown.id = 'screensaver-countdown';
-            countdown.style.cssText = `
-                position: fixed;
-                top: 250px;
-                left: 10px;
-                background: rgba(0, 0, 0, 0.8);
-                color: white;
-                padding: 6px 10px;
-                border-radius: 15px;
-                font-size: 11px;
-                z-index: 10000;
-                box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-                pointer-events: none;
-            `;
-            document.body.appendChild(countdown);
-            
-            // Add a disable screensaver button
-            const disableBtn = document.createElement('button');
-            disableBtn.id = 'disable-screensaver-btn';
-            disableBtn.style.cssText = `
-                position: fixed;
-                top: 280px;
-                left: 10px;
-                background: rgba(255, 100, 100, 0.9);
+            const disableScreensaverBtn = document.createElement('button');
+            disableScreensaverBtn.style.cssText = `
+                background: rgba(220, 53, 69, 0.9);
                 color: white;
                 border: none;
-                padding: 6px 12px;
-                border-radius: 15px;
+                padding: 8px 14px;
+                border-radius: 8px;
                 font-size: 11px;
                 font-weight: bold;
-                z-index: 10000;
-                box-shadow: 0 2px 10px rgba(0,0,0,0.3);
                 cursor: pointer;
                 transition: all 0.2s ease;
                 font-family: sans-serif;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 6px;
             `;
-            disableBtn.textContent = '⏹️ Disable Screensaver';
-            disableBtn.title = 'Stop screensaver mode and continue playing this game';
-            
-            // Add hover effects
-            disableBtn.addEventListener('mouseenter', () => {
-                disableBtn.style.background = 'rgba(255, 100, 100, 1)';
-                disableBtn.style.transform = 'scale(1.05)';
-                disableBtn.style.boxShadow = '0 4px 15px rgba(0,0,0,0.4)';
-            });
-            
-            disableBtn.addEventListener('mouseleave', () => {
-                disableBtn.style.background = 'rgba(255, 100, 100, 0.9)';
-                disableBtn.style.transform = 'scale(1)';
-                disableBtn.style.boxShadow = '0 2px 10px rgba(0,0,0,0.3)';
-            });
-            
-            // Add click functionality to disable screensaver
-            disableBtn.addEventListener('click', () => {
+            disableScreensaverBtn.innerHTML = '⏹️ Disable Screensaver';
+            disableScreensaverBtn.addEventListener('click', () => {
                 disableScreensaverMode();
             });
             
-            document.body.appendChild(disableBtn);
-            
-            // Add a next game button (disabled for first 60 seconds)
             const nextGameBtn = document.createElement('button');
             nextGameBtn.id = 'desktop-next-game-btn';
             nextGameBtn.style.cssText = `
-                position: fixed;
-                top: 310px;
-                left: 10px;
-                background: rgba(100, 200, 100, 0.9);
+                background: rgba(40, 167, 69, 0.9);
                 color: white;
                 border: none;
-                padding: 6px 12px;
-                border-radius: 15px;
+                padding: 8px 14px;
+                border-radius: 8px;
                 font-size: 11px;
                 font-weight: bold;
-                z-index: 10000;
-                box-shadow: 0 2px 10px rgba(0,0,0,0.3);
                 cursor: pointer;
                 transition: all 0.2s ease;
                 font-family: sans-serif;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 6px;
             `;
-            nextGameBtn.textContent = '⏭️ Next Game (60s)';
-            nextGameBtn.title = 'Go to next random game (available after 60 seconds)';
-            
-            // Initially disable the button
-            nextGameBtn.disabled = true;
-            nextGameBtn.style.opacity = '0.5';
-            nextGameBtn.style.cursor = 'not-allowed';
-            
-            // Add hover effects (only when enabled)
-            nextGameBtn.addEventListener('mouseenter', () => {
-                if (!nextGameBtn.disabled) {
-                    nextGameBtn.style.background = 'rgba(100, 200, 100, 1)';
-                    nextGameBtn.style.transform = 'scale(1.05)';
-                    nextGameBtn.style.boxShadow = '0 4px 15px rgba(0,0,0,0.4)';
-                    nextGameBtn.style.boxShadow = '0 4px 15px rgba(0,0,0,0.4)';
-                }
-            });
-            
-            nextGameBtn.addEventListener('mouseleave', () => {
-                if (!nextGameBtn.disabled) {
-                    nextGameBtn.style.background = 'rgba(100, 200, 100, 0.9)';
-                    nextGameBtn.style.transform = 'scale(1)';
-                    nextGameBtn.style.boxShadow = '0 2px 10px rgba(0,0,0,0.3)';
-                }
-            });
-            
-            // Add click functionality to go to next game
+            nextGameBtn.innerHTML = '⏭️ Next Game';
             nextGameBtn.addEventListener('click', () => {
-                if (!nextGameBtn.disabled) {
-                    console.log('Manual next game requested');
-                    // Redirect to randomgame to get a new random game
-                    window.location.href = '/randomgame/';
+                console.log('Manual next game requested');
+                window.location.href = '/randomgame/';
+            });
+            
+            // Add buttons to submenu
+            submenu.appendChild(backToScreensaverBtn);
+            submenu.appendChild(disableScreensaverBtn);
+            submenu.appendChild(nextGameBtn);
+            document.body.appendChild(submenu);
+            
+            // Toggle submenu on timer button click
+            timerBtn.addEventListener('click', () => {
+                const isVisible = submenu.style.display === 'flex';
+                submenu.style.display = isVisible ? 'none' : 'flex';
+                
+                // Add click outside to close functionality
+                if (!isVisible) {
+                    setTimeout(() => {
+                        document.addEventListener('click', closeSubmenu);
+                    }, 100);
                 }
             });
             
-            document.body.appendChild(nextGameBtn);
+            function closeSubmenu(e) {
+                if (!submenu.contains(e.target) && !timerBtn.contains(e.target)) {
+                    submenu.style.display = 'none';
+                    document.removeEventListener('click', closeSubmenu);
+                }
+            }
             
-            // Update countdown every second
+            // Update timer button text every second
             const countdownInterval = setInterval(() => {
                 const now = Date.now();
                 const startTime = parseInt(sessionStorage.getItem('screensaverStartTime') || '0');
                 const elapsed = now - startTime;
                 const remaining = (2.5 * 60 * 1000) - elapsed;
                 
-                // Check if 60 seconds have passed to enable next game button
-                if (elapsed >= 60000 && nextGameBtn.disabled) {
-                    nextGameBtn.disabled = false;
-                    nextGameBtn.style.opacity = '1';
-                    nextGameBtn.style.cursor = 'pointer';
-                    nextGameBtn.textContent = '⏭️ Next Game';
-                    nextGameBtn.title = 'Go to next random game now';
-                    nextGameBtn.style.background = 'rgba(100, 200, 100, 0.9)';
-                } else if (elapsed < 60000) {
-                    // Show countdown on button before it's enabled
-                    const buttonRemaining = 60000 - elapsed;
-                    const buttonMinutes = Math.floor(buttonRemaining / 60000);
-                    const buttonSeconds = Math.floor((buttonRemaining % 60000) / 1000);
-                    nextGameBtn.textContent = `⏭️ Next Game (${buttonMinutes}:${buttonSeconds.toString().padStart(2, '0')})`;
-                }
-                
                 if (remaining <= 0) {
-                    countdown.textContent = 'Refreshing...';
+                    timerBtn.textContent = '⏰ Refreshing...';
                 } else {
                     const minutes = Math.floor(remaining / 60000);
                     const seconds = Math.floor((remaining % 60000) / 1000);
-                    countdown.textContent = `Next game in ${minutes}:${seconds.toString().padStart(2, '0')}`;
+                    timerBtn.textContent = `⏰ ${minutes}:${seconds.toString().padStart(2, '0')}`;
                 }
             }, 1000);
             
@@ -1246,7 +1184,9 @@
                 'disable-screensaver-btn',
                 'desktop-next-game-btn',
                 'mobile-timer-btn',
-                'mobile-screensaver-submenu'
+                'mobile-screensaver-submenu',
+                'desktop-timer-btn',
+                'desktop-screensaver-submenu'
             ];
             
             elementsToRemove.forEach(id => {
@@ -1297,7 +1237,9 @@
                 'disable-screensaver-btn',
                 'desktop-next-game-btn',
                 'mobile-timer-btn',
-                'mobile-screensaver-submenu'
+                'mobile-screensaver-submenu',
+                'desktop-timer-btn',
+                'desktop-screensaver-submenu'
             ];
             
             elementsToRemove.forEach(id => {

@@ -1,7 +1,7 @@
 # Bonjour Arcade Screensaver System
 
 ## Overview
-The screensaver system automatically loads random games every 5 minutes, creating an endless arcade experience perfect for parties, waiting rooms, or discovering new games.
+The screensaver system automatically loads random games every 2.5 minutes, creating an endless arcade experience perfect for parties, waiting rooms, or discovering new games.
 
 ## How It Works
 

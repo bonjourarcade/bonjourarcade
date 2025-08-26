@@ -3,12 +3,12 @@ developer: Activision
 year: 1984
 genre: Platform, Puzzle, Shooter
 announcement_message: "Préparez-vous à vivre une aventure palpitante avec H.E.R.O. d'Activision, un incontournable de 1984 qui marie habilement plateforme et puzzle ! Dans ce jeu captivant, vous manœuvrez un hélicoptère équipé d'un jetpack pour sauver des mineurs coincés dans des cavernes pleines de dangers, tout en résolvant des énigmes astucieuses et en affrontant des ennemis redoutables. Avec son gameplay novateur et sa combinaison unique de stratégie et d'action, H.E.R.O. se démarque comme un classique intemporel qui ne manquera pas de vous tenir en haleine !"
-#controls:
-#  - 🕹️ Déplacer
-#  - 1️⃣  Tirer
+controls:
+  - 🕹️ Déplacer
+  - 1️⃣  Tirer
 #  - 2️⃣  Bombe
-#to_start: Insert Coin -> Start
+to_start: Start
 #recommended: 
 #added: 
-hide: yes
 added: 2025-07-27
+enable_score: true

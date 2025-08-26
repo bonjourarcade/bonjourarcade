@@ -262,6 +262,15 @@ find "$ROMS_DIR" -maxdepth 2 -type f -not -path "*/\.*" | while read -r rom_file
             # Extract controls as JSON array if present
             controls_json=$(echo "$metadata_json" | jq -c '.controls // null')
             new_flag=$(echo "$metadata_json" | jq -r '.new // empty')
+            
+            # Check if game is in predictions and should override hide setting
+            if [ -n "$title" ]; then
+                prediction_status=$(python3 scripts/check_predictions_status.py "$title" 2>/dev/null || echo "NOT_IN_PREDICTIONS")
+                if [ "$prediction_status" = "SHOW_GAME" ]; then
+                    hide="no"
+                    echo "  - Overriding hide setting for prediction game: $title (hide: $hide)"
+                fi
+            fi
         else
             echo "  - metadata.yaml found but failed to parse. Using default title ($game_id)."
             new_flag=""
@@ -269,6 +278,13 @@ find "$ROMS_DIR" -maxdepth 2 -type f -not -path "*/\.*" | while read -r rom_file
     else
         echo "  - No metadata.yaml found. Using default title ($game_id) and hiding this game (hide:yes)."
         new_flag=""
+        
+        # Check if game is in predictions and should override hide setting (for games without metadata)
+        prediction_status=$(python3 scripts/check_predictions_status.py "$title" 2>/dev/null || echo "NOT_IN_PREDICTIONS")
+        if [ "$prediction_status" = "SHOW_GAME" ]; then
+            hide="no"
+            echo "  - Overriding hide setting for prediction game without metadata: $title (hide: $hide)"
+        fi
     fi
 
     # Check if the game should be marked as new by date

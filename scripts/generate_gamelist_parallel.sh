@@ -279,11 +279,33 @@ for i in $(seq 1 $BATCH_WORKERS); do
                                 problem=$(echo "$metadata_json" | jq -r '.problem // ""')
                                 controls_json=$(echo "$metadata_json" | jq -c '.controls // null')
                                 new_flag=$(echo "$metadata_json" | jq -r '.new // empty')
+                                
+                                # Check if game is in predictions and should override hide setting
+                                if [ -n "$title" ]; then
+                                    prediction_status=$(python3 scripts/check_predictions_status.py "$title" 2>/dev/null || echo "NOT_IN_PREDICTIONS")
+                                    if [ "$prediction_status" = "SHOW_GAME" ]; then
+                                        hide="no"
+                                        echo "     🔍 Overriding hide setting for prediction game: $title (hide: $hide)" >> "$temp_dir/debug.log"
+                                    fi
+                                fi
                             else
                                 new_flag=""
                             fi
                         else
                             new_flag=""
+                        fi
+                        
+                        # Check if game is in predictions and should override hide setting (for games without metadata)
+                        if [ -f "$metadata_file" ] && [ -n "$title" ] && [ "$title" != "$game_id" ]; then
+                            # Title was extracted from metadata, already handled above
+                            :
+                        elif [ -n "$title" ]; then
+                            # Check if the title (which might be just the game_id) is in predictions
+                            prediction_status=$(python3 scripts/check_predictions_status.py "$title" 2>/dev/null || echo "NOT_IN_PREDICTIONS")
+                            if [ "$prediction_status" = "SHOW_GAME" ]; then
+                                hide="no"
+                                echo "     🔍 Overriding hide setting for prediction game without metadata: $title (hide: $hide)" >> "$temp_dir/debug.log"
+                            fi
                         fi
 
                         # Check if the game should be marked as new by date

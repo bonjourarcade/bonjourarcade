@@ -959,8 +959,8 @@
             submenu.appendChild(nextGameBtn);
             document.body.appendChild(submenu);
             
-            // Toggle submenu on timer button click/touch
-            const toggleSubmenu = () => {
+            // Toggle submenu on timer button click
+            timerBtn.addEventListener('click', () => {
                 const isVisible = submenu.style.display === 'flex';
                 submenu.style.display = isVisible ? 'none' : 'flex';
                 
@@ -968,19 +968,16 @@
                 if (!isVisible) {
                     setTimeout(() => {
                         document.addEventListener('click', closeSubmenu);
-                        document.addEventListener('touchend', closeSubmenu);
+                        document.addEventListener('touchstart', closeSubmenu);
                     }, 100);
                 }
-            };
-            
-            timerBtn.addEventListener('click', toggleSubmenu);
-            timerBtn.addEventListener('touchend', toggleSubmenu);
+            });
             
             function closeSubmenu(e) {
                 if (!submenu.contains(e.target) && !timerBtn.contains(e.target)) {
                     submenu.style.display = 'none';
                     document.removeEventListener('click', closeSubmenu);
-                    document.removeEventListener('touchend', closeSubmenu);
+                    document.removeEventListener('touchstart', closeSubmenu);
                 }
             }
             
@@ -1127,8 +1124,8 @@
             submenu.appendChild(nextGameBtn);
             document.body.appendChild(submenu);
             
-            // Toggle submenu on timer button click/touch
-            const toggleSubmenu = () => {
+            // Toggle submenu on timer button click
+            timerBtn.addEventListener('click', () => {
                 const isVisible = submenu.style.display === 'flex';
                 submenu.style.display = isVisible ? 'none' : 'flex';
                 
@@ -1136,19 +1133,16 @@
                 if (!isVisible) {
                     setTimeout(() => {
                         document.addEventListener('click', closeSubmenu);
-                        document.addEventListener('touchend', closeSubmenu);
+                        document.addEventListener('touchstart', closeSubmenu);
                     }, 100);
                 }
-            };
-            
-            timerBtn.addEventListener('click', toggleSubmenu);
-            timerBtn.addEventListener('touchend', toggleSubmenu);
+            });
             
             function closeSubmenu(e) {
                 if (!submenu.contains(e.target) && !timerBtn.contains(e.target)) {
                     submenu.style.display = 'none';
                     document.removeEventListener('click', closeSubmenu);
-                    document.removeEventListener('touchend', closeSubmenu);
+                    document.removeEventListener('touchstart', closeSubmenu);
                 }
             }
             

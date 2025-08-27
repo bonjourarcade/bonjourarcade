@@ -198,25 +198,8 @@
             }, 10000);
         }
 
-        // Reset timer on any user interaction
-        function resetAutoLaunchTimer() {
-            if (autoLaunchTimer) {
-                clearTimeout(autoLaunchTimer);
-                clearInterval(loadingInterval);
-                progress = 0;
-                document.querySelector('.loading-progress').style.width = '0%';
-                startAutoLaunchTimer();
-            }
-        }
-
         // Start the auto-launch timer
         startAutoLaunchTimer();
-
-        // Reset timer on user interaction
-        document.addEventListener('click', resetAutoLaunchTimer);
-        document.addEventListener('touchstart', resetAutoLaunchTimer);
-        document.addEventListener('keydown', resetAutoLaunchTimer);
-        document.addEventListener('mousemove', resetAutoLaunchTimer);
     </script>
 </body>
 </html>

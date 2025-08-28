@@ -10,8 +10,6 @@ controls:
   - 3️⃣  Grenade
 
 to_start: Insert Coin -> Start
-#recommended: 
-
 
 added: 2025-08-01
 enable_score: true

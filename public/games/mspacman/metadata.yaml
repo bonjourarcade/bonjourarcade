@@ -8,7 +8,6 @@ genre: Puzzle, Action
 #  - 2️⃣  Bombe
 
 to_start: Insert Coin -> Start
-#recommended: 
 
 added: 2025-07-31
 enable_score: true

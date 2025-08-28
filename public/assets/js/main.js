@@ -63,7 +63,6 @@ function showTooltipForItem(item) {
         { label: 'Année', key: 'year' },
         { label: 'Système', key: 'system', value: systemName },
         { label: 'Genre', key: 'genre' },
-        { label: 'Recommandé par', key: 'recommended' },
         { label: 'Ajouté', key: 'added' }
     ];
     let hasData = false;

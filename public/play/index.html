@@ -755,12 +755,11 @@
                     if (helpButton) helpButton.style.display = 'none';
                 }
                 
-                // --- Show help button only on desktop and not in screensaver mode ---
+                // --- Show help button on desktop (both normal and screensaver mode) ---
                 const helpButton = document.getElementById('help-button');
                 if (helpButton) {
-                    const isScreensaverMode = sessionStorage.getItem('screensaverMode') === 'true';
                     const isMobile = isMobileDevice();
-                    if (isScreensaverMode || isMobile) {
+                    if (isMobile) {
                         helpButton.style.display = 'none';
                     } else {
                         helpButton.style.display = 'flex';
@@ -928,12 +927,13 @@
             if (isScreensaverMode) {
                 console.log('Screensaver mode activated');
                 
-                // Set up automatic refresh every 2.5 minutes
+                // Set up automatic refresh based on configured interval
+                const configuredInterval = parseInt(sessionStorage.getItem('screensaverInterval')) || 150000; // Default to 150 seconds (2.5 minutes)
                 const refreshInterval = setInterval(() => {
                     console.log('Screensaver mode: Refreshing to new random game');
                     // Redirect to randomgame to get a new random game
                     window.location.href = '/randomgame/';
-                }, 2.5 * 60 * 1000); // 2.5 minutes
+                }, configuredInterval);
                 
                 // Store the interval ID so it can be cleared if needed
                 sessionStorage.setItem('screensaverRefreshInterval', refreshInterval);
@@ -979,12 +979,25 @@
                 z-index: 10000;
                 box-shadow: 0 6px 20px rgba(0,0,0,0.4);
                 cursor: pointer;
-                transition: all 0.2s ease;
+                transition: all 0.3s ease;
                 font-family: sans-serif;
                 backdrop-filter: blur(10px);
                 border: 1px solid rgba(255, 255, 255, 0.2);
                 min-width: 180px;
             `;
+            
+            // Add hover animation for mobile timer button
+            timerBtn.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateX(-50%) scale(1.1)';
+                this.style.boxShadow = '0 8px 25px rgba(0,0,0,0.6)';
+                this.style.background = 'rgba(0, 0, 0, 0.9)';
+            });
+            
+            timerBtn.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateX(-50%) scale(1)';
+                this.style.boxShadow = '0 6px 20px rgba(0,0,0,0.4)';
+                this.style.background = 'rgba(0, 0, 0, 0.7)';
+            });
             timerBtn.textContent = '⏰ Screensaver';
             document.body.appendChild(timerBtn);
             
@@ -1150,12 +1163,25 @@
                 z-index: 10000;
                 box-shadow: 0 4px 15px rgba(0,0,0,0.3);
                 cursor: pointer;
-                transition: all 0.2s ease;
+                transition: all 0.3s ease;
                 font-family: sans-serif;
                 backdrop-filter: blur(10px);
                 border: 1px solid rgba(255, 255, 255, 0.2);
                 min-width: 140px;
             `;
+            
+            // Add hover animation for desktop timer button
+            timerBtn.addEventListener('mouseenter', function() {
+                this.style.transform = 'scale(1.1)';
+                this.style.boxShadow = '0 6px 20px rgba(0,0,0,0.5)';
+                this.style.background = 'rgba(0, 0, 0, 0.95)';
+            });
+            
+            timerBtn.addEventListener('mouseleave', function() {
+                this.style.transform = 'scale(1)';
+                this.style.boxShadow = '0 4px 15px rgba(0,0,0,0.3)';
+                this.style.background = 'rgba(0, 0, 0, 0.8)';
+            });
             timerBtn.textContent = '⏰ Screensaver';
             document.body.appendChild(timerBtn);
             

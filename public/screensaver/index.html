@@ -256,7 +256,7 @@
             <p>The screensaver will automatically load random games at your configured interval, creating an endless arcade experience. Perfect for parties, waiting rooms, or just discovering new games!</p>
             
             <div class="loading-container">
-                <div class="loading-text">Launching screensaver...</div>
+                <div class="loading-text">Auto-launching in 2 minutes...</div>
                 <div class="loading-bar">
                     <div class="loading-progress"></div>
                 </div>
@@ -271,7 +271,7 @@
         function updateLoadingBar() {
             const progressElement = document.querySelector('.loading-progress');
             if (progress < 100) {
-                progress += 10; // Increment by 10% every second (10 seconds total)
+                progress += 0.833; // Increment by ~0.833% every second (120 seconds total)
                 progressElement.style.width = progress + '%';
             }
         }
@@ -303,18 +303,18 @@
             window.location.href = '/randomgame/';
         }
 
-        // Auto-launch after 10 seconds if no interaction
+        // Auto-launch after 2 minutes if no interaction
         let autoLaunchTimer;
         
         function startAutoLaunchTimer() {
             // Start loading bar animation
             loadingInterval = setInterval(updateLoadingBar, 1000);
             
-            // Auto-launch after 10 seconds
+            // Auto-launch after 2 minutes (120 seconds)
             autoLaunchTimer = setTimeout(() => {
                 clearInterval(loadingInterval);
                 launchScreensaver();
-            }, 10000);
+            }, 120000);
         }
 
         // Start the auto-launch timer

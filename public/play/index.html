@@ -929,6 +929,7 @@
                 
                 // Set up automatic refresh based on configured interval
                 const configuredInterval = parseInt(sessionStorage.getItem('screensaverInterval')) || 150000; // Default to 150 seconds (2.5 minutes)
+                console.log('Screensaver mode: Using configured interval of', configuredInterval, 'ms (', Math.round(configuredInterval/1000), 'seconds)');
                 const refreshInterval = setInterval(() => {
                     console.log('Screensaver mode: Refreshing to new random game');
                     // Redirect to randomgame to get a new random game
@@ -1129,7 +1130,13 @@
                 const now = Date.now();
                 const startTime = parseInt(sessionStorage.getItem('screensaverStartTime') || '0');
                 const elapsed = now - startTime;
-                const remaining = (2.5 * 60 * 1000) - elapsed;
+                const configuredInterval = parseInt(sessionStorage.getItem('screensaverInterval')) || 150000; // Default to 150 seconds
+                const remaining = configuredInterval - elapsed;
+                
+                // Debug logging (only log every 10 seconds to avoid spam)
+                if (Math.floor(remaining / 10000) !== Math.floor((remaining + 1000) / 10000)) {
+                    console.log('Screensaver countdown: remaining', Math.round(remaining/1000), 'seconds, configured interval:', Math.round(configuredInterval/1000), 'seconds');
+                }
                 
                 if (remaining <= 0) {
                     timerBtn.textContent = '⏰ Refreshing...';
@@ -1307,7 +1314,13 @@
                 const now = Date.now();
                 const startTime = parseInt(sessionStorage.getItem('screensaverStartTime') || '0');
                 const elapsed = now - startTime;
-                const remaining = (2.5 * 60 * 1000) - elapsed;
+                const configuredInterval = parseInt(sessionStorage.getItem('screensaverInterval')) || 150000; // Default to 150 seconds
+                const remaining = configuredInterval - elapsed;
+                
+                // Debug logging (only log every 10 seconds to avoid spam)
+                if (Math.floor(remaining / 10000) !== Math.floor((remaining + 1000) / 10000)) {
+                    console.log('Screensaver countdown: remaining', Math.round(remaining/1000), 'seconds, configured interval:', Math.round(configuredInterval/1000), 'seconds');
+                }
                 
                 if (remaining <= 0) {
                     timerBtn.textContent = '⏰ Refreshing...';

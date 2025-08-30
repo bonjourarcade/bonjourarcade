@@ -8,6 +8,11 @@ to subscribers using ConvertKit API and to one or more webhooks (e.g., Google Ch
 The announcement message is automatically read from the game's metadata.yaml file
 under the 'announcement_message' field. You can also override it with --custom-message.
 
+The script requires the game's metadata.yaml to contain:
+- announcement_message: Description of the game for the newsletter
+- controls: Array of control instructions for the game
+- to_start: Instructions on how to start the game
+
 Requirements:
 - requests library: pip install requests
 - ConvertKit account and API credentials
@@ -398,6 +403,38 @@ class NewsletterSender:
         try:
             with open(meta_path, 'r') as f:
                 meta = yaml.safe_load(f)
+            
+            # Validate required fields
+            missing_fields = []
+            if not meta.get('controls'):
+                missing_fields.append('controls')
+            if not meta.get('to_start'):
+                missing_fields.append('to_start')
+            
+            if missing_fields:
+                print(f"❌ ERROR: Game of the week metadata is missing required fields: {', '.join(missing_fields)}")
+                print(f"📁 File: {meta_path}")
+                print("📝 These fields are required for the newsletter to be sent:")
+                if 'controls' in missing_fields:
+                    print("   - controls: Array of control instructions for the game")
+                if 'to_start' in missing_fields:
+                    print("   - to_start: Instructions on how to start the game")
+                print("\n🛑 Aborting newsletter send to allow you to add the missing fields.")
+                print("\n💡 Example of what to add to metadata.yaml:")
+                if 'controls' in missing_fields:
+                    print("   controls:")
+                    print("     - '🕹️ Use arrow keys to move'")
+                    print("     - '🔴 Press SPACE to jump'")
+                if 'to_start' in missing_fields:
+                    print("   to_start: 'Press START or click the play button to begin'")
+                print(f"\n📋 Current metadata structure for {game_id}:")
+                for key, value in meta.items():
+                    if key in missing_fields:
+                        print(f"   {key}: [MISSING]")
+                    else:
+                        print(f"   {key}: {value}")
+                sys.exit(1)
+            
             return meta
         except FileNotFoundError:
             print(f"Error: Could not find metadata file for game {game_id}: {meta_path}")
@@ -407,6 +444,12 @@ class NewsletterSender:
             sys.exit(1)
     
     def create_email_content(self, game_id, meta, custom_message=None, last_week_highlight=None):
+        """
+        Create email content for the newsletter.
+        
+        Note: This method assumes that meta['controls'] and meta['to_start'] are present
+        and have values, as they are validated in read_game_metadata().
+        """
         from datetime import datetime
         import re
         cover_url = f'{BASE_URL}/games/{game_id}/cover.png'
@@ -776,11 +819,11 @@ def main():
         print('❌ Error: API secret is required. Set CONVERTKIT_API_SECRET environment variable.')
         sys.exit(1)
     
-    # EARLY VALIDATION: Check if we have an announcement message before any user interaction
+    # EARLY VALIDATION: Check if we have an announcement message and required metadata fields before any user interaction
     if not custom_message:
-        print("🔍 Checking game of the week announcement message...")
+        print("🔍 Checking game of the week metadata...")
         try:
-            # Create a temporary sender to check the announcement message
+            # Create a temporary sender to check the metadata
             temp_sender = NewsletterSender(
                 api_secret=api_secret,
                 api_url=args.mail_api_url,
@@ -789,10 +832,11 @@ def main():
                 week_seed=args.week_seed
             )
             
-            # Read game data and metadata to check announcement
+            # Read game data and metadata to check announcement and required fields
             game_id = temp_sender.read_game_of_the_week(args.week_seed)
             meta = temp_sender.read_game_metadata(game_id)
             
+            # Check announcement message
             announcement_message = meta.get('announcement_message', '')
             if not announcement_message.strip():
                 print("❌ ERROR: The announcement message for the game of the week is empty!")
@@ -809,15 +853,16 @@ def main():
                 print(f"\n📋 Current metadata structure for {game_id}:")
                 for key, value in meta.items():
                     if key == 'announcement_message':
-                        print(f"   {key}: {'[EMPTY]' if not value else value[:50] + '...' if len(str(value)) > 50 else value}")
+                        print(f"   {key}: {'[EMPTY]' if not value else value[:50] + '...' if len(str(value)) > 100 else value}")
                     else:
                         print(f"   {key}: {value}")
                 sys.exit(1)
             
             print(f"✅ Announcement message found: {announcement_message[:100]}{'...' if len(announcement_message) > 100 else ''}")
+            print("✅ Required metadata fields (controls, to_start) are present")
             
         except Exception as e:
-            print(f"⚠️  Warning: Could not validate announcement message early: {e}")
+            print(f"⚠️  Warning: Could not validate metadata early: {e}")
             print("   Will check again during the main process...")
     
     # Interactive webhook selection if no --webhook-label is provided

@@ -3,6 +3,10 @@
 
 image: alpine
 
+stages:
+  - deploy
+  - newsletter
+
 upload_to_gcs:
   stage: deploy
   image: google/cloud-sdk:latest
@@ -42,3 +46,24 @@ pages:
         - scripts/build_parallel.sh
         - scripts/generate_gamelist_parallel.sh
         - scripts/generate_thumbnails.sh
+
+send_newsletter:
+  stage: newsletter
+  image: python:3.9-alpine
+  before_script:
+    - apk update
+    - apk add --no-cache bash git
+    - pip install requests pyyaml questionary
+  script:
+    - echo "Starting automated newsletter send..."
+    - echo "Current time: $(date)"
+    - echo "Day of week: $(date +%A)"
+    - python3 scripts/send_newsletter.py --mail-only
+    - echo "Email sent successfully"
+    - python3 scripts/send_newsletter.py --webhook-only
+    - echo "Webhooks sent successfully"
+    - echo "Newsletter automation completed"
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+  variables:
+    CONVERTKIT_API_SECRET: $CONVERTKIT_API_SECRET

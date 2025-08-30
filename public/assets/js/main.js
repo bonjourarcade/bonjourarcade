@@ -471,6 +471,14 @@ function populateFeaturedGame(game) {
         contentContainer.appendChild(metaTable);
     }
 
+    // Add announcement message if present (after metadata)
+    if (game.announcement_message && game.announcement_message.trim()) {
+        const announcementDiv = document.createElement('div');
+        announcementDiv.className = 'game-announcement';
+        announcementDiv.textContent = game.announcement_message;
+        contentContainer.appendChild(announcementDiv);
+    }
+
     // Add mouse event listeners for featured game section (same as keyboard navigation)
     const featuredGameSection = document.getElementById('game-of-the-week');
     if (featuredGameSection) {

@@ -279,6 +279,7 @@ for i in $(seq 1 $BATCH_WORKERS); do
                                 problem=$(echo "$metadata_json" | jq -r '.problem // ""')
                                 controls_json=$(echo "$metadata_json" | jq -c '.controls // null')
                                 new_flag=$(echo "$metadata_json" | jq -r '.new // empty')
+                                announcement_message=$(echo "$metadata_json" | jq -r '.announcement_message // ""')
                                 
                                 # Check if game is in predictions and should override hide setting
                                 if [ -n "$title" ]; then
@@ -385,7 +386,8 @@ for i in $(seq 1 $BATCH_WORKERS); do
                             --argjson controls "$controls_json" \
                             --arg to_start "$to_start" \
                             --arg new_flag "$new_flag" \
-                            '{id: $id, title: $title, problem: $json_problem, developer: $developer, year: $year, genre: $genre, recommended: $recommended, added: $added, hide: $hide, coverArt: $coverArt, pageUrl: $pageUrl, core: $core, romPath: $romPath, saveState: $saveState, enable_score: $enable_score, controls: $controls, to_start: $to_start, new_flag: $new_flag}' 2>/dev/null || echo "{}")
+                            --arg announcement_message "$announcement_message" \
+                            '{id: $id, title: $title, problem: $json_problem, developer: $developer, year: $year, genre: $genre, recommended: $recommended, added: $added, hide: $hide, coverArt: $coverArt, pageUrl: $pageUrl, core: $core, romPath: $romPath, saveState: $saveState, enable_score: $enable_score, controls: $controls, to_start: $to_start, new_flag: $new_flag, announcement_message: $announcement_message}' 2>/dev/null || echo "{}")
 
                         # Only output valid JSON
                         if echo "$game_json" | jq -e . >/dev/null 2>&1; then

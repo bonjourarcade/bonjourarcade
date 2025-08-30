@@ -56,8 +56,8 @@ send_newsletter:
     - pip install requests pyyaml questionary
   script:
     - echo "Starting automated newsletter send..."
-    - echo "Current time: $(date)"
-    - echo "Day of week: $(date +%A)"
+    - echo "Current time = $(date)"
+    - echo "Day of week = $(date +%A)"
     - python3 scripts/send_newsletter.py --mail-only
     - echo "Email sent successfully"
     - python3 scripts/send_newsletter.py --webhook-only

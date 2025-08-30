@@ -433,21 +433,26 @@ function populateFeaturedGame(game) {
     // Add metadata fields if present (as a table)
     const metaTable = document.createElement('table');
     metaTable.className = 'game-meta-table';
+    
+    // Get system name from core field
+    const systemName = getSystemName(game.core);
+    
     const fields = [
-        { label: 'Title', key: 'title' },
-        { label: 'Developer', key: 'developer' },
-        { label: 'Year', key: 'year' },
-        { label: 'System', key: 'system' },
+        { label: 'Titre', key: 'title' },
+        { label: 'Développeur', key: 'developer' },
+        { label: 'Année', key: 'year' },
+        { label: 'Système', key: 'system', value: systemName },
         { label: 'Genre', key: 'genre' }
     ];
     fields.forEach(field => {
-        if (game[field.key]) {
+        let value = field.value !== undefined ? field.value : game[field.key];
+        if (value) {
             const row = document.createElement('tr');
             const labelCell = document.createElement('td');
             labelCell.innerHTML = `<strong>${field.label}:</strong>`;
             labelCell.className = 'meta-label';
             const valueCell = document.createElement('td');
-            valueCell.textContent = game[field.key];
+            valueCell.textContent = value;
             valueCell.className = 'meta-value';
             row.appendChild(labelCell);
             row.appendChild(valueCell);

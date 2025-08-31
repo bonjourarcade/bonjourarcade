@@ -4,6 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Loading Game...</title>
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Loading Game...">
+    <meta property="og:description" content="Loading Game...">
+    <meta property="og:image" content="">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="Loading Game...">
+    <meta property="twitter:description" content="Loading Game...">
+    <meta property="twitter:image" content="">
     <link rel="stylesheet" href="../assets/css/style.css">
     <style>
         /* Reset all elements to prevent overflow */
@@ -450,6 +462,19 @@
         function isMobileDevice() {
             return /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         }
+        
+        /**
+         * Helper function to update meta tags
+         * @param {string} property - The meta tag property to update
+         * @param {string} content - The new content value
+         */
+        function updateMetaTag(property, content) {
+            const metaTag = document.querySelector(`meta[property="${property}"]`) || 
+                           document.querySelector(`meta[name="${property}"]`);
+            if (metaTag) {
+                metaTag.setAttribute('content', content);
+            }
+        }
         // Summarize controls (same logic as main menu/newsletter)
         function summarizeControls(controls) {
             if (!controls || !Array.isArray(controls)) return '';
@@ -771,8 +796,19 @@
                      throw new Error(`Required files (ROM or Core info) for game '${selectedGame.title || gameId}' are missing according to gamelist.json.`);
                 }
 
-                // Step 5: Set the Page Title
-                document.title = selectedGame.title || gameId; // Use game title or fallback to ID
+                // Step 5.5: Update meta tags for proper link previews
+                const gameTitle = selectedGame.title || gameId;
+                
+                // Update page title and meta tags
+                document.title = `Play ${gameTitle}`;
+                updateMetaTag('og:title', `Play ${gameTitle}`);
+                updateMetaTag('twitter:title', `Play ${gameTitle}`);
+                
+                // Update image to use relative path
+                if (selectedGame.coverArt) {
+                    updateMetaTag('og:image', selectedGame.coverArt);
+                    updateMetaTag('twitter:image', selectedGame.coverArt);
+                }
                 // Show controls overlay (desktop only)
                 const controlsOverlay = document.getElementById('controls-overlay');
                 if (controlsOverlay) {

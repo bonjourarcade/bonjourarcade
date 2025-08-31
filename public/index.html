@@ -7,17 +7,17 @@
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://bonjourarcade.com/">
+    <meta property="og:url" content="">
     <meta property="og:title" content="BonjourArcade - Jeu de la semaine">
     <meta property="og:description" content="Chargement...">
-    <meta property="og:image" content="https://bonjourarcade.com/assets/images/bonjourarcade-logo.png">
+    <meta property="og:image" content="">
     
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://bonjourarcade.com/">
+    <meta property="twitter:url" content="">
     <meta property="twitter:title" content="BonjourArcade - Jeu de la semaine">
     <meta property="twitter:description" content="Chargement...">
-    <meta property="twitter:image" content="https://bonjourarcade.com/assets/images/bonjourarcade-logo.png">
+    <meta property="twitter:image" content="">
     
     <link rel="stylesheet" href="assets/css/style.css">
     <style>
@@ -59,7 +59,7 @@
                 <img src="assets/images/bonjourarcade-logo.png" alt="BonjourArcade Logo" class="header-logo">
                 <div class="header-actions">
                     <a target="_blank" id="leaderboard-link"
-                      href="https://felx.cc/leaderboard">Classements</a>
+                      href="/leaderboard">Classements</a>
                     <img src="assets/images/my_app_qr.png" alt="QR Code" class="static-qr-code">
                 </div>
                 <div style="position: relative;">
@@ -245,6 +245,36 @@
       });
     })();
     </script>
+    
+    <script>
+    // Initialize meta tags with current domain
+    document.addEventListener('DOMContentLoaded', function() {
+        const currentDomain = window.location.origin;
+        const currentUrl = window.location.href;
+        
+        // Update Open Graph meta tags
+        updateMetaTag('og:url', currentUrl);
+        updateMetaTag('og:image', `${currentDomain}/assets/images/bonjourarcade-logo.png`);
+        
+        // Update Twitter meta tags
+        updateMetaTag('twitter:url', currentUrl);
+        updateMetaTag('twitter:image', `${currentDomain}/assets/images/bonjourarcade-logo.png`);
+    });
+    
+    /**
+     * Helper function to update meta tags
+     * @param {string} property - The meta tag property to update
+     * @param {string} content - The new content value
+     */
+    function updateMetaTag(property, content) {
+        const metaTag = document.querySelector(`meta[property="${property}"]`) || 
+                       document.querySelector(`meta[name="${property}"]`);
+        if (metaTag) {
+            metaTag.setAttribute('content', content);
+        }
+    }
+    </script>
+    
     <div id="screensaver-overlay" class="screensaver-overlay">
         <img id="screensaver-image" class="screensaver-image" src="" alt="Screensaver Image">
         <img id="screensaver-logo" class="screensaver-logo" src="" alt="BonjourArcade Logo">

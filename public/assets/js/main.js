@@ -561,14 +561,14 @@ function updateSocialMediaMetaTags(game) {
     updateMetaTag('og:title', `BonjourArcade - ${displayTitle}`);
     updateMetaTag('og:description', description);
     if (game.coverArt) {
-        updateMetaTag('og:image', `https://bonjourarcade.com${game.coverArt}`);
+        updateMetaTag('og:image', `${window.location.origin}${game.coverArt}`);
     }
 
     // Update Twitter meta tags
     updateMetaTag('twitter:title', `BonjourArcade - ${displayTitle}`);
     updateMetaTag('twitter:description', description);
     if (game.coverArt) {
-        updateMetaTag('twitter:image', `https://bonjourarcade.com${game.coverArt}`);
+        updateMetaTag('twitter:image', `${window.location.origin}${game.coverArt}`);
     }
 }
 

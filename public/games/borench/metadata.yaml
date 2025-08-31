@@ -10,5 +10,5 @@ genre: Puzzle
 #to_start: Insert Coin -> Start
 
 hide: yes
-
+enable_score: true
 added: 2025-08-02

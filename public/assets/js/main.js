@@ -122,6 +122,18 @@ function removeTooltip() {
     if (tooltip) tooltip.remove();
 }
 
+/**
+ * Removes accents from text to enable accent-insensitive search
+ * @param {string} text - The text to remove accents from
+ * @returns {string} - The text with accents removed
+ */
+function removeAccents(text) {
+    if (!text) return '';
+    return text.normalize('NFD')
+               .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
+               .toLowerCase();
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     // This function starts the process when the HTML page is fully loaded
     fetchGameData();
@@ -203,23 +215,24 @@ async function fetchGameData() {
                     document.body.classList.remove('search-active');
                 }
 
-                // Check for exact id match (case-insensitive, full match only)
-                const exactMatch = window.allGamesData.find(game => game.id && game.id.toLowerCase() === searchTerm);
+                // Check for exact id match (case-insensitive and accent-insensitive, full match only)
+                const exactMatch = window.allGamesData.find(game => game.id && removeAccents(game.id) === removeAccents(searchTerm));
                 let filteredGames;
-                if (exactMatch && searchTerm.length > 0 && searchTerm === exactMatch.id.toLowerCase()) {
+                if (exactMatch && searchTerm.length > 0 && removeAccents(searchTerm) === removeAccents(exactMatch.id)) {
                     // Show only the exact match, even if hidden
                     filteredGames = [exactMatch];
                 } else {
-                    // Normal filtering (by title, only visible games)
-                    filteredGames = window.allGamesData.filter(game => {
-                        // Only match visible games for substring search
-                        if (game.hide === true || game.hide === 'yes') return false;
-                        let displayTitle = game.title;
-                        if (!displayTitle || displayTitle === game.id) {
-                            displayTitle = capitalizeFirst(game.id);
-                        }
-                        return displayTitle.toLowerCase().includes(searchTerm);
-                    });
+                                    // Normal filtering (by title, only visible games)
+                filteredGames = window.allGamesData.filter(game => {
+                    // Only match visible games for substring search
+                    if (game.hide === true || game.hide === 'yes') return false;
+                    let displayTitle = game.title;
+                    if (!displayTitle || displayTitle === game.id) {
+                        displayTitle = capitalizeFirst(game.id);
+                    }
+                    // Use accent-insensitive search
+                    return removeAccents(displayTitle).includes(removeAccents(searchTerm));
+                });
                 }
                 populatePreviousGames(filteredGames);
 
@@ -270,8 +283,8 @@ async function fetchGameData() {
                 
                 if (searchInput && searchInput.value.trim()) {
                     const searchTerm = searchInput.value.toLowerCase();
-                    // Check for exact id match first
-                    const exactMatch = visibleGames.find(game => game.id && game.id.toLowerCase() === searchTerm);
+                    // Check for exact id match first (accent-insensitive)
+                    const exactMatch = visibleGames.find(game => game.id && removeAccents(game.id) === removeAccents(searchTerm));
                     if (exactMatch) {
                         // If exact match exists, just go to that game
                         window.location.href = exactMatch.pageUrl;
@@ -284,7 +297,8 @@ async function fetchGameData() {
                         if (!displayTitle || displayTitle === game.id) {
                             displayTitle = capitalizeFirst(game.id);
                         }
-                        return displayTitle.toLowerCase().includes(searchTerm);
+                        // Use accent-insensitive search
+                        return removeAccents(displayTitle).includes(removeAccents(searchTerm));
                     });
                 }
                 
@@ -310,8 +324,8 @@ async function fetchGameData() {
                     
                     if (searchInput && searchInput.value.trim()) {
                         const searchTerm = searchInput.value.toLowerCase();
-                        // Check for exact id match first
-                        const exactMatch = visibleGames.find(game => game.id && game.id.toLowerCase() === searchTerm);
+                        // Check for exact id match first (accent-insensitive)
+                        const exactMatch = visibleGames.find(game => game.id && removeAccents(game.id) === removeAccents(searchTerm));
                         if (exactMatch) {
                             infoText.textContent = `Respecte votre recherche actuelle (1 jeu exact)`;
                             return;
@@ -323,7 +337,8 @@ async function fetchGameData() {
                             if (!displayTitle || displayTitle === game.id) {
                                 displayTitle = capitalizeFirst(game.id);
                             }
-                            return displayTitle.toLowerCase().includes(searchTerm);
+                            // Use accent-insensitive search
+                            return removeAccents(displayTitle).includes(removeAccents(searchTerm));
                         });
                         
                         infoText.textContent = `Respecte votre recherche actuelle (${gamesToRandomizeFrom.length}/${visibleGames.length} jeux)`;

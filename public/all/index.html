@@ -662,6 +662,14 @@
             }
         }
 
+        // Utility function to remove accents from text
+        function removeAccents(text) {
+            if (!text) return '';
+            return text.normalize('NFD')
+                       .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
+                       .toLowerCase();
+        }
+
         // Search functionality
         function filterGames(searchTerm) {
             if (!searchTerm) {
@@ -682,7 +690,8 @@
                 if (searchType === 'title') {
                     // Search only by title
                     let displayTitle = getDisplayTitle(game);
-                    return displayTitle.toLowerCase().includes(term);
+                    // Use accent-insensitive search
+                    return removeAccents(displayTitle).includes(removeAccents(term));
                 } else if (searchType === 'genre') {
                     // Search only by genre (exact match from dropdown, case insensitive)
                     // Check if any of the comma-separated genres match

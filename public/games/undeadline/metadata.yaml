@@ -1,6 +1,10 @@
-title: Undead Line
+title: UndeadLine
 developer: T&E Soft
 year: 1991
 genre: Shooter
-#added: 
 hide: yes
+controls:
+  - 🕹️ Déplacer
+  - 1️⃣  Boule piquante
+  - 2️⃣  Tirer
+  - 3️⃣  Bouclier

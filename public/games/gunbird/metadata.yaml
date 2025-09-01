@@ -3,9 +3,9 @@ developer: Psikyo
 year: 1994
 genre: Shooter
 #controls:
-#  - 🕹️ Déplacer
-#  - 1️⃣  Tirer
-#  - 2️⃣  Bombe
+  - 🕹️ Déplacer
+  - 1️⃣  Tirer/Charger
+  - 2️⃣  Bombe
 
 #to_start: Insert Coin -> Start
 
@@ -13,7 +13,7 @@ genre: Shooter
 # Ce message apparaîtra en haut de l'email et des webhooks
 announcement_message: 
 
-enable_score: false
+enable_score: true
 hide: yes
 
 added: 2025-08-24

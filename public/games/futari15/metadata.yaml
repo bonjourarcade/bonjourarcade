@@ -2,14 +2,16 @@ title: Mushihimesama Futari
 developer: CAVE
 year: 2006
 genre: Shooter
-#controls:
-#  - 🕹️ Déplacer
-#  - 1️⃣  Tirer
-#  - 2️⃣  Bombe
+controls:
+  - 🕹️ Déplacer
+  - 1️⃣  Tirer (Focus)
+  - 2️⃣  Bombe
+  - 3️⃣  Tirer (Auto)
 
-#to_start: Insert Coin -> Start
+to_start: Insert Coin -> Start
 
-enable_score: false
+enable_score: true
 hide: yes
 
 added: 2025-07-31
+announcement_message: "Plongez dans l'univers envoûtant de Mushihimesama Futari, un chef-d'œuvre de CAVE sorti en 2006 qui redéfinit le genre des shooters ! Armés de votre vaisseau insecto-entreprenant, vous devrez surmonter des hordes d'ennemis tout en découvrant un monde visuellement époustouflant rempli de créatures fascinantes et de paysages féeriques. Grâce à son système de scoring unique et ses mécaniques de jeu audacieuses, chaque partie vous promet un défi exaltant qui ne manquera pas de vous captiver !"

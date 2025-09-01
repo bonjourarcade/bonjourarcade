@@ -2,14 +2,16 @@ title: Thunder Force IV
 developer: TechnoSoft
 year: 1992
 genre: Shooter
-#controls:
-#  - 🕹️ Déplacer
-#  - 1️⃣  Tirer
-#  - 2️⃣  Bombe
+controls:
+  - 🕹️ Déplacer
+  - 1️⃣  Ajuster Vitesse
+  - 2️⃣  Tirer
+  - 3️⃣ Choix arme
 
-#to_start: Insert Coin -> Start
+to_start: Start
 
-enable_score: false
+enable_score: true
 hide: yes
 
 added: 2025-07-27
+announcement_message: "Préparez-vous à vivre une aventure spatiale explosive avec Thunder Force IV, le chef-d'œuvre de TechnoSoft sorti en 1992 ! Ce shooter intense vous plonge dans des niveaux éblouissants où vous contrôlez le vaisseau avancé "Dio" pour combattre des hordes d'ennemis et des boss gigantesques à travers des graphismes époustouflants et une bande-son mémorable. Avec son système de "Weapon Select" qui vous permet de personnaliser votre arsenal à chaque instant, chaque partie est une nouvelle expérience palpitante qui vous tiendra en haleine !"

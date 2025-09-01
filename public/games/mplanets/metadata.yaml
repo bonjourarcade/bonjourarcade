@@ -4,5 +4,9 @@ year: 1983
 genre: Shooter
 #added: 
 hide: yes
+enable_score: true
 added: 2025-07-27
+controls:
+  - 🕹️ Déplacer
+  - 1️⃣  Pew!
 announcement_message: "Préparez-vous à plonger dans l'univers intergalactique de Mad Planets, un shooter captivant de Gottlieb sorti en 1983 qui vous fera vivre une expérience incroyable ! Dans ce jeu unique, vous devez détruire des planètes menaçantes tout en évitant leurs projectiles, le tout dans un environnement dynamique où chaque tir compte et où la stratégie est essentielle. Avec son design coloré et son gameplay addictif, Mad Planets vous promet des heures de fun et de défis en mode arcade !"

@@ -2,14 +2,15 @@ title: Raiden II
 developer: Seibu Kaihatsu
 year: 1993
 genre: Shooter
-#controls:
-#  - 🕹️ Déplacer
-#  - 1️⃣  Tirer
-#  - 2️⃣  Bombe
+controls:
+  - 🕹️ Déplacer
+  - 1️⃣  Tirer
+  - 2️⃣  Bombe
 
-#to_start: Insert Coin -> Start
+to_start: Insert Coin -> Start
 
-enable_score: false
+enable_score: true
 hide: yes
 
 added: 2025-07-31
+announcement_message: "Préparez-vous à vivre une expérience palpitante avec Raiden II, le shooter légendaire de Seibu Kaihatsu sorti en 1993 ! Dans ce jeu, vous prenez les commandes d'un vaisseau spatial surarmé, prêt à affronter des vagues d'ennemis et des boss titanesques, tout en profitant d'une bande-son entraînante qui vous plongera dans l'action. Ce qui rend Raiden II unique, c'est son système de power-ups stratégiques et ses mécanismes de tir innovants qui vous permettent d'adapter votre style de jeu pour devenir le héros du ciel !"

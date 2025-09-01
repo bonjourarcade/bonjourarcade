@@ -2,16 +2,16 @@ title: Mikie
 developer: Konami
 year: 1984
 genre: Action
-#controls:
-#  - 🕹️ Déplacer
-#  - 1️⃣  Tirer
-#  - 2️⃣  Bombe
+controls:
+  - 🕹️ Déplacer/Pousser
+  - 1️⃣  Ouvrir porte
+  - 2️⃣  Coup de tête
 
-#to_start: Insert Coin -> Start
+to_start: Insert Coin -> Start
 
 announcement_message: 
 
-enable_score: false
+enable_score: true
 hide: yes
 
 added: 2025-08-17

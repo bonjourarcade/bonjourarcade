@@ -3,18 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Loading Game...</title>
+    <title>Play now!</title>
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:title" content="Loading Game...">
-    <meta property="og:description" content="Loading Game...">
+    <meta property="og:title" content="Play now!">
+    <meta property="og:description" content="Play now!">
     <meta property="og:image" content="">
     
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:title" content="Loading Game...">
-    <meta property="twitter:description" content="Loading Game...">
+    <meta property="twitter:title" content="Play now!">
+    <meta property="twitter:description" content="Play now!">
     <meta property="twitter:image" content="">
     <link rel="stylesheet" href="../assets/css/style.css">
     <style>
@@ -800,9 +800,8 @@
                 const gameTitle = selectedGame.title || gameId;
                 
                 // Update page title and meta tags
-                document.title = `Play ${gameTitle}`;
-                updateMetaTag('og:title', `Play ${gameTitle}`);
-                updateMetaTag('twitter:title', `Play ${gameTitle}`);
+                updateMetaTag('og:title', `Play now! ${gameTitle}`);
+                updateMetaTag('twitter:title', `Play now! ${gameTitle}`);
                 
                 // Update image to use relative path
                 if (selectedGame.coverArt) {

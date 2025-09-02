@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Play now!</title>
+    <title>BonjourArcade</title>
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
@@ -798,6 +798,8 @@
 
                 // Step 5.5: Update meta tags for proper link previews
                 const gameTitle = selectedGame.title || gameId;
+                // Update page title to game's full title
+                document.title = gameTitle;
                 
                 // Update page title and meta tags
                 updateMetaTag('og:title', `Play now! ${gameTitle}`);

@@ -42,6 +42,7 @@ pages:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       changes: 
         - public/**/*
+        - roms/**/*
         - plinko-gamelist.txt
         - scripts/build_parallel.sh
         - scripts/generate_gamelist_parallel.sh

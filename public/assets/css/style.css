@@ -52,12 +52,14 @@ body.theme-light {
     --background: #fff;
     --text-color: #222;
     --footer-bg: #f4f4f4;
+    --divider-color: #ddd;
     color: var(--text-color);
 }
 body.theme-dark {
     --background: #181a1b;
     --text-color: #f4f4f4;
     --footer-bg: #222;
+    --divider-color: #555;
     color: var(--text-color);
 }
 .browser-warning {
@@ -142,18 +144,18 @@ body.theme-dark {
     max-width: 100%;
     max-height: 60vh;
     height: auto;
-    margin: 0 auto 15px auto;
+    margin: 0px auto 0px auto;
     display: block;
 }
 
 #featured-game-title, .featured-title, .game-meta-table {
-    margin-bottom: 0;
+    margin-bottom: 10px;
 }
 
 .featured-section h2 {
     margin-top: 0;
     margin-bottom: 15px;
-    border-bottom: 2px solid #eee;
+    border-bottom: 2px solid var(--divider-color);
     padding-bottom: 10px;
 }
 
@@ -213,8 +215,10 @@ body.theme-dark {
 
 .featured-title {
     font-weight: bold;
-    margin-top: 15px;
-    font-size: 1.1em;
+    margin-top: 8px;
+    margin-bottom: 16px;
+    font-size: 2em;
+    text-align: center;
 }
 
 /* Previous Games Section (Right Column / Grid) */
@@ -229,7 +233,7 @@ body.theme-dark {
 .grid-section h2 {
      margin-top: 0;
      margin-bottom: 15px;
-     border-bottom: 2px solid #eee;
+     border-bottom: 2px solid var(--divider-color);
      padding-bottom: 10px;
 }
 

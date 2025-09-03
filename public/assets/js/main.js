@@ -453,7 +453,6 @@ function populateFeaturedGame(game) {
     const systemName = getSystemName(game.core);
     
     const fields = [
-        { label: 'Titre', key: 'title' },
         { label: 'Développeur', key: 'developer' },
         { label: 'Année', key: 'year' },
         { label: 'Système', key: 'system', value: systemName },

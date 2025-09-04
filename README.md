@@ -1,49 +1,48 @@
 # BonjourArcade
 
-Thank you for playing! :)
+Merci de jouer ! :)
 
-- **Game of the Week**: Automatically selected each week using the plinko system
-- `metadata.yaml`: Template metadata file that could go in
+- **Jeu de la semaine** : sélectionné automatiquement chaque semaine via le système Plinko
+- `metadata.yaml` : fichier modèle de métadonnées à placer dans
   `public/games/<game_id>/`
 
-# For adding a new game:
+# Ajouter un nouveau jeu
 
-1. Add the ROM to the correct `roms/<system>` folder.
+1. Ajoutez la ROM dans le bon dossier `roms/<system>`.
 
-That's it! When you push your change to the main branch, the CI/CD
-pipeline will pick it up and expose an endpoint that should match your
-ID. For example, `https://bonjourarcade-abcdefgh.gitlab.io/<game_id>`.
+C’est tout ! Quand vous poussez votre changement sur la branche principale, le
+pipeline CI/CD le prendra en charge et exposera un endpoint correspondant à
+votre ID. Par exemple : `https://bonjourarcade-abcdefgh.gitlab.io/<game_id>`.
 
-# How to make the game appear on your website's home page
+# Faire apparaître le jeu sur la page d’accueil du site
 
-1. Create a `public/games/<game_id>` folder, where the `game_id` is
-   the same value as the basename of your ROM.
-    - For example, if you add `roms/NES/gauntlet.nes`, you will
-      want a `public/games/gauntlet` folder to include metadata.
-1. Then, populate the metadata. See the section below for
-   more details.
+1. Créez un dossier `public/games/<game_id>`, où `game_id` est le même nom que
+   la base du fichier de votre ROM.
+   - Exemple : si vous ajoutez `roms/NES/gauntlet.nes`, vous voudrez un dossier
+     `public/games/gauntlet` pour y inclure les métadonnées.
+2. Remplissez ensuite les métadonnées. Voir la section ci‑dessous pour plus de
+   détails.
 
-## Creating metadata
+## Créer les métadonnées
 
-In `public/games/game_id`, two metadata files are supported:
-- `cover.png`, for the game cover image
-- `metadata.yaml`, which follows the [template](metadata.yaml)
+Dans `public/games/<game_id>`, deux fichiers de métadonnées sont pris en charge :
+- `cover.png` pour l’image de couverture du jeu
+- `metadata.yaml` qui suit le [modèle](metadata.yaml)
 
-# Setting controls for a system
+# Définir les contrôles pour un système
 
-You can do this in [public/config](public/config/), look for the
-`controls_*.json` files. Follow [this documentation from
-EmulatorJS](https://emulatorjs.org/docs4devs/control-mapping).
+Cela se fait dans [`public/config`](public/config/). Recherchez les fichiers
+`controls_*.json`. Suivez la [documentation d’EmulatorJS](https://emulatorjs.org/docs4devs/control-mapping).
 
-# Automatically load a save state when starting a game
+# Charger automatiquement une sauvegarde au démarrage d’un jeu
 
-Create a state file by clicking on the "floppy" button from the
-emulator. Then move and rename this file to
+Créez un fichier d’état en cliquant sur le bouton « disquette » dans
+l’émulateur. Déplacez puis renommez ce fichier en
 `public/games/<game_id>/save.state`.
 
-# Game of the Week System
+# Système « Jeu de la semaine »
 
-The game of the week is automatically selected using:
-- **Plinko System**: Weekly seeds (YYYYWW format) determine game selection
-- **Predictions**: Games are pre-selected in `public/plinko/predict/predictions.yaml`
-- **Automatic**: No manual file editing required
+Le jeu de la semaine est sélectionné automatiquement à l’aide de :
+- **Système Plinko** : des graines hebdomadaires (format YYYYWW) déterminent la sélection
+- **Prédictions** : jeux présélectionnés dans `public/plinko/predict/predictions.yaml`
+- **Automatique** : aucune modification manuelle de fichiers nécessaire

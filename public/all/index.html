@@ -533,6 +533,7 @@
                 <option value="title">Titre</option>
                 <option value="genre">Genre</option>
                 <option value="developer">Développeur</option>
+                <option value="system">Système</option>
                 <option value="new">Nouveaux jeux</option>
             </select>
             <input type="text" id="search-input" class="search-input" placeholder="Rechercher par titre..." style="border-radius: 0 8px 8px 0; border-left: none;">
@@ -541,6 +542,9 @@
             </select>
             <select id="developer-select" style="display: none; padding: 0.75rem 1rem; border: 2px solid var(--border-color); border-radius: 0 8px 8px 0; font-size: 1rem; background: var(--card-bg); color: var(--text-color); border-left: none; cursor: pointer;">
                 <option value="">Sélectionner un développeur...</option>
+            </select>
+            <select id="system-select" style="display: none; padding: 0.75rem 1rem; border: 2px solid var(--border-color); border-radius: 0 8px 8px 0; font-size: 1rem; background: var(--card-bg); color: var(--text-color); border-left: none; cursor: pointer;">
+                <option value="">Sélectionner un système...</option>
             </select>
             <select id="new-select" style="display: none; padding: 0.75rem 1rem; border: 2px solid var(--border-color); border-radius: 0 8px 8px 0; font-size: 1rem; background: var(--card-bg); color: var(--text-color); border-left: none; cursor: pointer;">
                 <option value="">Tous les jeux</option>
@@ -708,6 +712,13 @@
                         return individualDevelopers.includes(term.toLowerCase());
                     }
                     return false;
+                } else if (searchType === 'system') {
+                    // Search only by system (exact match from dropdown, case insensitive)
+                    if (game.core) {
+                        const systemName = getSystemName(game.core);
+                        return systemName.toLowerCase() === term.toLowerCase();
+                    }
+                    return false;
                 } else if (searchType === 'new') {
                     // Search only by new flag
                     if (term === 'new') {
@@ -795,9 +806,10 @@
             const searchInput = document.getElementById('search-input');
             const genreSelect = document.getElementById('genre-select');
             const developerSelect = document.getElementById('developer-select');
+            const systemSelect = document.getElementById('system-select');
             const newSelect = document.getElementById('new-select');
             const searchType = document.getElementById('search-type').value;
-            const isSearching = (searchInput && searchInput.value) || (genreSelect && genreSelect.value) || (developerSelect && developerSelect.value) || (newSelect && newSelect.value);
+            const isSearching = (searchInput && searchInput.value) || (genreSelect && genreSelect.value) || (developerSelect && developerSelect.value) || (systemSelect && systemSelect.value) || (newSelect && newSelect.value);
             
             if (isSearching) {
                 // Simple grid layout for search results (no sections)
@@ -1105,6 +1117,7 @@
             const searchInput = document.getElementById('search-input');
             const genreSelect = document.getElementById('genre-select');
             const developerSelect = document.getElementById('developer-select');
+            const systemSelect = document.getElementById('system-select');
             const newSelect = document.getElementById('new-select');
             const searchType = e.target.value;
             
@@ -1114,19 +1127,23 @@
                 searchInput.style.display = 'block';
                 genreSelect.style.display = 'none';
                 developerSelect.style.display = 'none';
+                systemSelect.style.display = 'none';
                 newSelect.style.display = 'none';
                 searchInput.value = '';
                 genreSelect.value = '';
                 developerSelect.value = '';
+                systemSelect.value = '';
                 newSelect.value = '';
             } else if (searchType === 'genre') {
                 searchInput.style.display = 'none';
                 genreSelect.style.display = 'block';
                 developerSelect.style.display = 'none';
+                systemSelect.style.display = 'none';
                 newSelect.style.display = 'none';
                 searchInput.value = '';
                 genreSelect.value = '';
                 developerSelect.value = '';
+                systemSelect.value = '';
                 newSelect.value = '';
                 
                 // Populate genre select with unique genres from gamesData (case-insensitive deduplication and comma splitting)
@@ -1157,10 +1174,12 @@
                 searchInput.style.display = 'none';
                 genreSelect.style.display = 'none';
                 developerSelect.style.display = 'block';
+                systemSelect.style.display = 'none';
                 newSelect.style.display = 'none';
                 searchInput.value = '';
                 genreSelect.value = '';
                 developerSelect.value = '';
+                systemSelect.value = '';
                 newSelect.value = '';
                 
                 // Populate developer select with unique developers from gamesData (case-insensitive deduplication and comma splitting)
@@ -1187,14 +1206,49 @@
                     option.textContent = developer;
                     developerSelect.appendChild(option);
                 });
+            } else if (searchType === 'system') {
+                searchInput.style.display = 'none';
+                genreSelect.style.display = 'none';
+                developerSelect.style.display = 'none';
+                systemSelect.style.display = 'block';
+                newSelect.style.display = 'none';
+                searchInput.value = '';
+                genreSelect.value = '';
+                developerSelect.value = '';
+                systemSelect.value = '';
+                newSelect.value = '';
+                
+                // Populate system select with unique systems from gamesData
+                const systemMap = new Map();
+                gamesData.forEach(game => {
+                    if (game.core) {
+                        const systemName = getSystemName(game.core);
+                        if (systemName) {
+                            const lowerSystemName = systemName.toLowerCase();
+                            if (!systemMap.has(lowerSystemName)) {
+                                systemMap.set(lowerSystemName, systemName);
+                            }
+                        }
+                    }
+                });
+                const uniqueSystems = Array.from(systemMap.values()).sort();
+                systemSelect.innerHTML = '<option value="">Sélectionner un système...</option>';
+                uniqueSystems.forEach(system => {
+                    const option = document.createElement('option');
+                    option.value = system;
+                    option.textContent = system;
+                    systemSelect.appendChild(option);
+                });
             } else if (searchType === 'new') {
                 searchInput.style.display = 'none';
                 genreSelect.style.display = 'none';
                 developerSelect.style.display = 'none';
+                systemSelect.style.display = 'none';
                 newSelect.style.display = 'block';
                 searchInput.value = '';
                 genreSelect.value = '';
                 developerSelect.value = '';
+                systemSelect.value = '';
                 newSelect.value = '';
             }
             
@@ -1216,6 +1270,15 @@
             // Ensure search type is set to 'developer' when filtering by developer
             if (e.target.value) {
                 document.getElementById('search-type').value = 'developer';
+            }
+            filterGames(e.target.value);
+        });
+
+        // System select event listener
+        document.getElementById('system-select').addEventListener('change', (e) => {
+            // Ensure search type is set to 'system' when filtering by system
+            if (e.target.value) {
+                document.getElementById('search-type').value = 'system';
             }
             filterGames(e.target.value);
         });
@@ -1453,7 +1516,7 @@
     function getSystemName(core) {
         if (!core) return '';
         const systemMap = {
-            'arcade': 'Arcade',
+            'arcade': 'Arcade (FBNeo)',
             'mame2003_plus': 'Arcade (MAME)',
             'atari2600': 'Atari 2600',
             'gb': 'Game Boy',

@@ -149,7 +149,7 @@ fi
 
 # Get list of all ROM files
 echo -e "${BLUE}📋 Scanning ROM files...${NC}"
-ROM_FILES=$(find "$ROMS_DIR" -maxdepth 2 -type f -not -path "*/\.*" | grep -v "/bios/" | sort)
+ROM_FILES=$(find -L "$ROMS_DIR" -maxdepth 2 -type f -not -path "*/\.*" | grep -v "/bios/" | sort)
 TOTAL_FILES=$(echo "$ROM_FILES" | wc -l)
 
 echo -e "${BLUE}📊 Found $TOTAL_FILES ROM files to process${NC}"

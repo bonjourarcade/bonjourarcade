@@ -531,6 +531,18 @@ if ! jq -e . "$OUTPUT_FILE" >/dev/null 2>&1; then
     exit 1
 fi
 
+# Create API endpoint for current game of the week ID
+echo -e "${BLUE}📝 Creating current-game API endpoint...${NC}"
+mkdir -p public/api
+CURRENT_GAME_ID=$(jq -r '.gameOfTheWeek.id' "$OUTPUT_FILE")
+if [ "$CURRENT_GAME_ID" != "null" ] && [ -n "$CURRENT_GAME_ID" ]; then
+    echo "$CURRENT_GAME_ID" > public/api/current-game
+    echo -e "${GREEN}✅ Created public/api/current-game with ID: $CURRENT_GAME_ID${NC}"
+else
+    echo "no-game" > public/api/current-game
+    echo -e "${YELLOW}⚠️  No current game found, created placeholder${NC}"
+fi
+
 # Clean up only if successful
 rm -rf "$TEMP_DIR"
 

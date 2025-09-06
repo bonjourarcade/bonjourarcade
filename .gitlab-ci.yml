@@ -1,4 +1,6 @@
 image: alpine
+variables:
+  GIT_DEPTH: 1
 
 stages:
   - deploy

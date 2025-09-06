@@ -1,23 +1,8 @@
-# This file is a template, and might need editing before it works on your project.
-# Full project: https://gitlab.com/pages/plain-html
-
 image: alpine
 
 stages:
   - deploy
   - newsletter
-
-upload_to_gcs:
-  stage: deploy
-  image: google/cloud-sdk:latest
-  script:
-    - echo "Setting up Google Cloud credentials..."
-    - gcloud auth activate-service-account --key-file=$GCLOUD_SERVICE_KEY
-    - bash upload-files.sh
-  rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-      changes: 
-        - roms/**/*
 
 pages:
   stage: deploy
@@ -42,7 +27,6 @@ pages:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       changes: 
         - public/**/*
-        - roms/**/*
         - plinko-gamelist.txt
         - scripts/build_parallel.sh
         - scripts/generate_gamelist_parallel.sh

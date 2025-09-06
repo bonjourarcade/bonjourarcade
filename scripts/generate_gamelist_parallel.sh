@@ -45,7 +45,7 @@ echo -e "${BLUE}🚀 Starting parallel gamelist generation with $NUM_WORKERS wor
 get_core_from_dir() {
     case "$1" in
         arcade|fbneo) echo "arcade" ;;
-        mame) echo "mame2003_plus" ;;
+        mame|mame2003) echo "mame2003_plus" ;;
         ATARI2600) echo "atari2600" ;;
         GAMEBOY)      echo "gb" ;;
         GBA)      echo "gba" ;;

@@ -1,5 +1,5 @@
 roms
-api/current-game
+public/api/current-game
 **/.DS_Store
 **/*.swp
 public/gamelist.json

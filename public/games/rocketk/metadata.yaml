@@ -4,6 +4,7 @@ year: 1993
 genre: Action
 hide: yes
 enable_score: true
+to_start: Start
 controls:
   - 🕹️ Déplacer
   - 1️⃣  Épée/Jet Pack

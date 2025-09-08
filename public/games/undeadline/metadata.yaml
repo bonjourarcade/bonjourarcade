@@ -3,8 +3,10 @@ developer: T&E Soft
 year: 1991
 genre: Shooter
 hide: yes
+to_start: Start
 controls:
   - 🕹️ Déplacer
   - 1️⃣  Boule piquante
   - 2️⃣  Tirer
   - 3️⃣  Bouclier
+announcement_message: "Préparez-vous à plonger dans l'univers saisissant d'Undeadline, un shooter captivant de T&E Soft sorti en 1991 ! Dans ce jeu, vous devrez faire face à des hordes de zombies menaçants tout en naviguant à travers des niveaux innovants où le temps est un facteur clé, ajoutant une dimension stratégique à l'action frénétique. Avec son ambiance unique et son gameplay addictif, Undeadline vous promet une expérience palpitante où chaque seconde compte pour survivre !"

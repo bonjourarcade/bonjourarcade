@@ -2,8 +2,8 @@ title: Mad Planets
 developer: Gottlieb
 year: 1983
 genre: Shooter
-#added: 
 hide: yes
+to_start: Select -> Start
 enable_score: true
 added: 2025-07-27
 controls:

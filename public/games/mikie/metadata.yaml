@@ -7,9 +7,9 @@ controls:
   - 1️⃣  Ouvrir porte
   - 2️⃣  Coup de tête
 
-to_start: Insert Coin -> Start
+to_start: Select -> Start
 
-announcement_message: 
+announcement_message: "Plongez dans l'univers décalé de Mikie, le jeu d'action déjanté de Konami sorti en 1984 ! Incarnez Mikie, un étudiant qui doit échapper à ses professeurs en évitant des obstacles loufoques tout en collectant des cœurs pour séduire la fille de vos rêves. Avec son mélange unique de plateforme et d'humour, Mikie vous fera vivre une expérience hilarante et mémorable, où chaque niveau est une véritable course contre la montre !"
 
 enable_score: true
 hide: yes

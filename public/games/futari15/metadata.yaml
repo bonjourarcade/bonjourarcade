@@ -8,7 +8,7 @@ controls:
   - 2️⃣  Bombe
   - 3️⃣  Tirer (Auto)
 
-to_start: Insert Coin -> Start
+to_start: Select -> Start
 
 enable_score: true
 hide: yes

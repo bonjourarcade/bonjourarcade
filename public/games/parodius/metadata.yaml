@@ -7,13 +7,13 @@ genre: Shooter, Cute
 #  - 1️⃣  Tirer
 #  - 2️⃣  Bombe
 
-#to_start: Insert Coin -> Start
+to_start: Select -> Start
 
 # Message d'annonce personnalisé pour la newsletter
 # Ce message apparaîtra en haut de l'email et des webhooks
-announcement_message: 
 
 enable_score: true
 hide: yes
 
 added: 2025-08-24
+announcement_message: "Plongez dans l'univers loufoque de Parodius Da!, le shooter hilarant de Konami sorti en 1990 qui parodie les classiques du genre avec style ! Affrontez des ennemis farfelus et des boss extravagants tout en pilotant un vaisseau aux capacités uniques inspiré des mignons personnages de l'univers de Konami. Avec ses visuels colorés et son humour décalé, ce jeu vous promet des heures de fun et de surprises !"

@@ -355,6 +355,15 @@
         #menu-button .arrow {
             font-size: 18px;
         }
+        
+        /* Mouse auto-hide functionality */
+        body.mouse-hidden {
+            cursor: none !important;
+        }
+        
+        body.mouse-hidden * {
+            cursor: none !important;
+        }
     </style>
 </head>
 <body>
@@ -956,6 +965,9 @@
 
         // Initialize screensaver mode functionality
         document.addEventListener('DOMContentLoaded', initScreensaverMode);
+        
+        // Initialize mouse auto-hide functionality
+        document.addEventListener('DOMContentLoaded', initMouseAutoHide);
 
         // Screensaver mode functionality - Completely overhauled for mobile
         function initScreensaverMode() {
@@ -1563,6 +1575,47 @@
                 }
             }
         });
+        
+        // Mouse auto-hide functionality
+        function initMouseAutoHide() {
+            let mouseTimeout;
+            const MOUSE_HIDE_DELAY = 5000; // 5 seconds
+            
+            // Function to show mouse cursor
+            function showMouse() {
+                document.body.classList.remove('mouse-hidden');
+            }
+            
+            // Function to hide mouse cursor
+            function hideMouse() {
+                document.body.classList.add('mouse-hidden');
+            }
+            
+            // Function to reset the timeout
+            function resetMouseTimeout() {
+                showMouse();
+                clearTimeout(mouseTimeout);
+                mouseTimeout = setTimeout(hideMouse, MOUSE_HIDE_DELAY);
+            }
+            
+            // Track mouse movement
+            document.addEventListener('mousemove', resetMouseTimeout);
+            document.addEventListener('mousedown', resetMouseTimeout);
+            document.addEventListener('mouseup', resetMouseTimeout);
+            
+            // Track touch events (for mobile devices)
+            document.addEventListener('touchstart', resetMouseTimeout);
+            document.addEventListener('touchend', resetMouseTimeout);
+            
+            // Track keyboard events
+            document.addEventListener('keydown', resetMouseTimeout);
+            document.addEventListener('keyup', resetMouseTimeout);
+            
+            // Start the initial timeout
+            resetMouseTimeout();
+            
+            console.log('Mouse auto-hide initialized with 5-second timeout');
+        }
     </script>
 </body>
 </html>

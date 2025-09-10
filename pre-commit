@@ -54,4 +54,5 @@ git push origin main
 
 echo "Pushed ROMs successfully"
 
+cd -
 exit 0

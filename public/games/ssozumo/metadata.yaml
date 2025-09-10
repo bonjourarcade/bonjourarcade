@@ -1,7 +1,7 @@
-title: 
-developer: 
-year: 
-genre: 
+title: Syusse Oozumou
+developer: Technos
+year: 1984
+genre: Sports
 #controls:
 #  - 🕹️ Déplacer
 #  - 1️⃣  Tirer
@@ -12,4 +12,4 @@ genre:
 enable_score: false
 hide: yes
 
-added: DATE_PLACEHOLDER
+added: 2025-09-10

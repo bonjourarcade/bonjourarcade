@@ -1,7 +1,7 @@
-title: 
-developer: 
-year: 
-genre: 
+title: Cosmo Police Galivan
+developer: Nichibutsu
+year: 1985
+genre: Platform
 #controls:
 #  - 🕹️ Déplacer
 #  - 1️⃣  Tirer
@@ -12,4 +12,4 @@ genre:
 enable_score: false
 hide: yes
 
-added: DATE_PLACEHOLDER
+added: 2025-09-10

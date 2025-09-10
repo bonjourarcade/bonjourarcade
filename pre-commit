@@ -43,4 +43,14 @@ if [ -n "$MODIFIED_PNGS" ]; then
 fi
 
 echo "PNG optimization completed successfully"
+
+# Push ROMs
+cd ~/perso/roms
+git add -A && git commit -m "Update ROM collection: $(git diff --cached --name-only | wc -l | tr -d ' ') files modified
+
+Files changed:
+$(git diff --cached --name-only | sed 's/^/- /')"
+
+echo "Pushed ROMs successfully"
+
 exit 0

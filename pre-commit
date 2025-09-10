@@ -3,7 +3,6 @@
 # Pre-commit hook to automatically shrink large PNG files
 # This hook runs the parallel PNG shrinking script before each commit
 #
-# Put it in .git/hooks/
 
 # Redirect output to stderr
 exec 1>&2
@@ -39,20 +38,9 @@ fi
 # Check if any PNG files were modified and need to be staged
 MODIFIED_PNGS=$(git diff --cached --name-only | grep '\.png$' || true)
 if [ -n "$MODIFIED_PNGS" ]; then
-    echo "PNG files were optimized and need to be re-staged:"
-    echo "$MODIFIED_PNGS"
-    echo ""
-    echo "Please run 'git add' on the modified files and commit again."
-    exit 1
+    echo "PNG files were optimized and will be re-staged."
+    git add $MODIFIED_PNGS
 fi
 
 echo "PNG optimization completed successfully"
 exit 0
-
-cd ~/perso/roms
-git add -A && git commit -m "Update ROM collection: $(git diff --cached --name-only | wc -l | tr -d ' ') files modified
-
-Files changed:
-$(git diff --cached --name-only | sed 's/^/- /')"
-git push origin main
-cd -

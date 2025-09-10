@@ -127,6 +127,48 @@
             width: 100%;
         }
 
+        .chronological-option {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            margin-bottom: 2rem;
+            text-align: left;
+            width: 100%;
+        }
+
+        .chronological-option h3 {
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .checkbox-container input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .checkbox-container label {
+            font-size: 0.9rem;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .chronological-note {
+            font-size: 0.8rem;
+            opacity: 0.8;
+            line-height: 1.4;
+        }
+
         .time-config h3 {
             margin-bottom: 15px;
             font-size: 1.1rem;
@@ -247,6 +289,15 @@
             <p class="time-note">Default: 2 minutes 30 seconds (150 seconds total)</p>
         </div>
         
+        <div class="chronological-option">
+            <h3>📅 Game Order</h3>
+            <div class="checkbox-container">
+                <input type="checkbox" id="chronologicalOrder" class="chronological-checkbox">
+                <label for="chronologicalOrder">Play games in chronological order (newest first)</label>
+            </div>
+            <p class="chronological-note">When enabled, games will be played in the order they were added to the website, starting with the most recently added games.</p>
+        </div>
+        
         <button class="launch-btn" onclick="launchScreensaver()">
             🚀 Launch Screensaver
         </button>
@@ -294,10 +345,14 @@
             
             const totalMilliseconds = (minutes * 60 + seconds) * 1000;
             
+            // Get chronological order preference
+            const chronologicalOrder = document.getElementById('chronologicalOrder').checked;
+            
             // Set screensaver mode flag in session storage
             sessionStorage.setItem('screensaverMode', 'true');
             sessionStorage.setItem('screensaverStartTime', Date.now().toString());
             sessionStorage.setItem('screensaverInterval', totalMilliseconds.toString());
+            sessionStorage.setItem('chronologicalOrder', chronologicalOrder.toString());
             
             // Redirect to randomgame which will then redirect to play
             window.location.href = '/randomgame/';

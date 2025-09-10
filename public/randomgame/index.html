@@ -98,12 +98,17 @@
     <script>
         let gameData = [];
         let currentGame = null;
+        let currentGameIndex = 0;
+        let isChronologicalOrder = false;
 
         async function loadRandomGame() {
             try {
                 // Show loading state
                 document.getElementById('game-info').style.display = 'none';
                 document.getElementById('error-container').style.display = 'none';
+                
+                // Check if we're in screensaver mode and if chronological order is enabled
+                isChronologicalOrder = sessionStorage.getItem('chronologicalOrder') === 'true';
                 
                 // Fetch the game list
                 const response = await fetch('/gamelist.json');
@@ -125,9 +130,32 @@
                     throw new Error('No games available');
                 }
                 
-                // Select a random game
-                const randomIndex = Math.floor(Math.random() * gameData.length);
-                currentGame = gameData[randomIndex];
+                // Sort games by added date if chronological order is enabled
+                if (isChronologicalOrder) {
+                    gameData.sort((a, b) => {
+                        const dateA = new Date(a.added || '1900-01-01');
+                        const dateB = new Date(b.added || '1900-01-01');
+                        return dateB - dateA; // Newest first
+                    });
+                    
+                    // Get current game index from session storage or start from 0
+                    currentGameIndex = parseInt(sessionStorage.getItem('currentGameIndex') || '0');
+                    
+                    // If we've gone through all games, reset to 0
+                    if (currentGameIndex >= gameData.length) {
+                        currentGameIndex = 0;
+                    }
+                    
+                    currentGame = gameData[currentGameIndex];
+                    
+                    // Increment index for next time
+                    currentGameIndex++;
+                    sessionStorage.setItem('currentGameIndex', currentGameIndex.toString());
+                } else {
+                    // Select a random game (original behavior)
+                    const randomIndex = Math.floor(Math.random() * gameData.length);
+                    currentGame = gameData[randomIndex];
+                }
                 
                 // Show game info briefly
                 document.getElementById('game-title').textContent = currentGame.title || 'Unknown Game';
@@ -185,6 +213,10 @@
         }
 
         function retryRandomGame() {
+            // Reset game index for chronological order if needed
+            if (isChronologicalOrder) {
+                sessionStorage.removeItem('currentGameIndex');
+            }
             loadRandomGame();
         }
 

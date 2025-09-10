@@ -7,7 +7,6 @@ genre: Platform, Cute
 #  - 1️⃣  Tirer
 #  - 2️⃣  Bombe
 to_start: Insert Coin -> Start
-enable_score: false
 
 added: 2025-07-26
 hide: yes

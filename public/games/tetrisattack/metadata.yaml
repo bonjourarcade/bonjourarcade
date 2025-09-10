@@ -2,7 +2,6 @@ title: Tetris Attack
 developer: Intelligent Systems
 year: 1996
 genre: Puzzle
-enable_score: false
 controls:
   - 🕹️ Déplacer
   - 1️⃣  Swap

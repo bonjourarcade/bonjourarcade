@@ -254,7 +254,7 @@ for i in $(seq 1 $BATCH_WORKERS); do
                         recommended=""
                         added=""
                         hide="yes"
-                        enable_score="false"
+                        enable_score="true"
                         to_start=""
                         problem=""
 
@@ -274,7 +274,7 @@ for i in $(seq 1 $BATCH_WORKERS); do
                                 recommended=$(echo "$metadata_json" | jq -r '.recommended // ""')
                                 added=$(echo "$metadata_json" | jq -r '.added // ""')
                                 hide=$(echo "$metadata_json" | jq -r '.hide // ""')
-                                enable_score=$(echo "$metadata_json" | jq -r '.enable_score // false')
+                                enable_score=$(echo "$metadata_json" | jq -r '.enable_score // true')
                                 to_start=$(echo "$metadata_json" | jq -r '.to_start // ""')
                                 problem=$(echo "$metadata_json" | jq -r '.problem // ""')
                                 controls_json=$(echo "$metadata_json" | jq -c '.controls // null')

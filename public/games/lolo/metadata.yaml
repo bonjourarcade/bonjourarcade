@@ -3,7 +3,6 @@ developer: HAL Laboratory
 year: 1989
 genre: Puzzle
 added: 2025-06-05
-enable_score: false
 controls:
   - 🕹️ Déplacer
   - 2️⃣  Tirer

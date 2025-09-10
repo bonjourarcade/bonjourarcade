@@ -13,7 +13,6 @@ genre: Action, Puzzle, Cute
 # Ce message apparaîtra en haut de l'email et des webhooks
 announcement_message: 
 
-enable_score: false
 hide: yes
 
 added: 2025-08-24

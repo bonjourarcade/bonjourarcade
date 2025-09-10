@@ -50,6 +50,7 @@ git add -A && git commit -m "Update ROM collection: $(git diff --cached --name-o
 
 Files changed:
 $(git diff --cached --name-only | sed 's/^/- /')"
+git push origin main
 
 echo "Pushed ROMs successfully"
 

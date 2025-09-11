@@ -1,19 +1,57 @@
-202531: "Pitfall II"
-202532: "Alien Syndrome"
-202533: "Shinobi III: Return of the Ninja Master"
-202534: "Balloon Fight"
-202535: "H.E.R.O."
-202536: "Metal Slug 3"
-202537: "Mad Planets"
-202538: "Gunbird 2"
-202539: "Rocket Knight Adventures"
-202540: "Raiden II"
-202541: "Boxy Boy"
-202542: Thunder Force IV
-202543: Mikie
-202544: Mushihimesama Futari
-202545: Gunbird
-202546: Undeadline
-202547: Ketsui
-202548: Parodius Da!
-202549: Seicross
+202531: 
+  title: "Pitfall II"
+  game_id: "pitfall2"
+202532: 
+  title: "Alien Syndrome"
+  game_id: "aliensyn"
+202533: 
+  title: "Shinobi III: Return of the Ninja Master"
+  game_id: "shinobi3"
+202534: 
+  title: "Balloon Fight"
+  game_id: "balloon"
+202535: 
+  title: "H.E.R.O."
+  game_id: "hero"
+202536: 
+  title: "Metal Slug 3"
+  game_id: "mslug3"
+202537: 
+  title: "Mad Planets"
+  game_id: "mplanets"
+202538: 
+  title: "Gunbird 2"
+  game_id: "gunbird2"
+202539: 
+  title: "Rocket Knight Adventures"
+  game_id: "rocketk"
+202540: 
+  title: "Raiden II"
+  game_id: "raiden2"
+202541: 
+  title: "Boxy Boy"
+  game_id: "boxyboy"
+202542: 
+  title: "Thunder Force IV"
+  game_id: "tfiv"
+202543: 
+  title: "Mikie"
+  game_id: "mikie"
+202544: 
+  title: "Mushihimesama Futari"
+  game_id: "futari15"
+202545: 
+  title: "Gunbird"
+  game_id: "gunbird"
+202546: 
+  title: "UndeadLine"
+  game_id: "undeadline"
+202547: 
+  title: "Ketsui: Kizuna Jigoku Tachi"
+  game_id: "ket"
+202548: 
+  title: "Parodius"
+  game_id: "parodius"
+202549: 
+  title: "Seicross"
+  game_id: "seicross"

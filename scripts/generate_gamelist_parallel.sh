@@ -82,7 +82,7 @@ if ! command -v python3 &> /dev/null; then
     exit 1
 fi
 
-# Get the current week's game title using the Python helper
+# Get the current week's game title and ID using the Python helpers
 FEATURED_GAME_TITLE=$(python3 scripts/get_current_week_game.py)
 if [ $? -ne 0 ] || [ -z "$FEATURED_GAME_TITLE" ]; then
     echo -e "${RED}Error: Failed to get current week's game from predictions.yaml${NC}"
@@ -91,59 +91,14 @@ fi
 
 echo -e "${GREEN}✅ Current week's game: $FEATURED_GAME_TITLE${NC}"
 
-# Function to find game ID by title
-find_game_id_by_title() {
-    local search_title="$1"
-    local games_dir="$2"
-    
-    # Search through all game directories for a title match
-    for game_dir in "$games_dir"/*/; do
-        if [ -d "$game_dir" ]; then
-            game_id=$(basename "$game_dir")
-            metadata_file="${game_dir}metadata.yaml"
-            
-            if [ -f "$metadata_file" ]; then
-                # Try to parse YAML and extract title
-                title=$(yq '.title // ""' "$metadata_file" 2>/dev/null | tr -d '"' | tr -d '\n' || echo "")
-                
-                if [ "$title" = "$search_title" ]; then
-                    echo "$game_id"
-                    return 0
-                fi
-            fi
-        fi
-    done
-    
-    # If no exact match found, try case-insensitive match
-    for game_dir in "$games_dir"/*/; do
-        if [ -d "$game_dir" ]; then
-            game_id=$(basename "$game_dir")
-            metadata_file="${game_dir}metadata.yaml"
-            
-            if [ -f "$metadata_file" ]; then
-                # Try to parse YAML and extract title
-                title=$(yq '.title // ""' "$metadata_file" 2>/dev/null | tr -d '"' | tr -d '\n' || echo "")
-                
-                if [ "${title,,}" = "${search_title,,}" ]; then
-                    echo "$game_id"
-                    return 0
-                fi
-            fi
-        fi
-    done
-    
-    echo ""
-    return 1
-}
-
-# Find the game ID for the featured game
-FEATURED_GAME_ID=$(find_game_id_by_title "$FEATURED_GAME_TITLE" "$GAMES_DIR")
-if [ -n "$FEATURED_GAME_ID" ]; then
-    echo -e "${GREEN}✅ Found game ID: $FEATURED_GAME_ID for title: $FEATURED_GAME_TITLE${NC}"
-else
-    echo -e "${YELLOW}⚠️  Warning: Could not find game ID for featured game: $FEATURED_GAME_TITLE${NC}"
-    FEATURED_GAME_ID=""
+# Get the game ID directly from predictions.yaml (much faster!)
+FEATURED_GAME_ID=$(python3 scripts/get_current_week_game_id.py)
+if [ $? -ne 0 ] || [ -z "$FEATURED_GAME_ID" ]; then
+    echo -e "${RED}Error: Failed to get current week's game ID from predictions.yaml${NC}"
+    exit 1
 fi
+
+echo -e "${GREEN}✅ Found game ID: $FEATURED_GAME_ID for title: $FEATURED_GAME_TITLE${NC}"
 
 # --- Main processing ---
 
@@ -329,7 +284,7 @@ for i in $(seq 1 $BATCH_WORKERS); do
 
                         # Check if the game should be marked as new by date
                         is_new_by_date=""
-                        if [ -n "$added" ]; then
+                        if [ -n "$added" ] && [ "$added" != "DATE_PLACEHOLDER" ]; then
                             added_epoch=$(date -j -f "%Y-%m-%d" "$added" +%s 2>/dev/null || date -d "$added" +%s 2>/dev/null)
                             now_epoch=$(date +%s)
                             if [ -n "$added_epoch" ]; then
@@ -499,7 +454,7 @@ echo -e "${BLUE}📝 Creating final gamelist.json...${NC}"
 # Find the featured game
 FEATURED_GAME="null"
 if [ -n "$FEATURED_GAME_ID" ]; then
-    FEATURED_GAME=$(grep "\"id\":\"$FEATURED_GAME_ID\"" "$TEMP_DIR/processed_games.json" | head -1 || echo "null")
+    FEATURED_GAME=$(grep "\"id\": \"$FEATURED_GAME_ID\"" "$TEMP_DIR/processed_games.json" | head -1 || echo "null")
     # Validate that we got valid JSON
     if [ "$FEATURED_GAME" != "null" ] && ! echo "$FEATURED_GAME" | jq -e . >/dev/null 2>&1; then
         echo -e "${YELLOW}⚠️  Warning: Featured game JSON is invalid, setting to null${NC}"

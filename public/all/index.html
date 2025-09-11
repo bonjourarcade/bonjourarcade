@@ -1482,10 +1482,8 @@
         fetch('/gamelist.json')
             .then(res => res.json())
             .then(data => {
-                // Combine gameOfTheWeek and previousGames
-                gamesData = [];
-                if (data.gameOfTheWeek) gamesData.push(data.gameOfTheWeek);
-                if (Array.isArray(data.previousGames)) gamesData = gamesData.concat(data.previousGames);
+                // Use all games from the simplified structure
+                gamesData = Array.isArray(data.games) ? data.games : [];
                 
                 // Filter out games with problems
                 gamesData = gamesData.filter(game => game.problem !== "true");

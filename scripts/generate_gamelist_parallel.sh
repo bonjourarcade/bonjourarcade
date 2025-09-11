@@ -82,23 +82,8 @@ if ! command -v python3 &> /dev/null; then
     exit 1
 fi
 
-# Get the current week's game title and ID using the Python helpers
-FEATURED_GAME_TITLE=$(python3 scripts/get_current_week_game.py)
-if [ $? -ne 0 ] || [ -z "$FEATURED_GAME_TITLE" ]; then
-    echo -e "${RED}Error: Failed to get current week's game from predictions.yaml${NC}"
-    exit 1
-fi
-
-echo -e "${GREEN}✅ Current week's game: $FEATURED_GAME_TITLE${NC}"
-
-# Get the game ID directly from predictions.yaml (much faster!)
-FEATURED_GAME_ID=$(python3 scripts/get_current_week_game_id.py)
-if [ $? -ne 0 ] || [ -z "$FEATURED_GAME_ID" ]; then
-    echo -e "${RED}Error: Failed to get current week's game ID from predictions.yaml${NC}"
-    exit 1
-fi
-
-echo -e "${GREEN}✅ Found game ID: $FEATURED_GAME_ID for title: $FEATURED_GAME_TITLE${NC}"
+# Note: Featured game is now handled via the /api/current-game endpoint
+# No need to process it during build time
 
 # --- Main processing ---
 
@@ -451,32 +436,10 @@ fi
 # Create final JSON output
 echo -e "${BLUE}📝 Creating final gamelist.json...${NC}"
 
-# Find the featured game
-FEATURED_GAME="null"
-if [ -n "$FEATURED_GAME_ID" ]; then
-    FEATURED_GAME=$(grep "\"id\": \"$FEATURED_GAME_ID\"" "$TEMP_DIR/processed_games.json" | head -1 || echo "null")
-    # Validate that we got valid JSON
-    if [ "$FEATURED_GAME" != "null" ] && ! echo "$FEATURED_GAME" | jq -e . >/dev/null 2>&1; then
-        echo -e "${YELLOW}⚠️  Warning: Featured game JSON is invalid, setting to null${NC}"
-        FEATURED_GAME="null"
-    fi
-fi
-
-# Create final JSON structure
-if [ "$FEATURED_GAME" != "null" ] && [ -n "$FEATURED_GAME_ID" ]; then
-    # Create final JSON with featured game
-    # Remove the featured game from the previousGames list to avoid duplication
-    jq -n \
-        --argjson featured "$FEATURED_GAME" \
-        --slurpfile games "$TEMP_DIR/processed_games.json" \
-        --arg featured_id "$FEATURED_GAME_ID" \
-        '{gameOfTheWeek: $featured, previousGames: ($games[0] | map(select(.id != $featured_id)))}' > "$OUTPUT_FILE"
-else
-    # Create final JSON without featured game
-    jq -n \
-        --slurpfile games "$TEMP_DIR/processed_games.json" \
-        '{gameOfTheWeek: {id: null, title: "N/A", coverArt: "/assets/images/placeholder_thumb.png", pageUrl: "#", core: null, romPath: null}, previousGames: $games[0]}' > "$OUTPUT_FILE"
-fi
+# Create final JSON structure (simplified - no gameOfTheWeek)
+jq -n \
+    --slurpfile games "$TEMP_DIR/processed_games.json" \
+    '{games: $games[0]}' > "$OUTPUT_FILE"
 
 # Validate the final output
 if ! jq -e . "$OUTPUT_FILE" >/dev/null 2>&1; then
@@ -489,8 +452,8 @@ fi
 # Create API endpoint for current game of the week ID
 echo -e "${BLUE}📝 Creating current-game API endpoint...${NC}"
 mkdir -p public/api
-CURRENT_GAME_ID=$(jq -r '.gameOfTheWeek.id' "$OUTPUT_FILE")
-if [ "$CURRENT_GAME_ID" != "null" ] && [ -n "$CURRENT_GAME_ID" ]; then
+CURRENT_GAME_ID=$(python3 scripts/get_current_week_game_id.py)
+if [ $? -eq 0 ] && [ -n "$CURRENT_GAME_ID" ]; then
     echo "$CURRENT_GAME_ID" > public/api/current-game
     echo -e "${GREEN}✅ Created public/api/current-game with ID: $CURRENT_GAME_ID${NC}"
 else

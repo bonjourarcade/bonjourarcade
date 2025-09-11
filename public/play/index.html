@@ -767,10 +767,8 @@
                 // Step 3: Find the specific game data using the gameId
                 console.log(`Searching for game ID '${gameId}' in game list...`);
                 let selectedGame = null;
-                if (gameData.gameOfTheWeek && gameData.gameOfTheWeek.id === gameId) {
-                    selectedGame = gameData.gameOfTheWeek;
-                } else if (gameData.previousGames) { // Check if previousGames exists
-                    selectedGame = gameData.previousGames.find(game => game.id === gameId);
+                if (Array.isArray(gameData.games)) {
+                    selectedGame = gameData.games.find(game => game.id === gameId);
                 }
 
                 // Handle case where the game is not found in the list
@@ -881,7 +879,7 @@
                     console.log(`Game-specific config loaded and merged for: ${gameId}`);
                   } else if (gameConfigResponse.status !== 404) {
                     throw new Error(`Failed to load game config '${gameConfigPath}' (Status: ${gameConfigResponse.status})`);
-                  } else {
+                } else {
                     console.log(`No game-specific config found for: ${gameId}`);
                   }
                 } catch (gameConfigError) {

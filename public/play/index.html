@@ -376,7 +376,7 @@
     <div id="controls-overlay" style="display:none;position:fixed;top:52px;left:10px;z-index:1999;background:rgba(0,0,0,0.85);color:#fff;padding:8px 14px 8px 12px;border-radius:6px;font-size:18px;font-family:sans-serif;box-shadow:0 2px 8px #0005;min-width:40px;max-width:220px;line-height:1.5;pointer-events:none;"></div>
 
     <div id="game-container">
-        <div id="game"><p style="text-align: center; padding-top: 50px;">Initializing...</p></div>
+        <iframe id="game-iframe" src="about:blank" style="width: 100%; height: 100%; border: none; background: #000;"></iframe>
     </div>
 
     <!-- QR Code Container -->
@@ -838,119 +838,34 @@
                     }
                 }
 
-                // Step 6: Set the Core EJS Variables Globally (used by EmulatorJS loader)
-                console.log(`Setting EJS Vars - Core: ${selectedGame.core}, ROM: ${selectedGame.romPath}`);
-                window.EJS_player = "#game";        // Emulator renders in the #game div
-                window.EJS_core = selectedGame.core;    // Core name from gamelist.json
-                window.EJS_gameUrl = selectedGame.romPath; // ROM path from gamelist.json
-                window.EJS_loadStateURL = selectedGame.saveState !== '' ? selectedGame.saveState : undefined;
+                // Step 6: Store game data globally for iframe access
+                console.log(`Storing game data for iframe - Core: ${selectedGame.core}, ROM: ${selectedGame.romPath}`);
+                window.gameData = selectedGame;
 
-                // Step 7: Fetch General Emulator Settings
-                console.log("Fetching emulator settings: /config/emulator_settings.json");
-                const settingsResponse = await fetch('/config/emulator_settings.json'); // Absolute path
-                if (!settingsResponse.ok) throw new Error(`Failed to load '/config/emulator_settings.json' (Status: ${settingsResponse.status})`);
-                const settings = await settingsResponse.json();
-                if (!settings) throw new Error("Emulator settings file loaded but contained invalid data.");
-
-                // Step 8: Assign Fetched Settings Globally
-                for (const [key, value] of Object.entries(settings)) {
-                  window[`${key}`] = value;
+                // Step 7: Load the iframe with the emulator
+                console.log("Loading emulator iframe...");
+                let iframe = document.getElementById('game-iframe');
+                if (!iframe) {
+                    // Recreate iframe if it doesn't exist
+                    recreateIframe();
+                    iframe = document.getElementById('game-iframe');
                 }
-
-                // --- NEW: Attempt to load game-specific config.json ---
-                try {
-                  const gameConfigPath = `/games/${gameId}/config.json`;
-                  console.log(`Attempting to fetch game-specific config: ${gameConfigPath}`);
-                  const gameConfigResponse = await fetch(gameConfigPath);
-                  if (gameConfigResponse.ok) {
-                    const gameConfig = await gameConfigResponse.json();
-                    if (!gameConfig || typeof gameConfig !== 'object') {
-                      throw new Error(`Game config file '${gameConfigPath}' loaded but contained invalid JSON.`);
-                    }
+                
+                if (iframe) {
+                    // Set the iframe source to load the emulator
+                    iframe.src = `emulator.html?game=${encodeURIComponent(gameId)}`;
                     
-                    // Log the game-specific config values
-                    console.log(`Game-specific config values for ${gameId}:`);
-                    for (const [key, value] of Object.entries(gameConfig)) {
-                      console.log(`  ${key} = ${value}`);
-                    }
-                    
-                    // Merge/override global settings with game-specific settings
-                    for (const [key, value] of Object.entries(gameConfig)) {
-                      window[`${key}`] = value;
-                    }
-                    console.log(`Game-specific config loaded and merged for: ${gameId}`);
-                  } else if (gameConfigResponse.status !== 404) {
-                    throw new Error(`Failed to load game config '${gameConfigPath}' (Status: ${gameConfigResponse.status})`);
-                  } else {
-                    console.log(`No game-specific config found for: ${gameId}`);
-                  }
-                } catch (gameConfigError) {
-                  console.error(`Error loading or parsing game-specific config:`, gameConfigError);
-                  showLauncherError(gameConfigError.message || `An error occurred loading game-specific config.`);
-                  return;
-                }
-
-                console.log("Final merged emulator settings (global + game-specific):");
-                // Log all EJS_* variables that are set
-                for (const key of Object.keys(window)) {
-                  if (key.startsWith('EJS_')) {
-                    console.log(`  ${key} = ${window[key]}`);
-                  }
-                }
-
-                window.EJS_backgroundImage =
-                `${window.location.protocol}//${window.location.hostname}:${window.location.port}/games/${gameId}/cover.png`; // Set background to game's cover
-
-                // Step 9: Fetch Controls JSON based on Core
-                const coreName = window.EJS_core;
-                const controlsJsonPath = `/config/controls_${coreName}.json`; // Path to control JSON file
-                // Only fetch global controls if not set by per-game config
-                if (typeof window.EJS_defaultControls === 'undefined') {
-                  console.log(`Attempting to fetch controls: ${controlsJsonPath}`);
-                  try {
-                      const controlsResponse = await fetch(controlsJsonPath);
-                      if (!controlsResponse.ok) {
-                           // Handle file not found gracefully - use defaults
-                           if (controlsResponse.status === 404) {
-                                console.warn(`Controls file not found: ${controlsJsonPath}. Using EmulatorJS default controls.`);
-                                window.EJS_defaultControls = { "0":{}, "1":{}, "2":{}, "3":{} }; // Use default empty controls (valid JSON)
-                           } else {
-                                // Throw error for other HTTP issues
-                                throw new Error(`Failed to fetch controls file (Status: ${controlsResponse.status})`);
-                           }
-                      } else {
-                          // Parse JSON and assign directly
-                          const controlsData = await controlsResponse.json();
-                          if (!controlsData) throw new Error(`Controls file '${controlsJsonPath}' loaded but contained invalid JSON.`);
-                          window.EJS_defaultControls = controlsData; // Assign fetched object
-                          console.log(`Controls assigned successfully for core: ${coreName}`);
-                      }
-                  } catch (controlsError) {
-                       // Handle fetch/parse errors specifically for controls JSON
-                       console.error(`Error loading or parsing controls from ${controlsJsonPath}:`, controlsError);
-                       console.warn("Using EmulatorJS default controls due to controls loading error.");
-                       window.EJS_defaultControls = { "0":{}, "1":{}, "2":{}, "3":{} }; // Fallback to default empty controls
-                  }
-                } else {
-                  console.log('Using EJS_defaultControls from per-game config.json');
-                }
-
-                // Step 10: Load the main EmulatorJS engine (loader.js)
-                // This now happens sequentially after successfully fetching/setting up everything else
-                if (window.EJS_pathtodata) {
-                    console.log("Loading EmulatorJS engine (loader.js)...");
-                    const loaderScript = document.createElement('script');
-                    // Use the path defined in emulator_settings.json
-                    loaderScript.src = `${window.EJS_pathtodata}loader.js`;
-                    loaderScript.onerror = () => {
-                        console.error("CRITICAL: Error loading EmulatorJS 'loader.js' from:", loaderScript.src);
-                        showLauncherError("Could not load the core emulator engine. Check network connection and EJS_pathtodata setting.");
+                    // Handle iframe load events
+                    iframe.onload = function() {
+                        console.log("Emulator iframe loaded successfully");
                     };
-                    document.body.appendChild(loaderScript);
-                    console.log("EmulatorJS 'loader.js' script added to page.");
+                    
+                    iframe.onerror = function() {
+                        console.error("Error loading emulator iframe");
+                        showLauncherError("Failed to load emulator iframe");
+                    };
                 } else {
-                     console.error("EJS_pathtodata is not defined after loading settings. Cannot load emulator engine.");
-                     showLauncherError("Emulator configuration error: Path to required emulator data is missing.");
+                    throw new Error("Emulator iframe not found and could not be created");
                 }
 
             } catch (error) { // Catch errors from initial fetches (gamelist, settings) or setup logic
@@ -963,11 +878,53 @@
         // Using DOMContentLoaded ensures the #game-container element exists
         document.addEventListener('DOMContentLoaded', loadSelectedGame);
 
+        // Global variable to store game data for iframe
+        window.gameData = null;
+
+        // Function to cleanup the emulator iframe
+        function cleanupEmulator() {
+            const iframe = document.getElementById('game-iframe');
+            if (iframe) {
+                console.log("Cleaning up emulator iframe...");
+                // Call cleanup function in iframe if it exists
+                try {
+                    if (iframe.contentWindow && iframe.contentWindow.cleanupEmulator) {
+                        iframe.contentWindow.cleanupEmulator();
+                    }
+                } catch (e) {
+                    console.warn("Could not call iframe cleanup function:", e);
+                }
+                // Remove the iframe to trigger WebAssembly cleanup
+                iframe.src = 'about:blank';
+                iframe.remove();
+                console.log("Emulator iframe removed - WebAssembly instance should be cleaned up");
+            }
+        }
+
+        // Function to recreate the iframe (useful for testing)
+        function recreateIframe() {
+            cleanupEmulator();
+            const gameContainer = document.getElementById('game-container');
+            if (gameContainer) {
+                const newIframe = document.createElement('iframe');
+                newIframe.id = 'game-iframe';
+                newIframe.style.cssText = 'width: 100%; height: 100%; border: none; background: #000;';
+                newIframe.src = 'about:blank';
+                gameContainer.appendChild(newIframe);
+                console.log("New iframe created");
+            }
+        }
+
         // Initialize screensaver mode functionality
         document.addEventListener('DOMContentLoaded', initScreensaverMode);
         
         // Initialize mouse auto-hide functionality
         document.addEventListener('DOMContentLoaded', initMouseAutoHide);
+
+        // Cleanup emulator when page is unloaded
+        window.addEventListener('beforeunload', function() {
+            cleanupEmulator();
+        });
 
         // Screensaver mode functionality - Completely overhauled for mobile
         function initScreensaverMode() {
@@ -981,6 +938,8 @@
                 console.log('Screensaver mode: Using configured interval of', configuredInterval, 'ms (', Math.round(configuredInterval/1000), 'seconds)');
                 const refreshInterval = setInterval(() => {
                     console.log('Screensaver mode: Refreshing to new random game');
+                    // Cleanup current emulator before redirecting
+                    cleanupEmulator();
                     // Redirect to randomgame to get a new random game
                     window.location.href = '/randomgame/';
                 }, configuredInterval);
@@ -1139,6 +1098,7 @@
             nextGameBtn.addEventListener('click', () => {
                 if (!nextGameBtn.disabled) {
                     console.log('Manual next game requested');
+                    cleanupEmulator();
                     window.location.href = '/randomgame/';
                 }
             });
@@ -1327,6 +1287,7 @@
             nextGameBtn.innerHTML = '⏭️ Next Game';
             nextGameBtn.addEventListener('click', () => {
                 console.log('Manual next game requested');
+                cleanupEmulator();
                 window.location.href = '/randomgame/';
             });
             

@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Emulator</title>
+    <style>
+        /* Reset all elements to prevent overflow */
+        * {
+            box-sizing: border-box !important;
+        }
+        
+        /* Basic styling to make the emulator fill the iframe */
+        html, body { 
+            margin: 0 !important; 
+            padding: 0 !important; 
+            height: 100% !important; 
+            width: 100% !important;
+            overflow: hidden !important; 
+            background-color: #000 !important; 
+            color: #eee !important;
+            /* Grid background pattern */
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        #game { 
+            width: 100% !important; 
+            height: 100% !important; 
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        .error-message { 
+            font-family: sans-serif; 
+            padding: 20px; 
+            text-align: center; 
+            color: #ffdddd; 
+            background-color: #330000; 
+            border: 1px solid red;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .loading-message {
+            font-family: sans-serif;
+            font-size: 18px;
+            color: #fff;
+            text-align: center;
+            padding-top: 50px;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div id="game"><p class="loading-message">Initializing...</p></div>
+
+    <script>
+        // Function to display error messages
+        function showError(message) {
+            const gameContainer = document.getElementById('game');
+            if (gameContainer) {
+                gameContainer.innerHTML = `<div class="error-message">Error: ${message}</div>`;
+            }
+        }
+
+        // Function to get URL parameters
+        function getUrlParameter(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        // Function to detect if the device is mobile
+        function isMobileDevice() {
+            return /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+
+        // Custom buttons configuration
+        window.EJS_Buttons = {
+            playPause: true,
+            restart: true,
+            mute: true,
+            settings: true,
+            fullscreen: true,
+            saveState: true,
+            loadState: true,
+            screenRecord: true,
+            gamepad: true,
+            cheat: false,
+            volume: true,
+            saveSavFiles: false,
+            loadSavFiles: false,
+            quickSave: true,
+            quickLoad: true,
+            screenshot: true,
+            cacheManager: true,
+            customDownload: {
+                visible: true,
+                displayName: "Download this game",
+                icon: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/><path d="M12,19L16,15H13V11H11V15H8L12,19Z"/></svg>',
+                callback: () => {
+                    if (window.parent && window.parent.downloadFile && window.parent.basename) {
+                        window.parent.downloadFile(window.EJS_gameUrl, window.parent.basename(window.EJS_gameUrl));
+                    }
+                }
+            },
+            exitEmulation: false
+        };
+
+        // Main function to load the emulator
+        async function loadEmulator() {
+            try {
+                // Get game ID from URL parameter
+                const gameId = getUrlParameter('game');
+                if (!gameId) {
+                    throw new Error('No game ID provided');
+                }
+
+                console.log(`Loading emulator for game: ${gameId}`);
+
+                // Fetch game data from parent window or API
+                let gameData;
+                try {
+                    // Try to get from parent window first
+                    if (window.parent && window.parent.gameData) {
+                        gameData = window.parent.gameData;
+                    } else {
+                        // Fallback: fetch directly
+                        const response = await fetch('/gamelist.json');
+                        if (!response.ok) {
+                            throw new Error(`Failed to fetch game list (Status: ${response.status})`);
+                        }
+                        const allGames = await response.json();
+                        
+                        // Find the specific game
+                        if (allGames.gameOfTheWeek && allGames.gameOfTheWeek.id === gameId) {
+                            gameData = allGames.gameOfTheWeek;
+                        } else if (allGames.previousGames) {
+                            gameData = allGames.previousGames.find(game => game.id === gameId);
+                        }
+                        
+                        if (!gameData) {
+                            throw new Error(`Game with ID '${gameId}' not found`);
+                        }
+                    }
+                } catch (error) {
+                    throw new Error(`Failed to load game data: ${error.message}`);
+                }
+
+                // Check if required files are present
+                if (gameData.romMissing === true || !gameData.romPath || !gameData.core || gameData.core === 'null') {
+                    throw new Error(`Required files (ROM or Core info) for game '${gameData.title || gameId}' are missing`);
+                }
+
+                // Set EmulatorJS variables
+                window.EJS_player = "#game";
+                window.EJS_core = gameData.core;
+                window.EJS_gameUrl = gameData.romPath;
+                window.EJS_loadStateURL = gameData.saveState !== '' ? gameData.saveState : undefined;
+
+                // Fetch emulator settings
+                const settingsResponse = await fetch('/config/emulator_settings.json');
+                if (!settingsResponse.ok) {
+                    throw new Error(`Failed to load emulator settings (Status: ${settingsResponse.status})`);
+                }
+                const settings = await settingsResponse.json();
+                if (!settings) {
+                    throw new Error("Emulator settings file contained invalid data");
+                }
+
+                // Apply settings
+                for (const [key, value] of Object.entries(settings)) {
+                    window[`${key}`] = value;
+                }
+
+                // Try to load game-specific config
+                try {
+                    const gameConfigPath = `/games/${gameId}/config.json`;
+                    const gameConfigResponse = await fetch(gameConfigPath);
+                    if (gameConfigResponse.ok) {
+                        const gameConfig = await gameConfigResponse.json();
+                        if (gameConfig && typeof gameConfig === 'object') {
+                            for (const [key, value] of Object.entries(gameConfig)) {
+                                window[`${key}`] = value;
+                            }
+                            console.log(`Game-specific config loaded for: ${gameId}`);
+                        }
+                    }
+                } catch (gameConfigError) {
+                    console.warn(`Could not load game-specific config: ${gameConfigError.message}`);
+                }
+
+                // Set background image
+                window.EJS_backgroundImage = `${window.location.protocol}//${window.location.hostname}:${window.location.port}/games/${gameId}/cover.png`;
+
+                // Load controls
+                const coreName = window.EJS_core;
+                const controlsJsonPath = `/config/controls_${coreName}.json`;
+                
+                if (typeof window.EJS_defaultControls === 'undefined') {
+                    try {
+                        const controlsResponse = await fetch(controlsJsonPath);
+                        if (controlsResponse.ok) {
+                            const controlsData = await controlsResponse.json();
+                            window.EJS_defaultControls = controlsData;
+                            console.log(`Controls loaded for core: ${coreName}`);
+                        } else {
+                            console.warn(`Controls file not found: ${controlsJsonPath}`);
+                            window.EJS_defaultControls = { "0":{}, "1":{}, "2":{}, "3":{} };
+                        }
+                    } catch (controlsError) {
+                        console.warn(`Error loading controls: ${controlsError.message}`);
+                        window.EJS_defaultControls = { "0":{}, "1":{}, "2":{}, "3":{} };
+                    }
+                }
+
+                // Load EmulatorJS engine
+                if (window.EJS_pathtodata) {
+                    console.log("Loading EmulatorJS engine...");
+                    const loaderScript = document.createElement('script');
+                    loaderScript.src = `${window.EJS_pathtodata}loader.js`;
+                    loaderScript.onerror = () => {
+                        throw new Error("Failed to load EmulatorJS loader.js");
+                    };
+                    document.body.appendChild(loaderScript);
+                } else {
+                    throw new Error("EJS_pathtodata is not defined");
+                }
+
+            } catch (error) {
+                console.error("Error loading emulator:", error);
+                showError(error.message || "Failed to load emulator");
+            }
+        }
+
+        // Cleanup function to be called when iframe is removed
+        window.cleanupEmulator = function() {
+            console.log("Cleaning up emulator...");
+            // The iframe will be destroyed, which should clean up the WebAssembly instance
+            // This is the key benefit of using an iframe
+        };
+
+        // Start loading when DOM is ready
+        document.addEventListener('DOMContentLoaded', loadEmulator);
+
+        // Handle page unload to ensure cleanup
+        window.addEventListener('beforeunload', function() {
+            console.log("Emulator iframe unloading - WebAssembly will be cleaned up");
+        });
+    </script>
+</body>
+</html>

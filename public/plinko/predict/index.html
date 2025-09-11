@@ -180,7 +180,8 @@
         if (seed >= currentSeed) {
           const tr = document.createElement('tr');
           const date = seedToDate(seed);
-          tr.innerHTML = `<td>${seed}</td><td>${date}</td><td>${predictions[seed]}</td>`;
+          tr.innerHTML =
+            `<td>${seed}</td><td>${date}</td><td>${predictions[seed].title}</td>`;
           tbody.appendChild(tr);
         }
       }

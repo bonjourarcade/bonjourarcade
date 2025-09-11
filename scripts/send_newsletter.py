@@ -510,7 +510,6 @@ class NewsletterSender:
                         <li><b>Année :</b> {year}</li>
                         <li><b>Genre :</b> {genre}</li>
                         <li><b>Contrôles :</b> {controls}</li>
-                        <li><b>Tirage Plinko :</b> <a href="{self.plinko_url}">{self.plinko_url}</a></li>
                     </ul>
                 </div>
                 <div style="flex:1;min-width:0;text-align:center;">
@@ -644,7 +643,6 @@ Annonce du jeu de la semaine!
 {{b}}Genre :{{b}} {genre}
 {{b}}Contrôles :{{b}} {controls}
 {{b}}Image :{{b}} {cover_url}
-{{b}}Tirage Plinko :{{b}} {self.plinko_url}
 {{b}}Classements :{{b}} {leaderboard_url}
 
 🕹️ {{b}}Faites-en l'essai :{{b}} {play_url}
@@ -746,7 +744,6 @@ Bonne semaine ! ☀️
         # Generate email content
         print("✍️  Generating email content...")
         content = self.create_email_content(game_id, meta, custom_message=custom_message, last_week_highlight=last_week_highlight)
-        print(f'🔗 Plinko link for this week: {self.plinko_url}')
         print(f'✅ Email content ready: {content["subject"]}')
         
         # Webhook-only: send webhooks and exit before email

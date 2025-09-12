@@ -118,10 +118,8 @@
                 
                 const data = await response.json();
                 
-                // Combine gameOfTheWeek and previousGames
-                gameData = [];
-                if (data.gameOfTheWeek) gameData.push(data.gameOfTheWeek);
-                if (Array.isArray(data.previousGames)) gameData = gameData.concat(data.previousGames);
+                // Use all games from the simplified structure
+                gameData = Array.isArray(data.games) ? data.games : [];
                 
                 // Filter out games with problems
                 gameData = gameData.filter(game => game.problem !== "true");

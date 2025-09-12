@@ -767,10 +767,8 @@
                 // Step 3: Find the specific game data using the gameId
                 console.log(`Searching for game ID '${gameId}' in game list...`);
                 let selectedGame = null;
-                if (gameData.gameOfTheWeek && gameData.gameOfTheWeek.id === gameId) {
-                    selectedGame = gameData.gameOfTheWeek;
-                } else if (gameData.previousGames) { // Check if previousGames exists
-                    selectedGame = gameData.previousGames.find(game => game.id === gameId);
+                if (Array.isArray(gameData.games)) {
+                    selectedGame = gameData.games.find(game => game.id === gameId);
                 }
 
                 // Handle case where the game is not found in the list

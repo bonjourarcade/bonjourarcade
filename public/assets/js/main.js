@@ -154,6 +154,21 @@ function isFirefox() {
 // window.addEventListener('DOMContentLoaded', checkBrowser);
 async function fetchGameData() {
     try {
+        // First, get the current game ID from the API endpoint
+        let currentGameId = null;
+        try {
+            const currentGameResponse = await fetch('/api/current-game');
+            if (currentGameResponse.ok) {
+                currentGameId = await currentGameResponse.text();
+                currentGameId = currentGameId.trim(); // Remove any whitespace
+                if (currentGameId === 'no-game') {
+                    currentGameId = null;
+                }
+            }
+        } catch (error) {
+            console.warn('Could not fetch current game from API:', error);
+        }
+
         // Use absolute path from root, matching HTML links/server root
         const response = await fetch('/gamelist.json');
 
@@ -168,25 +183,25 @@ async function fetchGameData() {
         // Parse the JSON data from the response
         const data = await response.json();
 
-        // Check if the received data structure is as expected
-        if (!data || typeof data.gameOfTheWeek === 'undefined' || typeof data.previousGames === 'undefined') {
+        // Check if the received data structure is as expected (now simplified)
+        if (!data || !Array.isArray(data.games)) {
              throw new Error("Invalid data structure received from gamelist.json.");
         }
 
+        // Find the current game of the week from the games list
+        let gameOfTheWeek = null;
+        if (currentGameId) {
+            gameOfTheWeek = data.games.find(game => game.id === currentGameId);
+        }
+
         // Store game of the week data globally for potential redirects
-        window.gameOfTheWeekData = data.gameOfTheWeek;
+        window.gameOfTheWeekData = gameOfTheWeek;
 
         // Populate sections using the fetched data
-        populateFeaturedGame(data.gameOfTheWeek);
+        populateFeaturedGame(gameOfTheWeek);
 
-        // Combine game of the week with previous games for grid and randomizer
-        let allGames = [];
-        if (data.gameOfTheWeek && data.gameOfTheWeek.id) {
-            allGames.push(data.gameOfTheWeek);
-        }
-        if (Array.isArray(data.previousGames)) {
-            allGames = allGames.concat(data.previousGames);
-        }
+        // Use all games for grid and randomizer (no need to combine separate arrays)
+        let allGames = data.games;
 
         // Store all games globally for filtering purposes
         window.allGamesData = allGames;

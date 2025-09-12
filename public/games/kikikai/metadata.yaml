@@ -11,5 +11,6 @@ genre: Shooter
 
 enable_score: true
 hide: yes
+problem: true
 
 added: 2025-09-10

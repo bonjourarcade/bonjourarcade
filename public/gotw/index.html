@@ -41,16 +41,32 @@
     <script>
         async function redirectToGameOfTheWeek() {
             try {
+                // First get the current game ID from the API
+                const currentGameResponse = await fetch('/api/current-game');
+                if (!currentGameResponse.ok) {
+                    throw new Error(`Failed to fetch current game: ${currentGameResponse.statusText}`);
+                }
+                const currentGameId = (await currentGameResponse.text()).trim();
+                
+                if (currentGameId === 'no-game') {
+                    console.error('No current game set.');
+                    window.location.href = '/';
+                    return;
+                }
+
+                // Then get the game details from gamelist.json
                 const response = await fetch('/gamelist.json');
                 if (!response.ok) {
                     throw new Error(`Failed to fetch gamelist.json: ${response.statusText}`);
                 }
                 const data = await response.json();
-                if (data.gameOfTheWeek && data.gameOfTheWeek.pageUrl) {
-                    window.location.href = data.gameOfTheWeek.pageUrl;
+                
+                // Find the current game in the games list
+                const currentGame = data.games.find(game => game.id === currentGameId);
+                if (currentGame && currentGame.pageUrl) {
+                    window.location.href = currentGame.pageUrl;
                 } else {
-                    console.error('Game of the Week data not found or invalid.');
-                    // Fallback in case of error or no GOTW set
+                    console.error('Current game not found in gamelist or no pageUrl.');
                     window.location.href = '/';
                 }
             } catch (error) {

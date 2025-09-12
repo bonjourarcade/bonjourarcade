@@ -535,6 +535,7 @@
                 <option value="developer">Développeur</option>
                 <option value="system">Système</option>
                 <option value="new">Nouveaux jeux</option>
+                <option value="week">Jeux de la semaine</option>
             </select>
             <input type="text" id="search-input" class="search-input" placeholder="Rechercher par titre..." style="border-radius: 0 8px 8px 0; border-left: none;">
             <select id="genre-select" style="display: none; padding: 0.75rem 1rem; border: 2px solid var(--border-color); border-radius: 0 8px 8px 0; font-size: 1rem; background: var(--card-bg); color: var(--text-color); border-left: none; cursor: pointer;">
@@ -581,6 +582,17 @@
         // Store all games data globally
         let gamesData = [];
         let filteredGamesData = [];
+        let predictionsData = [];
+        
+        // Function to get current week number in YYYYWW format
+        function getCurrentWeek() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const startOfYear = new Date(year, 0, 1);
+            const days = Math.floor((now - startOfYear) / (24 * 60 * 60 * 1000));
+            const weekNumber = Math.ceil((days + startOfYear.getDay() + 1) / 7);
+            return year * 100 + weekNumber;
+        }
         
         // Back to home button
         document.getElementById('back-home-btn').addEventListener('click', function() {
@@ -676,7 +688,9 @@
 
         // Search functionality
         function filterGames(searchTerm) {
-            if (!searchTerm) {
+            const searchType = document.getElementById('search-type').value;
+            
+            if (!searchTerm && searchType !== 'week') {
                 filteredGamesData = gamesData;
                 updateSearchInfo();
                 renderGames(filteredGamesData);
@@ -686,7 +700,41 @@
                 return;
             }
             
-            const searchType = document.getElementById('search-type').value;
+            // Handle week games filter
+            if (searchType === 'week') {
+                const currentWeek = getCurrentWeek();
+                
+                // Filter games that are in predictions and not from future weeks
+                filteredGamesData = gamesData.filter(game => {
+                    const prediction = predictionsData.find(pred => pred.game_id === game.id);
+                    if (!prediction) return false;
+                    
+                    // Only include games from current week or earlier
+                    const weekNumber = parseInt(prediction.week);
+                    return weekNumber <= currentWeek;
+                });
+                
+                // Sort by seed number (week number) in descending order (latest first)
+                filteredGamesData.sort((a, b) => {
+                    const aPrediction = predictionsData.find(pred => pred.game_id === a.id);
+                    const bPrediction = predictionsData.find(pred => pred.game_id === b.id);
+                    
+                    if (!aPrediction || !bPrediction) return 0;
+                    
+                    const aWeek = parseInt(aPrediction.week);
+                    const bWeek = parseInt(bPrediction.week);
+                    
+                    return bWeek - aWeek; // Descending order (latest first)
+                });
+                
+                updateSearchInfo();
+                renderGames(filteredGamesData);
+                hideHeaderElements(); // Hide header elements when filtering
+                hideSectionHeaders(); // Hide section headers when filtering
+                updateRandomButtonText(); // Update random button text with filter count
+                return;
+            }
+            
             const term = searchTerm.toLowerCase();
             
             // Filter based on search type
@@ -809,7 +857,7 @@
             const systemSelect = document.getElementById('system-select');
             const newSelect = document.getElementById('new-select');
             const searchType = document.getElementById('search-type').value;
-            const isSearching = (searchInput && searchInput.value) || (genreSelect && genreSelect.value) || (developerSelect && developerSelect.value) || (systemSelect && systemSelect.value) || (newSelect && newSelect.value);
+            const isSearching = (searchInput && searchInput.value) || (genreSelect && genreSelect.value) || (developerSelect && developerSelect.value) || (systemSelect && systemSelect.value) || (newSelect && newSelect.value) || (searchType === 'week');
             
             if (isSearching) {
                 // Simple grid layout for search results (no sections)
@@ -853,6 +901,19 @@
                         if (!titleA || titleA === a.id) titleA = capitalizeFirst(a.id);
                         if (!titleB || titleB === b.id) titleB = capitalizeFirst(b.id);
                         return titleA.localeCompare(titleB);
+                    });
+                } else if (searchType === 'week') {
+                    // Sort week games by seed number (week number) in descending order (latest first)
+                    games.sort((a, b) => {
+                        const aPrediction = predictionsData.find(pred => pred.game_id === a.id);
+                        const bPrediction = predictionsData.find(pred => pred.game_id === b.id);
+                        
+                        if (!aPrediction || !bPrediction) return 0;
+                        
+                        const aWeek = parseInt(aPrediction.week);
+                        const bWeek = parseInt(bPrediction.week);
+                        
+                        return bWeek - aWeek; // Descending order (latest first)
                     });
                 } else {
                     // Sort games alphabetically for other search types
@@ -1250,6 +1311,21 @@
                 developerSelect.value = '';
                 systemSelect.value = '';
                 newSelect.value = '';
+            } else if (searchType === 'week') {
+                searchInput.style.display = 'none';
+                genreSelect.style.display = 'none';
+                developerSelect.style.display = 'none';
+                systemSelect.style.display = 'none';
+                newSelect.style.display = 'none';
+                searchInput.value = '';
+                genreSelect.value = '';
+                developerSelect.value = '';
+                systemSelect.value = '';
+                newSelect.value = '';
+                
+                // Trigger week games filter
+                filterGames('');
+                return;
             }
             
             // Clear any existing search results
@@ -1291,6 +1367,7 @@
             }
             filterGames(e.target.value);
         });
+
 
         // Keyboard event listener for "/" key and arrow keys
         document.addEventListener('keydown', function(e) {
@@ -1477,6 +1554,48 @@
                 }, 500);
             }
         });
+
+        // Fetch predictions data
+        fetch('/plinko/predict/predictions.yaml')
+            .then(res => res.text())
+            .then(yamlText => {
+                // Parse YAML data (simple parsing for this specific format)
+                const lines = yamlText.split('\n');
+                const predictions = [];
+                let currentPrediction = null;
+                
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i];
+                    
+                    // Check if line is a week key (format: YYYYWW: )
+                    if (/^\d{6}: $/.test(line)) {
+                        if (currentPrediction) {
+                            predictions.push(currentPrediction);
+                        }
+                        currentPrediction = {
+                            week: line.replace(': ', ''),
+                            title: '',
+                            game_id: ''
+                        };
+                    } else if (currentPrediction && line.startsWith('  title: ')) {
+                        currentPrediction.title = line.replace('  title: ', '').replace(/"/g, '');
+                    } else if (currentPrediction && line.startsWith('  game_id: ')) {
+                        currentPrediction.game_id = line.replace('  game_id: ', '').replace(/"/g, '');
+                    }
+                }
+                
+                // Add the last prediction
+                if (currentPrediction) {
+                    predictions.push(currentPrediction);
+                }
+                
+                // Store predictions data (already in chronological order from latest to oldest)
+                predictionsData = predictions;
+            })
+            .catch(err => {
+                console.error('Error loading predictions.yaml:', err);
+                predictionsData = [];
+            });
 
         // Fetch and render games
         fetch('/gamelist.json')

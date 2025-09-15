@@ -662,9 +662,7 @@ Annonce du jeu de la semaine!
 {{b}}Classements :{{b}} {leaderboard_url}
 
 🕹️ {{b}}Faites-en l'essai :{{b}} {play_url}
-
 {last_week_text}
-
 Bonne semaine ! ☀️
 """.strip()
         sent_any = False

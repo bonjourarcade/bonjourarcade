@@ -57,3 +57,5 @@ send_newsletter:
     - if: $CI_PIPELINE_SOURCE == "schedule"
   variables:
     CONVERTKIT_API_SECRET: $CONVERTKIT_API_SECRET
+  dependencies:
+    - pages

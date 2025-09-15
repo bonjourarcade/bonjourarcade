@@ -113,13 +113,24 @@ class NewsletterSender:
             # YAML parser converts string keys to integers, so we need to convert the seed to int
             try:
                 seed_int = int(seed)
-                game_title = predictions.get(seed_int)
+                game_data = predictions.get(seed_int)
             except ValueError:
                 # If seed is not a valid integer, try as string
-                game_title = predictions.get(seed)
+                game_data = predictions.get(seed)
+            
+            if not game_data:
+                print(f"⚠️  Warning: No prediction found for seed {seed}")
+                return None
+            
+            # Extract the title from the game data (which can be a dict or string)
+            if isinstance(game_data, dict):
+                game_title = game_data.get('title')
+            else:
+                # If it's already a string, use it directly
+                game_title = game_data
             
             if not game_title:
-                print(f"⚠️  Warning: No prediction found for seed {seed}")
+                print(f"⚠️  Warning: No title found in prediction data for seed {seed}")
                 return None
             
             print(f"🎯 For seed {seed}, predicted game: {game_title}")
@@ -142,8 +153,13 @@ class NewsletterSender:
             
             # Search through all games for a title match
             all_games = []
+            # Add games from the main games array
+            if gamelist.get('games'):
+                all_games.extend(gamelist['games'])
+            # Add game of the week if it exists
             if gamelist.get('gameOfTheWeek') and gamelist['gameOfTheWeek'].get('id'):
                 all_games.append(gamelist['gameOfTheWeek'])
+            # Add previous games if they exist
             if gamelist.get('previousGames'):
                 all_games.extend(gamelist['previousGames'])
             

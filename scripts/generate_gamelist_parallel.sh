@@ -41,6 +41,13 @@ fi
 
 echo -e "${BLUE}🚀 Starting parallel gamelist generation with $NUM_WORKERS workers...${NC}"
 
+# Optional manifest input to avoid scanning local roms/ in CI
+# If ROMS_MANIFEST_URL or ROMS_MANIFEST_PATH is provided, we'll read the list of ROM entries
+# from there instead of traversing the filesystem. Expected manifest format: one entry per line,
+# relative path under roms root (e.g. "NES/SuperMarioBros.nes"). Lines containing "/bios/" are ignored.
+ROMS_MANIFEST_URL=${ROMS_MANIFEST_URL:-}
+ROMS_MANIFEST_PATH=${ROMS_MANIFEST_PATH:-}
+
 # --- Core Mapping (Directory name -> EJS_core name) ---
 get_core_from_dir() {
     case "$1" in
@@ -85,11 +92,24 @@ fi
 # Note: Featured game is now handled via the /api/current-game endpoint
 # No need to process it during build time
 
-# --- Main processing ---
-
-# Get list of all ROM files
-echo -e "${BLUE}📋 Scanning ROM files...${NC}"
-ROM_FILES=$(find -L "$ROMS_DIR" -maxdepth 2 -type f -not -path "*/\.*" | grep -v "/bios/" | sort)
+echo -e "${BLUE}📋 Collecting ROM entries...${NC}"
+TEMP_MANIFEST=""
+if [ -n "$ROMS_MANIFEST_URL" ]; then
+    echo -e "${BLUE}🌐 Fetching manifest from URL: $ROMS_MANIFEST_URL${NC}"
+    TEMP_MANIFEST=$(mktemp)
+    if ! curl -fsSL "$ROMS_MANIFEST_URL" -o "$TEMP_MANIFEST"; then
+        echo -e "${RED}❌ Failed to download ROMS_MANIFEST_URL${NC}"
+        exit 1
+    fi
+    ROM_FILES=$(cat "$TEMP_MANIFEST" | grep -v "/bios/" | sort)
+elif [ -n "$ROMS_MANIFEST_PATH" ] && [ -f "$ROMS_MANIFEST_PATH" ]; then
+    echo -e "${BLUE}📄 Using local manifest file: $ROMS_MANIFEST_PATH${NC}"
+    ROM_FILES=$(cat "$ROMS_MANIFEST_PATH" | grep -v "/bios/" | sort)
+else
+    # Fallback to scanning local filesystem
+    echo -e "${BLUE}🗂️  Scanning roms directory: $ROMS_DIR${NC}"
+    ROM_FILES=$(find -L "$ROMS_DIR" -maxdepth 2 -type f -not -path "*/\.*" | grep -v "/bios/" | sed "s#^$ROMS_DIR/##" | sort)
+fi
 TOTAL_FILES=$(echo "$ROM_FILES" | wc -l)
 
 echo -e "${BLUE}📊 Found $TOTAL_FILES ROM files to process${NC}"
@@ -152,8 +172,8 @@ for i in $(seq 1 $BATCH_WORKERS); do
                 
                 # Process each ROM file in the batch
                 file_count=0
-                while IFS= read -r rom_file; do
-                    [ -z "$rom_file" ] && continue
+                while IFS= read -r rom_entry; do
+                    [ -z "$rom_entry" ] && continue
                     file_count=$((file_count + 1))
                     
                     # Debug output for every 10th file
@@ -164,9 +184,15 @@ for i in $(seq 1 $BATCH_WORKERS); do
                     # Add error handling around the entire file processing
                     if ! (
                         # Extract game_id from filename (remove extension)
-                        game_id=$(basename "$rom_file" | sed 's/\.[^.]*$//')
-                        rom_subdir=$(basename "$(dirname "$rom_file")")
-                        rom_filename=$(basename "$rom_file")
+                        # rom_entry is like "NES/Game.nes" from the manifest
+                        if echo "$rom_entry" | grep -q "/"; then
+                            rom_subdir=$(echo "$rom_entry" | cut -d'/' -f1)
+                            rom_filename=$(echo "$rom_entry" | awk -F'/' '{print $NF}')
+                        else
+                            rom_subdir=$(basename "$(dirname "$rom_entry")")
+                            rom_filename=$(basename "$rom_entry")
+                        fi
+                        game_id=$(echo "$rom_filename" | sed 's/\.[^.]*$//')
                         
                         # Skip BIOS files
                         if [ "$rom_subdir" = "bios" ]; then

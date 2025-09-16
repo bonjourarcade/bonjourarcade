@@ -81,7 +81,7 @@ show_progress() {
             if grep -q "Getting current week's game from predictions.yaml" /tmp/gamelist_output.log; then
                 current_stage=2
             fi
-            if grep -q "Scanning ROM files" /tmp/gamelist_output.log; then
+            if grep -q "Scanning ROM files\|Collecting ROM entries" /tmp/gamelist_output.log; then
                 current_stage=3
             fi
             if grep -q "Starting.*worker processes" /tmp/gamelist_output.log; then

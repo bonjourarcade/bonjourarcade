@@ -16,7 +16,7 @@ pages:
     - pip3 install yq                                  # Install the Python-based yq
     - pip3 install Pillow                              # Install dependencies for PNG shrinking
   script:
-    - git clone --depth 1 https://gitlab.com/bonjourarcade/roms.git
+    #- git clone --depth 1 https://gitlab.com/bonjourarcade/roms.git
     - bash scripts/build_sequential.sh
     - cp plinko-gamelist.txt public/plinko/gamelist.txt
     #- cd public
@@ -31,9 +31,9 @@ pages:
       changes: 
         - public/**/*
         - plinko-gamelist.txt
-        - scripts/build_parallel.sh
+        #- scripts/build_parallel.sh
         - scripts/build_sequential.sh
-        - scripts/generate_gamelist_parallel.sh
+        #- scripts/generate_gamelist_parallel.sh
         - scripts/generate_gamelist_sequential.sh
         - scripts/generate_thumbnails.sh
 

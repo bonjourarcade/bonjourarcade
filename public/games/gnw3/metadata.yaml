@@ -1,0 +1,15 @@
+title: Game & Watch Gallery 3
+developer: TOSE
+year: 1999
+genre: Compilation, Action
+#controls:
+#  - 🕹️ Déplacer
+#  - 1️⃣  Tirer
+#  - 2️⃣  Bombe
+
+#to_start: Insert Coin -> Start
+
+enable_score: true
+hide: yes
+
+added: 2025-09-16

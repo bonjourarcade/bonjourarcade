@@ -224,6 +224,15 @@
         body.theme-dark .search-info {
             color: #aaa;
         }
+        .filter-count {
+            font-size: 0.9rem;
+            color: #666;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+        body.theme-dark .filter-count {
+            color: #aaa;
+        }
         .no-results {
             text-align: center;
             padding: 2rem;
@@ -241,17 +250,30 @@
             }
             
             .search-container {
-                flex: 1 1 100% !important;
-                min-width: 0 !important;
-                max-width: none !important;
-                margin: 0 !important;
                 width: 100% !important;
+                margin-bottom: 1rem !important;
+                flex-direction: column !important;
+                align-items: stretch !important;
+                gap: 0.5rem !important;
+            }
+            
+            .search-container > *:not(.filter-count) {
+                width: 100% !important;
+                margin: 0 !important;
+                border-radius: 8px !important;
+            }
+            
+            .filter-count {
+                text-align: center !important;
+                margin-top: 0.5rem !important;
+                font-size: 0.8rem !important;
             }
             
             .search-input {
                 width: 100%;
                 max-width: none;
                 box-sizing: border-box;
+                border-radius: 8px !important;
             }
             
             .random-game-btn {
@@ -279,7 +301,7 @@
             
             #header-container {
                 gap: 0.5rem !important;
-                margin-bottom: 1rem !important;
+                margin-bottom: 0.5rem !important;
             }
             
             #header-buttons {
@@ -295,6 +317,7 @@
             
             .search-container {
                 margin-bottom: 0.8rem !important;
+                gap: 0.3rem !important;
             }
             
             .random-game-btn {
@@ -525,40 +548,40 @@
     </style>
 </head>
 <body>
-    <div id="header-container" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+    <div id="header-container" style="display: flex; justify-content: flex-start; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem;">
         <button id="back-home-btn" style="padding: 0.6rem 1.2rem; font-size: 1rem; border-radius: 6px; border: none; background: #222; color: #fff; cursor: pointer; font-family: sans-serif; box-shadow: 0 2px 6px rgba(0,0,0,0.08);">← Retour Accueil</button>
-        
-        <div class="search-container" style="margin-bottom: 0; flex: 1; min-width: 250px; max-width: 600px; margin-left: 0; margin-right: 0;">
-            <select id="search-type" style="padding: 0.75rem 0.5rem; border: 2px solid var(--border-color); border-radius: 8px 0 0 8px; font-size: 1rem; background: var(--card-bg); color: var(--text-color); border-right: none; cursor: pointer;">
-                <option value="title">Titre</option>
-                <option value="genre">Genre</option>
-                <option value="developer">Développeur</option>
-                <option value="system">Système</option>
-                <option value="week">Jeux de la semaine</option>
-            </select>
-            <input type="text" id="search-input" class="search-input" placeholder="Rechercher par titre..." style="border-radius: 0 8px 8px 0; border-left: none;">
-            <select id="genre-select" style="display: none; padding: 0.75rem 1rem; border: 2px solid var(--border-color); border-radius: 0 8px 8px 0; font-size: 1rem; background: var(--card-bg); color: var(--text-color); border-left: none; cursor: pointer;">
-                <option value="">Sélectionner un genre...</option>
-            </select>
-            <select id="developer-select" style="display: none; padding: 0.75rem 1rem; border: 2px solid var(--border-color); border-radius: 0 8px 8px 0; font-size: 1rem; background: var(--card-bg); color: var(--text-color); border-left: none; cursor: pointer;">
-                <option value="">Sélectionner un développeur...</option>
-            </select>
-            <select id="system-select" style="display: none; padding: 0.75rem 1rem; border: 2px solid var(--border-color); border-radius: 0 8px 8px 0; font-size: 1rem; background: var(--card-bg); color: var(--text-color); border-left: none; cursor: pointer;">
-                <option value="">Sélectionner un système...</option>
-            </select>
-            <select id="sort-select" style="padding: 0.75rem 0.5rem; border: 2px solid var(--border-color); border-radius: 8px; font-size: 1rem; background: var(--card-bg); color: var(--text-color); cursor: pointer; margin-left: 0.5rem;">
-                <option value="alpha">Trier: Alphabétique</option>
-                <option value="latest">Trier: Derniers ajouts</option>
-            </select>
-            <span class="search-info" id="search-info"></span>
-        </div>
         
         <div id="header-buttons" style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
             <button id="theme-toggle" class="theme-toggle" style="margin-right: 0;">🌙</button>
             <button id="random-game-btn" class="random-game-btn">🎲 Jeu aléatoire (avec filtres)</button>
-            <div class="random-info-text">Respecte vos filtres actuels</div>
             <button id="screensaver-btn" class="screensaver-btn" style="padding: 0.6rem 1.2rem; font-size: 1rem; border-radius: 6px; border: none; background: linear-gradient(45deg, #ff6b6b, #ee5a24); color: #fff; cursor: pointer; font-family: sans-serif; box-shadow: 0 2px 6px rgba(0,0,0,0.2);">🔄 Mode écran de veille</button>
         </div>
+    </div>
+    
+    <div class="search-container" style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+        <select id="search-type" style="padding: 0.75rem 0.5rem; border: 2px solid var(--border-color); border-radius: 8px 0 0 8px; font-size: 1rem; background: var(--card-bg); color: var(--text-color); border-right: none; cursor: pointer;">
+            <option value="title">Titre</option>
+            <option value="genre">Genre</option>
+            <option value="developer">Développeur</option>
+            <option value="system">Système</option>
+            <option value="week">Jeux de la semaine</option>
+        </select>
+        <input type="text" id="search-input" class="search-input" placeholder="Rechercher par titre..." style="border-radius: 0 8px 8px 0; border-left: none; flex: 1; min-width: 200px;">
+        <select id="genre-select" style="display: none; padding: 0.75rem 1rem; border: 2px solid var(--border-color); border-radius: 0 8px 8px 0; font-size: 1rem; background: var(--card-bg); color: var(--text-color); border-left: none; cursor: pointer;">
+            <option value="">Sélectionner un genre...</option>
+        </select>
+        <select id="developer-select" style="display: none; padding: 0.75rem 1rem; border: 2px solid var(--border-color); border-radius: 0 8px 8px 0; font-size: 1rem; background: var(--card-bg); color: var(--text-color); border-left: none; cursor: pointer;">
+            <option value="">Sélectionner un développeur...</option>
+        </select>
+        <select id="system-select" style="display: none; padding: 0.75rem 1rem; border: 2px solid var(--border-color); border-radius: 0 8px 8px 0; font-size: 1rem; background: var(--card-bg); color: var(--text-color); border-left: none; cursor: pointer;">
+            <option value="">Sélectionner un système...</option>
+        </select>
+        <select id="sort-select" style="padding: 0.75rem 0.5rem; border: 2px solid var(--border-color); border-radius: 8px; font-size: 1rem; background: var(--card-bg); color: var(--text-color); cursor: pointer;">
+            <option value="alpha">Trier: Alphabétique</option>
+            <option value="latest">Trier: Derniers ajouts</option>
+        </select>
+        <span class="search-info" id="search-info"></span>
+        <div class="filter-count" id="filter-count">1046 jeux</div>
     </div>
     
     <div id="header-content" class="header-content">
@@ -695,7 +718,6 @@
                 renderGames(filteredGamesData);
                 showHeaderElements(); // Show header elements when search is cleared
                 showSectionHeaders(); // Show section headers when search is cleared
-                updateRandomButtonText(); // Update random button text with filter count
                 return;
             }
             
@@ -730,7 +752,6 @@
                 renderGames(filteredGamesData);
                 hideHeaderElements(); // Hide header elements when filtering
                 hideSectionHeaders(); // Hide section headers when filtering
-                updateRandomButtonText(); // Update random button text with filter count
                 return;
             }
             
@@ -774,7 +795,6 @@
             renderGames(filteredGamesData);
             hideHeaderElements(); // Hide header elements when searching
             hideSectionHeaders(); // Hide section headers when searching
-            updateRandomButtonText(); // Update random button text with filter count
         }
         
         function showHeaderElements() {
@@ -808,10 +828,17 @@
         
         function updateSearchInfo() {
             const searchInfo = document.getElementById('search-info');
+            const filterCount = document.getElementById('filter-count');
+            
             if (filteredGamesData.length === gamesData.length) {
+                // No active filters - show total count in filter-count, hide search-info
                 searchInfo.textContent = '';
+                filterCount.textContent = `${filteredGamesData.length} jeux`;
+                filterCount.style.display = 'block';
             } else {
+                // Active filters - show detailed message in search-info, hide filter-count
                 searchInfo.textContent = `${filteredGamesData.length} jeu${filteredGamesData.length > 1 ? 'x' : ''} trouvé${filteredGamesData.length > 1 ? 's' : ''}`;
+                filterCount.style.display = 'none';
             }
         }
         
@@ -1177,23 +1204,6 @@
             }
         }
         
-        // Function to update random button text with current filter count
-        function updateRandomButtonText() {
-            const randomBtn = document.getElementById('random-game-btn');
-            const infoText = document.querySelector('.random-info-text');
-            
-            if (randomBtn && infoText) {
-                const gamesToRandomizeFrom = filteredGamesData.length > 0 ? filteredGamesData : gamesData;
-                const totalGames = gamesData.length;
-                const filteredCount = gamesToRandomizeFrom.length;
-                
-                if (filteredCount === totalGames) {
-                    infoText.textContent = `Respecte vos filtres actuels (${totalGames} jeux)`;
-                } else {
-                    infoText.textContent = `Respecte vos filtres actuels (${filteredCount}/${totalGames} jeux)`;
-                }
-            }
-        }
 
         // Check if device is mobile
         function isMobileDevice() {
@@ -1660,8 +1670,8 @@
                 // Render all games initially
                 renderGames(gamesData);
                 
-                // Update random button text with initial count
-                updateRandomButtonText();
+                // Update filter count with initial count
+                updateSearchInfo();
             })
             .catch(err => {
                 console.error('Error loading games.json:', err);

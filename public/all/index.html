@@ -565,6 +565,7 @@
             <option value="developer">Développeur</option>
             <option value="system">Système</option>
             <option value="week">Jeux de la semaine</option>
+            <option value="history">Historique</option>
         </select>
         <input type="text" id="search-input" class="search-input" placeholder="Rechercher par titre..." style="border-radius: 0 8px 8px 0; border-left: none; flex: 1; min-width: 200px;">
         <select id="genre-select" style="display: none; padding: 0.75rem 1rem; border: 2px solid var(--border-color); border-radius: 0 8px 8px 0; font-size: 1rem; background: var(--card-bg); color: var(--text-color); border-left: none; cursor: pointer;">
@@ -605,6 +606,7 @@
         let gamesData = [];
         let filteredGamesData = [];
         let predictionsData = [];
+        let gameHistory = [];
         
         // Function to get current week number in YYYYWW format
         function getCurrentWeek() {
@@ -614,6 +616,63 @@
             const days = Math.floor((now - startOfYear) / (24 * 60 * 60 * 1000));
             const weekNumber = Math.ceil((days + startOfYear.getDay() + 1) / 7);
             return year * 100 + weekNumber;
+        }
+        
+        // Game history management functions
+        function loadGameHistory() {
+            try {
+                const historyData = sessionStorage.getItem('gameHistory');
+                if (historyData) {
+                    gameHistory = JSON.parse(historyData);
+                } else {
+                    gameHistory = [];
+                }
+                return gameHistory;
+            } catch (error) {
+                console.error('Error loading game history:', error);
+                gameHistory = [];
+                return gameHistory;
+            }
+        }
+        
+        function saveGameHistory() {
+            try {
+                sessionStorage.setItem('gameHistory', JSON.stringify(gameHistory));
+            } catch (error) {
+                console.error('Error saving game history:', error);
+            }
+        }
+        
+        function addGameToHistory(gameId) {
+            if (!gameId) return;
+            
+            // Remove if already exists to avoid duplicates
+            gameHistory = gameHistory.filter(entry => entry.gameId !== gameId);
+            
+            // Add to beginning of array (most recent first)
+            gameHistory.unshift({
+                gameId: gameId,
+                timestamp: Date.now(),
+                date: new Date().toISOString()
+            });
+            
+            // Keep only last 50 games to avoid storage bloat
+            if (gameHistory.length > 50) {
+                gameHistory = gameHistory.slice(0, 50);
+            }
+            
+            saveGameHistory();
+        }
+        
+        function getHistoryGameIds() {
+            // Always load fresh data from sessionStorage
+            const freshHistory = loadGameHistory();
+            // Ensure we have an array before calling map
+            if (!Array.isArray(freshHistory)) {
+                console.warn('History data is not an array:', freshHistory);
+                return [];
+            }
+            return freshHistory.map(entry => entry.gameId);
         }
         
         // Back to home button
@@ -712,7 +771,7 @@
         function filterGames(searchTerm) {
             const searchType = document.getElementById('search-type').value;
             
-            if (!searchTerm && searchType !== 'week') {
+            if (!searchTerm && searchType !== 'week' && searchType !== 'history') {
                 filteredGamesData = gamesData;
                 updateSearchInfo();
                 renderGames(filteredGamesData);
@@ -746,6 +805,38 @@
                     const bWeek = parseInt(bPrediction.week);
                     
                     return bWeek - aWeek; // Descending order (latest first)
+                });
+                
+                updateSearchInfo();
+                renderGames(filteredGamesData);
+                hideHeaderElements(); // Hide header elements when filtering
+                hideSectionHeaders(); // Hide section headers when filtering
+                return;
+            }
+            
+            // Handle history filter
+            if (searchType === 'history') {
+                const historyGameIds = getHistoryGameIds();
+                
+                // Filter games that are in the history
+                filteredGamesData = gamesData.filter(game => {
+                    return historyGameIds.includes(game.id);
+                });
+                
+                // If no games in history, show a message
+                if (filteredGamesData.length === 0) {
+                    const container = document.getElementById('gameGrid');
+                    container.innerHTML = '<div class="no-results">Aucun jeu dans votre historique. Lancez quelques jeux pour les voir apparaître ici !</div>';
+                    hideHeaderElements();
+                    hideSectionHeaders();
+                    return;
+                }
+                
+                // Sort by history order (most recent first)
+                filteredGamesData.sort((a, b) => {
+                    const aIndex = historyGameIds.indexOf(a.id);
+                    const bIndex = historyGameIds.indexOf(b.id);
+                    return aIndex - bIndex; // Ascending order (most recent first)
                 });
                 
                 updateSearchInfo();
@@ -877,7 +968,7 @@
             const systemSelect = document.getElementById('system-select');
             const sortSelect = document.getElementById('sort-select');
             const searchType = document.getElementById('search-type').value;
-            const isSearching = (searchInput && searchInput.value) || (genreSelect && genreSelect.value) || (developerSelect && developerSelect.value) || (systemSelect && systemSelect.value) || (searchType === 'week');
+            const isSearching = (searchInput && searchInput.value) || (genreSelect && genreSelect.value) || (developerSelect && developerSelect.value) || (systemSelect && systemSelect.value) || (searchType === 'week') || (searchType === 'history');
             
             if (isSearching) {
                 // Simple grid layout for search results (no sections)
@@ -979,6 +1070,7 @@
                     div.querySelector('a').addEventListener('click', function(e) {
                         sessionStorage.setItem('referrerAllGames', '1');
                         sessionStorage.setItem('lastPlayedGame', game.id);
+                        addGameToHistory(game.id);
                     });
 
                     // Tooltip event listeners - only on non-mobile devices
@@ -1056,6 +1148,7 @@
                         div.querySelector('a').addEventListener('click', function(e) {
                             sessionStorage.setItem('referrerAllGames', '1');
                             sessionStorage.setItem('lastPlayedGame', game.id);
+                            addGameToHistory(game.id);
                         });
                         if (!isMobileDevice()) {
                             div.addEventListener('mouseenter', (e) => {
@@ -1167,6 +1260,7 @@
                         div.querySelector('a').addEventListener('click', function(e) {
                             sessionStorage.setItem('referrerAllGames', '1');
                             sessionStorage.setItem('lastPlayedGame', game.id);
+                            addGameToHistory(game.id);
                         });
 
                         // Tooltip event listeners - only on non-mobile devices
@@ -1260,6 +1354,16 @@
             if (searchType === 'title') {
                 searchInput.placeholder = 'Rechercher par titre...';
                 searchInput.style.display = 'block';
+                genreSelect.style.display = 'none';
+                developerSelect.style.display = 'none';
+                systemSelect.style.display = 'none';
+                searchInput.value = '';
+                genreSelect.value = '';
+                developerSelect.value = '';
+                systemSelect.value = '';
+            } else if (searchType === 'history') {
+                searchInput.placeholder = 'Historique des jeux joués...';
+                searchInput.style.display = 'none';
                 genreSelect.style.display = 'none';
                 developerSelect.style.display = 'none';
                 systemSelect.style.display = 'none';
@@ -1377,6 +1481,19 @@
                 systemSelect.value = '';
                 
                 // Trigger week games filter
+                filterGames('');
+                return;
+            } else if (searchType === 'history') {
+                searchInput.style.display = 'none';
+                genreSelect.style.display = 'none';
+                developerSelect.style.display = 'none';
+                systemSelect.style.display = 'none';
+                searchInput.value = '';
+                genreSelect.value = '';
+                developerSelect.value = '';
+                systemSelect.value = '';
+                
+                // Trigger history filter
                 filterGames('');
                 return;
             }
@@ -1580,6 +1697,7 @@
         window.addEventListener('DOMContentLoaded', () => {
             initTheme();
             checkBrowser();
+            loadGameHistory();
             
             // Check if we should scroll to a specific game (from URL parameter or session storage)
             const urlParams = new URLSearchParams(window.location.search);

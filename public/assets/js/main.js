@@ -302,6 +302,7 @@ async function fetchGameData() {
                     const exactMatch = visibleGames.find(game => game.id && removeAccents(game.id) === removeAccents(searchTerm));
                     if (exactMatch) {
                         // If exact match exists, just go to that game
+                        addGameToHistory(exactMatch.id);
                         window.location.href = exactMatch.pageUrl;
                         return;
                     }
@@ -326,6 +327,7 @@ async function fetchGameData() {
                 const randomIdx = Math.floor(Math.random() * gamesToRandomizeFrom.length);
                 const randomGame = gamesToRandomizeFrom[randomIdx];
                 if (randomGame && randomGame.pageUrl) {
+                    addGameToHistory(randomGame.id);
                     window.location.href = randomGame.pageUrl;
                 }
             };
@@ -951,6 +953,11 @@ function handleGameClick(element) {
 
     // After animation and sound, navigate
     setTimeout(() => {
+        // Track game in history before navigating
+        const gameId = extractGameIdFromUrl(targetUrl);
+        if (gameId) {
+            addGameToHistory(gameId);
+        }
         window.location.href = targetUrl;
     }, 700);
 }
@@ -1158,6 +1165,11 @@ function handleGameClick(element) {
 
         // After animation and sound, navigate
         setTimeout(() => {
+            // Track game in history before navigating
+            const gameId = extractGameIdFromUrl(targetUrl);
+            if (gameId) {
+                addGameToHistory(gameId);
+            }
             window.location.href = targetUrl;
         }, 700);
     }

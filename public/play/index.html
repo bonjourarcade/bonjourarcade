@@ -759,7 +759,7 @@
 
             try {
                 // Step 2: Fetch the master game list
-                const listResponse = await fetch('/gamelist.json'); // Fetch from site root
+                const listResponse = await fetch('https://storage.googleapis.com/bonjourarcade-roms/gamelist.json'); // Fetch from Google Cloud Storage
                 if (!listResponse.ok) {
                     throw new Error(`Failed to fetch game list '/gamelist.json' (Status: ${listResponse.status})`);
                 }

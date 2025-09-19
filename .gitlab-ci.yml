@@ -16,11 +16,16 @@ pages:
     - pip3 install yq                                  # Install the Python-based yq
     - pip3 install Pillow                              # Install dependencies for PNG shrinking
   script:
-    #- git clone --depth 1 https://gitlab.com/bonjourarcade/roms.git
     - bash scripts/build_sequential.sh
     - cp plinko-gamelist.txt public/plinko/gamelist.txt
     #- cd public
     #- zip -r games.zip games
+    # Upload gamelist.json to Google Cloud Storage
+    - apk add --no-cache gcloud-cli
+    - echo "$GCLOUD_SERVICE_KEY" | base64 -d > /tmp/gcs-key.json
+    - gcloud auth activate-service-account --key-file=/tmp/gcs-key.json
+    - gcloud config set project bonjourarcade
+    - gsutil cp public/gamelist.json gs://bonjourarcade-roms/gamelist.json
     - echo "The site will be deployed to $CI_PAGES_URL"
   artifacts:
     paths:

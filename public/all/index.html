@@ -1768,7 +1768,7 @@
             });
 
         // Fetch and render games
-        fetch('/gamelist.json')
+        fetch('https://storage.googleapis.com/bonjourarcade-roms/gamelist.json')
             .then(res => res.json())
             .then(data => {
                 // Use all games from the simplified structure

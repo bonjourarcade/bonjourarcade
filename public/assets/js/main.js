@@ -169,8 +169,8 @@ async function fetchGameData() {
             console.warn('Could not fetch current game from API:', error);
         }
 
-        // Use absolute path from root, matching HTML links/server root
-        const response = await fetch('/gamelist.json');
+        // Use Google Cloud Storage URL for gamelist.json
+        const response = await fetch('https://storage.googleapis.com/bonjourarcade-roms/gamelist.json');
 
         if (!response.ok) {
             // Handle common errors like file not found

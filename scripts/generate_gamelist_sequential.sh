@@ -147,7 +147,7 @@ while IFS= read -r rom_entry; do
         rom_path="/roms/${rom_subdir}/${rom_filename}"
     else
         # Production mode - use Google Cloud Storage URLs
-        rom_path="https://storage.googleapis.com/bonjourarcade-roms/${rom_subdir}/${rom_filename}"
+        rom_path="https://storage.googleapis.com/bonjourarcade/roms/${rom_subdir}/${rom_filename}"
     fi
     
     core=$(get_core_from_dir "$rom_subdir")

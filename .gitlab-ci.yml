@@ -24,7 +24,7 @@ pages:
     # Upload gamelist.json to Google Cloud Storage
     - /root/google-cloud-sdk/bin/gcloud auth activate-service-account --key-file=$GCLOUD_SERVICE_KEY
     - /root/google-cloud-sdk/bin/gcloud config set project bonjourarcade
-    - /root/google-cloud-sdk/bin/gsutil cp public/gamelist.json gs://bonjourarcade-roms/gamelist.json
+    - /root/google-cloud-sdk/bin/gsutil cp public/gamelist.json gs://bonjourarcade/gamelist.json
     - echo "The site will be deployed to $CI_PAGES_URL"
   artifacts:
     paths:

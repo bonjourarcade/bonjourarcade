@@ -55,7 +55,9 @@
                 }
 
                 // Then get the game details from gamelist.json
-                const response = await fetch('https://storage.googleapis.com/bonjourarcade-roms/gamelist.json');
+                const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+                const gamelistUrl = isLocalhost ? '../gamelist.json' : 'https://storage.googleapis.com/bonjourarcade-roms/gamelist.json';
+                const response = await fetch(gamelistUrl);
                 if (!response.ok) {
                     throw new Error(`Failed to fetch gamelist.json: ${response.statusText}`);
                 }
@@ -67,12 +69,12 @@
                     window.location.href = currentGame.pageUrl;
                 } else {
                     console.error('Current game not found in gamelist or no pageUrl.');
-                    window.location.href = '/';
+                    window.location.href = '../';
                 }
             } catch (error) {
                 console.error('Error fetching Game of the Week:', error);
                 // Fallback to homepage on error
-                window.location.href = '/';
+                window.location.href = '../';
             }
         }
 

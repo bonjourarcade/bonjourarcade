@@ -169,8 +169,10 @@ async function fetchGameData() {
             console.warn('Could not fetch current game from API:', error);
         }
 
-        // Use Google Cloud Storage URL for gamelist.json
-        const response = await fetch('https://storage.googleapis.com/bonjourarcade-roms/gamelist.json');
+        // Use local gamelist.json for development, Google Cloud Storage for production
+        const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        const gamelistUrl = isLocalhost ? 'gamelist.json' : 'https://storage.googleapis.com/bonjourarcade-roms/gamelist.json';
+        const response = await fetch(gamelistUrl);
 
         if (!response.ok) {
             // Handle common errors like file not found
@@ -436,8 +438,8 @@ function populateFeaturedGame(game) {
 
     // Create link container for the image
     const gameLink = document.createElement('a');
-    // Use pageUrl from JSON (should point to /play?game=...)
-    gameLink.href = game.pageUrl || ('/play?game=' + game.id);
+    // Use pageUrl from JSON (should point to play?game=...)
+    gameLink.href = game.pageUrl || ('play?game=' + game.id);
     gameLink.style.position = 'relative';
 
     // Featured Image (uses game.coverArt only now)
@@ -654,7 +656,7 @@ function populatePreviousGames(games) {
         }
 
         const link = document.createElement('a');
-        // Use pageUrl from JSON (should point to /play.html?game=...)
+        // Use pageUrl from JSON (should point to play?game=...)
         link.href = game.pageUrl || '#';
         link.style.position = 'relative';
 

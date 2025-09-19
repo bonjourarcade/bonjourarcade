@@ -12,7 +12,7 @@ pages:
     - apk update
     - apk add --no-cache bash curl imagemagick git python3 py3-pip jq #zip  # Install necessary packages
     # Install Google Cloud SDK (non-interactive)
-    - curl https://sdk.cloud.google.com | bash -s -- --disable-prompts
+    - curl https://sdk.cloud.google.com | bash -s -- --disable-prompts > /dev/null
     - export PATH=$PATH:/root/google-cloud-sdk/bin
     - python3 -m venv /tmp/yq-env                      # Create a virtual environment
     - . /tmp/yq-env/bin/activate                       # Activate the virtual environment

@@ -12,7 +12,7 @@ GAMES_DIR="public/games"
 ROMS_DIR="roms"
 OUTPUT_FILE="public/gamelist.json"
 DEFAULT_COVER="assets/images/placeholder_thumb.png" # Relative to public root
-LAUNCHER_PAGE="/play"
+LAUNCHER_PAGE="play"
 
 # Check if we're in local testing mode
 if [ "$LOCAL_TESTING" = "true" ]; then

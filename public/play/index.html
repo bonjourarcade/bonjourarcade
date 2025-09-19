@@ -419,8 +419,8 @@
         </div>
     </div>
 
-    <script src="/assets/js/banner.js"></script>
-    <script src="/assets/js/game-history.js"></script>
+    <script src="../assets/js/banner.js"></script>
+    <script src="../assets/js/game-history.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <script>
         function downloadFile(url, filename) {
@@ -759,7 +759,9 @@
 
             try {
                 // Step 2: Fetch the master game list
-                const listResponse = await fetch('https://storage.googleapis.com/bonjourarcade-roms/gamelist.json'); // Fetch from Google Cloud Storage
+                const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+                const gamelistUrl = isLocalhost ? '../gamelist.json' : 'https://storage.googleapis.com/bonjourarcade-roms/gamelist.json';
+                const listResponse = await fetch(gamelistUrl);
                 if (!listResponse.ok) {
                     throw new Error(`Failed to fetch game list '/gamelist.json' (Status: ${listResponse.status})`);
                 }

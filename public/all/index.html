@@ -600,7 +600,7 @@
 
     <div class="grid" id="gameGrid"></div>
 
-    <script src="/assets/js/banner.js"></script>
+    <script src="../assets/js/banner.js"></script>
     <script>
         // Store all games data globally
         let gamesData = [];
@@ -677,7 +677,7 @@
         
         // Back to home button
         document.getElementById('back-home-btn').addEventListener('click', function() {
-            window.location.href = '/index.html';
+            window.location.href = '../index.html';
         });
         
         // Function to scroll to a specific game
@@ -687,7 +687,7 @@
             // Wait for games to be rendered
             setTimeout(() => {
                 // Find the game element by its link href
-                const gameLink = document.querySelector(`a[href="/play?game=${gameId}"]`);
+                const gameLink = document.querySelector(`a[href="../play?game=${gameId}"]`);
                 if (gameLink) {
                     const gameElement = gameLink.closest('.game');
                     if (gameElement) {
@@ -1768,7 +1768,9 @@
             });
 
         // Fetch and render games
-        fetch('https://storage.googleapis.com/bonjourarcade-roms/gamelist.json')
+        const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        const gamelistUrl = isLocalhost ? '../gamelist.json' : 'https://storage.googleapis.com/bonjourarcade-roms/gamelist.json';
+        fetch(gamelistUrl)
             .then(res => res.json())
             .then(data => {
                 // Use all games from the simplified structure

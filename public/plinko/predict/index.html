@@ -198,7 +198,7 @@
           const tr = document.createElement('tr');
           const date = seedToDate(seed);
           tr.innerHTML =
-            `<td>${seed}</td><td>${date}</td><td><a href="../../play?game=${predictions[seed].game_id}">${predictions[seed].title}</a></td>`;
+            `<td>${seed}</td><td>${date}</td><td><a href="/play?game=${predictions[seed].game_id}">${predictions[seed].title}</a></td>`;
           tbody.appendChild(tr);
         }
       }

@@ -11,6 +11,9 @@ pages:
   before_script:
     - apk update
     - apk add --no-cache bash curl imagemagick git python3 py3-pip jq #zip  # Install necessary packages
+    # Install Google Cloud SDK (non-interactive)
+    - curl https://sdk.cloud.google.com | bash -s -- --disable-prompts
+    - export PATH=$PATH:/root/google-cloud-sdk/bin
     - python3 -m venv /tmp/yq-env                      # Create a virtual environment
     - . /tmp/yq-env/bin/activate                       # Activate the virtual environment
     - pip3 install yq                                  # Install the Python-based yq
@@ -18,14 +21,10 @@ pages:
   script:
     - bash scripts/build_sequential.sh
     - cp plinko-gamelist.txt public/plinko/gamelist.txt
-    #- cd public
-    #- zip -r games.zip games
     # Upload gamelist.json to Google Cloud Storage
-    - apk add --no-cache gcloud-cli
-    - echo "$GCLOUD_SERVICE_KEY" | base64 -d > /tmp/gcs-key.json
-    - gcloud auth activate-service-account --key-file=/tmp/gcs-key.json
-    - gcloud config set project bonjourarcade
-    - gsutil cp public/gamelist.json gs://bonjourarcade-roms/gamelist.json
+    - /root/google-cloud-sdk/bin/gcloud auth activate-service-account --key-file=$GCLOUD_SERVICE_KEY
+    - /root/google-cloud-sdk/bin/gcloud config set project bonjourarcade
+    - /root/google-cloud-sdk/bin/gsutil cp public/gamelist.json gs://bonjourarcade-roms/gamelist.json
     - echo "The site will be deployed to $CI_PAGES_URL"
   artifacts:
     paths:

@@ -793,16 +793,7 @@ function populatePreviousGames(games) {
         link.style.position = 'relative';
 
         const img = document.createElement('img');
-        let coverSrc = game.coverArt || '/assets/images/placeholder_thumb.png';
-
-        // Use thumbnail version for the previous games grid if available
-        if (coverSrc && coverSrc !== '/assets/images/placeholder_thumb.png') {
-            const lastDotIndex = coverSrc.lastIndexOf('.');
-            if (lastDotIndex !== -1) {
-                coverSrc = coverSrc.substring(0, lastDotIndex) + '_thumb' + coverSrc.substring(lastDotIndex);
-            }
-        }
-
+        const coverSrc = game.coverArt || '/assets/images/placeholder_thumb.png';
         img.src = coverSrc;
         img.alt = game.title || 'Game Cover';
         img.loading = 'lazy'; // Lazy load images

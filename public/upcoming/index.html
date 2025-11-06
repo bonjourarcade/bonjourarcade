@@ -895,16 +895,7 @@
         }
 
         function getThumbnailSrc(coverArt) {
-            if (!coverArt || coverArt === '/assets/images/placeholder_thumb.png') {
-                return '/assets/images/placeholder_thumb.png';
-            }
-            
-            // Convert cover.png to cover_thumb.png
-            if (coverArt.includes('/cover.png')) {
-                return coverArt.replace('/cover.png', '/cover_thumb.png');
-            }
-            
-            return coverArt;
+            return coverArt || '/assets/images/placeholder_thumb.png';
         }
 
         function getGameInfo(game) {

@@ -31,6 +31,26 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      
+      - name: Create API endpoint from predictions.yaml
+        run: |
+          # Install PyYAML for reading predictions.yaml
+          pip3 install pyyaml
+          
+          # Create the API directory
+          mkdir -p public/api
+          
+          # Get the current game ID from predictions.yaml
+          CURRENT_GAME_ID=$(python3 scripts/get_current_week_game_id.py)
+          
+          # Create the API endpoint file
+          if [ $? -eq 0 ] && [ -n "$CURRENT_GAME_ID" ]; then
+            echo "$CURRENT_GAME_ID" > public/api/current-game
+            echo "✅ Created public/api/current-game with ID: $CURRENT_GAME_ID"
+          else
+            echo "no-game" > public/api/current-game
+            echo "⚠️  No current game found, created placeholder"
+          fi
 #      
 #      - name: Install dependencies
 #        run: |

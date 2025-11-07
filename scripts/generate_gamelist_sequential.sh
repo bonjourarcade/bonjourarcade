@@ -509,7 +509,8 @@ if ! jq -e . "$OUTPUT_FILE" >/dev/null 2>&1; then
     exit 1
 fi
 
-# Create API endpoint for current game of the week ID
+# Create API endpoint for current game of the week ID (for 3rd party apps)
+# This reads from predictions.yaml based on the current week's yyyyww
 echo -e "${BLUE}📝 Creating current-game API endpoint...${NC}"
 mkdir -p public/api
 CURRENT_GAME_ID=$(python3 scripts/get_current_week_game_id.py)

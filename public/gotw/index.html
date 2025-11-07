@@ -41,21 +41,20 @@
     <script>
         async function redirectToGameOfTheWeek() {
             try {
-                // First get the current game ID from the API
+                // Get the current game ID from the API endpoint (generated from predictions.yaml)
                 const currentGameResponse = await fetch('/api/current-game');
                 if (!currentGameResponse.ok) {
                     throw new Error(`Failed to fetch current game: ${currentGameResponse.statusText}`);
                 }
                 const currentGameId = (await currentGameResponse.text()).trim();
                 
-                if (currentGameId === 'no-game') {
+                if (currentGameId === 'no-game' || !currentGameId) {
                     console.error('No current game set.');
                     window.location.href = '/';
                     return;
                 }
 
                 // Then get the game details from gamelist.json
-                const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
                 const cacheBuster = '?v=' + Date.now();
                 const gamelistUrl = isLocalhost ? '../gamelist.json' + cacheBuster : 'https://storage.googleapis.com/bonjourarcade/gamelist.json' + cacheBuster;
                 const response = await fetch(gamelistUrl);

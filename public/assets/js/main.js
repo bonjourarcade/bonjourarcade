@@ -156,7 +156,10 @@ function isFirefox() {
 // window.addEventListener('DOMContentLoaded', checkBrowser);
 async function fetchGameData() {
     try {
-        // First, get the current game ID from the API endpoint
+        // Use local gamelist.json for development, Google Cloud Storage for production
+        const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        
+        // Get the current game ID from the API endpoint (generated from predictions.yaml)
         let currentGameId = null;
         try {
             const currentGameResponse = await fetch('/api/current-game');
@@ -170,9 +173,6 @@ async function fetchGameData() {
         } catch (error) {
             console.warn('Could not fetch current game from API:', error);
         }
-
-        // Use local gamelist.json for development, Google Cloud Storage for production
-        const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
         
         // Load predictions.yaml to get list of previous games of the week
         let previousGotwGameIds = new Set();

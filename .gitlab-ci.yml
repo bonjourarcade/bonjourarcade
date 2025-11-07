@@ -26,6 +26,7 @@ pages:
     - /root/google-cloud-sdk/bin/gcloud config set project bonjourarcade
     - /root/google-cloud-sdk/bin/gsutil cp public/gamelist.json gs://bonjourarcade/gamelist.json
     - echo "The site will be deployed to $CI_PAGES_URL"
+  interruptible: true
   artifacts:
     paths:
       - public
@@ -59,5 +60,6 @@ send_newsletter:
     - echo "Newsletter automation completed"
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"
+  interruptible: true
   dependencies:
     - pages

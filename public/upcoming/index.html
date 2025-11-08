@@ -527,10 +527,15 @@
         // Load upcoming games
         async function loadUpcomingGames() {
             try {
+                // Determine gamelist URL based on hostname
+                const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+                const cacheBuster = '?v=' + Date.now();
+                const gamelistUrl = isLocalhost ? '../gamelist.json' + cacheBuster : 'https://storage.googleapis.com/bonjourarcade/gamelist.json' + cacheBuster;
+                
                 // Load both predictions and game data
                 const [predictionsResponse, gamesResponse] = await Promise.all([
                     fetch('../plinko/predict/predictions.yaml'),
-                    fetch('../gamelist.json')
+                    fetch(gamelistUrl)
                 ]);
                 
                 if (!predictionsResponse.ok || !gamesResponse.ok) {

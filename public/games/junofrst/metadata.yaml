@@ -8,6 +8,6 @@ controls:
   - 1️⃣  Tirer
   - 2️⃣  Warp
 
-#to_start: Select -> Start
+to_start: Select -> Start
 hide: yes
 announcement_message: "Préparez-vous à embarquer dans l'espace avec Juno First, un shooter emblématique de Konami sorti en 1983 qui a su captiver les joueurs avec son gameplay innovant ! Ce titre unique vous plonge dans une bataille intergalactique où vous devez détruire des vaisseaux ennemis tout en évitant les obstacles, le tout dans une perspective à la fois fascinante et stimulante. Avec ses graphismes stylisés et sa bande-son entraînante, Juno First vous promet une expérience de jeu inoubliable qui a marqué l'histoire des jeux d'arcade !"

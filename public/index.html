@@ -47,20 +47,15 @@
     <div class="container">
         <header>
             <div class="header-flex">
-                <button id="random-game-btn" class="random-game-btn">🎲 Jouer au hasard</button>
-                <button id="newsletter-subscribe"
-                  class="newsletter-btn">📧 S’abonner au jeu de la
-                  semaine</button>
+                <img src="assets/images/bonjourarcade-logo.png" alt="BonjourArcade Logo" class="header-logo">
                 <div class="game-launcher">
                     <input type="text" id="game-id-input"
                     placeholder="Recherche">
                     <!-- <button id="launch-game-btn">Lancer</button> -->
                 </div>
-                <img src="assets/images/bonjourarcade-logo.png" alt="BonjourArcade Logo" class="header-logo">
+                <a id="newsletter-subscribe"
+                  class="newsletter-btn" href="https://ko-fi.com/bonjourarcade" target="_blank" rel="noopener">☕ Supporter BonjourArcade</a>
                 <div class="header-actions">
-                    <a target="_blank" id="leaderboard-link"
-                      href="https://alloarcade.web.app">Classements</a>
-                    <img src="assets/images/my_app_qr.png" alt="QR Code" class="static-qr-code">
                 </div>
                 <div style="position: relative;">
                   <button id="theme-toggle-btn" class="theme-btn" aria-label="Changer le thème" type="button">
@@ -287,6 +282,13 @@
 
     <!-- Newsletter Subscription Modal -->
     <!-- The newsletter modal and form HTML have been removed. -->
+    
+    <!-- Random Game Button and Leaderboard -->
+    <div style="text-align: center; padding: 20px 0; margin-top: 40px; display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
+        <button id="random-game-btn" class="random-game-btn">🎲 Jouer au hasard</button>
+        <a target="_blank" id="leaderboard-link" href="https://alloarcade.web.app">Classements</a>
+    </div>
+    
     <footer>
       <!-- Première ligne : Navigation -->
       <div class="footer-row">
@@ -305,6 +307,7 @@
           Communauté
         </a>
         <a href="https://gitlab.com/bonjourarcade/bonjourarcade/-/issues" class="footer-emoji-link" title="Questions? Commentaires? Suggestions?" aria-label="Contacter BonjourArcade" target="_blank" rel="noopener">📧 Questions? Suggestions?</a>
+        <a href="https://bonjourarcade.kit.com/abonne" class="footer-emoji-link" title="S'abonner à la liste de diffusion pour recevoir le jeu de la semaine" aria-label="S'abonner à la liste de diffusion" target="_blank" rel="noopener">📬 S'abonner à la liste de diffusion</a>
       </div>
       
       <!-- Troisième ligne : Produits et support -->

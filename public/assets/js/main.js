@@ -1466,14 +1466,19 @@ function handleGameClick(element) {
     });
 })();
 
-// Newsletter functionality
+// Newsletter functionality (now Ko-fi support button)
 function initializeNewsletter() {
-    const subscribeBtn = document.getElementById('newsletter-subscribe');
-    if (!subscribeBtn) return;
-    subscribeBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        window.open('https://bonjourarcade.kit.com/abonne', '_blank');
-    });
+    // Ensure the link points to Ko-fi (defensive check in case of caching issues)
+    const supportLink = document.getElementById('newsletter-subscribe');
+    if (supportLink && supportLink.tagName === 'A') {
+        // Make sure href is set correctly
+        if (!supportLink.href.includes('ko-fi.com')) {
+            supportLink.href = 'https://ko-fi.com/bonjourarcade';
+        }
+        // Remove any old event listeners by cloning and replacing
+        const newLink = supportLink.cloneNode(true);
+        supportLink.parentNode.replaceChild(newLink, supportLink);
+    }
 }
 
 // --- Ensure menu and main content are visible after browser back navigation ---

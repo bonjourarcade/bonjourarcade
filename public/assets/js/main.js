@@ -196,7 +196,7 @@ async function fetchGameData() {
             const currentWeek = getISOWeek(now);
             const currentWeekSeed = currentYear * 100 + currentWeek;
             
-            const predictionsUrl = isLocalhost ? 'plinko/predict/predictions.yaml' : 'https://storage.googleapis.com/bonjourarcade/plinko/predict/predictions.yaml';
+            const predictionsUrl = '/plinko/predict/predictions.yaml';
             const predictionsResponse = await fetch(predictionsUrl);
             if (predictionsResponse.ok) {
                 const predictionsText = await predictionsResponse.text();

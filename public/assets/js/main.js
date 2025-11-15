@@ -292,8 +292,63 @@ async function fetchGameData() {
             return shuffled;
         }
 
-        // Randomize the order of games
-        filteredGames = shuffleArray(filteredGames);
+        // Helper function to check if a game is actually new (by flag or by date)
+        function isGameActuallyNew(game) {
+            // Always require an added date to verify - don't trust stale flags
+            if (!game.added) {
+                return false;
+            }
+            
+            // Check if added date is within last 7 days
+            try {
+                const addedDate = new Date(game.added);
+                const now = new Date();
+                // Only consider it new if the date is in the past and within 7 days
+                if (addedDate <= now) {
+                    const diffTime = now - addedDate;
+                    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                    if (diffDays <= 7) {
+                        return true;
+                    }
+                }
+            } catch (e) {
+                // Invalid date, don't consider it new
+                return false;
+            }
+            return false;
+        }
+        
+        // Separate new games from the rest (using date-aware checking)
+        const newGames = filteredGames.filter(game => isGameActuallyNew(game));
+        const otherGames = filteredGames.filter(game => !isGameActuallyNew(game));
+        
+        // Sort new games by release date (newest first), then alphabetically
+        newGames.sort((a, b) => {
+            // First, sort by added date (newest first)
+            const dateA = a.added ? new Date(a.added).getTime() : 0;
+            const dateB = b.added ? new Date(b.added).getTime() : 0;
+            if (dateB !== dateA) {
+                return dateB - dateA; // Newest first
+            }
+            // If dates are equal or both missing, sort alphabetically
+            let titleA = a.title;
+            let titleB = b.title;
+            if (!titleA || titleA === a.id) {
+                titleA = capitalizeFirst(a.id);
+            }
+            if (!titleB || titleB === b.id) {
+                titleB = capitalizeFirst(b.id);
+            }
+            const normalizedA = normalizeTitleForSorting(titleA).toLowerCase();
+            const normalizedB = normalizeTitleForSorting(titleB).toLowerCase();
+            return normalizedA.localeCompare(normalizedB);
+        });
+        
+        // Randomize the order of other games
+        const shuffledOtherGames = shuffleArray(otherGames);
+        
+        // Combine: new games first, then randomized other games
+        filteredGames = [...newGames, ...shuffledOtherGames];
         
         // Store shuffled games globally for search/clear functionality
         window.allGamesData = filteredGames;
@@ -535,6 +590,41 @@ function populateFeaturedGame(game) {
         featuredSection.classList.add('rom-missing-featured'); // Use a distinct class
     }
 
+    // Helper function to check if a game is new (by flag or by date)
+    // Note: Game of the week is always considered new
+    function isGameNew(game) {
+        // Game of the week is always new
+        // (This function is only called for the featured game, so always return true)
+        return true;
+        
+        // Original logic kept for reference but not used for featured game:
+        // Check explicit new_flag first
+        // if (game.new_flag === 'true') {
+        //     return true;
+        // }
+        // // Fallback: check if added date is within last 7 days
+        // if (game.added) {
+        //     try {
+        //         const addedDate = new Date(game.added);
+        //         const now = new Date();
+        //         // Only consider it new if the date is in the past and within 7 days
+        //         if (addedDate <= now) {
+        //             const diffTime = now - addedDate;
+        //             const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        //             if (diffDays <= 7) {
+        //                 return true;
+        //             }
+        //         }
+        //     } catch (e) {
+        //         // Invalid date, ignore
+        //     }
+        // }
+        // return false;
+    }
+    
+    // Game of the week is always considered new
+    const isNew = isGameNew(game);
+
     // Create link container for the image
     const gameLink = document.createElement('a');
     // Use pageUrl from JSON (should point to /play?game=...)
@@ -549,15 +639,19 @@ function populateFeaturedGame(game) {
     img.alt = game.title || 'Featured Game';
     gameLink.appendChild(img);
 
-    // Add new badge if new_flag is true
-    if (game.new_flag === 'true') {
+    // Add orange frame around the image if game is new
+    if (isNew) {
+        gameLink.classList.add('featured-game-new');
+    }
+
+    // Add new badge if game is new
+    if (isNew) {
         const badge = document.createElement('span');
         badge.className = 'new-badge';
         badge.textContent = 'NOUVEAU';
         badge.style.position = 'absolute';
         badge.style.top = '7px';
         badge.style.left = '7px';
-        gameLink.classList.add('featured-game-new');
         gameLink.appendChild(badge);
     }
     
@@ -777,8 +871,27 @@ function populatePreviousGames(games) {
             gameItem.classList.add('rom-missing');
         }
 
-        // Add new border if new_flag is true
-        if (game.new_flag === 'true') {
+        // Add new border if game is actually new (using date-aware checking)
+        // Always require an added date - don't trust stale flags
+        let isNewInList = false;
+        if (game.added) {
+            try {
+                const addedDate = new Date(game.added);
+                const now = new Date();
+                if (addedDate <= now) {
+                    const diffTime = now - addedDate;
+                    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                    // Only consider it new if within 7 days
+                    if (diffDays <= 7) {
+                        isNewInList = true;
+                    }
+                }
+            } catch (e) {
+                // Invalid date, don't consider it new
+            }
+        }
+        
+        if (isNewInList) {
             gameItem.classList.add('game-new');
         }
         
@@ -798,8 +911,8 @@ function populatePreviousGames(games) {
         img.alt = game.title || 'Game Cover';
         img.loading = 'lazy'; // Lazy load images
 
-        // Add new badge if new_flag is true
-        if (game.new_flag === 'true') {
+        // Add new badge if game is actually new
+        if (isNewInList) {
             const badge = document.createElement('span');
             badge.className = 'new-badge';
             badge.textContent = 'NOUVEAU';

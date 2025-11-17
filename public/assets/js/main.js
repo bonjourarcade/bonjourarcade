@@ -299,6 +299,12 @@ async function fetchGameData() {
                 return false;
             }
             
+            // Don't show hidden games as new (unless they were previously games of the week,
+            // which are already handled by the hide override above)
+            if (game.hide === true || game.hide === 'yes') {
+                return false;
+            }
+            
             // Check if added date is within last 7 days
             try {
                 const addedDate = new Date(game.added);

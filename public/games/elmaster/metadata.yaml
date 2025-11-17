@@ -2,6 +2,12 @@ title: Elemental Master
 developer: TechnoSoft
 year: 1990
 genre: Shooter
-#added: 
+added: 2025-11-17
 hide: yes
+to_start: Start
+controls:
+  - 🕹️ Déplacer
+  - 1️⃣ Tir bas
+  - 2️⃣ Tir haut
+  - 3️⃣ Changer d'arme
 announcement_message: "Entrez dans le monde mystique d'Elemental Master, un shooter captivant de TechnoSoft sorti en 1990 qui vous invite à maîtriser les éléments ! Parcourez des niveaux enchanteurs en contrôlant un sorcier armé de puissants sorts, et déchaînez des attaques dévastatrices contre des ennemis variés dans un univers riche en couleurs et en surprises. Avec sa mécanique unique de gestion des éléments et des combats dynamiques, ce jeu emblématique promet une expérience palpitante qui vous tiendra en haleine jusqu'à la dernière seconde !"

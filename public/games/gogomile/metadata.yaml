@@ -2,12 +2,11 @@ title: Go Go! Mile Smile
 developer: Fuuki
 year: 1995
 genre: Puzzle, Cute
-#controls:
-#  - 🕹️ Déplacer
-#  - 1️⃣  Tirer
-#  - 2️⃣  Bombe
+controls:
+  - 🕹️ Déplacer
+  - 1️⃣  Retour rapide
 
-#to_start: Select -> Start
+to_start: Select -> Start
 
 # Message d'annonce personnalisé pour la newsletter
 # Ce message apparaîtra en haut de l'email et des webhooks

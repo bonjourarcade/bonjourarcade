@@ -2,15 +2,13 @@ title: Parodius
 developer: Konami
 year: 1990
 genre: Shooter, Cute, co-op
-#controls:
-#  - 🕹️ Déplacer
-#  - 1️⃣  Tirer
-#  - 2️⃣  Bombe
+controls:
+  - 🕹️ Déplacer
+  - 1️⃣  Upgrade
+  - 2️⃣  Tirer
+  - 3️⃣  Arme secondaire
 
 to_start: Select -> Start
-
-# Message d'annonce personnalisé pour la newsletter
-# Ce message apparaîtra en haut de l'email et des webhooks
 
 enable_score: true
 hide: yes

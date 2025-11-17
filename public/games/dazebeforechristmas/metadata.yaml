@@ -2,12 +2,13 @@ title: Daze Before Christmas
 developer: Funcom
 year: 1994
 genre: Platform
-#controls:
-#  - 🕹️ Déplacer
-#  - 1️⃣  Tirer
-#  - 2️⃣  Bombe
+controls:
+  - 🕹️ Déplacer
+  - 1️⃣  Neige
+  - 2️⃣  Sauter
+  - 3️⃣  Neige
 
-#to_start: Select -> Start
+to_start: Start
 
 enable_score: true
 hide: yes

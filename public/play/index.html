@@ -780,11 +780,11 @@
             // Fetch leaderboard data
             fetchLeaderboard(gameId);
             
-            // Set up periodic refresh of leaderboard every 10 minutes
+            // Set up periodic refresh of leaderboard every 2 minutes
             const scoreRefreshInterval = setInterval(() => {
-                console.log('Refreshing leaderboard scores (10-minute interval)');
+                console.log('Refreshing leaderboard scores (2-minute interval)');
                 fetchLeaderboard(gameId);
-            }, 600000); // 10 minutes = 600,000 milliseconds
+            }, 120000); // 2 minutes = 120,000 milliseconds
             
             // Store interval ID for cleanup if needed
             window.leaderboardRefreshInterval = scoreRefreshInterval;

@@ -1,45 +1,62 @@
 1944: The Loop Master
+A. B. Cop
+Abadox
+Advanced Busterhawk Gley Lancer
 Adventure Island
+Adventures of Dino Riki
+After Burner 2
+Alex Kidd in Miracle World
+Alex Kidd in Shinobi World
 Alien Soldier
-Alien Syndrome
+Alien Storm
+Altered Beast
 Armed Police Batrider
+Armor Attack
+Armored Car
 Asteroids Deluxe
 Atomic Runner
 B-Wings #Famicom
-Ballon Fight
-Batsugun
 Battle Chopper
 Battle City
 Battle Garegga
 Battletoads
 Bird Week
 Black Belt
-Blades of Steel
+Blade Buster
+#Blades of Steel
 Blazing Star
 Botanic
 Boogie Wings
+Boxing Bugs
 Bubble Bobble
-Boxy Boy
 Burgertime
 Cardinal Sins
-Castle of Illusion Starring Mickey Mouse
+#Castle of Illusion Starring Mickey Mouse
 Castlevania (VS)
 Centipede
+Cheeky Mouse
 Choplifter # downloaded, chplftb (bootleg)
 Circus Charlie
 Combat School
 Contra Hard Corps
 Cosmic Cop
-Darius Gaiden #Saturn
+Darius Extra
+Darius Gaiden
+Defender
+Dick Tracy (Sega)
 Dig Dug
 DoDonPachi Dai-Fukkatsu
+DoDonPachi SaiDaiOuJou
 Dogyuun
-Dolphin #Atari 2600
+Dolphin (A26)
 Donkey Kong
 Double Dragon II: The Revenge # Arcade
 Dragon Breed
+Dragonfire (A26)
+Earthion
 ESP Ra. De.
 Elevator Action Returns
+Enduro (A26)
 Enduro Racer
 Espgaluda
 Espgaluda II
@@ -47,80 +64,86 @@ Exed Exes
 Fantasy
 Fantasy Zone II - The Tears of Opa-Opa
 Fast Lane
+Fathom (A26)
 Fever SOS
-Fire Shark #Same Same Same
+Fire Shark
 Firepower 2000
+Flappy Bird
 Flicky
 Flying Shark
+Freeway (A26)
 Frogger
 Frontier Force
+Gaiares
 Gain Ground
+Galaga
 Galaga '88
 Gauntlet
 Gekirindan
 GG Aleste II
 GG Aleste 3
-Ghouls n Ghosts'
+Ghouls 'n Ghosts
 Giga Wing
-Golden Axe II: Revenge of Death Adder
 Gradius
 Gradius 2
+Grand Prix (A26)
 Grind Stormer
 Gun.Smoke
-Gunbird
-Gunbird 2
 Gun Frontier
 Gunlock # Layer Section, Galactic Attack, Rayforce
+Gunstar Heroes
 Guwange
-H.E.R.O. #Atari 2600
+Hagane: The Final Conflict
 Hammerin' Harry
 Hyper Duel
 Ibara
 In the Hunt
 Judgement Silversword
-Juno First # Atari 2600 only for now
+Jump Bug
+Juno First
 Karateka
-Ketsui
 Kid Niki Radical Ninja
 Kingdom Grandprix
-Kung Fu #NES
+Lan Master
+Lawn Mower
 League Bowling
 Legend of Hero Tonma
 Lode Runner
 Meikyu Jima
-MUSHA
-Mad Planets
+M.U.S.H.A.
 Marble Madness
 Mario Bros.
 Mars Matrix
 Mega Man II
 Metal Black
 Metal Slug 2
-Metal Slug 3
 Metal Slug Super Vehicle-001
-Metal Storm #Patched
+Metal Storm
+Micro Mages
 Midnight Resistance
-Mikie
 Missile Command
+Moon Cresta
 Moon Patrol
 Mortal Kombat
-Mr Driller # Game Boy Color
+Mr Driller
 Ms Pac-Man
 Mushihimesama
-Mushihimesama Futari
-NHL 94
-NHL 96
-Name that Tune
+NHL 94 2025
 Neo Turf Masters
 Ninja Gaiden
 Ninja Gaiden II
+Omega Blast
+Out Run
+#Outrunners
 Out Zone
 Pac-Land
 Parodius Da!
 Pengo
 Pinball #NES
-Pitfall II
+Pokémon Pinball 
+Pokémon Pinball Ruby & Sapphire
 Pole Position
+#Poto Poto
 Power Strike II
 Predator II
 Progear
@@ -129,49 +152,60 @@ Puzzle Uo Poko
 Puzznic
 Pyoro 64
 Q*Bert
-QIX #bright NES hack
+QIX
 R-Type
 R-Type LEO
-R.C. Pro-AM
 Raiden
 Raiden II
+Raiden DX
 Rainbow Islands
+Recca
+Rip Off
 River Raid #Atari 2600
 Road Fighter
 Robby Roto
 Robocop
 Robotron 2084
 Rock 'n Roll Racing
-Rocket Knight Adventures
 Saint Dragon
 Salamander II
 Section Z
-Seicross
 Sensible Soccer
 Shinobi
-Shinobi III: Return of the Ninja Master
+Sky Kid
+Snake
 Snap Jack
 Sonic The Hedgehog 2
 SonSon
 Sorcer Striker
 Space Harrier
 Space Invaders
+Spectar
 Spelunker
-Stampede #Atari 2600
+Splatterhouse
+Stampede (A26)
+Star Castle
 Star Wars Arcade
+Street Fighter II
 Streets of Rage 2
 Strider
 Strikers 1945 Plus
 Sunset Riders
 Super Contra
 Super Hang-on
-Super Mario All-Stars + World
-Super Mario Bros.
+Super Mario Bros. (VS)
+Super Mario Bros. 2
+Super Mario Bros. 3
+Super Mario World
 Super Mario World 2: Yoshi's Island
-Tapper #Root Beer
+Super Road Blaster
+Tanzer
+Tapper
+Targ
 Tempest
+Terra Cresta
 Tetris The Absolute The Grand Master 2 Plus
-The Legend of Kage #Already supported
+The Legend of Kage
 The Simpsons
 Thunder Blade
 Thunder Force II
@@ -181,14 +215,16 @@ Time Pilot
 Time Pilot '84
 Track 'n Field
 Truxton
+TwinBee
 Twin Cobra
 Twin Cobra II
+Twinkle Tale
 Ultimate Mortal Kombat 3
-Undeadline #already downloaded!
 Vimana
 Vulgus
 Warpman
 Wild Guns
+Wild West Cowboys of Moo Mesa
 Wonder Boy
 Wonder Boy III Monster Lair
 World of Illusion

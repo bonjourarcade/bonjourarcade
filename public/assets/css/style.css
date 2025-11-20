@@ -820,9 +820,24 @@ body.theme-light #game-of-the-week.game-item--selected {
     width: 100vw; height: 100vh;
 }
 
-/* Hide game of the week when search is active */
+/* Hide game of the week and previous week games when search is active */
 body.search-active #game-of-the-week {
-    display: none;
+    display: none !important;
+}
+
+body.search-active #previous-week-games {
+    display: none !important;
+}
+
+/* Hide the entire left column when search is active to free up space for the grid */
+body.search-active .left-column {
+    display: none !important;
+}
+
+/* Make the grid section expand to full width when left column is hidden */
+body.search-active .grid-section {
+    flex: 1 1 100% !important;
+    max-width: 100% !important;
 }
 
 #no-results-message {

@@ -176,6 +176,7 @@ async function fetchGameData() {
         
         // Load predictions.yaml to get list of previous games of the week
         let previousGotwGameIds = new Set();
+        let previousWeekGames = []; // Array to store previous week games with their week numbers
         try {
             // Get current week in YYYYWW format
             function getISOWeek(date) {
@@ -219,18 +220,29 @@ async function fetchGameData() {
                     if (weekMatch) {
                         currentWeekInFile = parseInt(weekMatch[1]);
                     } else if (currentWeekInFile !== null) {
+                        // Match both "game_id:" and "  game_id:" (with indentation)
                         const gameIdMatch = line.match(/^\s*game_id:\s*(.+)$/);
                         if (gameIdMatch) {
                             const gameId = gameIdMatch[1].trim().replace(/^["']|["']$/g, '');
                             // Only include if this week is in the past
                             if (gameId && currentWeekInFile < currentWeekSeed) {
                                 previousGotwGameIds.add(gameId);
+                                // Store all previous week games (not just the previous week)
+                                previousWeekGames.push({
+                                    gameId: gameId,
+                                    week: currentWeekInFile
+                                });
                             }
                         }
                     }
                 }
                 
+                // Sort by week (descending - most recent first) and limit to 10
+                previousWeekGames.sort((a, b) => b.week - a.week);
+                previousWeekGames = previousWeekGames.slice(0, 10);
+                
                 console.log(`Found ${previousGotwGameIds.size} previous games of the week (current week: ${currentWeekSeed})`);
+                console.log(`Found ${previousWeekGames.length} games from previous weeks (showing last 10)`);
             }
         } catch (error) {
             console.warn('Could not fetch predictions.yaml:', error);
@@ -266,6 +278,9 @@ async function fetchGameData() {
 
         // Populate sections using the fetched data
         populateFeaturedGame(gameOfTheWeek);
+
+        // Populate previous week games section
+        populatePreviousWeekGames(previousWeekGames, data.games);
 
         // Use all games for grid and randomizer (no need to combine separate arrays)
         let allGames = data.games;
@@ -762,6 +777,165 @@ function populateFeaturedGame(game) {
         });
     }
     
+}
+
+/**
+ * Populates the "Previous Week Games" section with games from the previous week.
+ * @param {Array} previousWeekGames - An array of objects with gameId and week properties.
+ * @param {Array} allGames - An array of all game objects from gamelist.json.
+ */
+function populatePreviousWeekGames(previousWeekGames, allGames) {
+    const container = document.getElementById('previous-week-games-list');
+    if (!container) {
+        console.warn("Element with ID 'previous-week-games-list' not found.");
+        return;
+    }
+
+    // Clear placeholder/loading content
+    container.innerHTML = '';
+
+    // If no previous week games, hide the section
+    if (!previousWeekGames || previousWeekGames.length === 0) {
+        const section = document.getElementById('previous-week-games');
+        if (section) {
+            section.style.display = 'none';
+        }
+        return;
+    }
+
+    // Show the section
+    const section = document.getElementById('previous-week-games');
+    if (section) {
+        section.style.display = 'block';
+    }
+
+    // Games are already sorted by week (descending - most recent first) and limited to 10
+
+    // Create game items for each previous week game
+    previousWeekGames.forEach((prevGame, idx) => {
+        const game = allGames.find(g => g.id === prevGame.gameId);
+        if (!game || !game.id) {
+            return; // Skip if game not found
+        }
+
+        const gameItem = document.createElement('div');
+        gameItem.className = 'previous-week-game-item';
+        gameItem.dataset.gameId = game.id;
+        gameItem._gameData = game; // Attach game data directly
+
+        // Add the 'rom-missing' class if the flag is true
+        if (game.romMissing === true) {
+            gameItem.classList.add('rom-missing');
+        }
+
+        // Add external game styling if it's an external game
+        if (game.game_type === 'external' || game.core === 'external') {
+            gameItem.classList.add('game-external');
+        }
+
+        const link = document.createElement('a');
+        link.href = game.pageUrl || '#';
+        link.style.position = 'relative';
+        link.style.display = 'flex';
+        link.style.alignItems = 'center';
+        link.style.gap = '15px';
+        link.style.textDecoration = 'none';
+        link.style.color = 'inherit';
+        // Prevent link from triggering navigation directly - we handle it via gameItem click
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+        });
+
+        const img = document.createElement('img');
+        const coverSrc = game.coverArt || '/assets/images/placeholder_thumb.png';
+        img.src = coverSrc;
+        img.alt = game.title || 'Game Cover';
+        img.loading = 'lazy';
+        img.style.width = '80px';
+        img.style.height = '80px';
+        img.style.objectFit = 'cover';
+        img.style.flexShrink = '0';
+
+        const title = document.createElement('div');
+        title.className = 'previous-week-game-title';
+
+        // Set the title (capitalize if using default)
+        let displayTitle = game.title;
+        if (!displayTitle || displayTitle === game.id) {
+            displayTitle = capitalizeFirst(game.id);
+        }
+        
+        // Normalize title for display (move "The" to the end)
+        displayTitle = normalizeTitleForSorting(displayTitle);
+        
+        title.textContent = displayTitle;
+        title.style.fontWeight = 'bold';
+        title.style.fontSize = '1.1em';
+
+        link.appendChild(img);
+        link.appendChild(title);
+        gameItem.appendChild(link);
+        container.appendChild(gameItem);
+
+        // Add mouse hover behavior
+        gameItem.addEventListener('mouseenter', (e) => {
+            e.stopPropagation(); // Prevent event from bubbling up
+            clearHighlights();
+            removeTooltipWithTimeout();
+            gameItem.classList.add('game-item--selected');
+            if (tooltipTimeout) clearTimeout(tooltipTimeout);
+            tooltipTimeout = setTimeout(() => {
+                showTooltipForItem(gameItem);
+            }, 80);
+        });
+        gameItem.addEventListener('mouseleave', (e) => {
+            e.stopPropagation(); // Prevent event from bubbling up
+            gameItem.classList.remove('game-item--selected');
+            removeTooltipWithTimeout();
+        });
+        
+        // Click behavior - stop propagation to prevent conflicts with parent sections
+        gameItem.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation(); // Prevent event from bubbling up to parent sections
+            handleGameClick(gameItem);
+        });
+    });
+
+    // Add "Voir tous les jeux de la semaine" link at the bottom
+    if (previousWeekGames.length > 0) {
+        const viewAllLink = document.createElement('a');
+        viewAllLink.href = '/all?filter=week';
+        viewAllLink.textContent = 'Voir tous les jeux de la semaine';
+        viewAllLink.style.display = 'block';
+        viewAllLink.style.textAlign = 'center';
+        viewAllLink.style.marginTop = '20px';
+        viewAllLink.style.padding = '12px';
+        viewAllLink.style.backgroundColor = 'var(--background)';
+        viewAllLink.style.color = 'var(--text-color)';
+        viewAllLink.style.textDecoration = 'none';
+        viewAllLink.style.borderRadius = '8px';
+        viewAllLink.style.border = '2px solid var(--divider-color)';
+        viewAllLink.style.transition = 'all 0.2s ease-in-out';
+        viewAllLink.style.fontWeight = 'bold';
+        
+        // Hover effect
+        viewAllLink.addEventListener('mouseenter', () => {
+            viewAllLink.style.backgroundColor = 'var(--text-color)';
+            viewAllLink.style.color = 'var(--background)';
+            viewAllLink.style.transform = 'translateY(-2px)';
+            viewAllLink.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
+        });
+        viewAllLink.addEventListener('mouseleave', () => {
+            viewAllLink.style.backgroundColor = 'var(--background)';
+            viewAllLink.style.color = 'var(--text-color)';
+            viewAllLink.style.transform = 'translateY(0)';
+            viewAllLink.style.boxShadow = 'none';
+        });
+        
+        container.appendChild(viewAllLink);
+    }
 }
 
 /**

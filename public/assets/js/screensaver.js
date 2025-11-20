@@ -26,6 +26,9 @@ const logoSize = 150; // Matches CSS width for the logo
 // New: Separate animation frame for gamepad polling
 let gamepadAnimationFrame;
 
+// Image load timeout (for handling slow/failed image loads)
+let imageLoadTimeout = null;
+
 // Core screensaver logic functions
 function timerIncrement() {
     idleTime++;
@@ -107,54 +110,114 @@ function startScreensaver() {
         const isIndexPage = window.location.pathname === '/' || window.location.pathname.includes('index.html');
 
         if (isIndexPage && window.featuredGameCoverArt) {
-            coverSrc = window.featuredGameCoverArt;
+            // Validate that featuredGameCoverArt is a valid string (not an object or other type)
+            if (typeof window.featuredGameCoverArt === 'string' && window.featuredGameCoverArt.trim()) {
+                coverSrc = window.featuredGameCoverArt;
+            }
         } else if (window.EJS_backgroundImage) {
-            coverSrc = window.EJS_backgroundImage;
+            // Validate that EJS_backgroundImage is a valid string
+            if (typeof window.EJS_backgroundImage === 'string' && window.EJS_backgroundImage.trim()) {
+                coverSrc = window.EJS_backgroundImage;
+            }
         } else {
             const featuredGameImgElement = document.getElementById('featured-game-img');
             if (featuredGameImgElement && featuredGameImgElement.src) {
                 coverSrc = featuredGameImgElement.src;
             }
         }
+        
+        // Ensure coverSrc is a valid URL string
+        if (typeof coverSrc !== 'string' || !coverSrc.trim()) {
+            coverSrc = '/assets/images/placeholder_thumb.png';
+        }
+        
         screensaverImage.src = coverSrc;
 
         // Set logo source
         screensaverLogo.src = '/assets/images/bonjourarcade-logo.png';
 
         const initScreensaverAnimation = () => {
+            const viewportWidth = document.documentElement.clientWidth;
+            const viewportHeight = document.documentElement.clientHeight;
+            
+            // Validate viewport dimensions
+            if (viewportWidth <= 0 || viewportHeight <= 0) {
+                // Viewport not ready, try again later
+                setTimeout(initScreensaverAnimation, 100);
+                return;
+            }
+
             // Initialize main image position
-            const currentImageWidth = screensaverImage.offsetWidth;
-            const currentImageHeight = screensaverImage.offsetHeight;
-            imageX = Math.random() * (document.documentElement.clientWidth - currentImageWidth);
-            imageY = Math.random() * (document.documentElement.clientHeight - currentImageHeight);
+            const currentImageWidth = screensaverImage.offsetWidth || 200; // Fallback to 200px if invalid
+            const currentImageHeight = screensaverImage.offsetHeight || 200;
+            const maxImageX = Math.max(0, viewportWidth - currentImageWidth);
+            const maxImageY = Math.max(0, viewportHeight - currentImageHeight);
+            imageX = Math.random() * maxImageX;
+            imageY = Math.random() * maxImageY;
 
             // Initialize logo position
-            const currentLogoWidth = screensaverLogo.offsetWidth;
-            const currentLogoHeight = screensaverLogo.offsetHeight;
-            logoX = Math.random() * (document.documentElement.clientWidth - currentLogoWidth);
-            logoY = Math.random() * (document.documentElement.clientHeight - currentLogoHeight);
+            const currentLogoWidth = screensaverLogo.offsetWidth || 200; // Fallback to 200px if invalid
+            const currentLogoHeight = screensaverLogo.offsetHeight || 200;
+            const maxLogoX = Math.max(0, viewportWidth - currentLogoWidth);
+            const maxLogoY = Math.max(0, viewportHeight - currentLogoHeight);
+            logoX = Math.random() * maxLogoX;
+            logoY = Math.random() * maxLogoY;
 
             screensaverAnimationFrame = requestAnimationFrame(updateScreensaverImagePosition);
         };
 
         // Wait for both images to load before starting animation
         let imagesLoaded = 0;
+        // Clear any existing timeout
+        if (imageLoadTimeout) {
+            clearTimeout(imageLoadTimeout);
+            imageLoadTimeout = null;
+        }
         const imageLoadHandler = (event) => {
             imagesLoaded++;
             if (imagesLoaded === 2) { // Assuming 2 images: screensaverImage and screensaverLogo
+                if (imageLoadTimeout) clearTimeout(imageLoadTimeout);
                 initScreensaverAnimation();
             }
         };
 
-        if (screensaverImage.complete) {
+        // Error handler for image loading failures
+        const imageErrorHandler = (imgElement, fallbackSrc) => {
+            return () => {
+                // If image fails to load, use fallback
+                if (imgElement.src !== fallbackSrc) {
+                    imgElement.src = fallbackSrc;
+                } else {
+                    // Even fallback failed, but still try to start animation
+                    imagesLoaded++;
+                    if (imagesLoaded === 2) {
+                        if (imageLoadTimeout) clearTimeout(imageLoadTimeout);
+                        initScreensaverAnimation();
+                    }
+                }
+            };
+        };
+
+        // Set timeout to start animation even if images don't load (after 5 seconds)
+        imageLoadTimeout = setTimeout(() => {
+            if (imagesLoaded < 2) {
+                console.warn('Screensaver images taking too long to load, starting animation anyway');
+                imagesLoaded = 2; // Force start animation
+                initScreensaverAnimation();
+            }
+        }, 5000);
+
+        if (screensaverImage.complete && screensaverImage.naturalWidth > 0) {
             imageLoadHandler({ target: { id: 'screensaver-image', src: screensaverImage.src } });
         } else {
             screensaverImage.onload = imageLoadHandler;
+            screensaverImage.onerror = imageErrorHandler(screensaverImage, '/assets/images/placeholder_thumb.png');
         }
-        if (screensaverLogo.complete) {
+        if (screensaverLogo.complete && screensaverLogo.naturalWidth > 0) {
             imageLoadHandler({ target: { id: 'screensaver-logo', src: screensaverLogo.src } });
         } else {
             screensaverLogo.onload = imageLoadHandler;
+            screensaverLogo.onerror = imageErrorHandler(screensaverLogo, '/assets/images/bonjourarcade-logo.png');
         }
     }
 }
@@ -172,8 +235,14 @@ function stopScreensaver() {
         screensaverImage.src = '';
         screensaverLogo.src = ''; // Clear logo source
         cancelAnimationFrame(screensaverAnimationFrame);
+        if (imageLoadTimeout) {
+            clearTimeout(imageLoadTimeout);
+            imageLoadTimeout = null;
+        }
         screensaverImage.onload = null;
+        screensaverImage.onerror = null; // Remove error handler
         screensaverLogo.onload = null; // Remove logo onload handler
+        screensaverLogo.onerror = null; // Remove logo error handler
         screensaverOverlay.classList.remove('screensaver-dark-background'); // Remove dark background
         // console.log('Screensaver stopped. Final screensaverActive:', screensaverActive);
         // console.log('Body classes:', document.body.classList.value);
@@ -187,11 +256,30 @@ function updateScreensaverImagePosition() {
     const viewportWidth = document.documentElement.clientWidth;
     const viewportHeight = document.documentElement.clientHeight;
 
+    // Validate viewport dimensions
+    if (viewportWidth <= 0 || viewportHeight <= 0) {
+        if (screensaverActive) {
+            screensaverAnimationFrame = requestAnimationFrame(updateScreensaverImagePosition);
+        }
+        return;
+    }
+
     // Update and check main image position
     imageX += imageDx;
     imageY += imageDy;
     const currentImageWidth = screensaverImage.offsetWidth;
     const currentImageHeight = screensaverImage.offsetHeight;
+
+    // Validate image dimensions - if invalid, reinitialize position
+    if (currentImageWidth <= 0 || currentImageHeight <= 0 || isNaN(currentImageWidth) || isNaN(currentImageHeight)) {
+        // Image hasn't loaded or dimensions are invalid - reinitialize position
+        imageX = Math.random() * Math.max(0, viewportWidth - 200);
+        imageY = Math.random() * Math.max(0, viewportHeight - 200);
+        if (screensaverActive) {
+            screensaverAnimationFrame = requestAnimationFrame(updateScreensaverImagePosition);
+        }
+        return;
+    }
 
     if (imageX + currentImageWidth > viewportWidth || imageX < 0) {
         imageDx *= -1;
@@ -211,6 +299,17 @@ function updateScreensaverImagePosition() {
     logoY += logoDy;
     const currentLogoWidth = screensaverLogo.offsetWidth;
     const currentLogoHeight = screensaverLogo.offsetHeight;
+
+    // Validate logo dimensions - if invalid, reinitialize position
+    if (currentLogoWidth <= 0 || currentLogoHeight <= 0 || isNaN(currentLogoWidth) || isNaN(currentLogoHeight)) {
+        // Logo hasn't loaded or dimensions are invalid - reinitialize position
+        logoX = Math.random() * Math.max(0, viewportWidth - 200);
+        logoY = Math.random() * Math.max(0, viewportHeight - 200);
+        if (screensaverActive) {
+            screensaverAnimationFrame = requestAnimationFrame(updateScreensaverImagePosition);
+        }
+        return;
+    }
 
     if (logoX + currentLogoWidth > viewportWidth || logoX < 0) {
         logoDx *= -1;

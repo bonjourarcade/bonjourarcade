@@ -119,15 +119,24 @@ body.theme-dark {
     gap: 30px;
 }
 
-/* Featured Game Section (Left Column) */
-.featured-section {
+/* Left Column containing Game of the Week and Previous Week Games */
+.left-column {
     flex: 1 1 350px;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    gap: 8px;
     min-width: 320px;
     max-width: 480px;
-    height: 100%;
+    box-sizing: border-box;
+}
+
+/* Featured Game Section (Left Column) */
+.featured-section {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    min-width: 320px;
+    max-width: 480px;
     box-sizing: border-box;
 }
 
@@ -136,7 +145,6 @@ body.theme-dark {
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    height: 100%;
 }
 
 #featured-game-content img {
@@ -219,6 +227,74 @@ body.theme-dark {
     margin-bottom: 16px;
     font-size: 2em;
     text-align: center;
+}
+
+/* Previous Week Games Section */
+.previous-week-section {
+    width: 100%;
+    min-width: 320px;
+    max-width: 480px;
+    margin-top: 0;
+    margin-bottom: 0;
+    box-sizing: border-box;
+}
+
+.previous-week-section h2 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    border-bottom: 2px solid var(--divider-color);
+    padding-bottom: 10px;
+    font-size: 1.5em;
+}
+
+.previous-week-games-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.previous-week-game-item {
+    border: 3px solid transparent;
+    background-color: #ececec;
+    padding: 15px;
+    border-radius: 8px;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s, border 0.2s;
+}
+
+.previous-week-game-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    border: 3px solid #2196f3;
+}
+
+.previous-week-game-item a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.previous-week-game-item img {
+    border-radius: 4px;
+}
+
+body.theme-light .previous-week-game-item {
+    background: #ececec;
+    border: 3px solid #e0e0e0;
+    transition: border 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+
+body.theme-light .previous-week-game-item:hover {
+    border: 3px solid #2196f3;
+    box-shadow: 0 0 16px 2px #2196f355;
+}
+
+body.theme-dark .previous-week-game-item {
+    background: #23272b;
+    border: 3px solid #23272b;
+    color: var(--text-color);
+}
+
+body.theme-dark .previous-week-game-item:hover {
+    border: 3px solid #fffd37;
 }
 
 /* Previous Games Section (Right Column / Grid) */
@@ -490,7 +566,13 @@ footer {
         max-width: 100%;
     }
     
-    .featured-section, .grid-section {
+    .left-column {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+    }
+    
+    .featured-section, .previous-week-section, .grid-section {
         width: 100%;
         max-width: 100%;
         min-width: 0;
@@ -582,7 +664,12 @@ footer {
         flex-direction: column;
         min-height: unset;
     }
-    .featured-section, .grid-section {
+    .left-column {
+        max-width: 100%;
+        width: 100%;
+        min-width: 0;
+    }
+    .featured-section, .previous-week-section, .grid-section {
         max-width: 100%;
         width: 100%;
         min-width: 0;

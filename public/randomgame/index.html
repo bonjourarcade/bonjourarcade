@@ -132,7 +132,30 @@
                 const data = await response.json();
                 
                 // Use all games from the simplified structure
-                gameData = Array.isArray(data.games) ? data.games : [];
+                let allGames = Array.isArray(data.games) ? data.games : [];
+                
+                // Check if screensaver should use filtered games
+                const hasFilter = sessionStorage.getItem('screensaverHasFilter') === 'true';
+                if (hasFilter) {
+                    const filteredGameIdsJson = sessionStorage.getItem('screensaverFilteredGames');
+                    if (filteredGameIdsJson) {
+                        try {
+                            const filteredGameIds = JSON.parse(filteredGameIdsJson);
+                            // Filter games to only include those in the filtered list
+                            gameData = allGames.filter(game => filteredGameIds.includes(game.id));
+                        } catch (e) {
+                            console.error('Error parsing filtered games:', e);
+                            // Fallback to all games if parsing fails
+                            gameData = allGames;
+                        }
+                    } else {
+                        // No filtered games list, use all games
+                        gameData = allGames;
+                    }
+                } else {
+                    // No filter active, use all games
+                    gameData = allGames;
+                }
                 
                 // Filter out games with problems
                 gameData = gameData.filter(game => game.problem !== "true");

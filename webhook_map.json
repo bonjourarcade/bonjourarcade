@@ -1,5 +1,5 @@
 {
-  "test_hook": {
+  "discord_test_hook": {
     "env": "DISCORD_TEST_WEBHOOK_URL",
     "type": "discord"
   },
@@ -13,6 +13,10 @@
   },
   "googlechat_alloprof": {
     "env": "GOOGLECHAT_ALLOPROF_WEBHOOK_URL",
+    "type": "googlechat"
+  },
+  "googlechat_test": {
+    "env": "GOOGLECHAT_TEST_WEBHOOK_URL",
     "type": "googlechat"
   }
 }

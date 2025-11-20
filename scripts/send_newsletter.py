@@ -63,7 +63,7 @@ class NewsletterSender:
             now = datetime.now()
             week = now.isocalendar()[1]
             plinko_seed = f"{now.year}{week:02d}"
-        self.plinko_url = f"https://felx.cc/plinko/{plinko_seed}"
+        self.plinko_url = f"https://f-l.ca/plinko/{plinko_seed}"
 
     def get_previous_week_seed(self, current_seed=None):
         """Calculate the previous week's seed in YYYYWW format."""
@@ -94,13 +94,13 @@ class NewsletterSender:
         week = previous_week.isocalendar()[1]
         return f"{previous_week.year}{week:02d}"
 
-    def get_game_from_seed(self, seed):
-        """Get the game title that would be selected for a given seed using the predictions.yaml file."""
+    def get_game_id_from_seed(self, seed):
+        """Get the game_id that would be selected for a given seed using the predictions.yaml file."""
         try:
             # Read the predictions.yaml file to get the game for this seed
             predictions_path = 'public/plinko/predict/predictions.yaml'
             if not os.path.exists(predictions_path):
-                print(f"⚠️  Warning: predictions.yaml not found, cannot determine previous week's game")
+                print(f"⚠️  Warning: predictions.yaml not found, cannot determine game for seed {seed}")
                 return None
                 
             with open(predictions_path, 'r') as f:
@@ -110,7 +110,7 @@ class NewsletterSender:
                 print(f"⚠️  Warning: predictions.yaml is empty or invalid")
                 return None
             
-            # Look up the game title for this seed
+            # Look up the game data for this seed
             # YAML parser converts string keys to integers, so we need to convert the seed to int
             try:
                 seed_int = int(seed)
@@ -123,23 +123,72 @@ class NewsletterSender:
                 print(f"⚠️  Warning: No prediction found for seed {seed}")
                 return None
             
-            # Extract the title from the game data (which can be a dict or string)
+            # Extract the game_id from the game data (which can be a dict with game_id or a string)
             if isinstance(game_data, dict):
-                game_title = game_data.get('title')
+                game_id = game_data.get('game_id')
             else:
-                # If it's already a string, use it directly
-                game_title = game_data
+                # If it's already a string, treat it as game_id
+                game_id = game_data
             
-            if not game_title:
-                print(f"⚠️  Warning: No title found in prediction data for seed {seed}")
+            if not game_id:
+                print(f"⚠️  Warning: No game_id found in prediction data for seed {seed}")
                 return None
             
-            print(f"🎯 For seed {seed}, predicted game: {game_title}")
-            return game_title
+            print(f"🎯 For seed {seed}, predicted game_id: {game_id}")
+            return game_id
             
         except Exception as e:
-            print(f"⚠️  Warning: Could not determine previous week's game: {e}")
+            print(f"⚠️  Warning: Could not determine game_id for seed {seed}: {e}")
             return None
+
+    def get_game_title_from_id(self, game_id):
+        """Get the game title from gamelist.json using the game_id."""
+        try:
+            gamelist_path = 'public/gamelist.json'
+            if not os.path.exists(gamelist_path):
+                print(f"⚠️  Warning: gamelist.json not found, cannot look up game title")
+                return None
+                
+            with open(gamelist_path, 'r') as f:
+                gamelist = json.load(f)
+            
+            # Search through all games for a game_id match
+            all_games = []
+            # Add games from the main games array
+            if gamelist.get('games'):
+                all_games.extend(gamelist['games'])
+            # Add game of the week if it exists
+            if gamelist.get('gameOfTheWeek') and gamelist['gameOfTheWeek'].get('id'):
+                all_games.append(gamelist['gameOfTheWeek'])
+            # Add previous games if they exist
+            if gamelist.get('previousGames'):
+                all_games.extend(gamelist['previousGames'])
+            
+            # Find the game with matching id
+            for game in all_games:
+                if game.get('id') == game_id:
+                    title = game.get('title')
+                    if title:
+                        return title
+            
+            print(f"⚠️  Warning: No game found with id: {game_id}")
+            return None
+            
+        except Exception as e:
+            print(f"⚠️  Warning: Error looking up game title for id {game_id}: {e}")
+            return None
+
+    def get_game_from_seed(self, seed):
+        """Get the game title that would be selected for a given seed using the predictions.yaml file.
+        This method gets the game_id from predictions.yaml and then looks up the title from gamelist.json."""
+        game_id = self.get_game_id_from_seed(seed)
+        if not game_id:
+            return None
+        
+        game_title = self.get_game_title_from_id(game_id)
+        if game_title:
+            print(f"🎯 For seed {seed}, predicted game: {game_title}")
+        return game_title
 
     def find_game_id_by_title(self, game_title):
         """Find a game ID in the gamelist that matches the given title."""
@@ -287,21 +336,22 @@ class NewsletterSender:
             prev_week_seed = self.get_previous_week_seed(current_seed)
             print(f"🔍 Looking for previous week's game (seed: {prev_week_seed})...")
             
-            # Get the game title for that seed from predictions.yaml
-            prev_game_title = self.get_game_from_seed(prev_week_seed)
-            if not prev_game_title:
-                print("⚠️  Could not determine previous week's game")
-                return None
-            
-            print(f"🎮 Previous week's game: {prev_game_title}")
-            
-            # Find the corresponding game ID in the gamelist
-            prev_game_id = self.find_game_id_by_title(prev_game_title)
+            # Get the game_id for that seed from predictions.yaml
+            prev_game_id = self.get_game_id_from_seed(prev_week_seed)
             if not prev_game_id:
-                print(f"⚠️  Could not find game ID for title: {prev_game_title}")
+                print("⚠️  Could not determine previous week's game_id")
                 return None
             
             print(f"🆔 Found game ID: {prev_game_id}")
+            
+            # Get the game title from gamelist.json
+            prev_game_title = self.get_game_title_from_id(prev_game_id)
+            if not prev_game_title:
+                print(f"⚠️  Could not find game title for id: {prev_game_id}")
+                # Use game_id as fallback title
+                prev_game_title = prev_game_id
+            
+            print(f"🎮 Previous week's game: {prev_game_title}")
             
             # Get the top scores for that game
             top_scores = self.get_top_scores(prev_game_id, top_count=3)
@@ -362,16 +412,10 @@ class NewsletterSender:
                 seed = f"{now.year}{week:02d}"
                 print(f"🎯 Using current week seed: {seed}")
             
-            # Get the game title for the seed
-            game_title = self.get_game_from_seed(seed)
-            if not game_title:
-                print(f"Error: Could not find game prediction for seed: {seed}")
-                sys.exit(1)
-            
-            # Find the corresponding game ID in the gamelist
-            game_id = self.find_game_id_by_title(game_title)
+            # Get the game_id directly from predictions.yaml
+            game_id = self.get_game_id_from_seed(seed)
             if not game_id:
-                print(f"Error: Could not find game ID for title: {game_title}")
+                print(f"Error: Could not find game prediction for seed: {seed}")
                 sys.exit(1)
             
             return game_id
@@ -470,7 +514,7 @@ class NewsletterSender:
         from datetime import datetime
         import re
         cover_url = f'{BASE_URL}/games/{game_id}/cover.png'
-        play_url = f'https://felx.cc/b/{game_id}'
+        play_url = f'https://f-l.ca/b/{game_id}'
         leaderboard_url = f'https://alloarcade.web.app/leaderboards/{game_id}'
         title = meta.get('title', game_id)
         # Remove parenthetical content for display in email body
@@ -668,7 +712,7 @@ class NewsletterSender:
             except Exception as e:
                 print(f"⚠️  Failed to parse webhook map JSON: {e}. Skipping webhook notification.")
                 return
-        play_url = f'https://felx.cc/b/{game_id}'
+        play_url = f'https://f-l.ca/b/{game_id}'
         cover_url = f'{BASE_URL}/games/{game_id}/cover.png'
         leaderboard_url = f'https://alloarcade.web.app/leaderboards/{game_id}'
         title = meta.get('title', game_id)
@@ -699,6 +743,7 @@ Top scores de la semaine dernière sur {{b}}{last_week_highlight['game_title']}{
         
         custom_text = f"{announcement_message}\n\n" if announcement_message else ''
         # Message template with {b} for bold, now includes plinko link and last week's highlight
+        # Note: For Google Chat, we use cards instead of this template
         message_template = f"""
 Annonce du jeu de la semaine!
 {custom_text}{{b}}Jeu de la semaine :{{b}} {title}
@@ -707,12 +752,98 @@ Annonce du jeu de la semaine!
 {{b}}Genre :{{b}} {genre}
 {{b}}Contrôles :{{b}} {controls}
 {{b}}Image :{{b}} {cover_url}
-{{b}}Classements :{{b}} {leaderboard_url}
 
 {{b}}Jouez ici :{{b}} {play_url}
 {last_week_text}
 Bonne semaine ! ☀️
 """.strip()
+        
+        # Build Google Chat card payload with image widget
+        def build_google_chat_card():
+            """Build a Google Chat card message with image widget."""
+            widgets = []
+            
+            # Add announcement message if available
+            if announcement_message:
+                widgets.append({
+                    "textParagraph": {
+                        "text": announcement_message
+                    }
+                })
+            
+            # Add game details using keyValue widgets for bold labels
+            widgets.append({
+                "keyValue": {
+                    "topLabel": "Développeur",
+                    "content": developer
+                }
+            })
+            widgets.append({
+                "keyValue": {
+                    "topLabel": "Année",
+                    "content": str(year)
+                }
+            })
+            widgets.append({
+                "keyValue": {
+                    "topLabel": "Genre",
+                    "content": genre
+                }
+            })
+            widgets.append({
+                "keyValue": {
+                    "topLabel": "Contrôles",
+                    "content": controls
+                }
+            })
+            
+            # Add last week's highlight if available
+            if last_week_highlight:
+                # Build the full text with header and all scores
+                highlight_text = f"Top scores de la semaine dernière sur {last_week_highlight['game_title']}\n"
+                for score in last_week_highlight['top_scores']:
+                    medal = "🥇" if score['rank'] == 1 else "🥈" if score['rank'] == 2 else "🥉"
+                    highlight_text += f"{medal} {score['player']}: {score['score']:,} points\n"
+                widgets.append({
+                    "textParagraph": {
+                        "text": highlight_text.strip()
+                    }
+                })
+            
+            # Add play button
+            button_play_url = f'https://f-l.ca/b/{game_id}'
+            widgets.append({
+                "buttons": [
+                    {
+                        "textButton": {
+                            "text": "🎮 Jouer maintenant !",
+                            "onClick": {
+                                "openLink": {
+                                    "url": button_play_url
+                                }
+                            }
+                        }
+                    }
+                ]
+            })
+            
+            return {
+                "cards": [
+                    {
+                        "header": {
+                            "title": "🕹️ Annonce du jeu de la semaine!",
+                            "subtitle": title,
+                            "imageUrl": cover_url,
+                            "imageStyle": "AVATAR"  # AVATAR displays smaller than IMAGE
+                        },
+                        "sections": [
+                            {
+                                "widgets": widgets
+                            }
+                        ]
+                    }
+                ]
+            }
         sent_any = False
         # If filter_label is set, only use that label
         if filter_label:
@@ -735,8 +866,7 @@ Bonne semaine ! ☀️
                     bold = '**'
                     payload = {"content": message_template.replace('{b}', bold)}
                 elif wtype == 'googlechat':
-                    bold = '*'
-                    payload = {"text": message_template.replace('{b}', bold)}
+                    payload = build_google_chat_card()
                 else:
                     print(f"⚠️  Unknown webhook type '{wtype}' for label '{label}'. Skipping.")
                     continue
@@ -756,8 +886,7 @@ Bonne semaine ! ☀️
                 bold = '**'
                 payload = {"content": message_template.replace('{b}', bold)}
             elif wtype == 'googlechat':
-                bold = '*'
-                payload = {"text": message_template.replace('{b}', bold)}
+                payload = build_google_chat_card()
             else:
                 print(f"⚠️  Unknown webhook type '{wtype}' for label '{label}'. Skipping.")
                 continue
@@ -769,7 +898,15 @@ Bonne semaine ! ☀️
             except requests.exceptions.RequestException as e:
                 print(f"❌ Error sending webhook to '{label}' (env: {env_var}, type: {wtype}): {e}")
                 if hasattr(e, 'response') and e.response:
-                    print(f"Response: {e.response.text}")
+                    print(f"Response status: {e.response.status_code}")
+                    print(f"Response body: {e.response.text}")
+                    # Also print the payload for debugging (truncated)
+                    import json
+                    payload_str = json.dumps(payload, indent=2, ensure_ascii=False)
+                    if len(payload_str) > 1000:
+                        print(f"Payload (first 1000 chars): {payload_str[:1000]}...")
+                    else:
+                        print(f"Payload: {payload_str}")
         if not sent_any:
             print("⚠️  No webhook messages sent (no valid URLs found).")
 

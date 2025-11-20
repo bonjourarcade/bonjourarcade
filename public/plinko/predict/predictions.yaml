@@ -1,160 +1,108 @@
 # les autres: voir Barcode Arcade dans docs job
 
 202511:
-  title: Vanguard
   game_id: vanguard
 202512:
-  title: "Arkanoid: Doh It Again"
   game_id: dohitagain
 202513:
-  title: Pac-Man
   game_id: pacman
 202514:
-  title: Gyruss
   game_id: gyruss
 202515:
-  title: Berzerk
   game_id: berzerk
 202516:
-  title: Scramble
   game_id: scramble
 202517:
-  title: "1943: The Battle of Midway"
   game_id: 1943
 202518:
-  title: Pac-Man Championship Edition
   game_id: pacmance
 202519:
-  title: Find Luigi
   game_id: findluigi
 202520:
-  title: DoDonPachi
   game_id: ddonpach
 202521:
-  title: Contra
   game_id: contranes
 202522:
-  title: Joust
   game_id: joust
 202523:
-  title: Bubbles
   game_id: bubbles
 202524:
-  title: Excitebike
   game_id: excitebike
 202525: 
-  title: Clu Clu Land
   game_id: clucluland
 202526: 
-  title: Kung Fu
   game_id: kungfu
 202527: 
-  title: "Ice Climber"
   game_id: iceclimber
 202528: 
-  title: "Chopper Command"
   game_id: chopcom
 202529: 
-  title: Batsugun
   game_id: batsugun
 202530: 
-  title: "R.C. Pro-AM"
   game_id: rcproam
 202531: 
-  title: "Pitfall II"
   game_id: "pitfall2"
 202532: 
-  title: "Alien Syndrome"
   game_id: "aliensyn"
 202533: 
-  title: "Shinobi III: Return of the Ninja Master"
   game_id: "shinobi3"
 202534: 
-  title: "Balloon Fight"
   game_id: "balloon"
 202535: 
-  title: "H.E.R.O."
   game_id: "hero"
 202536: 
-  title: "Metal Slug 3"
   game_id: "mslug3"
 202537: 
-  title: "Mad Planets"
   game_id: "mplanets"
 202538: 
-  title: "Gunbird 2"
   game_id: "gunbird2"
 202539: 
-  title: "Rocket Knight Adventures"
   game_id: "rocketk"
 202540: 
-  title: "Raiden II"
   game_id: "raiden2"
 202541: 
-  title: "Kickle Cubicle (NES)"
   game_id: "kicklecubiclenes"
 202542: 
-  title: "Flappy Bird"
   game_id: flappybird
 202543: 
-  title: "Mushihimesama Futari"
   game_id: "futari15"
 202544: 
-  title: "Nibbler"
   game_id: "nibbler"
 202545: 
-  title: "UndeadLine"
   game_id: "undeadline"
 202546: 
-  title: "Juno First"
   game_id: junofrst
 202547: 
-  title: "Elemental Master"
   game_id: "elmaster"
 202548: 
-  title: "Parodius"
   game_id: "parodius"
 202549: 
-  title: "Go Go! Mile Smile"
   game_id: "gogomile"
 202550: 
-  title: "Loco-Motion"
   game_id: "locomotn"
 202551: 
-  title: Toki
   game_id: toki
 202552:
-  title: Daze Before Christmas
   game_id: dazebeforechristmas
 202601:
-  title: Cyber-Lip
   game_id: cyberlip
 202602:
-  title: Gun.Smoke
   game_id: gunsmoke
 202603:
-  title: Pengo
   game_id: pengo
 202604:
-  title: Bird Week
   game_id: birdweek
 202605:
-  title: Mazinger Z
   game_id: mazinger
 202606:
-  title: Mars Matrix
   game_id: mmatrix
 202607:
-  title: Flicky
   game_id: flicky
 202608:
-  title: Last Duel
   game_id: lastduel
 202609:
-  title: Armed Police Batrider
   game_id: batrider
 202610:
-  title: Sonic the Hedgehog 3 Complete
   game_id: sonic3c
 202611:
   game_id: spcinv95

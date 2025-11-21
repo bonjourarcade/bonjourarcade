@@ -11,7 +11,7 @@ genre: Action, Puzzle, Cute
 
 # Message d'annonce personnalisé pour la newsletter
 # Ce message apparaîtra en haut de l'email et des webhooks
-announcement_message: 
+announcement_message: "Plongez dans l'univers glacé de Pengo, un jeu captivant de Coreland Technology sorti en 1983 qui allie action frénétique et puzzles astucieux ! Incarnez un adorable pingouin qui doit pousser des blocs de glace pour écraser des ennemis tout en naviguant à travers des labyrinthes enneigés. Avec ses graphismes colorés et son gameplay addictif, Pengo vous garantit des heures de plaisir en résolvant des énigmes tout en combattant des créatures espiègles !"
 
 hide: yes
 

@@ -76,8 +76,8 @@ class AnnouncementGenerator:
         week = next_week.isocalendar()[1]
         return f"{next_week.year}{week:02d}"
 
-    def get_game_from_seed(self, seed):
-        """Get the game title that would be selected for a given seed using the predictions.yaml file."""
+    def get_game_id_from_seed(self, seed):
+        """Get the game_id that would be selected for a given seed using the predictions.yaml file."""
         try:
             predictions_path = 'public/plinko/predict/predictions.yaml'
             if not os.path.exists(predictions_path):
@@ -91,7 +91,7 @@ class AnnouncementGenerator:
                 print(f"❌ Error: predictions.yaml is empty or invalid")
                 sys.exit(1)
             
-            # Look up the game title for this seed
+            # Look up the game_id for this seed
             try:
                 seed_int = int(seed)
                 game_data = predictions.get(seed_int)
@@ -102,25 +102,26 @@ class AnnouncementGenerator:
                 print(f"❌ Error: No prediction found for seed {seed}")
                 sys.exit(1)
             
-            # Extract title from the game data (could be dict or string)
+            # Extract game_id from the game data (could be dict or string)
             if isinstance(game_data, dict):
-                game_title = game_data.get('title')
+                game_id = game_data.get('game_id')
             else:
-                game_title = game_data
+                # If it's a string, it might be the game_id itself (old format)
+                game_id = game_data
             
-            if not game_title:
-                print(f"❌ Error: No title found in prediction data for seed {seed}")
+            if not game_id:
+                print(f"❌ Error: No game_id found in prediction data for seed {seed}")
                 sys.exit(1)
             
-            print(f"🎯 For seed {seed}, predicted game: {game_title}")
-            return game_title
+            print(f"🎯 For seed {seed}, predicted game_id: {game_id}")
+            return game_id
             
         except Exception as e:
-            print(f"❌ Error: Could not determine game for seed {seed}: {e}")
+            print(f"❌ Error: Could not determine game_id for seed {seed}: {e}")
             sys.exit(1)
 
-    def find_game_id_by_title(self, game_title):
-        """Find a game ID in the gamelist that matches the given title."""
+    def get_game_title_from_id(self, game_id):
+        """Get the game title from gamelist.json using the game_id."""
         try:
             gamelist_path = 'public/gamelist.json'
             if not os.path.exists(gamelist_path):
@@ -130,38 +131,30 @@ class AnnouncementGenerator:
             with open(gamelist_path, 'r') as f:
                 gamelist = json.load(f)
             
-            # Search through all games for a title match
+            # Search through all games for a game_id match
             all_games = []
-            if gamelist.get('gameOfTheWeek') and gamelist['gameOfTheWeek'].get('id'):
-                all_games.append(gamelist['gameOfTheWeek'])
-            if gamelist.get('previousGames'):
-                all_games.extend(gamelist['previousGames'])
+            # Add games from the main games array
             if gamelist.get('games'):
                 all_games.extend(gamelist['games'])
+            # Add game of the week if it exists
+            if gamelist.get('gameOfTheWeek') and gamelist['gameOfTheWeek'].get('id'):
+                all_games.append(gamelist['gameOfTheWeek'])
+            # Add previous games if they exist
+            if gamelist.get('previousGames'):
+                all_games.extend(gamelist['previousGames'])
             
-            # Try exact match first
+            # Find the game with matching id
             for game in all_games:
-                if game.get('title') == game_title:
-                    return game.get('id')
+                if game.get('id') == game_id:
+                    title = game.get('title')
+                    if title:
+                        return title
             
-            # Try case-insensitive match
-            for game in all_games:
-                if game.get('title', '').lower() == game_title.lower():
-                    return game.get('id')
-            
-            # Try partial match
-            for game in all_games:
-                game_title_lower = game.get('title', '').lower()
-                search_title_lower = game_title.lower()
-                if search_title_lower in game_title_lower or game_title_lower in search_title_lower:
-                    print(f"🔍 Found partial match: '{game.get('title')}' for '{game_title}'")
-                    return game.get('id')
-            
-            print(f"❌ Error: No game found with title: {game_title}")
+            print(f"❌ Error: No game found with id: {game_id}")
             sys.exit(1)
             
         except Exception as e:
-            print(f"❌ Error: Error searching for game title: {e}")
+            print(f"❌ Error: Error looking up game title for id {game_id}: {e}")
             sys.exit(1)
 
     def read_game_metadata(self, game_id):
@@ -364,8 +357,8 @@ Génère maintenant l'annonce pour {game_title} :"""
         
         # Get game information
         print("📖 Reading game of the week...")
-        game_title = self.get_game_from_seed(seed)
-        game_id = self.find_game_id_by_title(game_title)
+        game_id = self.get_game_id_from_seed(seed)
+        game_title = self.get_game_title_from_id(game_id)
         print(f'✅ Game of the week: {game_id} ({game_title})')
         
         # Read metadata

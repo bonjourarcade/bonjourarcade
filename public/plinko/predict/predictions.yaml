@@ -85,7 +85,7 @@
 202552:
   game_id: dazebeforechristmas
 202601:
-  game_id: cyberlip
+  game_id: tetris
 202602:
   game_id: gunsmoke
 202603:
@@ -146,3 +146,5 @@
   game_id: machrider
 202631:
   game_id: rayforce
+202632:
+  game_id: cyberlip

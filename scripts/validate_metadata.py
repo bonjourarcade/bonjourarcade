@@ -75,10 +75,26 @@ def validate_game_metadata(game_id, game_metadata_path, required_fields):
             if field not in game_metadata:
                 missing_fields.append(field)
                 errors.append(f"Missing field: {field}")
-            elif game_metadata[field] is None or game_metadata[field] == '':
-                # Field exists but is empty
-                missing_fields.append(field)
-                errors.append(f"Field '{field}' exists but is empty")
+            else:
+                # Check if the field value is empty
+                value = game_metadata[field]
+                is_empty = False
+                
+                if value is None:
+                    is_empty = True
+                elif isinstance(value, str):
+                    # Check for empty string or whitespace-only string
+                    if value == '' or value.strip() == '':
+                        is_empty = True
+                elif isinstance(value, (list, dict)):
+                    # Check for empty list or dict
+                    if len(value) == 0:
+                        is_empty = True
+                # For other types (int, bool, etc.), consider them as filled
+                
+                if is_empty:
+                    missing_fields.append(field)
+                    errors.append(f"Field '{field}' exists but is empty")
         
         is_valid = len(missing_fields) == 0
         return is_valid, missing_fields, errors

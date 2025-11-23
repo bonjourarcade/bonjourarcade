@@ -41,7 +41,7 @@
     <script>
         async function redirectToGameOfTheWeek() {
             try {
-                // Get the current game ID from the API endpoint (generated from predictions.yaml)
+                // Get the current game ID from the API endpoint (generated from upcoming.yaml)
                 const currentGameResponse = await fetch('/api/current-game');
                 if (!currentGameResponse.ok) {
                     throw new Error(`Failed to fetch current game: ${currentGameResponse.statusText}`);

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Helper script to get the current week's game title from predictions.yaml.
+Helper script to get the current week's game title from upcoming.yaml.
 This script is used by the generate_gamelist.sh scripts to replace the game-of-the-week file dependency.
 """
 
@@ -16,19 +16,19 @@ def get_current_week_seed():
     return f"{now.year}{week:02d}"
 
 def get_game_from_seed(seed):
-    """Get the game info (title and game_id) that would be selected for a given seed using the predictions.yaml file."""
+    """Get the game info (title and game_id) that would be selected for a given seed using the upcoming.yaml file."""
     try:
-        # Read the predictions.yaml file to get the game for this seed
-        predictions_path = 'public/plinko/predict/predictions.yaml'
+        # Read the upcoming.yaml file to get the game for this seed
+        predictions_path = 'public/upcoming/upcoming.yaml'
         if not os.path.exists(predictions_path):
-            print(f"Error: predictions.yaml not found at {predictions_path}", file=sys.stderr)
+            print(f"Error: upcoming.yaml not found at {predictions_path}", file=sys.stderr)
             return None
             
         with open(predictions_path, 'r') as f:
             predictions = yaml.safe_load(f)
         
         if not predictions:
-            print(f"Error: predictions.yaml is empty or invalid", file=sys.stderr)
+            print(f"Error: upcoming.yaml is empty or invalid", file=sys.stderr)
             return None
         
         # Look up the game info for this seed

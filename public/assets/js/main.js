@@ -159,7 +159,7 @@ async function fetchGameData() {
         // Use local gamelist.json for development, Google Cloud Storage for production
         const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
         
-        // Get the current game ID from the API endpoint (generated from predictions.yaml)
+        // Get the current game ID from the API endpoint (generated from upcoming.yaml)
         let currentGameId = null;
         try {
             const currentGameResponse = await fetch('/api/current-game');
@@ -174,7 +174,7 @@ async function fetchGameData() {
             console.warn('Could not fetch current game from API:', error);
         }
         
-        // Load predictions.yaml to get list of previous games of the week
+        // Load upcoming.yaml to get list of previous games of the week
         let previousGotwGameIds = new Set();
         let previousWeekGames = []; // Array to store previous week games with their week numbers
         try {
@@ -197,7 +197,7 @@ async function fetchGameData() {
             const currentWeek = getISOWeek(now);
             const currentWeekSeed = currentYear * 100 + currentWeek;
             
-            const predictionsUrl = '/plinko/predict/predictions.yaml';
+            const predictionsUrl = '/upcoming/upcoming.yaml';
             const predictionsResponse = await fetch(predictionsUrl);
             if (predictionsResponse.ok) {
                 const predictionsText = await predictionsResponse.text();
@@ -245,7 +245,7 @@ async function fetchGameData() {
                 console.log(`Found ${previousWeekGames.length} games from previous weeks (showing last 10)`);
             }
         } catch (error) {
-            console.warn('Could not fetch predictions.yaml:', error);
+            console.warn('Could not fetch upcoming.yaml:', error);
         }
         const cacheBuster = '?v=' + Date.now();
         const gamelistUrl = isLocalhost ? 'gamelist.json' + cacheBuster : 'https://storage.googleapis.com/bonjourarcade/gamelist.json' + cacheBuster;

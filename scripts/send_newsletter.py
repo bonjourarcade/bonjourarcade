@@ -95,19 +95,19 @@ class NewsletterSender:
         return f"{previous_week.year}{week:02d}"
 
     def get_game_id_from_seed(self, seed):
-        """Get the game_id that would be selected for a given seed using the predictions.yaml file."""
+        """Get the game_id that would be selected for a given seed using the upcoming.yaml file."""
         try:
-            # Read the predictions.yaml file to get the game for this seed
-            predictions_path = 'public/plinko/predict/predictions.yaml'
+            # Read the upcoming.yaml file to get the game for this seed
+            predictions_path = 'public/upcoming/upcoming.yaml'
             if not os.path.exists(predictions_path):
-                print(f"⚠️  Warning: predictions.yaml not found, cannot determine game for seed {seed}")
+                print(f"⚠️  Warning: upcoming.yaml not found, cannot determine game for seed {seed}")
                 return None
                 
             with open(predictions_path, 'r') as f:
                 predictions = yaml.safe_load(f)
             
             if not predictions:
-                print(f"⚠️  Warning: predictions.yaml is empty or invalid")
+                print(f"⚠️  Warning: upcoming.yaml is empty or invalid")
                 return None
             
             # Look up the game data for this seed
@@ -179,8 +179,8 @@ class NewsletterSender:
             return None
 
     def get_game_from_seed(self, seed):
-        """Get the game title that would be selected for a given seed using the predictions.yaml file.
-        This method gets the game_id from predictions.yaml and then looks up the title from gamelist.json."""
+        """Get the game title that would be selected for a given seed using the upcoming.yaml file.
+        This method gets the game_id from upcoming.yaml and then looks up the title from gamelist.json."""
         game_id = self.get_game_id_from_seed(seed)
         if not game_id:
             return None
@@ -336,7 +336,7 @@ class NewsletterSender:
             prev_week_seed = self.get_previous_week_seed(current_seed)
             print(f"🔍 Looking for previous week's game (seed: {prev_week_seed})...")
             
-            # Get the game_id for that seed from predictions.yaml
+            # Get the game_id for that seed from upcoming.yaml
             prev_game_id = self.get_game_id_from_seed(prev_week_seed)
             if not prev_game_id:
                 print("⚠️  Could not determine previous week's game_id")
@@ -400,7 +400,7 @@ class NewsletterSender:
         return summary.strip()
 
     def read_game_of_the_week(self, week_seed=None):
-        """Read the game of the week from predictions.yaml using the specified seed or current week's seed."""
+        """Read the game of the week from upcoming.yaml using the specified seed or current week's seed."""
         try:
             # Use provided seed or get current week's seed
             if week_seed:
@@ -412,7 +412,7 @@ class NewsletterSender:
                 seed = f"{now.year}{week:02d}"
                 print(f"🎯 Using current week seed: {seed}")
             
-            # Get the game_id directly from predictions.yaml
+            # Get the game_id directly from upcoming.yaml
             game_id = self.get_game_id_from_seed(seed)
             if not game_id:
                 print(f"Error: Could not find game prediction for seed: {seed}")
@@ -425,7 +425,7 @@ class NewsletterSender:
             sys.exit(1)
 
     def get_current_week_game_title(self):
-        """Get the current week's game title from predictions.yaml."""
+        """Get the current week's game title from upcoming.yaml."""
         try:
             # Get current week's seed
             now = datetime.now()
@@ -445,7 +445,7 @@ class NewsletterSender:
             return None
 
     def get_week_game_by_seed(self, seed):
-        """Get the game title for a specific week seed from predictions.yaml."""
+        """Get the game title for a specific week seed from upcoming.yaml."""
         try:
             game_title = self.get_game_from_seed(seed)
             if not game_title:

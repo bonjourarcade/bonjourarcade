@@ -77,18 +77,18 @@ class AnnouncementGenerator:
         return f"{next_week.year}{week:02d}"
 
     def get_game_id_from_seed(self, seed):
-        """Get the game_id that would be selected for a given seed using the predictions.yaml file."""
+        """Get the game_id that would be selected for a given seed using the upcoming.yaml file."""
         try:
-            predictions_path = 'public/plinko/predict/predictions.yaml'
+            predictions_path = 'public/upcoming/upcoming.yaml'
             if not os.path.exists(predictions_path):
-                print(f"❌ Error: predictions.yaml not found at {predictions_path}")
+                print(f"❌ Error: upcoming.yaml not found at {predictions_path}")
                 sys.exit(1)
                 
             with open(predictions_path, 'r') as f:
                 predictions = yaml.safe_load(f)
             
             if not predictions:
-                print(f"❌ Error: predictions.yaml is empty or invalid")
+                print(f"❌ Error: upcoming.yaml is empty or invalid")
                 sys.exit(1)
             
             # Look up the game_id for this seed

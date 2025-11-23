@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Helper script to check if a game is in predictions.yaml and determine its status.
+Helper script to check if a game is in upcoming.yaml and determine its status.
 This script is used by the generate_gamelist scripts to override hide settings for prediction games.
 """
 
@@ -38,10 +38,10 @@ def seed_to_date(seed):
         return None
 
 def is_game_in_predictions(game_id):
-    """Check if a game_id exists in predictions.yaml and return its status."""
+    """Check if a game_id exists in upcoming.yaml and return its status."""
     try:
-        # Read the predictions.yaml file
-        predictions_path = 'public/plinko/predict/predictions.yaml'
+        # Read the upcoming.yaml file
+        predictions_path = 'public/upcoming/upcoming.yaml'
         if not os.path.exists(predictions_path):
             return None
             
@@ -82,7 +82,7 @@ def is_game_in_predictions(game_id):
         return None
         
     except Exception as e:
-        print(f"Error: Could not read predictions.yaml: {e}", file=sys.stderr)
+        print(f"Error: Could not read upcoming.yaml: {e}", file=sys.stderr)
         return None
 
 def check_week_status(seed):

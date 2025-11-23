@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Helper script to get the current week's game ID from predictions.yaml.
+Helper script to get the current week's game ID from upcoming.yaml.
 This script is used by the generate_gamelist.sh scripts to get the game ID directly.
 """
 

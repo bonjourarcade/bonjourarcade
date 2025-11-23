@@ -78,7 +78,7 @@ show_progress() {
             if grep -q "Starting parallel gamelist generation" /tmp/gamelist_output.log; then
                 current_stage=1
             fi
-            if grep -q "Getting current week's game from predictions.yaml" /tmp/gamelist_output.log; then
+            if grep -q "Getting current week's game from upcoming.yaml" /tmp/gamelist_output.log; then
                 current_stage=2
             fi
             if grep -q "Scanning ROM files\|Collecting ROM entries" /tmp/gamelist_output.log; then

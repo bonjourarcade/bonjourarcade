@@ -33,7 +33,7 @@ pip install -r requirements.txt
 
 ## 📧 Weekly Workflow
 
-1. **Update predictions**: Use `/plinko/index.html?seed=YYYYWW` to test and update `predictions.yaml`
+1. **Update predictions**: Use `/plinko/index.html?seed=YYYYWW` to test and update `upcoming.yaml`
 2. **Send newsletter**: `python scripts/send_newsletter.py`
 
 ### Test First
@@ -44,7 +44,7 @@ python scripts/send_newsletter.py --dry-run
 ## 🔧 How It Works
 
 - **Game Selection**: Plinko automatically selects games using weekly seeds
-- **Newsletter**: Reads current week's game from predictions.yaml
+- **Newsletter**: Reads current week's game from upcoming.yaml
 - **Content**: Includes game info, cover image, play link, and plinko seed
 
 ## 🤖 Automated Newsletter (GitLab CI)

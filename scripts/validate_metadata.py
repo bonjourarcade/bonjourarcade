@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Script to validate that all games in predictions.yaml have complete metadata.yaml files.
+Script to validate that all games in upcoming.yaml have complete metadata.yaml files.
 A metadata.yaml is considered complete if it has a value for each field present in the
 archetypal metadata.yaml at the root of the project.
 """
@@ -30,7 +30,7 @@ def get_archetypal_fields(archetypal_path):
 
 def get_game_ids_from_predictions(predictions_path):
     """
-    Extract all game_id values from predictions.yaml.
+    Extract all game_id values from upcoming.yaml.
     """
     try:
         with open(predictions_path, 'r') as f:
@@ -49,7 +49,7 @@ def get_game_ids_from_predictions(predictions_path):
         
         return game_ids
     except Exception as e:
-        print(f"Error reading predictions.yaml: {e}", file=sys.stderr)
+        print(f"Error reading upcoming.yaml: {e}", file=sys.stderr)
         sys.exit(1)
 
 def validate_game_metadata(game_id, game_metadata_path, required_fields):
@@ -111,7 +111,7 @@ def main():
     project_root = script_dir.parent
     
     archetypal_path = project_root / 'metadata.yaml'
-    predictions_path = project_root / 'public' / 'plinko' / 'predict' / 'predictions.yaml'
+    predictions_path = project_root / 'public' / 'upcoming' / 'upcoming.yaml'
     games_dir = project_root / 'public' / 'games'
     
     # Check that required files exist
@@ -120,7 +120,7 @@ def main():
         sys.exit(1)
     
     if not predictions_path.exists():
-        print(f"Error: predictions.yaml not found at {predictions_path}", file=sys.stderr)
+        print(f"Error: upcoming.yaml not found at {predictions_path}", file=sys.stderr)
         sys.exit(1)
     
     # Get required fields from archetypal metadata
@@ -134,7 +134,7 @@ def main():
     
     # Get all game IDs from predictions
     game_entries = get_game_ids_from_predictions(predictions_path)
-    print(f"Found {len(game_entries)} games in predictions.yaml")
+    print(f"Found {len(game_entries)} games in upcoming.yaml")
     print()
     
     # Validate each game's metadata

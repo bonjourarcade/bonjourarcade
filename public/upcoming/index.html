@@ -534,7 +534,7 @@
                 
                 // Load both predictions and game data
                 const [predictionsResponse, gamesResponse] = await Promise.all([
-                    fetch('../plinko/predict/predictions.yaml'),
+                    fetch('upcoming.yaml'),
                     fetch(gamelistUrl)
                 ]);
                 
@@ -573,7 +573,7 @@
                 // Check if line is a week number (YYYYWW format)
                 if (/^\d{6}:$/.test(line)) {
                     // Save previous game if exists. Include entries that at least have a game_id;
-                    // title may be missing in predictions.yaml and will be filled from gamelist.json later.
+                    // title may be missing in upcoming.yaml and will be filled from gamelist.json later.
                     if (currentWeek && currentGame.game_id) {
                         games.push({
                             week: currentWeek,

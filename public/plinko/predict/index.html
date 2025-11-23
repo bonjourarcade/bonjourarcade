@@ -156,7 +156,7 @@
     const gamelistUrl = isLocalhost ? '../gamelist.json' + cacheBuster : 'https://storage.googleapis.com/bonjourarcade/gamelist.json' + cacheBuster;
     
     Promise.all([
-      fetch('predictions.yaml').then(r => r.text()).then(yamlText => { predictions = jsyaml.load(yamlText) || {}; }),
+      fetch('../upcoming/upcoming.yaml').then(r => r.text()).then(yamlText => { predictions = jsyaml.load(yamlText) || {}; }),
       fetch(gamelistUrl).then(r => {
         if (!r.ok) return null;
         return r.json();

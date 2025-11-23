@@ -67,10 +67,10 @@ if ! command -v find &> /dev/null; then
     exit 1
 fi
 
-# --- Read Featured Game ID from predictions.yaml ---
-echo -e "${BLUE}🔍 Getting current week's game from predictions.yaml...${NC}"
+# --- Read Featured Game ID from upcoming.yaml ---
+echo -e "${BLUE}🔍 Getting current week's game from upcoming.yaml...${NC}"
 if ! command -v python3 &> /dev/null; then
-    echo -e "${RED}Error: python3 is required to read predictions.yaml${NC}"
+    echo -e "${RED}Error: python3 is required to read upcoming.yaml${NC}"
     exit 1
 fi
 
@@ -210,7 +210,7 @@ while IFS= read -r rom_entry; do
             announcement_message=$(echo "$metadata_json" | jq -r '.announcement_message // ""')
             
             # Check if game is in predictions and should override hide setting
-            # Check by game_id (not title) since predictions.yaml uses game_id
+            # Check by game_id (not title) since upcoming.yaml uses game_id
             if [ -n "$game_id" ]; then
                 prediction_result=$(python3 scripts/check_predictions_status.py "$game_id" 2>/dev/null || echo "NOT_IN_PREDICTIONS")
                 if [[ "$prediction_result" == SHOW_GAME* ]]; then
@@ -233,7 +233,7 @@ while IFS= read -r rom_entry; do
     fi
     
     # Check if game is in predictions and should override hide setting (for games without metadata)
-    # Check by game_id (not title) since predictions.yaml uses game_id
+    # Check by game_id (not title) since upcoming.yaml uses game_id
     if [ -f "$metadata_file" ] && [ -n "$title" ] && [ "$title" != "$game_id" ]; then
         # Title was extracted from metadata, already handled above
         :
@@ -510,7 +510,7 @@ if ! jq -e . "$OUTPUT_FILE" >/dev/null 2>&1; then
 fi
 
 # Create API endpoint for current game of the week ID (for 3rd party apps)
-# This reads from predictions.yaml based on the current week's yyyyww
+# This reads from upcoming.yaml based on the current week's yyyyww
 echo -e "${BLUE}📝 Creating current-game API endpoint...${NC}"
 mkdir -p public/api
 CURRENT_GAME_ID=$(python3 scripts/get_current_week_game_id.py)

@@ -87,7 +87,7 @@ python3 scripts/send_newsletter.py --dry-run
 - Dependencies are installed automatically
 
 ### 2. Newsletter Process
-1. **Reads current week's game** from `predictions.yaml`
+1. **Reads current week's game** from `upcoming.yaml`
 2. **Validates metadata** (requires `controls` and `to_start` fields)
 3. **Sends email** to ConvertKit subscribers
 4. **Sends webhooks** to all configured channels
@@ -106,8 +106,8 @@ python3 scripts/send_newsletter.py --dry-run
 ├── scripts/
 │   ├── send_newsletter.py           # Main newsletter script
 │   └── test_automated_newsletter.sh # Local testing script
-├── public/plinko/predict/
-│   └── predictions.yaml             # Game of the week predictions
+├── public/upcoming/
+│   └── upcoming.yaml                # Game of the week predictions
 ├── public/games/
 │   └── {game_id}/
 │       └── metadata.yaml            # Game metadata (must have controls & to_start)

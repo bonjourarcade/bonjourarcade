@@ -2640,7 +2640,7 @@
         });
 
         // Fetch predictions data
-        fetch('/plinko/predict/predictions.yaml')
+        fetch('/upcoming/upcoming.yaml')
             .then(res => res.text())
             .then(yamlText => {
                 // Parse YAML data (simple parsing for this specific format)
@@ -2677,7 +2677,7 @@
                 predictionsData = predictions;
             })
             .catch(err => {
-                console.error('Error loading predictions.yaml:', err);
+                console.error('Error loading upcoming.yaml:', err);
                 predictionsData = [];
             });
 

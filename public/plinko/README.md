@@ -11,7 +11,7 @@ A physics-based plinko game that automatically selects games for BonjourArcade.
 
 - **Weekly Seeds**: Each week gets a unique seed (YYYYWW format)
 - **Deterministic**: Same seed always produces the same result
-- **Auto-Selection**: Automatically picks games from predictions.yaml
+- **Auto-Selection**: Automatically picks games from upcoming.yaml
 
 ## Features
 

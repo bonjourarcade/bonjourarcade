@@ -14,7 +14,7 @@
       font-weight: bold;
       text-align: center;
       padding: 12px 0;
-      z-index: 100; /* Lowered so UI buttons can appear above */
+      z-index: 3000; /* Above header (2000) so staging banner appears on top */
       font-size: 1.2em;
       letter-spacing: 2px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.15);
@@ -55,12 +55,17 @@
       const banners = document.querySelectorAll('.bonjourarcade-banner');
       totalHeight = Array.from(banners).reduce((sum, b) => sum + b.offsetHeight, 0);
     }
+    // Check if we're on the play page (has header)
+    const playHeader = document.getElementById('play-header');
+    const headerHeight = playHeader ? 50 : 0; // Header is 50px on play page
+    const totalOffset = totalHeight + headerHeight;
+    
     // Always set margin-top (for normal flow layouts)
-    gameContainer.style.marginTop = totalHeight ? totalHeight + 'px' : '';
+    gameContainer.style.marginTop = totalOffset ? totalOffset + 'px' : '';
     // If absolutely or fixed positioned, set top as well (for canvas/fixed layouts)
     const pos = window.getComputedStyle(gameContainer).position;
     if (pos === 'absolute' || pos === 'fixed') {
-      gameContainer.style.top = totalHeight ? totalHeight + 'px' : '';
+      gameContainer.style.top = totalOffset ? totalOffset + 'px' : '';
     }
   }
 

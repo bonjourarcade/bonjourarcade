@@ -986,15 +986,10 @@
                     if (helpButton) helpButton.style.display = 'none';
                 }
                 
-                // --- Show help button on desktop (both normal and screensaver mode) ---
+                // --- Show help button on all devices ---
                 const helpButton = document.getElementById('help-button');
                 if (helpButton) {
-                    const isMobile = isMobileDevice();
-                    if (isMobile) {
-                        helpButton.style.display = 'none';
-                    } else {
-                        helpButton.style.display = 'flex';
-                    }
+                    helpButton.style.display = 'flex';
                 }
 
                 // Step 4: Check if the ROM or Core info for this game is missing

@@ -87,6 +87,32 @@
             text-align: center;
         }
         
+        /* Fast-forward button styling */
+        #fastforward-button {
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 8px 12px !important;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: sans-serif;
+            font-size: 12px !important;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: background-color 0.2s;
+            margin: 0 !important;
+            backdrop-filter: blur(10px);
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        #fastforward-button:hover {
+            background-color: rgba(0, 0, 0, 0.9);
+        }
+        #fastforward-button:active {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
         /* Help button styling */
         #help-button {
             background-color: rgba(0, 0, 0, 0.7);
@@ -346,6 +372,44 @@
             transition: top 0.2s;
         }
         
+        /* Header sections for three-column layout */
+        #play-header-left {
+            display: flex;
+            align-items: center;
+            flex: 0 0 auto;
+        }
+        
+        #play-header-center {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 auto;
+        }
+        
+        #play-header-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 0 0 auto;
+            margin-left: auto;
+        }
+        
+        /* Logo styling */
+        #play-header-logo {
+            height: 32px;
+            width: auto;
+            max-height: 32px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        
+        #play-header-logo:hover {
+            opacity: 0.8;
+        }
+        
         /* Menu button styling */
         #menu-button {
             background-color: rgba(0, 0, 0, 0.7);
@@ -428,16 +492,29 @@
         <button id="browser-warning-close" aria-label="Fermer">×</button>
     </div>
     
-    <!-- Header with Menu and Aide buttons -->
+    <!-- Header with Menu, Logo, and buttons -->
     <header id="play-header">
-        <div id="menu-button">
-            <span class="arrow">←</span>
-            <span>MENU</span>
+        <div id="play-header-left">
+            <div id="menu-button">
+                <span class="arrow">←</span>
+                <span>MENU</span>
+            </div>
         </div>
-        <button id="help-button">
-            <span>❔</span>
-            <span>Aide</span>
-        </button>
+        <div id="play-header-center">
+            <a href="/" aria-label="Retour à l'accueil">
+                <img id="play-header-logo" src="../assets/images/bonjourarcade-logo.png" alt="BonjourArcade Logo">
+            </a>
+        </div>
+        <div id="play-header-right">
+            <button id="fastforward-button">
+                <span>⏩</span>
+                <span>FF</span>
+            </button>
+            <button id="help-button">
+                <span>❔</span>
+                <span>Aide</span>
+            </button>
+        </div>
     </header>
     
     <!-- Controls Overlay (desktop only) -->
@@ -1700,6 +1777,200 @@
                 window.location.href = '/';
             }
         });
+        
+        // Fast-forward button functionality
+        (function() {
+            const fastForwardButton = document.getElementById('fastforward-button');
+            if (!fastForwardButton) return;
+            
+            let isHolding = false;
+            let holdInterval = null;
+            
+            // Function to get the target element for keyboard events (game canvas or window)
+            function getKeyboardTarget() {
+                // Try to find the game canvas or input element
+                const gameElement = document.getElementById('game');
+                if (gameElement) {
+                    // Look for canvas or input elements inside the game container
+                    const canvas = gameElement.querySelector('canvas');
+                    if (canvas) return canvas;
+                    const input = gameElement.querySelector('input');
+                    if (input) return input;
+                    return gameElement;
+                }
+                // Fallback to window
+                return window;
+            }
+            
+            // Function to simulate pressing the 0 key
+            function simulateKeyPress(keyValue) {
+                const target = getKeyboardTarget();
+                
+                // Try to focus the game element if it's focusable
+                const gameElement = document.getElementById('game');
+                if (gameElement && gameElement.focus) {
+                    try {
+                        gameElement.focus();
+                    } catch (e) {
+                        // Element might not be focusable, that's okay
+                    }
+                }
+                
+                // Create event with all necessary properties for EmulatorJS
+                const keydownEvent = new KeyboardEvent('keydown', {
+                    key: keyValue,
+                    code: 'Digit0',
+                    keyCode: 48,
+                    which: 48,
+                    charCode: 0,
+                    bubbles: true,
+                    cancelable: true,
+                    view: window,
+                    composed: true
+                });
+                
+                // Try multiple dispatch methods to ensure EmulatorJS catches it
+                // 1. Dispatch on the target element
+                if (target && target.dispatchEvent) {
+                    target.dispatchEvent(keydownEvent);
+                }
+                
+                // 2. Dispatch on window
+                window.dispatchEvent(keydownEvent);
+                
+                // 3. Dispatch on document
+                document.dispatchEvent(keydownEvent);
+                
+                // 4. Try dispatching on the game container
+                if (gameElement && gameElement !== target) {
+                    gameElement.dispatchEvent(keydownEvent);
+                }
+            }
+            
+            // Function to simulate releasing the 0 key
+            function simulateKeyRelease(keyValue) {
+                const target = getKeyboardTarget();
+                const gameElement = document.getElementById('game');
+                
+                // Create event with all necessary properties for EmulatorJS
+                const keyupEvent = new KeyboardEvent('keyup', {
+                    key: keyValue,
+                    code: 'Digit0',
+                    keyCode: 48,
+                    which: 48,
+                    charCode: 0,
+                    bubbles: true,
+                    cancelable: true,
+                    view: window,
+                    composed: true
+                });
+                
+                // Try multiple dispatch methods to ensure EmulatorJS catches it
+                // 1. Dispatch on the target element
+                if (target && target.dispatchEvent) {
+                    target.dispatchEvent(keyupEvent);
+                }
+                
+                // 2. Dispatch on window
+                window.dispatchEvent(keyupEvent);
+                
+                // 3. Dispatch on document
+                document.dispatchEvent(keyupEvent);
+                
+                // 4. Try dispatching on the game container
+                if (gameElement && gameElement !== target) {
+                    gameElement.dispatchEvent(keyupEvent);
+                }
+            }
+            
+            // Click: simulate a single press and release
+            fastForwardButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                simulateKeyPress('0');
+                // Release after a short delay to simulate a click
+                setTimeout(() => {
+                    simulateKeyRelease('0');
+                }, 100);
+            });
+            
+            // Mouse down: start holding
+            fastForwardButton.addEventListener('mousedown', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                isHolding = true;
+                simulateKeyPress('0');
+                
+                // Keep the key pressed while holding (but don't spam too much)
+                holdInterval = setInterval(() => {
+                    if (isHolding) {
+                        simulateKeyPress('0');
+                    }
+                }, 100); // Simulate keydown every 100ms while holding
+            });
+            
+            // Mouse up: stop holding
+            fastForwardButton.addEventListener('mouseup', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                isHolding = false;
+                if (holdInterval) {
+                    clearInterval(holdInterval);
+                    holdInterval = null;
+                }
+                simulateKeyRelease('0');
+            });
+            
+            // Mouse leave: stop holding if mouse leaves button while pressed
+            fastForwardButton.addEventListener('mouseleave', function(e) {
+                if (isHolding) {
+                    isHolding = false;
+                    if (holdInterval) {
+                        clearInterval(holdInterval);
+                        holdInterval = null;
+                    }
+                    simulateKeyRelease('0');
+                }
+            });
+            
+            // Touch events for mobile
+            fastForwardButton.addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                isHolding = true;
+                simulateKeyPress('0');
+                
+                // Keep the key pressed while holding
+                holdInterval = setInterval(() => {
+                    if (isHolding) {
+                        simulateKeyPress('0');
+                    }
+                }, 100);
+            });
+            
+            fastForwardButton.addEventListener('touchend', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                isHolding = false;
+                if (holdInterval) {
+                    clearInterval(holdInterval);
+                    holdInterval = null;
+                }
+                simulateKeyRelease('0');
+            });
+            
+            fastForwardButton.addEventListener('touchcancel', function(e) {
+                e.preventDefault();
+                if (isHolding) {
+                    isHolding = false;
+                    if (holdInterval) {
+                        clearInterval(holdInterval);
+                        holdInterval = null;
+                    }
+                    simulateKeyRelease('0');
+                }
+            });
+        })();
         
         // Help button functionality
         document.getElementById('help-button').addEventListener('click', function() {

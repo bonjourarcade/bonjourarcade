@@ -7,6 +7,7 @@ archetypal metadata.yaml at the root of the project.
 
 import os
 import sys
+import json
 import yaml
 from pathlib import Path
 
@@ -31,6 +32,7 @@ def get_archetypal_fields(archetypal_path):
 def get_game_ids_from_predictions(predictions_path):
     """
     Extract all game_id values from upcoming.yaml.
+    Returns list of (seed, game_id) tuples.
     """
     try:
         with open(predictions_path, 'r') as f:
@@ -44,13 +46,53 @@ def get_game_ids_from_predictions(predictions_path):
             if isinstance(game_data, dict):
                 game_id = game_data.get('game_id')
                 if game_id:
-                    game_ids.append((seed, game_id, game_data.get('title', 'Unknown')))
+                    game_ids.append((seed, game_id))
             # Old format entries (just strings) are skipped as they don't have game_id
         
         return game_ids
     except Exception as e:
         print(f"Error reading upcoming.yaml: {e}", file=sys.stderr)
         sys.exit(1)
+
+def get_game_title_from_gamelist(game_id, gamelist_path):
+    """
+    Get the game title from gamelist.json using the game_id.
+    Returns the title if found, otherwise returns 'Unknown'.
+    """
+    try:
+        if not os.path.exists(gamelist_path):
+            return 'Unknown'
+        
+        with open(gamelist_path, 'r') as f:
+            gamelist = json.load(f)
+        
+        # Convert game_id to string for comparison
+        game_id_str = str(game_id)
+        
+        # Search through all games for a game_id match
+        all_games = []
+        # Add games from the main games array
+        if gamelist.get('games'):
+            all_games.extend(gamelist['games'])
+        # Add game of the week if it exists
+        if gamelist.get('gameOfTheWeek') and gamelist['gameOfTheWeek'].get('id'):
+            all_games.append(gamelist['gameOfTheWeek'])
+        # Add previous games if they exist
+        if gamelist.get('previousGames'):
+            all_games.extend(gamelist['previousGames'])
+        
+        # Find the game with matching id
+        for game in all_games:
+            if str(game.get('id')) == game_id_str:
+                title = game.get('title')
+                if title:
+                    return title
+        
+        return 'Unknown'
+        
+    except Exception as e:
+        print(f"Warning: Error looking up game title for id {game_id}: {e}", file=sys.stderr)
+        return 'Unknown'
 
 def validate_game_metadata(game_id, game_metadata_path, required_fields):
     """
@@ -112,6 +154,7 @@ def main():
     
     archetypal_path = project_root / 'metadata.yaml'
     predictions_path = project_root / 'public' / 'upcoming' / 'upcoming.yaml'
+    gamelist_path = project_root / 'public' / 'gamelist.json'
     games_dir = project_root / 'public' / 'games'
     
     # Check that required files exist
@@ -122,6 +165,9 @@ def main():
     if not predictions_path.exists():
         print(f"Error: upcoming.yaml not found at {predictions_path}", file=sys.stderr)
         sys.exit(1)
+    
+    if not gamelist_path.exists():
+        print(f"Warning: gamelist.json not found at {gamelist_path}, titles will be 'Unknown'", file=sys.stderr)
     
     # Get required fields from archetypal metadata
     all_fields = get_archetypal_fields(archetypal_path)
@@ -141,9 +187,11 @@ def main():
     invalid_games = []
     valid_count = 0
     
-    for seed, game_id, title in game_entries:
+    for seed, game_id in game_entries:
         # Convert game_id to string in case it's an integer (e.g., 1943)
         game_id_str = str(game_id)
+        # Get title from gamelist.json
+        title = get_game_title_from_gamelist(game_id_str, gamelist_path)
         game_metadata_path = games_dir / game_id_str / 'metadata.yaml'
         is_valid, missing_fields, errors = validate_game_metadata(
             game_id_str, game_metadata_path, required_fields

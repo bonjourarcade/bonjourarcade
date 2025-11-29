@@ -1,0 +1,17 @@
+title: Gourmet Sentai Bara Yarou
+developer: Winds, Fupac
+year: 1995
+genre: Beat 'em up
+controls:
+#  - 🕹️ Déplacer
+#  - 1️⃣  Tirer
+#  - 2️⃣  Bombe
+#  - 3️⃣ ...
+#  - 4️⃣ ...
+
+to_start: Select -> Start
+
+enable_score: true
+hide: yes
+
+added: 2025-11-28

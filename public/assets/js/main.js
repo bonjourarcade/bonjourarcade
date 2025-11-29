@@ -841,11 +841,7 @@ function populatePreviousWeekGames(previousWeekGames, allGames) {
         link.style.gap = '15px';
         link.style.textDecoration = 'none';
         link.style.color = 'inherit';
-        // Prevent link from triggering navigation directly - we handle it via gameItem click
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-        });
+        // No event listener needed - gameItem handles the click
 
         const img = document.createElement('img');
         const coverSrc = game.coverArt || '/assets/images/placeholder_thumb.png';

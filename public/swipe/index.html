@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Swipe - BonjourArcade</title>
+    <style>
+        :root {
+            --background: #f0f0f0;
+            --text-color: #222;
+            --card-bg: white;
+            --card-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            --border-color: #ddd;
+            --swipe-left-color: #ff4444;
+            --swipe-right-color: #4CAF50;
+        }
+
+        body.theme-dark {
+            --background: #181a1b;
+            --text-color: #f4f4f4;
+            --card-bg: #23272b;
+            --card-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            --border-color: #444;
+            --swipe-left-color: #ff6666;
+            --swipe-right-color: #66bb6a;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: sans-serif;
+            background: var(--background);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            transition: background-color 0.3s, color 0.3s;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .header {
+            padding: 1rem;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--card-bg);
+            z-index: 10;
+        }
+
+        .header h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.5rem;
+        }
+
+        .header-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: 2px solid var(--text-color);
+            color: var(--text-color);
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .theme-toggle:hover {
+            background: var(--text-color);
+            color: var(--background);
+        }
+
+        .back-btn {
+            background: none;
+            border: 2px solid var(--text-color);
+            color: var(--text-color);
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s;
+        }
+
+        .back-btn:hover {
+            background: var(--text-color);
+            color: var(--background);
+        }
+
+        .swipe-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            padding: 2rem;
+            overflow: hidden;
+        }
+
+        .card-stack {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            height: 600px;
+        }
+
+        .game-card {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            border-radius: 16px;
+            cursor: grab;
+            user-select: none;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s ease, scale 0.6s ease;
+        }
+
+        .game-card:active {
+            cursor: grabbing;
+        }
+
+        .game-card.swiping-left {
+            border: 3px solid var(--swipe-left-color);
+        }
+
+        .game-card.swiping-right {
+            border: 3px solid var(--swipe-right-color);
+        }
+
+        .game-card.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .game-card.exiting-left {
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.8s ease;
+        }
+
+        .game-card.exiting-right {
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s ease;
+        }
+
+        .game-card.entering {
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.8s ease, scale 0.8s ease;
+        }
+
+        .game-cover {
+            flex: 1;
+            background: #222;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .game-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: #222;
+        }
+
+        .game-info {
+            padding: 1.5rem;
+            background: var(--card-bg);
+        }
+
+        .game-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            color: var(--text-color);
+        }
+
+        .game-meta {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        .meta-label {
+            font-weight: bold;
+            color: var(--text-color);
+            opacity: 0.8;
+        }
+
+        .meta-value {
+            color: var(--text-color);
+        }
+
+        .game-card-wrapper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+            overflow: visible;
+        }
+
+        .game-announcement {
+            position: absolute;
+            left: -200px;
+            top: 0;
+            bottom: 0;
+            width: 180px;
+            padding: 1.5rem;
+            background: var(--card-bg);
+            border-left: 3px solid var(--text-color);
+            border-radius: 16px 0 0 16px;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            color: var(--text-color);
+            opacity: 0.95;
+            display: flex;
+            align-items: center;
+            box-shadow: -4px 0 10px rgba(0,0,0,0.1);
+            overflow-y: auto;
+            z-index: 1;
+        }
+
+        body.theme-dark .game-announcement {
+            box-shadow: -4px 0 10px rgba(0,0,0,0.3);
+        }
+
+        .game-card-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            z-index: 2;
+            background: var(--card-bg);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .cards-passed-counter {
+            font-size: 0.9rem;
+            color: var(--text-color);
+            opacity: 0.7;
+            margin-left: 1rem;
+        }
+
+        .reshuffle-animation {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--card-bg);
+            padding: 2rem 3rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            z-index: 10000;
+            font-size: 1.2rem;
+            text-align: center;
+            animation: fadeInOut 2s ease-in-out;
+        }
+
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+            20%, 80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+
+        @keyframes shuffle {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-5deg) scale(1.05); }
+            50% { transform: rotate(5deg) scale(0.95); }
+            75% { transform: rotate(-3deg) scale(1.02); }
+        }
+
+        .card-stack.reshuffling .game-card {
+            animation: shuffle 1s ease-in-out;
+        }
+
+        .swipe-indicator {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 3rem;
+            font-weight: bold;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 100;
+        }
+
+        .swipe-indicator.left {
+            left: 20px;
+            color: var(--swipe-left-color);
+        }
+
+        .swipe-indicator.right {
+            right: 20px;
+            color: var(--swipe-right-color);
+        }
+
+        .swipe-indicator.visible {
+            opacity: 0.7;
+        }
+
+        .instructions {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--text-color);
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            font-size: 1.2rem;
+        }
+
+        .error {
+            text-align: center;
+            padding: 2rem;
+            color: var(--swipe-left-color);
+        }
+
+        .no-more-games {
+            text-align: center;
+            padding: 2rem;
+            font-size: 1.2rem;
+        }
+
+        .no-more-games button {
+            margin-top: 1rem;
+            padding: 0.75rem 1.5rem;
+            background: var(--text-color);
+            color: var(--background);
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .card-stack {
+                max-width: 100%;
+                height: 500px;
+            }
+
+            .game-title {
+                font-size: 1.2rem;
+            }
+
+            .game-meta {
+                font-size: 0.85rem;
+            }
+
+            .swipe-container {
+                padding: 1rem;
+            }
+
+            .game-announcement {
+                left: -150px;
+                width: 140px;
+                padding: 1rem;
+                font-size: 0.8rem;
+            }
+
+            .cards-passed-counter {
+                display: block;
+                margin-left: 0;
+                margin-top: 0.5rem;
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔄 Swipe <span class="cards-passed-counter" id="cards-passed-counter">0 cartes passées</span></h1>
+        <div class="header-controls">
+            <a href="../" class="back-btn">← Retour</a>
+            <button id="theme-toggle" class="theme-toggle">🌙</button>
+        </div>
+    </div>
+
+    <div class="swipe-container">
+        <div class="card-stack" id="card-stack">
+            <div class="loading" id="loading">Chargement des jeux...</div>
+        </div>
+        <div class="swipe-indicator left" id="swipe-left-indicator">← PASSER</div>
+        <div class="swipe-indicator right" id="swipe-right-indicator">LANCER →</div>
+        <div class="instructions" id="instructions">
+            Glissez la carte ou utilisez les flèches ← →
+        </div>
+    </div>
+
+    <script>
+        let allGamesData = []; // All games from the server
+        let availableGames = []; // Games not yet passed
+        let passedGameIds = new Set(); // Track passed games
+        let currentGameIndex = 0;
+        let cardsPassedCount = 0;
+        let isDragging = false;
+        let startX = 0;
+        let startY = 0;
+        let currentX = 0;
+        let currentY = 0;
+        let currentCard = null;
+        let isProcessingSwipe = false; // Lock to prevent rapid duplicate swipes
+
+        // Theme management
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.body.classList.add('theme-dark');
+                document.getElementById('theme-toggle').textContent = '☀️';
+            } else {
+                document.body.classList.remove('theme-dark');
+                document.getElementById('theme-toggle').textContent = '🌙';
+            }
+        }
+
+        function toggleTheme() {
+            const body = document.body;
+            const toggle = document.getElementById('theme-toggle');
+            
+            if (body.classList.contains('theme-dark')) {
+                body.classList.remove('theme-dark');
+                localStorage.setItem('theme', 'light');
+                toggle.textContent = '🌙';
+            } else {
+                body.classList.add('theme-dark');
+                localStorage.setItem('theme', 'dark');
+                toggle.textContent = '☀️';
+            }
+        }
+
+        document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+
+        // Helper functions
+        function capitalizeFirst(str) {
+            if (!str) return '';
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+
+        function getDisplayTitle(game) {
+            let displayTitle = game.title;
+            if (!displayTitle || displayTitle === game.id) {
+                displayTitle = capitalizeFirst(game.id);
+            }
+            if (game.problem === "true") {
+                displayTitle += ' (❌)';
+            }
+            return displayTitle;
+        }
+
+        function getSystemName(core) {
+            if (!core) return '';
+            const systemMap = {
+                'arcade': 'Arcade (FBNeo)',
+                'mame2003_plus': 'Arcade (MAME)',
+                'atari2600': 'Atari 2600',
+                'gb': 'Game Boy',
+                'gba': 'Game Boy Advance',
+                'segaMD': 'Sega Genesis/Mega Drive',
+                'segaGG': 'Sega Game Gear',
+                'jaguar': 'Atari Jaguar',
+                'n64': 'Nintendo 64',
+                'nes': 'Nintendo Entertainment System',
+                'pce': 'PC Engine/TurboGrafx-16',
+                'psx': 'PlayStation',
+                'sega32x': 'Sega 32X',
+                'segaMS': 'Sega Master System',
+                'snes': 'Super Nintendo',
+                'vb': 'Virtual Boy',
+                'ws': 'WonderSwan'
+            };
+            return systemMap[core] || core;
+        }
+
+        function shuffleArray(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Update cards passed counter
+        function updateCardsPassedCounter() {
+            const counter = document.getElementById('cards-passed-counter');
+            if (counter) {
+                counter.textContent = `${cardsPassedCount} carte${cardsPassedCount !== 1 ? 's' : ''} passée${cardsPassedCount !== 1 ? 's' : ''}`;
+            }
+        }
+
+        // Check if we need to reshuffle
+        function checkAndReshuffle() {
+            if (availableGames.length === 0 && allGamesData.length > 0) {
+                // All games have been passed, reshuffle
+                showReshuffleAnimation();
+                passedGameIds.clear();
+                availableGames = [...allGamesData];
+                shuffleArray(availableGames);
+                currentGameIndex = 0;
+                cardsPassedCount = 0;
+                updateCardsPassedCounter();
+                
+                // Clear current cards and show new ones
+                const stack = document.getElementById('card-stack');
+                stack.innerHTML = '';
+                showNextCard();
+            }
+        }
+
+        // Show reshuffle animation
+        function showReshuffleAnimation() {
+            const animation = document.createElement('div');
+            animation.className = 'reshuffle-animation';
+            animation.textContent = '🔄 Paquet rebrassé!';
+            document.body.appendChild(animation);
+            
+            const stack = document.getElementById('card-stack');
+            stack.classList.add('reshuffling');
+            
+            setTimeout(() => {
+                animation.remove();
+                stack.classList.remove('reshuffling');
+            }, 2000);
+        }
+
+        // Create game card element
+        function createGameCard(game) {
+            const card = document.createElement('div');
+            card.className = 'game-card';
+            card._gameData = game;
+
+            const wrapper = document.createElement('div');
+            wrapper.className = 'game-card-wrapper';
+
+            const coverSrc = game.coverArt || '/assets/images/placeholder_thumb.png';
+            const title = getDisplayTitle(game);
+            const systemName = getSystemName(game.core);
+
+            const hasAnnouncement = game.announcement_message && game.announcement_message.trim();
+            const announcementHtml = hasAnnouncement
+                ? `<div class="game-announcement">${escapeHtml(game.announcement_message)}</div>` 
+                : '';
+
+            const cardContent = document.createElement('div');
+            cardContent.className = 'game-card-content';
+            cardContent.innerHTML = `
+                <div class="game-cover">
+                    <img src="${coverSrc}" alt="${title}" loading="lazy">
+                </div>
+                <div class="game-info">
+                    <div class="game-title">${title}</div>
+                    <div class="game-meta">
+                        ${game.year ? `<div class="meta-label">Année:</div><div class="meta-value">${game.year}</div>` : ''}
+                        ${game.developer ? `<div class="meta-label">Développeur:</div><div class="meta-value">${game.developer}</div>` : ''}
+                        ${systemName ? `<div class="meta-label">Système:</div><div class="meta-value">${systemName}</div>` : ''}
+                        ${game.genre ? `<div class="meta-label">Genre:</div><div class="meta-value">${game.genre}</div>` : ''}
+                    </div>
+                </div>
+            `;
+
+            wrapper.innerHTML = announcementHtml;
+            wrapper.appendChild(cardContent);
+            card.appendChild(wrapper);
+
+            // Add drag event listeners
+            card.addEventListener('mousedown', startDrag);
+            card.addEventListener('touchstart', startDrag, { passive: false });
+
+            return card;
+        }
+
+        // Swipe handling
+        function startDrag(e) {
+            if (availableGames.length === 0) return;
+            
+            isDragging = true;
+            currentCard = e.currentTarget;
+            const touch = e.touches ? e.touches[0] : e;
+            startX = touch.clientX;
+            startY = touch.clientY;
+            currentX = startX;
+            currentY = startY;
+
+            document.addEventListener('mousemove', onDrag);
+            document.addEventListener('touchmove', onDrag, { passive: false });
+            document.addEventListener('mouseup', endDrag);
+            document.addEventListener('touchend', endDrag);
+
+            e.preventDefault();
+        }
+
+        function onDrag(e) {
+            if (!isDragging || !currentCard) return;
+
+            const touch = e.touches ? e.touches[0] : e;
+            currentX = touch.clientX;
+            currentY = touch.clientY;
+
+            const deltaX = currentX - startX;
+            const deltaY = currentY - startY;
+            const rotation = deltaX * 0.1;
+
+            currentCard.style.transform = `translate(${deltaX}px, ${deltaY}px) rotate(${rotation}deg)`;
+
+            // Show swipe indicators
+            const threshold = 50;
+            if (deltaX > threshold) {
+                currentCard.classList.add('swiping-right');
+                currentCard.classList.remove('swiping-left');
+                document.getElementById('swipe-right-indicator').classList.add('visible');
+                document.getElementById('swipe-left-indicator').classList.remove('visible');
+            } else if (deltaX < -threshold) {
+                currentCard.classList.add('swiping-left');
+                currentCard.classList.remove('swiping-right');
+                document.getElementById('swipe-left-indicator').classList.add('visible');
+                document.getElementById('swipe-right-indicator').classList.remove('visible');
+            } else {
+                currentCard.classList.remove('swiping-left', 'swiping-right');
+                document.getElementById('swipe-left-indicator').classList.remove('visible');
+                document.getElementById('swipe-right-indicator').classList.remove('visible');
+            }
+        }
+
+        function endDrag(e) {
+            if (!isDragging || !currentCard || isProcessingSwipe) return;
+
+            isDragging = false;
+            const deltaX = currentX - startX;
+            const threshold = 100;
+
+            if (Math.abs(deltaX) > threshold) {
+                if (deltaX > 0) {
+                    // Swipe right - launch game
+                    launchGame();
+                } else {
+                    // Swipe left - next game
+                    nextGame();
+                }
+            } else {
+                // Snap back
+                currentCard.style.transform = '';
+                currentCard.classList.remove('swiping-left', 'swiping-right');
+                document.getElementById('swipe-left-indicator').classList.remove('visible');
+                document.getElementById('swipe-right-indicator').classList.remove('visible');
+            }
+
+            document.removeEventListener('mousemove', onDrag);
+            document.removeEventListener('touchmove', onDrag);
+            document.removeEventListener('mouseup', endDrag);
+            document.removeEventListener('touchend', endDrag);
+
+            currentCard = null;
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (availableGames.length === 0 || isProcessingSwipe) return;
+            
+            // Don't trigger if user is typing in an input
+            const activeElement = document.activeElement;
+            if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
+                return;
+            }
+
+            if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                // Simulate swipe right for animation
+                const card = document.querySelector('.game-card:not(.hidden)');
+                if (card) {
+                    currentCard = card;
+                    startX = window.innerWidth / 2;
+                    startY = window.innerHeight / 2;
+                    currentX = startX + 150; // Simulate right swipe
+                    currentY = startY;
+                }
+                launchGame();
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                // Simulate swipe left for animation
+                const card = document.querySelector('.game-card:not(.hidden)');
+                if (card) {
+                    currentCard = card;
+                    startX = window.innerWidth / 2;
+                    startY = window.innerHeight / 2;
+                    currentX = startX - 150; // Simulate left swipe
+                    currentY = startY;
+                }
+                nextGame();
+            }
+        });
+
+        // Helper to detect mobile
+        function isMobileDevice() {
+            return /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+
+        // Game actions
+        function launchGame() {
+            if (availableGames.length === 0 || isProcessingSwipe) return;
+            isProcessingSwipe = true;
+            const game = availableGames[0];
+            const stack = document.getElementById('card-stack');
+            const allCards = stack.querySelectorAll('.game-card');
+            const card = Array.from(allCards).find(card => 
+                !card.classList.contains('hidden') && 
+                (parseInt(card.style.zIndex) === 10 || card.style.zIndex === '10' || (!card.style.zIndex && card === allCards[0]))
+            );
+            
+            if (card && !isMobileDevice()) {
+                // Desktop: rotate 90 degrees to the right edge
+                card.classList.add('exiting-right', 'hidden');
+                const stackRect = stack.getBoundingClientRect();
+                const centerX = stackRect.left + stackRect.width / 2;
+                const centerY = stackRect.top + stackRect.height / 2;
+                const rightEdge = window.innerWidth;
+                const targetX = rightEdge - centerX + 50; // Add some padding
+                const targetY = centerY - (stackRect.top + stackRect.height / 2);
+                
+                // Rotate 90 degrees and move to right edge
+                card.style.transform = `translate(${targetX}px, ${targetY}px) rotate(90deg)`;
+                card.style.opacity = '0';
+                
+                // Redirect after animation
+                setTimeout(() => {
+                    window.location.href = game.pageUrl;
+                }, 600);
+            } else {
+                // Mobile: simple fade out
+                if (card) {
+                    card.classList.add('exiting-right', 'hidden');
+                    card.style.opacity = '0';
+                    card.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+                    // Slight movement to right on mobile
+                    card.style.transform = 'translate(50px, 0) scale(0.9)';
+                }
+                setTimeout(() => {
+                    window.location.href = game.pageUrl;
+                }, isMobileDevice() ? 400 : 600);
+            }
+            // Note: isProcessingSwipe will be reset on page navigation, so no need to unlock
+        }
+
+        function nextGame() {
+            if (availableGames.length === 0 || isProcessingSwipe) return;
+            
+            // Lock to prevent rapid duplicate calls
+            isProcessingSwipe = true;
+
+            const stack = document.getElementById('card-stack');
+            const allCards = stack.querySelectorAll('.game-card');
+            const activeCard = Array.from(allCards).find(card => 
+                !card.classList.contains('hidden') && 
+                (parseInt(card.style.zIndex) === 10 || card.style.zIndex === '10' || (!card.style.zIndex && card === allCards[0]))
+            );
+            const previewCard = Array.from(allCards).find(card => 
+                !card.classList.contains('hidden') && 
+                (parseInt(card.style.zIndex) === 9 || card.style.zIndex === '9')
+            );
+            
+            // Get the current game ID BEFORE removing it
+            const currentGameId = activeCard && activeCard._gameData ? activeCard._gameData.id : null;
+            
+            // Mark current game as passed and remove from available games IMMEDIATELY
+            if (currentGameId) {
+                passedGameIds.add(currentGameId);
+                cardsPassedCount++;
+                updateCardsPassedCounter();
+                
+                // Remove from available games immediately to prevent duplicates
+                availableGames = availableGames.filter(game => game.id !== currentGameId);
+            }
+            
+            if (activeCard) {
+                // Mark as exiting and animate out to the left
+                activeCard.classList.add('exiting-left', 'hidden');
+                const exitX = -window.innerWidth - 500;
+                // Use actual position if dragging, otherwise 0
+                const deltaY = (isDragging && currentY && startY && currentY !== startY) ? currentY - startY : 0;
+                activeCard.style.transform = `translate(${exitX}px, ${deltaY}px) rotate(-30deg)`;
+                activeCard.style.opacity = '0';
+            }
+
+            // Animate next card (preview) coming up, but only if it's different
+            if (previewCard && previewCard._gameData && previewCard._gameData.id !== currentGameId) {
+                previewCard.classList.add('entering');
+                previewCard.style.zIndex = '10';
+                previewCard.style.transform = 'scale(1) translateY(0px)';
+                previewCard.style.opacity = '1';
+            } else if (previewCard && previewCard._gameData && previewCard._gameData.id === currentGameId) {
+                // If preview is the same as active, remove it and we'll create a new one
+                previewCard.remove();
+            }
+            
+            setTimeout(() => {
+                if (activeCard) {
+                    activeCard.remove();
+                }
+                // Clean up the card that just became active
+                if (previewCard && previewCard.parentNode) {
+                    previewCard.classList.remove('entering');
+                    previewCard.style.transition = '';
+                }
+                // Check if we need to reshuffle
+                checkAndReshuffle();
+                // Show new preview card if needed
+                showNextCard();
+                // Unlock after animation completes
+                isProcessingSwipe = false;
+            }, 800);
+        }
+
+        function showNextCard() {
+            const stack = document.getElementById('card-stack');
+            
+            if (availableGames.length === 0) {
+                // This should not happen as we reshuffle, but just in case
+                checkAndReshuffle();
+                return;
+            }
+
+            // Count existing cards
+            const existingCards = stack.querySelectorAll('.game-card');
+            const activeCard = Array.from(existingCards).find(card => 
+                !card.classList.contains('hidden') &&
+                (card.style.zIndex === '10' || parseInt(card.style.zIndex) === 10)
+            );
+            const previewCard = Array.from(existingCards).find(card => 
+                !card.classList.contains('hidden') &&
+                (card.style.zIndex === '9' || parseInt(card.style.zIndex) === 9)
+            );
+
+            // Get current active game ID to avoid duplicates
+            const activeGameId = activeCard && activeCard._gameData ? activeCard._gameData.id : null;
+
+            // If we don't have an active card, create one from available games
+            if (!activeCard && availableGames.length > 0) {
+                const game = availableGames[0];
+                // Double-check it's not the same as what we just removed
+                if (game.id !== activeGameId) {
+                    const card = createGameCard(game);
+                    card.style.zIndex = '10';
+                    stack.appendChild(card);
+                }
+            }
+
+            // If we don't have a preview card and there are more games, create one
+            if (!previewCard && availableGames.length > 1) {
+                // Find the next game that's different from active
+                let nextGame = null;
+                for (let i = 0; i < availableGames.length; i++) {
+                    if (availableGames[i].id !== activeGameId) {
+                        nextGame = availableGames[i];
+                        break;
+                    }
+                }
+                
+                if (nextGame) {
+                    const card = createGameCard(nextGame);
+                    card.style.zIndex = '9';
+                    card.style.transform = 'scale(0.95) translateY(10px)';
+                    card.style.opacity = '0.7';
+                    stack.appendChild(card);
+                }
+            } else if (previewCard && previewCard._gameData && previewCard._gameData.id === activeGameId) {
+                // If preview is the same as active, remove it
+                previewCard.remove();
+                // Create a new preview if available
+                if (availableGames.length > 1) {
+                    let nextGame = null;
+                    for (let i = 0; i < availableGames.length; i++) {
+                        if (availableGames[i].id !== activeGameId) {
+                            nextGame = availableGames[i];
+                            break;
+                        }
+                    }
+                    if (nextGame) {
+                        const card = createGameCard(nextGame);
+                        card.style.zIndex = '9';
+                        card.style.transform = 'scale(0.95) translateY(10px)';
+                        card.style.opacity = '0.7';
+                        stack.appendChild(card);
+                    }
+                }
+            }
+        }
+
+        // Load games
+        async function loadGames() {
+            try {
+                const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+                const cacheBuster = '?v=' + Date.now();
+                const gamelistUrl = isLocalhost ? '../gamelist.json' + cacheBuster : 'https://storage.googleapis.com/bonjourarcade/gamelist.json' + cacheBuster;
+                
+                const response = await fetch(gamelistUrl);
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch game list (Status: ${response.status})`);
+                }
+                
+                const data = await response.json();
+                allGamesData = Array.isArray(data.games) ? data.games : [];
+                
+                // Initialize available games (filter out passed ones, but initially none are passed)
+                availableGames = [...allGamesData];
+                
+                // Shuffle games for random order
+                shuffleArray(availableGames);
+                
+                // Initialize counter
+                updateCardsPassedCounter();
+                
+                // Hide loading and show first card
+                document.getElementById('loading').style.display = 'none';
+                showNextCard();
+            } catch (error) {
+                console.error('Error loading games:', error);
+                document.getElementById('loading').innerHTML = `
+                    <div class="error">
+                        <p>Erreur lors du chargement des jeux.</p>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Initialize
+        initTheme();
+        loadGames();
+    </script>
+</body>
+</html>
+

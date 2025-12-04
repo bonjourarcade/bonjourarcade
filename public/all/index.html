@@ -865,6 +865,7 @@
                 renderGames(filteredGamesData);
                 showHeaderElements(); // Show header elements when search is cleared
                 showSectionHeaders(); // Show section headers when search is cleared
+                updateShareableUrl(); // Update URL when filter is cleared
                 return;
             }
             
@@ -899,6 +900,7 @@
                 renderGames(filteredGamesData);
                 hideHeaderElements(); // Hide header elements when filtering
                 hideSectionHeaders(); // Hide section headers when filtering
+                updateShareableUrl(); // Update URL with week filter
                 return;
             }
             
@@ -918,6 +920,7 @@
                     container.innerHTML = '<div class="no-results">Aucun jeu dans votre historique. Lancez quelques jeux pour les voir apparaître ici !</div>';
                     hideHeaderElements();
                     hideSectionHeaders();
+                    updateShareableUrl(); // Update URL with history filter (even if empty)
                     return;
                 }
                 
@@ -941,6 +944,7 @@
                 renderGames(filteredGamesData);
                 hideHeaderElements(); // Hide header elements when filtering
                 hideSectionHeaders(); // Hide section headers when filtering
+                updateShareableUrl(); // Update URL with history filter
                 return;
             }
             
@@ -984,6 +988,7 @@
             renderGames(filteredGamesData);
             hideHeaderElements(); // Hide header elements when searching
             hideSectionHeaders(); // Hide section headers when searching
+            updateShareableUrl(); // Update URL with current filter
         }
         
         function showHeaderElements() {

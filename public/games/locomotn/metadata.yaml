@@ -10,6 +10,5 @@ to_start: Select -> Start
 
 # Message d'annonce personnalisé pour la newsletter
 # Ce message apparaîtra en haut de l'email et des webhooks
-announcement_message: "Embarquez dans une aventure captivante avec Loco-Motion, un jeu de puzzle stratégique signé Konami en 1982 ! Dans ce titre unique, vous devez concevoir des chemins pour guider un train à travers des niveaux de plus en plus complexes, alliant réflexion et créativité. Avec ses mécanismes ingénieux et ses défis stimulants, Loco-Motion vous promet des heures de plaisir en combinant logique et stratégie dans un univers rétro fascinant !"
-
+announcement_message: "Vous souvenez-vous de ces 'jeux de pousse-pousse' où l'on devait démêler une image en poussant des carrés? Eh bien Loco-Motion, créé par Konami en 1982, c'est un jeu de pousse-pousse sur lequel se promène un train qui doit ramasser des passagers. Ce concept surprenant a très bien vieilli. Essayez-le, vous ne serez pas déçu!"
 added: 2025-09-06

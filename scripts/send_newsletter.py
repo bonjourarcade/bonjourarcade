@@ -864,7 +864,7 @@ Bonne semaine ! ☀️
                     continue
                 if wtype == 'discord':
                     bold = '**'
-                    payload = {"content": message_template.replace('{b}', bold)}
+                    payload = {"content": f"@everyone {message_template.replace('{b}', bold)}"}
                 elif wtype == 'googlechat':
                     payload = build_google_chat_card()
                 else:
@@ -884,7 +884,7 @@ Bonne semaine ! ☀️
                 continue
             if wtype == 'discord':
                 bold = '**'
-                payload = {"content": message_template.replace('{b}', bold)}
+                payload = {"content": f"@everyone {message_template.replace('{b}', bold)}"}
             elif wtype == 'googlechat':
                 payload = build_google_chat_card()
             else:

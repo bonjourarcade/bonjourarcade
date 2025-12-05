@@ -2,16 +2,16 @@ title: Mega Man
 developer: Capcom
 year: 1987
 genre: Platform, Shooter
-#controls:
-#  - 🕹️ Déplacer
-#  - 1️⃣  Tirer
-#  - 2️⃣  Bombe
+controls:
+  - 🕹️ Déplacer
+  - 1️⃣  Tirer
+  - 2️⃣  Sauter
 
-#to_start: Select -> Start
+to_start: Start
 
 # Message d'annonce personnalisé pour la newsletter
 # Ce message apparaîtra en haut de l'email et des webhooks
-announcement_message: 
+announcement_message: MEGA MAN! C'est ici, en 1987, qu'est née une nouvelle icône du monde des jeux vidéo. Son innovation principale est que vous choisissez l'ordre dans lequel compléter les niveaux. À la fin de chaque niveau, vous trouverez une nouvelle arme qui est la faiblesse d'un des boss restants. Est-ce que Mega Man sauvera la planète des machinations du Dr. Wily? À vous de voir!
 
 hide: yes
 

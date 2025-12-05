@@ -9,5 +9,5 @@ controls:
   - 3️⃣  Sauter
 #to_start: Select -> Start
 added: 2025-08-10
-announcement_message: "This is a test!"
+announcement_message:
 enable_score: true

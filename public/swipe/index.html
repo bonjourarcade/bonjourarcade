@@ -107,6 +107,39 @@
             overflow: hidden;
         }
 
+        .swipe-overlay {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 50%;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1;
+        }
+
+        .swipe-overlay.left {
+            left: 0;
+            background: rgba(255, 68, 68, 0.2);
+        }
+
+        .swipe-overlay.right {
+            right: 0;
+            background: rgba(76, 175, 80, 0.2);
+        }
+
+        .swipe-overlay.visible {
+            opacity: 1;
+        }
+
+        body.theme-dark .swipe-overlay.left {
+            background: rgba(255, 102, 102, 0.25);
+        }
+
+        body.theme-dark .swipe-overlay.right {
+            background: rgba(102, 187, 106, 0.25);
+        }
+
         .card-stack {
             position: relative;
             width: 100%;
@@ -123,10 +156,15 @@
             cursor: grab;
             user-select: none;
             transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s ease, scale 0.6s ease;
+            will-change: transform;
         }
 
         .game-card:active {
             cursor: grabbing;
+        }
+
+        .game-card.dragging {
+            transition: none !important;
         }
 
         .game-card.swiping-left {
@@ -151,7 +189,7 @@
         }
 
         .game-card.entering {
-            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.8s ease, scale 0.8s ease;
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.8s ease;
         }
 
         .game-cover {
@@ -213,27 +251,27 @@
 
         .game-announcement {
             position: absolute;
-            left: -200px;
+            right: -200px;
             top: 0;
             bottom: 0;
             width: 180px;
             padding: 1.5rem;
             background: var(--card-bg);
-            border-left: 3px solid var(--text-color);
-            border-radius: 16px 0 0 16px;
+            border-right: 3px solid var(--text-color);
+            border-radius: 0 16px 16px 0;
             font-size: 0.85rem;
             line-height: 1.5;
             color: var(--text-color);
             opacity: 0.95;
             display: flex;
             align-items: center;
-            box-shadow: -4px 0 10px rgba(0,0,0,0.1);
+            box-shadow: 4px 0 10px rgba(0,0,0,0.1);
             overflow-y: auto;
             z-index: 1;
         }
 
         body.theme-dark .game-announcement {
-            box-shadow: -4px 0 10px rgba(0,0,0,0.3);
+            box-shadow: 4px 0 10px rgba(0,0,0,0.3);
         }
 
         .game-card-content {
@@ -311,6 +349,16 @@
             opacity: 0.7;
         }
 
+        .swipe-indicator.initial-hint {
+            opacity: 0.5;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 0.8; }
+        }
+
         .instructions {
             position: absolute;
             bottom: 2rem;
@@ -371,7 +419,7 @@
             }
 
             .game-announcement {
-                left: -150px;
+                right: -150px;
                 width: 140px;
                 padding: 1rem;
                 font-size: 0.8rem;
@@ -396,11 +444,13 @@
     </div>
 
     <div class="swipe-container">
+        <div class="swipe-overlay left" id="swipe-overlay-left"></div>
+        <div class="swipe-overlay right" id="swipe-overlay-right"></div>
         <div class="card-stack" id="card-stack">
             <div class="loading" id="loading">Chargement des jeux...</div>
         </div>
-        <div class="swipe-indicator left" id="swipe-left-indicator">← PASSER</div>
-        <div class="swipe-indicator right" id="swipe-right-indicator">LANCER →</div>
+        <div class="swipe-indicator left initial-hint" id="swipe-left-indicator">← PASSER</div>
+        <div class="swipe-indicator right initial-hint" id="swipe-right-indicator">LANCER →</div>
         <div class="instructions" id="instructions">
             Glissez la carte ou utilisez les flèches ← →
         </div>
@@ -419,6 +469,13 @@
         let currentY = 0;
         let currentCard = null;
         let isProcessingSwipe = false; // Lock to prevent rapid duplicate swipes
+        const imagePreloadCache = new Set(); // Cache for preloaded images
+        let isFirstSwipe = true; // Track if this is the first swipe to show initial indicators
+        let lastMoveTime = 0;
+        let lastMoveX = 0;
+        let lastMoveY = 0;
+        let velocityX = 0;
+        let velocityY = 0;
 
         // Theme management
         function initTheme() {
@@ -525,6 +582,10 @@
                 cardsPassedCount = 0;
                 updateCardsPassedCounter();
                 
+                // Clear image cache and preload new images
+                imagePreloadCache.clear();
+                preloadGameImages(5);
+                
                 // Clear current cards and show new ones
                 const stack = document.getElementById('card-stack');
                 stack.innerHTML = '';
@@ -568,9 +629,11 @@
 
             const cardContent = document.createElement('div');
             cardContent.className = 'game-card-content';
+            // Use eager loading for active/preview cards since images are preloaded
+            const loadingAttr = imagePreloadCache.has(coverSrc) ? 'eager' : 'lazy';
             cardContent.innerHTML = `
                 <div class="game-cover">
-                    <img src="${coverSrc}" alt="${title}" loading="lazy">
+                    <img src="${coverSrc}" alt="${title}" loading="${loadingAttr}">
                 </div>
                 <div class="game-info">
                     <div class="game-title">${title}</div>
@@ -600,11 +663,21 @@
             
             isDragging = true;
             currentCard = e.currentTarget;
+            // Disable transition immediately for instant response
+            currentCard.style.transition = 'none';
+            currentCard.classList.add('dragging');
             const touch = e.touches ? e.touches[0] : e;
             startX = touch.clientX;
             startY = touch.clientY;
             currentX = startX;
             currentY = startY;
+            
+            // Reset velocity tracking
+            lastMoveTime = Date.now();
+            lastMoveX = startX;
+            lastMoveY = startY;
+            velocityX = 0;
+            velocityY = 0;
 
             document.addEventListener('mousemove', onDrag);
             document.addEventListener('touchmove', onDrag, { passive: false });
@@ -618,8 +691,28 @@
             if (!isDragging || !currentCard) return;
 
             const touch = e.touches ? e.touches[0] : e;
-            currentX = touch.clientX;
-            currentY = touch.clientY;
+            const now = Date.now();
+            const newX = touch.clientX;
+            const newY = touch.clientY;
+            
+            // Calculate velocity based on recent movement
+            const timeDelta = now - lastMoveTime;
+            if (timeDelta > 0 && timeDelta < 100) { // Only calculate if time delta is reasonable
+                const moveDeltaX = newX - lastMoveX;
+                const moveDeltaY = newY - lastMoveY;
+                // Use exponential moving average for smoother velocity, but with higher weight on recent movement
+                const alpha = 0.5;
+                const instantVelocityX = moveDeltaX / timeDelta;
+                const instantVelocityY = moveDeltaY / timeDelta;
+                velocityX = velocityX * (1 - alpha) + instantVelocityX * alpha;
+                velocityY = velocityY * (1 - alpha) + instantVelocityY * alpha;
+            }
+            
+            currentX = newX;
+            currentY = newY;
+            lastMoveX = newX;
+            lastMoveY = newY;
+            lastMoveTime = now;
 
             const deltaX = currentX - startX;
             const deltaY = currentY - startY;
@@ -627,30 +720,50 @@
 
             currentCard.style.transform = `translate(${deltaX}px, ${deltaY}px) rotate(${rotation}deg)`;
 
-            // Show swipe indicators
+            // Show swipe indicators and overlays
             const threshold = 50;
             if (deltaX > threshold) {
                 currentCard.classList.add('swiping-right');
                 currentCard.classList.remove('swiping-left');
                 document.getElementById('swipe-right-indicator').classList.add('visible');
                 document.getElementById('swipe-left-indicator').classList.remove('visible');
+                document.getElementById('swipe-overlay-right').classList.add('visible');
+                document.getElementById('swipe-overlay-left').classList.remove('visible');
             } else if (deltaX < -threshold) {
                 currentCard.classList.add('swiping-left');
                 currentCard.classList.remove('swiping-right');
                 document.getElementById('swipe-left-indicator').classList.add('visible');
                 document.getElementById('swipe-right-indicator').classList.remove('visible');
+                document.getElementById('swipe-overlay-left').classList.add('visible');
+                document.getElementById('swipe-overlay-right').classList.remove('visible');
             } else {
                 currentCard.classList.remove('swiping-left', 'swiping-right');
-                document.getElementById('swipe-left-indicator').classList.remove('visible');
-                document.getElementById('swipe-right-indicator').classList.remove('visible');
+                const leftIndicator = document.getElementById('swipe-left-indicator');
+                const rightIndicator = document.getElementById('swipe-right-indicator');
+                leftIndicator.classList.remove('visible');
+                rightIndicator.classList.remove('visible');
+                // Show initial hints if first swipe and not dragging
+                if (isFirstSwipe) {
+                    leftIndicator.classList.add('initial-hint');
+                    rightIndicator.classList.add('initial-hint');
+                }
+                document.getElementById('swipe-overlay-left').classList.remove('visible');
+                document.getElementById('swipe-overlay-right').classList.remove('visible');
             }
         }
 
         function endDrag(e) {
             if (!isDragging || !currentCard || isProcessingSwipe) return;
 
+            // Remove event listeners first
+            document.removeEventListener('mousemove', onDrag);
+            document.removeEventListener('touchmove', onDrag);
+            document.removeEventListener('mouseup', endDrag);
+            document.removeEventListener('touchend', endDrag);
+
             isDragging = false;
             const deltaX = currentX - startX;
+            const deltaY = currentY - startY;
             const threshold = 100;
 
             if (Math.abs(deltaX) > threshold) {
@@ -662,19 +775,134 @@
                     nextGame();
                 }
             } else {
-                // Snap back
-                currentCard.style.transform = '';
-                currentCard.classList.remove('swiping-left', 'swiping-right');
-                document.getElementById('swipe-left-indicator').classList.remove('visible');
-                document.getElementById('swipe-right-indicator').classList.remove('visible');
+                // Always try momentum if we have any movement, even small
+                // Calculate velocity magnitude to determine if we should continue
+                const velocityMagnitude = Math.sqrt(velocityX * velocityX + velocityY * velocityY);
+                if (velocityMagnitude > 0.05 || Math.abs(deltaX) > 10 || Math.abs(deltaY) > 10) {
+                    // Continue with momentum if there's any movement or velocity
+                    continueWithMomentum(deltaX, deltaY);
+                } else {
+                    // Snap back - re-enable transition for smooth animation
+                    currentCard.classList.remove('dragging');
+                    currentCard.style.transition = '';
+                    currentCard.style.transform = '';
+                    currentCard.classList.remove('swiping-left', 'swiping-right');
+                    const leftIndicator = document.getElementById('swipe-left-indicator');
+                    const rightIndicator = document.getElementById('swipe-right-indicator');
+                    leftIndicator.classList.remove('visible');
+                    rightIndicator.classList.remove('visible');
+                    // Show initial hints if first swipe and not dragging
+                    if (isFirstSwipe) {
+                        leftIndicator.classList.add('initial-hint');
+                        rightIndicator.classList.add('initial-hint');
+                    }
+                    document.getElementById('swipe-overlay-left').classList.remove('visible');
+                    document.getElementById('swipe-overlay-right').classList.remove('visible');
+                    currentCard = null;
+                }
             }
+        }
 
-            document.removeEventListener('mousemove', onDrag);
-            document.removeEventListener('touchmove', onDrag);
-            document.removeEventListener('mouseup', endDrag);
-            document.removeEventListener('touchend', endDrag);
-
-            currentCard = null;
+        function continueWithMomentum(startDeltaX, startDeltaY) {
+            if (!currentCard || isProcessingSwipe) {
+                return;
+            }
+            
+            // Store reference to card before it might be cleared
+            const card = currentCard;
+            const stack = document.getElementById('card-stack');
+            
+            // Ensure card still has dragging class for no transition
+            if (!card.classList.contains('dragging')) {
+                card.classList.add('dragging');
+                card.style.transition = 'none';
+            }
+            
+            let posX = startDeltaX;
+            let posY = startDeltaY;
+            // Scale velocity for animation (convert from px/ms to px/frame at ~60fps)
+            // Multiply by a larger factor to make momentum more noticeable
+            let vx = velocityX * 20;
+            let vy = velocityY * 20;
+            const friction = 0.92; // Slightly less friction for longer momentum
+            const minVelocity = 0.1; // Lower threshold to continue animation longer
+            
+            // Determine direction
+            const isRight = vx > 0;
+            
+            // Update indicators based on direction
+            const leftIndicator = document.getElementById('swipe-left-indicator');
+            const rightIndicator = document.getElementById('swipe-right-indicator');
+            if (isRight) {
+                card.classList.add('swiping-right');
+                card.classList.remove('swiping-left');
+                rightIndicator.classList.add('visible');
+                leftIndicator.classList.remove('visible');
+                document.getElementById('swipe-overlay-right').classList.add('visible');
+                document.getElementById('swipe-overlay-left').classList.remove('visible');
+            } else {
+                card.classList.add('swiping-left');
+                card.classList.remove('swiping-right');
+                leftIndicator.classList.add('visible');
+                rightIndicator.classList.remove('visible');
+                document.getElementById('swipe-overlay-left').classList.add('visible');
+                document.getElementById('swipe-overlay-right').classList.remove('visible');
+            }
+            
+            function animate() {
+                if (!card || !card.parentNode) return;
+                
+                // Apply velocity
+                posX += vx;
+                posY += vy;
+                
+                // Apply friction
+                vx *= friction;
+                vy *= friction;
+                
+                // Calculate rotation based on position
+                const rotation = posX * 0.1;
+                
+                // Update transform
+                card.style.transform = `translate(${posX}px, ${posY}px) rotate(${rotation}deg)`;
+                
+                // Check if card has left the screen
+                const cardRect = card.getBoundingClientRect();
+                const screenWidth = window.innerWidth;
+                
+                if (isRight && cardRect.left > screenWidth) {
+                    // Card exited right - launch game
+                    launchGame();
+                    return;
+                } else if (!isRight && cardRect.right < 0) {
+                    // Card exited left - next game
+                    nextGame();
+                    return;
+                }
+                
+                // Continue animation if velocity is significant
+                if (Math.abs(vx) > minVelocity || Math.abs(vy) > minVelocity) {
+                    requestAnimationFrame(animate);
+                } else {
+                    // Velocity too low, snap back
+                    card.classList.remove('dragging');
+                    card.style.transition = '';
+                    card.style.transform = '';
+                    card.classList.remove('swiping-left', 'swiping-right');
+                    leftIndicator.classList.remove('visible');
+                    rightIndicator.classList.remove('visible');
+                    if (isFirstSwipe) {
+                        leftIndicator.classList.add('initial-hint');
+                        rightIndicator.classList.add('initial-hint');
+                    }
+                    document.getElementById('swipe-overlay-left').classList.remove('visible');
+                    document.getElementById('swipe-overlay-right').classList.remove('visible');
+                    currentCard = null;
+                }
+            }
+            
+            // Start animation immediately
+            requestAnimationFrame(animate);
         }
 
         // Keyboard navigation
@@ -689,6 +917,14 @@
 
             if (e.key === 'ArrowRight') {
                 e.preventDefault();
+                // Show swipe right indicator and overlay
+                const leftIndicator = document.getElementById('swipe-left-indicator');
+                const rightIndicator = document.getElementById('swipe-right-indicator');
+                leftIndicator.classList.remove('visible', 'initial-hint');
+                rightIndicator.classList.add('visible');
+                rightIndicator.classList.remove('initial-hint');
+                document.getElementById('swipe-overlay-right').classList.add('visible');
+                document.getElementById('swipe-overlay-left').classList.remove('visible');
                 // Simulate swipe right for animation
                 const card = document.querySelector('.game-card:not(.hidden)');
                 if (card) {
@@ -698,9 +934,20 @@
                     currentX = startX + 150; // Simulate right swipe
                     currentY = startY;
                 }
-                launchGame();
+                // Small delay to show the indicator before launching
+                setTimeout(() => {
+                    launchGame();
+                }, 200);
             } else if (e.key === 'ArrowLeft') {
                 e.preventDefault();
+                // Show swipe left indicator and overlay
+                const leftIndicator = document.getElementById('swipe-left-indicator');
+                const rightIndicator = document.getElementById('swipe-right-indicator');
+                rightIndicator.classList.remove('visible', 'initial-hint');
+                leftIndicator.classList.add('visible');
+                leftIndicator.classList.remove('initial-hint');
+                document.getElementById('swipe-overlay-left').classList.add('visible');
+                document.getElementById('swipe-overlay-right').classList.remove('visible');
                 // Simulate swipe left for animation
                 const card = document.querySelector('.game-card:not(.hidden)');
                 if (card) {
@@ -710,7 +957,10 @@
                     currentX = startX - 150; // Simulate left swipe
                     currentY = startY;
                 }
-                nextGame();
+                // Small delay to show the indicator before next game
+                setTimeout(() => {
+                    nextGame();
+                }, 200);
             }
         });
 
@@ -719,10 +969,45 @@
             return /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         }
 
+        // Preload images for upcoming games
+        function preloadGameImages(count = 5) {
+            const gamesToPreload = availableGames.slice(0, count);
+            gamesToPreload.forEach((game, index) => {
+                const coverSrc = game.coverArt || '/assets/images/placeholder_thumb.png';
+                if (!imagePreloadCache.has(coverSrc)) {
+                    imagePreloadCache.add(coverSrc);
+                    const img = new Image();
+                    // Stagger loading slightly to avoid overwhelming the browser
+                    setTimeout(() => {
+                        img.src = coverSrc;
+                        // Optionally handle load/error events
+                        img.onload = () => {
+                            // Image preloaded successfully
+                        };
+                        img.onerror = () => {
+                            // Remove from cache if failed to allow retry
+                            imagePreloadCache.delete(coverSrc);
+                        };
+                    }, index * 50); // 50ms delay between each image
+                }
+            });
+        }
+
         // Game actions
         function launchGame() {
             if (availableGames.length === 0 || isProcessingSwipe) return;
             isProcessingSwipe = true;
+            // Hide overlays and indicators
+            document.getElementById('swipe-overlay-left').classList.remove('visible');
+            document.getElementById('swipe-overlay-right').classList.remove('visible');
+            const leftIndicator = document.getElementById('swipe-left-indicator');
+            const rightIndicator = document.getElementById('swipe-right-indicator');
+            leftIndicator.classList.remove('visible', 'initial-hint');
+            rightIndicator.classList.remove('visible', 'initial-hint');
+            // Mark that first swipe is done
+            if (isFirstSwipe) {
+                isFirstSwipe = false;
+            }
             const game = availableGames[0];
             const stack = document.getElementById('card-stack');
             const allCards = stack.querySelectorAll('.game-card');
@@ -770,6 +1055,17 @@
             
             // Lock to prevent rapid duplicate calls
             isProcessingSwipe = true;
+            // Hide overlays and indicators
+            document.getElementById('swipe-overlay-left').classList.remove('visible');
+            document.getElementById('swipe-overlay-right').classList.remove('visible');
+            const leftIndicator = document.getElementById('swipe-left-indicator');
+            const rightIndicator = document.getElementById('swipe-right-indicator');
+            leftIndicator.classList.remove('visible', 'initial-hint');
+            rightIndicator.classList.remove('visible', 'initial-hint');
+            // Mark that first swipe is done
+            if (isFirstSwipe) {
+                isFirstSwipe = false;
+            }
 
             const stack = document.getElementById('card-stack');
             const allCards = stack.querySelectorAll('.game-card');
@@ -805,12 +1101,29 @@
                 activeCard.style.opacity = '0';
             }
 
-            // Animate next card (preview) coming up, but only if it's different
+            // Animate next card (preview) coming from the top, but only if it's different
             if (previewCard && previewCard._gameData && previewCard._gameData.id !== currentGameId) {
-                previewCard.classList.add('entering');
+                // Remove any existing transition to set initial position immediately
+                previewCard.style.transition = 'none';
                 previewCard.style.zIndex = '10';
-                previewCard.style.transform = 'scale(1) translateY(0px)';
+                // Calculate position relative to card-stack center
+                // Start from above the screen (negative translateY)
+                const stackRect = stack.getBoundingClientRect();
+                const stackCenterY = stackRect.top + stackRect.height / 2;
+                // Distance from center of stack to top of screen, plus extra to ensure it's off-screen
+                const startY = -(stackCenterY + stackRect.height);
+                previewCard.style.transform = `translate(0px, ${startY}px) scale(1)`;
                 previewCard.style.opacity = '1';
+                // Force browser to apply the initial transform
+                previewCard.offsetHeight;
+                // Now add the entering class which has the transition, and animate to center
+                previewCard.classList.add('entering');
+                // Use requestAnimationFrame to ensure the transition is applied
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        previewCard.style.transform = 'translate(0px, 0px) scale(1)';
+                    });
+                });
             } else if (previewCard && previewCard._gameData && previewCard._gameData.id === currentGameId) {
                 // If preview is the same as active, remove it and we'll create a new one
                 previewCard.remove();
@@ -827,6 +1140,8 @@
                 }
                 // Check if we need to reshuffle
                 checkAndReshuffle();
+                // Preload more images for upcoming games
+                preloadGameImages(5);
                 // Show new preview card if needed
                 showNextCard();
                 // Unlock after animation completes
@@ -862,6 +1177,11 @@
                 const game = availableGames[0];
                 // Double-check it's not the same as what we just removed
                 if (game.id !== activeGameId) {
+                    // Ensure image is preloaded before creating card
+                    const coverSrc = game.coverArt || '/assets/images/placeholder_thumb.png';
+                    if (!imagePreloadCache.has(coverSrc)) {
+                        preloadGameImages(1);
+                    }
                     const card = createGameCard(game);
                     card.style.zIndex = '10';
                     stack.appendChild(card);
@@ -880,11 +1200,28 @@
                 }
                 
                 if (nextGame) {
+                    // Ensure image is preloaded before creating card
+                    const coverSrc = nextGame.coverArt || '/assets/images/placeholder_thumb.png';
+                    if (!imagePreloadCache.has(coverSrc)) {
+                        preloadGameImages(1);
+                    }
                     const card = createGameCard(nextGame);
                     card.style.zIndex = '9';
-                    card.style.transform = 'scale(0.95) translateY(10px)';
+                    // Disable transition for initial positioning
+                    card.style.transition = 'none';
+                    // Position preview card off-screen at the top
+                    // Calculate position relative to card-stack center
+                    const stackRect = stack.getBoundingClientRect();
+                    const stackCenterY = stackRect.top + stackRect.height / 2;
+                    // Distance from center of stack to top of screen, plus extra to ensure it's off-screen
+                    const startY = -(stackCenterY + stackRect.height);
+                    card.style.transform = `translate(0px, ${startY}px) scale(0.95)`;
                     card.style.opacity = '0.7';
                     stack.appendChild(card);
+                    // Force browser to apply the initial transform
+                    card.offsetHeight;
+                    // Re-enable transition after positioning
+                    card.style.transition = '';
                 }
             } else if (previewCard && previewCard._gameData && previewCard._gameData.id === activeGameId) {
                 // If preview is the same as active, remove it
@@ -899,11 +1236,28 @@
                         }
                     }
                     if (nextGame) {
+                        // Ensure image is preloaded before creating card
+                        const coverSrc = nextGame.coverArt || '/assets/images/placeholder_thumb.png';
+                        if (!imagePreloadCache.has(coverSrc)) {
+                            preloadGameImages(1);
+                        }
                         const card = createGameCard(nextGame);
                         card.style.zIndex = '9';
-                        card.style.transform = 'scale(0.95) translateY(10px)';
+                        // Disable transition for initial positioning
+                        card.style.transition = 'none';
+                        // Position preview card off-screen at the top
+                        // Calculate position relative to card-stack center
+                        const stackRect = stack.getBoundingClientRect();
+                        const stackCenterY = stackRect.top + stackRect.height / 2;
+                        // Distance from center of stack to top of screen, plus extra to ensure it's off-screen
+                        const startY = -(stackCenterY + stackRect.height);
+                        card.style.transform = `translate(0px, ${startY}px) scale(0.95)`;
                         card.style.opacity = '0.7';
                         stack.appendChild(card);
+                        // Force browser to apply the initial transform
+                        card.offsetHeight;
+                        // Re-enable transition after positioning
+                        card.style.transition = '';
                     }
                 }
             }
@@ -933,6 +1287,9 @@
                 // Initialize counter
                 updateCardsPassedCounter();
                 
+                // Preload images for upcoming games
+                preloadGameImages(5);
+                
                 // Hide loading and show first card
                 document.getElementById('loading').style.display = 'none';
                 showNextCard();
@@ -953,4 +1310,5 @@
     </script>
 </body>
 </html>
+
 

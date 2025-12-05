@@ -157,7 +157,7 @@ function isFirefox() {
 async function fetchGameData() {
     try {
         // Use local gamelist.json for development, Google Cloud Storage for production
-        const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.startsWith('192.168.');
         
         // Get the current game ID from the API endpoint (generated from upcoming.yaml)
         let currentGameId = null;

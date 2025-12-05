@@ -121,7 +121,7 @@
                 isChronologicalOrder = sessionStorage.getItem('chronologicalOrder') === 'true';
                 
                 // Fetch the game list
-                const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+                const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.startsWith('192.168.');
                 const cacheBuster = '?v=' + Date.now();
                 const gamelistUrl = isLocalhost ? '../gamelist.json' + cacheBuster : 'https://storage.googleapis.com/bonjourarcade/gamelist.json' + cacheBuster;
                 const response = await fetch(gamelistUrl);

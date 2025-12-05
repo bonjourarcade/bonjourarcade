@@ -197,7 +197,7 @@
 
         .game-cover {
             flex: 1;
-            background: #222;
+            background: #ddd;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -205,11 +205,19 @@
             position: relative;
         }
 
+        body.theme-dark .game-cover {
+            background: #333;
+        }
+
         .game-cover img {
             width: 100%;
             height: 100%;
             object-fit: contain;
-            background: #222;
+            background: #ddd;
+        }
+
+        body.theme-dark .game-cover img {
+            background: #333;
         }
 
         .game-info {
@@ -483,6 +491,7 @@
         let velocityY = 0;
         let dragStartTime = 0;
         let isCardEntering = false; // Track if card is currently entering from top
+        let currentGameOfTheWeekId = null; // Store the current game of the week ID
 
         // Theme management
         function initTheme() {
@@ -584,7 +593,26 @@
                 showReshuffleAnimation();
                 passedGameIds.clear();
                 availableGames = [...allGamesData];
-                shuffleArray(availableGames);
+                
+                // Put game of the week first if it exists
+                if (currentGameOfTheWeekId) {
+                    const gameOfTheWeekIndex = availableGames.findIndex(game => game.id === currentGameOfTheWeekId);
+                    if (gameOfTheWeekIndex !== -1) {
+                        // Remove the game of the week from its current position
+                        const gameOfTheWeek = availableGames.splice(gameOfTheWeekIndex, 1)[0];
+                        // Put it at the beginning
+                        availableGames.unshift(gameOfTheWeek);
+                    }
+                }
+                
+                // Shuffle the remaining games (everything except the first one)
+                if (availableGames.length > 1) {
+                    const firstGame = availableGames[0];
+                    const restOfGames = availableGames.slice(1);
+                    shuffleArray(restOfGames);
+                    availableGames = [firstGame, ...restOfGames];
+                }
+                
                 currentGameIndex = 0;
                 cardsPassedCount = 0;
                 updateCardsPassedCounter();
@@ -750,8 +778,8 @@
                 const rightIndicator = document.getElementById('swipe-right-indicator');
                 leftIndicator.classList.remove('visible');
                 rightIndicator.classList.remove('visible');
-                // Show initial hints if first swipe and not dragging
-                if (isFirstSwipe) {
+                // Show initial hints if first swipe and not dragging, but not on mobile
+                if (isFirstSwipe && !isMobileDevice()) {
                     leftIndicator.classList.add('initial-hint');
                     rightIndicator.classList.add('initial-hint');
                 }
@@ -837,8 +865,8 @@
                 const rightIndicator = document.getElementById('swipe-right-indicator');
                 leftIndicator.classList.remove('visible');
                 rightIndicator.classList.remove('visible');
-                // Show initial hints if first swipe and not dragging
-                if (isFirstSwipe) {
+                // Show initial hints if first swipe and not dragging, but not on mobile
+                if (isFirstSwipe && !isMobileDevice()) {
                     leftIndicator.classList.add('initial-hint');
                     rightIndicator.classList.add('initial-hint');
                 }
@@ -972,7 +1000,8 @@
                     card.classList.remove('swiping-left', 'swiping-right');
                     leftIndicator.classList.remove('visible');
                     rightIndicator.classList.remove('visible');
-                    if (isFirstSwipe) {
+                    // Show initial hints if first swipe, but not on mobile
+                    if (isFirstSwipe && !isMobileDevice()) {
                         leftIndicator.classList.add('initial-hint');
                         rightIndicator.classList.add('initial-hint');
                     }
@@ -1475,9 +1504,24 @@
         // Load games
         async function loadGames() {
             try {
-                const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+                const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.startsWith('192.168.');
                 const cacheBuster = '?v=' + Date.now();
                 const gamelistUrl = isLocalhost ? '../gamelist.json' + cacheBuster : 'https://storage.googleapis.com/bonjourarcade/gamelist.json' + cacheBuster;
+                
+                // Fetch game of the week ID
+                currentGameOfTheWeekId = null;
+                try {
+                    const currentGameResponse = await fetch('/api/current-game');
+                    if (currentGameResponse.ok) {
+                        currentGameOfTheWeekId = await currentGameResponse.text();
+                        currentGameOfTheWeekId = currentGameOfTheWeekId.trim();
+                        if (currentGameOfTheWeekId === 'no-game' || !currentGameOfTheWeekId) {
+                            currentGameOfTheWeekId = null;
+                        }
+                    }
+                } catch (error) {
+                    console.warn('Could not fetch current game from API:', error);
+                }
                 
                 const response = await fetch(gamelistUrl);
                 if (!response.ok) {
@@ -1490,8 +1534,24 @@
                 // Initialize available games (filter out passed ones, but initially none are passed)
                 availableGames = [...allGamesData];
                 
-                // Shuffle games for random order
-                shuffleArray(availableGames);
+                // Put game of the week first if it exists
+                if (currentGameOfTheWeekId) {
+                    const gameOfTheWeekIndex = availableGames.findIndex(game => game.id === currentGameOfTheWeekId);
+                    if (gameOfTheWeekIndex !== -1) {
+                        // Remove the game of the week from its current position
+                        const gameOfTheWeek = availableGames.splice(gameOfTheWeekIndex, 1)[0];
+                        // Put it at the beginning
+                        availableGames.unshift(gameOfTheWeek);
+                    }
+                }
+                
+                // Shuffle the remaining games (everything except the first one)
+                if (availableGames.length > 1) {
+                    const firstGame = availableGames[0];
+                    const restOfGames = availableGames.slice(1);
+                    shuffleArray(restOfGames);
+                    availableGames = [firstGame, ...restOfGames];
+                }
                 
                 // Initialize counter
                 updateCardsPassedCounter();
@@ -1515,6 +1575,13 @@
 
         // Initialize
         initTheme();
+        // Remove initial hints on mobile
+        if (isMobileDevice()) {
+            const leftIndicator = document.getElementById('swipe-left-indicator');
+            const rightIndicator = document.getElementById('swipe-right-indicator');
+            leftIndicator.classList.remove('initial-hint');
+            rightIndicator.classList.remove('initial-hint');
+        }
         loadGames();
     </script>
 </body>

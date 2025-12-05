@@ -482,6 +482,7 @@
         let velocityX = 0;
         let velocityY = 0;
         let dragStartTime = 0;
+        let isCardEntering = false; // Track if card is currently entering from top
 
         // Theme management
         function initTheme() {
@@ -995,6 +996,11 @@
                 return;
             }
 
+            // Ignore arrow keys if card is still entering from top
+            if (isCardEntering) {
+                return;
+            }
+
             if (e.key === 'ArrowRight') {
                 e.preventDefault();
                 // Show swipe right indicator and overlay
@@ -1261,6 +1267,24 @@
                 previewCard.style.opacity = '0';
                 // Force browser to apply the initial transform
                 previewCard.offsetHeight;
+                // Mark that card is entering
+                isCardEntering = true;
+                // Add transitionend listener to detect when animation completes
+                const handleTransitionEnd = (e) => {
+                    // Only handle transform transitions (not opacity)
+                    if (e.propertyName === 'transform' && previewCard.classList.contains('entering')) {
+                        isCardEntering = false;
+                        previewCard.removeEventListener('transitionend', handleTransitionEnd);
+                    }
+                };
+                previewCard.addEventListener('transitionend', handleTransitionEnd);
+                // Safety timeout in case transitionend doesn't fire (transition duration is 0.4s)
+                setTimeout(() => {
+                    if (isCardEntering && previewCard.classList.contains('entering')) {
+                        isCardEntering = false;
+                        previewCard.removeEventListener('transitionend', handleTransitionEnd);
+                    }
+                }, 500);
                 // Now add the entering class which has the transition, and animate to center
                 previewCard.classList.add('entering');
                 previewCard.style.transition = '';
@@ -1286,6 +1310,10 @@
                 if (previewCard && previewCard.parentNode) {
                     previewCard.classList.remove('entering');
                     previewCard.style.transition = '';
+                    // Reset entering flag if card was entering
+                    if (isCardEntering) {
+                        isCardEntering = false;
+                    }
                 }
                 // Hide indicators after animation completes
                 const leftIndicator = document.getElementById('swipe-left-indicator');
@@ -1347,6 +1375,24 @@
                     stack.appendChild(card);
                     // Force reflow
                     card.offsetHeight;
+                    // Mark that card is entering
+                    isCardEntering = true;
+                    // Add transitionend listener to detect when animation completes
+                    const handleTransitionEnd = (e) => {
+                        // Only handle transform transitions (not opacity)
+                        if (e.propertyName === 'transform' && card.classList.contains('entering')) {
+                            isCardEntering = false;
+                            card.removeEventListener('transitionend', handleTransitionEnd);
+                        }
+                    };
+                    card.addEventListener('transitionend', handleTransitionEnd);
+                    // Safety timeout in case transitionend doesn't fire (transition duration is 0.4s)
+                    setTimeout(() => {
+                        if (isCardEntering && card.classList.contains('entering')) {
+                            isCardEntering = false;
+                            card.removeEventListener('transitionend', handleTransitionEnd);
+                        }
+                    }, 500);
                     // Active la transition et anime vers le centre
                     card.classList.add('entering');
                     card.style.transition = '';

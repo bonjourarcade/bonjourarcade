@@ -211,6 +211,7 @@
 
         .game-info {
             padding: 1.5rem;
+            padding-top: 2rem;
             background: var(--card-bg);
         }
 
@@ -476,6 +477,7 @@
         let lastMoveY = 0;
         let velocityX = 0;
         let velocityY = 0;
+        let dragStartTime = 0;
 
         // Theme management
         function initTheme() {
@@ -661,6 +663,8 @@
         function startDrag(e) {
             if (availableGames.length === 0) return;
             
+            console.log('👆 startDrag called', { eventType: e.type });
+            
             isDragging = true;
             currentCard = e.currentTarget;
             // Disable transition immediately for instant response
@@ -673,11 +677,14 @@
             currentY = startY;
             
             // Reset velocity tracking
-            lastMoveTime = Date.now();
+            dragStartTime = Date.now();
+            lastMoveTime = dragStartTime;
             lastMoveX = startX;
             lastMoveY = startY;
             velocityX = 0;
             velocityY = 0;
+
+            console.log('👆 startDrag initialized', { startX, startY, dragStartTime });
 
             document.addEventListener('mousemove', onDrag);
             document.addEventListener('touchmove', onDrag, { passive: false });
@@ -695,13 +702,18 @@
             const newX = touch.clientX;
             const newY = touch.clientY;
             
+            // Log occasionally to avoid spam
+            if (Math.random() < 0.01) { // 1% of the time
+                console.log('🖱️ onDrag', { newX, newY, deltaX: newX - startX, deltaY: newY - startY });
+            }
+            
             // Calculate velocity based on recent movement
             const timeDelta = now - lastMoveTime;
             if (timeDelta > 0 && timeDelta < 100) { // Only calculate if time delta is reasonable
                 const moveDeltaX = newX - lastMoveX;
                 const moveDeltaY = newY - lastMoveY;
-                // Use exponential moving average for smoother velocity, but with higher weight on recent movement
-                const alpha = 0.5;
+                // Use exponential moving average with higher weight on recent movement for more responsive velocity
+                const alpha = 0.7; // Increased from 0.5 to be more responsive
                 const instantVelocityX = moveDeltaX / timeDelta;
                 const instantVelocityY = moveDeltaY / timeDelta;
                 velocityX = velocityX * (1 - alpha) + instantVelocityX * alpha;
@@ -753,7 +765,12 @@
         }
 
         function endDrag(e) {
-            if (!isDragging || !currentCard || isProcessingSwipe) return;
+            console.log('🎯 endDrag called', { isDragging, hasCard: !!currentCard, isProcessingSwipe, eventType: e.type });
+            
+            if (!isDragging || !currentCard || isProcessingSwipe) {
+                console.log('❌ endDrag early exit:', { isDragging, hasCard: !!currentCard, isProcessingSwipe });
+                return;
+            }
 
             // Remove event listeners first
             document.removeEventListener('mousemove', onDrag);
@@ -762,6 +779,7 @@
             document.removeEventListener('touchend', endDrag);
 
             isDragging = false;
+            console.log('✅ endDrag proceeding');
             const deltaX = currentX - startX;
             const deltaY = currentY - startY;
             const threshold = 100;
@@ -775,13 +793,58 @@
                     nextGame();
                 }
             } else {
-                // Always try momentum if we have any movement, even small
-                // Calculate velocity magnitude to determine if we should continue
-                const velocityMagnitude = Math.sqrt(velocityX * velocityX + velocityY * velocityY);
-                if (velocityMagnitude > 0.05 || Math.abs(deltaX) > 10 || Math.abs(deltaY) > 10) {
-                    // Continue with momentum if there's any movement or velocity
-                    continueWithMomentum(deltaX, deltaY);
+                // Always try momentum if we have any movement
+                const totalDragTime = Date.now() - dragStartTime;
+                const timeSinceLastMove = Date.now() - lastMoveTime;
+                
+                console.log('🔍 endDrag - Debug Info:', {
+                    deltaX,
+                    deltaY,
+                    threshold,
+                    totalDragTime,
+                    timeSinceLastMove,
+                    velocityX,
+                    velocityY,
+                    lastMoveX,
+                    lastMoveY,
+                    currentX,
+                    currentY
+                });
+                
+                // Calculate velocity from recent movement (last 100ms)
+                let finalVelocityX = velocityX;
+                let finalVelocityY = velocityY;
+                
+                // If we have recent movement, use it to calculate velocity
+                if (timeSinceLastMove < 100 && timeSinceLastMove > 0) {
+                    const recentDeltaX = currentX - lastMoveX;
+                    const recentDeltaY = currentY - lastMoveY;
+                    const recentVelocityX = recentDeltaX / timeSinceLastMove;
+                    const recentVelocityY = recentDeltaY / timeSinceLastMove;
+                    // Blend with stored velocity, but favor recent movement
+                    finalVelocityX = velocityX * 0.3 + recentVelocityX * 0.7;
+                    finalVelocityY = velocityY * 0.3 + recentVelocityY * 0.7;
+                    console.log('📊 Using recent velocity:', { recentVelocityX, recentVelocityY, finalVelocityX, finalVelocityY });
+                }
+                
+                // If velocity is still very low, calculate from overall movement
+                const velocityMagnitude = Math.sqrt(finalVelocityX * finalVelocityX + finalVelocityY * finalVelocityY);
+                if (velocityMagnitude < 0.2 && totalDragTime > 0) {
+                    // Use average velocity over the entire drag
+                    finalVelocityX = deltaX / totalDragTime;
+                    finalVelocityY = deltaY / totalDragTime;
+                    console.log('📊 Using average velocity:', { finalVelocityX, finalVelocityY, totalDragTime });
+                }
+                
+                console.log('🎯 Final velocities before momentum check:', { finalVelocityX, finalVelocityY, velocityMagnitude });
+                
+                // Always continue with momentum if there's any movement
+                if (Math.abs(deltaX) > 3 || Math.abs(deltaY) > 3) {
+                    console.log('✅ Calling continueWithMomentum with:', { deltaX, deltaY, finalVelocityX, finalVelocityY });
+                    // Continue with momentum - always use it if there's movement
+                    continueWithMomentum(deltaX, deltaY, finalVelocityX, finalVelocityY);
                 } else {
+                    console.log('❌ Not enough movement, snapping back');
                     // Snap back - re-enable transition for smooth animation
                     currentCard.classList.remove('dragging');
                     currentCard.style.transition = '';
@@ -803,8 +866,11 @@
             }
         }
 
-        function continueWithMomentum(startDeltaX, startDeltaY) {
+        function continueWithMomentum(startDeltaX, startDeltaY, useVelocityX, useVelocityY) {
+            console.log('🚀 continueWithMomentum called with:', { startDeltaX, startDeltaY, useVelocityX, useVelocityY, currentCard: !!currentCard, isProcessingSwipe });
+            
             if (!currentCard || isProcessingSwipe) {
+                console.log('⚠️ Exiting continueWithMomentum early:', { hasCard: !!currentCard, isProcessingSwipe });
                 return;
             }
             
@@ -820,15 +886,57 @@
             
             let posX = startDeltaX;
             let posY = startDeltaY;
+            
+            // Use provided velocities or fall back to stored velocities
+            const finalVelocityX = useVelocityX !== undefined ? useVelocityX : velocityX;
+            const finalVelocityY = useVelocityY !== undefined ? useVelocityY : velocityY;
+            
+            console.log('📐 Initial velocities:', { finalVelocityX, finalVelocityY });
+            
             // Scale velocity for animation (convert from px/ms to px/frame at ~60fps)
-            // Multiply by a larger factor to make momentum more noticeable
-            let vx = velocityX * 20;
-            let vy = velocityY * 20;
-            const friction = 0.92; // Slightly less friction for longer momentum
-            const minVelocity = 0.1; // Lower threshold to continue animation longer
+            // At 60fps, each frame is ~16.67ms, so we multiply by ~16.67
+            // But we use a higher multiplier to make momentum more noticeable
+            let vx = finalVelocityX * 30; // Increased multiplier for more noticeable momentum
+            let vy = finalVelocityY * 30;
+            
+            console.log('📐 Scaled velocities (before min check):', { vx, vy });
+            
+            // Always ensure minimum velocity based on movement direction
+            // This guarantees the card will continue moving even if calculated velocity is low
+            const minInitialVelocity = 3; // Minimum initial velocity in px/frame
+            if (Math.abs(startDeltaX) > 3) {
+                // If there's horizontal movement, ensure minimum velocity in that direction
+                if (Math.abs(vx) < minInitialVelocity) {
+                    vx = startDeltaX > 0 ? minInitialVelocity : -minInitialVelocity;
+                }
+            }
+            if (Math.abs(startDeltaY) > 3) {
+                // If there's vertical movement, ensure minimum velocity in that direction
+                if (Math.abs(vy) < minInitialVelocity) {
+                    vy = startDeltaY > 0 ? minInitialVelocity : -minInitialVelocity;
+                }
+            }
+            
+            // If no significant velocity but there's movement, create velocity from position
+            if (Math.abs(vx) < 0.5 && Math.abs(startDeltaX) > 10) {
+                // Create velocity based on movement distance (faster for longer drags)
+                const speedFactor = Math.min(Math.abs(startDeltaX) / 50, 2); // Scale up to 2x
+                vx = startDeltaX > 0 ? minInitialVelocity * speedFactor : -minInitialVelocity * speedFactor;
+            }
+            if (Math.abs(vy) < 0.5 && Math.abs(startDeltaY) > 10) {
+                const speedFactor = Math.min(Math.abs(startDeltaY) / 50, 2);
+                vy = startDeltaY > 0 ? minInitialVelocity * speedFactor : -minInitialVelocity * speedFactor;
+            }
+            
+            const friction = 0.96; // Reduced friction for longer momentum
+            const minVelocity = 0.1; // Threshold to continue animation
+            
+            console.log('📐 Final velocities (after min check):', { vx, vy, friction, minVelocity });
             
             // Determine direction
             const isRight = vx > 0;
+            
+            console.log('🎬 Starting animation loop with:', { posX, posY, vx, vy, isRight });
             
             // Update indicators based on direction
             const leftIndicator = document.getElementById('swipe-left-indicator');
@@ -849,8 +957,13 @@
                 document.getElementById('swipe-overlay-right').classList.remove('visible');
             }
             
+            let frameCount = 0;
             function animate() {
-                if (!card || !card.parentNode) return;
+                frameCount++;
+                if (!card || !card.parentNode) {
+                    console.log('⚠️ Animation stopped: card removed');
+                    return;
+                }
                 
                 // Apply velocity
                 posX += vx;
@@ -866,15 +979,22 @@
                 // Update transform
                 card.style.transform = `translate(${posX}px, ${posY}px) rotate(${rotation}deg)`;
                 
+                // Log every 10 frames for debugging
+                if (frameCount % 10 === 0) {
+                    console.log(`🎬 Frame ${frameCount}:`, { posX, posY, vx, vy, rotation });
+                }
+                
                 // Check if card has left the screen
                 const cardRect = card.getBoundingClientRect();
                 const screenWidth = window.innerWidth;
                 
                 if (isRight && cardRect.left > screenWidth) {
+                    console.log('✅ Card exited right - launching game');
                     // Card exited right - launch game
                     launchGame();
                     return;
                 } else if (!isRight && cardRect.right < 0) {
+                    console.log('✅ Card exited left - next game');
                     // Card exited left - next game
                     nextGame();
                     return;
@@ -884,6 +1004,7 @@
                 if (Math.abs(vx) > minVelocity || Math.abs(vy) > minVelocity) {
                     requestAnimationFrame(animate);
                 } else {
+                    console.log('🛑 Animation stopped: velocity too low', { vx, vy, minVelocity });
                     // Velocity too low, snap back
                     card.classList.remove('dragging');
                     card.style.transition = '';
@@ -902,6 +1023,7 @@
             }
             
             // Start animation immediately
+            console.log('▶️ Starting animation loop');
             requestAnimationFrame(animate);
         }
 
@@ -1305,6 +1427,7 @@
         }
 
         // Initialize
+        console.log('🚀 Swipe page initialized');
         initTheme();
         loadGames();
     </script>

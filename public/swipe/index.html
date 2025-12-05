@@ -594,24 +594,8 @@
                 passedGameIds.clear();
                 availableGames = [...allGamesData];
                 
-                // Put game of the week first if it exists
-                if (currentGameOfTheWeekId) {
-                    const gameOfTheWeekIndex = availableGames.findIndex(game => game.id === currentGameOfTheWeekId);
-                    if (gameOfTheWeekIndex !== -1) {
-                        // Remove the game of the week from its current position
-                        const gameOfTheWeek = availableGames.splice(gameOfTheWeekIndex, 1)[0];
-                        // Put it at the beginning
-                        availableGames.unshift(gameOfTheWeek);
-                    }
-                }
-                
-                // Shuffle the remaining games (everything except the first one)
-                if (availableGames.length > 1) {
-                    const firstGame = availableGames[0];
-                    const restOfGames = availableGames.slice(1);
-                    shuffleArray(restOfGames);
-                    availableGames = [firstGame, ...restOfGames];
-                }
+                // Shuffle all games randomly
+                shuffleArray(availableGames);
                 
                 currentGameIndex = 0;
                 cardsPassedCount = 0;
@@ -1534,24 +1518,8 @@
                 // Initialize available games (filter out passed ones, but initially none are passed)
                 availableGames = [...allGamesData];
                 
-                // Put game of the week first if it exists
-                if (currentGameOfTheWeekId) {
-                    const gameOfTheWeekIndex = availableGames.findIndex(game => game.id === currentGameOfTheWeekId);
-                    if (gameOfTheWeekIndex !== -1) {
-                        // Remove the game of the week from its current position
-                        const gameOfTheWeek = availableGames.splice(gameOfTheWeekIndex, 1)[0];
-                        // Put it at the beginning
-                        availableGames.unshift(gameOfTheWeek);
-                    }
-                }
-                
-                // Shuffle the remaining games (everything except the first one)
-                if (availableGames.length > 1) {
-                    const firstGame = availableGames[0];
-                    const restOfGames = availableGames.slice(1);
-                    shuffleArray(restOfGames);
-                    availableGames = [firstGame, ...restOfGames];
-                }
+                // Shuffle all games randomly
+                shuffleArray(availableGames);
                 
                 // Initialize counter
                 updateCardsPassedCounter();

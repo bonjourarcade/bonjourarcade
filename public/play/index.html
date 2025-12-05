@@ -410,6 +410,46 @@
             opacity: 0.8;
         }
         
+        /* Mobile adjustments to prevent logo from being hidden by FF button */
+        @media (max-width: 768px) {
+            #play-header-logo {
+                height: 24px;
+                max-height: 24px;
+            }
+            
+            #play-header-center {
+                left: 50%;
+                transform: translateX(-50%);
+                width: auto;
+                max-width: none;
+            }
+            
+            #play-header-left {
+                flex: 0 0 auto;
+                min-width: 70px;
+            }
+            
+            #play-header-right {
+                flex: 0 0 auto;
+                min-width: 50px;
+                justify-content: flex-end;
+            }
+            
+            #fastforward-button {
+                padding: 6px 8px !important;
+                font-size: 11px !important;
+                gap: 4px;
+            }
+            
+            #fastforward-button span:last-child {
+                display: none; /* Hide "FF" text on mobile, keep only icon */
+            }
+            
+            #help-button {
+                display: none; /* Hide help button on mobile to save space */
+            }
+        }
+        
         /* Menu button styling */
         #menu-button {
             background-color: rgba(0, 0, 0, 0.7);

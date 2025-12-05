@@ -155,8 +155,11 @@
             border-radius: 16px;
             cursor: grab;
             user-select: none;
-            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s ease, scale 0.6s ease;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s ease;
             will-change: transform;
+            /* Add transparent border by default to prevent size recalculation */
+            border: 3px solid transparent;
+            box-sizing: border-box;
         }
 
         .game-card:active {
@@ -168,11 +171,11 @@
         }
 
         .game-card.swiping-left {
-            border: 3px solid var(--swipe-left-color);
+            border-color: var(--swipe-left-color);
         }
 
         .game-card.swiping-right {
-            border: 3px solid var(--swipe-right-color);
+            border-color: var(--swipe-right-color);
         }
 
         .game-card.hidden {
@@ -189,7 +192,7 @@
         }
 
         .game-card.entering {
-            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.8s ease;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease;
         }
 
         .game-cover {
@@ -265,9 +268,10 @@
             color: var(--text-color);
             opacity: 0.95;
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             box-shadow: 4px 0 10px rgba(0,0,0,0.1);
             overflow-y: auto;
+            overflow-x: hidden;
             z-index: 1;
         }
 
@@ -663,8 +667,6 @@
         function startDrag(e) {
             if (availableGames.length === 0) return;
             
-            console.log('👆 startDrag called', { eventType: e.type });
-            
             isDragging = true;
             currentCard = e.currentTarget;
             // Disable transition immediately for instant response
@@ -684,8 +686,6 @@
             velocityX = 0;
             velocityY = 0;
 
-            console.log('👆 startDrag initialized', { startX, startY, dragStartTime });
-
             document.addEventListener('mousemove', onDrag);
             document.addEventListener('touchmove', onDrag, { passive: false });
             document.addEventListener('mouseup', endDrag);
@@ -701,11 +701,6 @@
             const now = Date.now();
             const newX = touch.clientX;
             const newY = touch.clientY;
-            
-            // Log occasionally to avoid spam
-            if (Math.random() < 0.01) { // 1% of the time
-                console.log('🖱️ onDrag', { newX, newY, deltaX: newX - startX, deltaY: newY - startY });
-            }
             
             // Calculate velocity based on recent movement
             const timeDelta = now - lastMoveTime;
@@ -765,112 +760,95 @@
         }
 
         function endDrag(e) {
-            console.log('🎯 endDrag called', { isDragging, hasCard: !!currentCard, isProcessingSwipe, eventType: e.type });
-            
-            if (!isDragging || !currentCard || isProcessingSwipe) {
-                console.log('❌ endDrag early exit:', { isDragging, hasCard: !!currentCard, isProcessingSwipe });
-                return;
-            }
-
-            // Remove event listeners first
+            // Remove event listeners first, before any early exit checks
+            // This ensures listeners are always cleaned up, preventing accumulation
             document.removeEventListener('mousemove', onDrag);
             document.removeEventListener('touchmove', onDrag);
             document.removeEventListener('mouseup', endDrag);
             document.removeEventListener('touchend', endDrag);
+            
+            if (!isDragging || !currentCard || isProcessingSwipe) {
+                return;
+            }
 
             isDragging = false;
-            console.log('✅ endDrag proceeding');
             const deltaX = currentX - startX;
             const deltaY = currentY - startY;
             const threshold = 100;
 
-            if (Math.abs(deltaX) > threshold) {
+            // Always try momentum if we have any movement
+            const totalDragTime = Date.now() - dragStartTime;
+            const timeSinceLastMove = Date.now() - lastMoveTime;
+            
+            // Calculate velocity from recent movement (last 100ms)
+            let finalVelocityX = velocityX;
+            let finalVelocityY = velocityY;
+            
+            // If we have recent movement, use it to calculate velocity
+            if (timeSinceLastMove < 100 && timeSinceLastMove > 0) {
+                const recentDeltaX = currentX - lastMoveX;
+                const recentDeltaY = currentY - lastMoveY;
+                const recentVelocityX = recentDeltaX / timeSinceLastMove;
+                const recentVelocityY = recentDeltaY / timeSinceLastMove;
+                // Blend with stored velocity, but favor recent movement
+                finalVelocityX = velocityX * 0.3 + recentVelocityX * 0.7;
+                finalVelocityY = velocityY * 0.3 + recentVelocityY * 0.7;
+            }
+            
+            // If velocity is still very low, calculate from overall movement
+            const velocityMagnitude = Math.sqrt(finalVelocityX * finalVelocityX + finalVelocityY * finalVelocityY);
+            if (velocityMagnitude < 0.2 && totalDragTime > 0) {
+                // Use average velocity over the entire drag
+                finalVelocityX = deltaX / totalDragTime;
+                finalVelocityY = deltaY / totalDragTime;
+            }
+            
+            // Track if threshold was exceeded to ensure card exits screen
+            const thresholdExceeded = Math.abs(deltaX) > threshold;
+            if (thresholdExceeded) {
+                // Ensure minimum velocity in the swipe direction to complete animation
+                const minSwipeVelocity = 0.8; // Minimum velocity to ensure card exits screen
                 if (deltaX > 0) {
-                    // Swipe right - launch game
-                    launchGame();
-                } else {
-                    // Swipe left - next game
-                    nextGame();
-                }
-            } else {
-                // Always try momentum if we have any movement
-                const totalDragTime = Date.now() - dragStartTime;
-                const timeSinceLastMove = Date.now() - lastMoveTime;
-                
-                console.log('🔍 endDrag - Debug Info:', {
-                    deltaX,
-                    deltaY,
-                    threshold,
-                    totalDragTime,
-                    timeSinceLastMove,
-                    velocityX,
-                    velocityY,
-                    lastMoveX,
-                    lastMoveY,
-                    currentX,
-                    currentY
-                });
-                
-                // Calculate velocity from recent movement (last 100ms)
-                let finalVelocityX = velocityX;
-                let finalVelocityY = velocityY;
-                
-                // If we have recent movement, use it to calculate velocity
-                if (timeSinceLastMove < 100 && timeSinceLastMove > 0) {
-                    const recentDeltaX = currentX - lastMoveX;
-                    const recentDeltaY = currentY - lastMoveY;
-                    const recentVelocityX = recentDeltaX / timeSinceLastMove;
-                    const recentVelocityY = recentDeltaY / timeSinceLastMove;
-                    // Blend with stored velocity, but favor recent movement
-                    finalVelocityX = velocityX * 0.3 + recentVelocityX * 0.7;
-                    finalVelocityY = velocityY * 0.3 + recentVelocityY * 0.7;
-                    console.log('📊 Using recent velocity:', { recentVelocityX, recentVelocityY, finalVelocityX, finalVelocityY });
-                }
-                
-                // If velocity is still very low, calculate from overall movement
-                const velocityMagnitude = Math.sqrt(finalVelocityX * finalVelocityX + finalVelocityY * finalVelocityY);
-                if (velocityMagnitude < 0.2 && totalDragTime > 0) {
-                    // Use average velocity over the entire drag
-                    finalVelocityX = deltaX / totalDragTime;
-                    finalVelocityY = deltaY / totalDragTime;
-                    console.log('📊 Using average velocity:', { finalVelocityX, finalVelocityY, totalDragTime });
-                }
-                
-                console.log('🎯 Final velocities before momentum check:', { finalVelocityX, finalVelocityY, velocityMagnitude });
-                
-                // Always continue with momentum if there's any movement
-                if (Math.abs(deltaX) > 3 || Math.abs(deltaY) > 3) {
-                    console.log('✅ Calling continueWithMomentum with:', { deltaX, deltaY, finalVelocityX, finalVelocityY });
-                    // Continue with momentum - always use it if there's movement
-                    continueWithMomentum(deltaX, deltaY, finalVelocityX, finalVelocityY);
-                } else {
-                    console.log('❌ Not enough movement, snapping back');
-                    // Snap back - re-enable transition for smooth animation
-                    currentCard.classList.remove('dragging');
-                    currentCard.style.transition = '';
-                    currentCard.style.transform = '';
-                    currentCard.classList.remove('swiping-left', 'swiping-right');
-                    const leftIndicator = document.getElementById('swipe-left-indicator');
-                    const rightIndicator = document.getElementById('swipe-right-indicator');
-                    leftIndicator.classList.remove('visible');
-                    rightIndicator.classList.remove('visible');
-                    // Show initial hints if first swipe and not dragging
-                    if (isFirstSwipe) {
-                        leftIndicator.classList.add('initial-hint');
-                        rightIndicator.classList.add('initial-hint');
+                    // Swiping right - ensure positive velocity
+                    if (finalVelocityX < minSwipeVelocity) {
+                        finalVelocityX = minSwipeVelocity;
                     }
-                    document.getElementById('swipe-overlay-left').classList.remove('visible');
-                    document.getElementById('swipe-overlay-right').classList.remove('visible');
-                    currentCard = null;
+                } else {
+                    // Swiping left - ensure negative velocity
+                    if (finalVelocityX > -minSwipeVelocity) {
+                        finalVelocityX = -minSwipeVelocity;
+                    }
                 }
+            }
+            
+            // Always continue with momentum if there's any movement
+            if (Math.abs(deltaX) > 3 || Math.abs(deltaY) > 3) {
+                // Continue with momentum - always use it if there's movement
+                // Pass thresholdExceeded flag to ensure proper animation completion
+                continueWithMomentum(deltaX, deltaY, finalVelocityX, finalVelocityY, thresholdExceeded);
+            } else {
+                // Snap back - re-enable transition for smooth animation
+                currentCard.classList.remove('dragging');
+                currentCard.style.transition = '';
+                currentCard.style.transform = '';
+                currentCard.classList.remove('swiping-left', 'swiping-right');
+                const leftIndicator = document.getElementById('swipe-left-indicator');
+                const rightIndicator = document.getElementById('swipe-right-indicator');
+                leftIndicator.classList.remove('visible');
+                rightIndicator.classList.remove('visible');
+                // Show initial hints if first swipe and not dragging
+                if (isFirstSwipe) {
+                    leftIndicator.classList.add('initial-hint');
+                    rightIndicator.classList.add('initial-hint');
+                }
+                document.getElementById('swipe-overlay-left').classList.remove('visible');
+                document.getElementById('swipe-overlay-right').classList.remove('visible');
+                currentCard = null;
             }
         }
 
-        function continueWithMomentum(startDeltaX, startDeltaY, useVelocityX, useVelocityY) {
-            console.log('🚀 continueWithMomentum called with:', { startDeltaX, startDeltaY, useVelocityX, useVelocityY, currentCard: !!currentCard, isProcessingSwipe });
-            
+        function continueWithMomentum(startDeltaX, startDeltaY, useVelocityX, useVelocityY, thresholdExceeded = false) {
             if (!currentCard || isProcessingSwipe) {
-                console.log('⚠️ Exiting continueWithMomentum early:', { hasCard: !!currentCard, isProcessingSwipe });
                 return;
             }
             
@@ -891,19 +869,14 @@
             const finalVelocityX = useVelocityX !== undefined ? useVelocityX : velocityX;
             const finalVelocityY = useVelocityY !== undefined ? useVelocityY : velocityY;
             
-            console.log('📐 Initial velocities:', { finalVelocityX, finalVelocityY });
-            
             // Scale velocity for animation (convert from px/ms to px/frame at ~60fps)
             // At 60fps, each frame is ~16.67ms, so we multiply by ~16.67
             // But we use a higher multiplier to make momentum more noticeable
             let vx = finalVelocityX * 30; // Increased multiplier for more noticeable momentum
             let vy = finalVelocityY * 30;
             
-            console.log('📐 Scaled velocities (before min check):', { vx, vy });
-            
-            // Always ensure minimum velocity based on movement direction
-            // This guarantees the card will continue moving even if calculated velocity is low
-            const minInitialVelocity = 3; // Minimum initial velocity in px/frame
+            // If threshold was exceeded, use higher minimum velocity to ensure card exits screen
+            const minInitialVelocity = thresholdExceeded ? 8 : 3; // Higher velocity when threshold exceeded
             if (Math.abs(startDeltaX) > 3) {
                 // If there's horizontal movement, ensure minimum velocity in that direction
                 if (Math.abs(vx) < minInitialVelocity) {
@@ -928,15 +901,12 @@
                 vy = startDeltaY > 0 ? minInitialVelocity * speedFactor : -minInitialVelocity * speedFactor;
             }
             
-            const friction = 0.96; // Reduced friction for longer momentum
+            // Use less friction when threshold exceeded to ensure card exits screen smoothly
+            const friction = thresholdExceeded ? 0.98 : 0.96; // Less friction when threshold exceeded
             const minVelocity = 0.1; // Threshold to continue animation
-            
-            console.log('📐 Final velocities (after min check):', { vx, vy, friction, minVelocity });
             
             // Determine direction
             const isRight = vx > 0;
-            
-            console.log('🎬 Starting animation loop with:', { posX, posY, vx, vy, isRight });
             
             // Update indicators based on direction
             const leftIndicator = document.getElementById('swipe-left-indicator');
@@ -957,11 +927,8 @@
                 document.getElementById('swipe-overlay-right').classList.remove('visible');
             }
             
-            let frameCount = 0;
             function animate() {
-                frameCount++;
                 if (!card || !card.parentNode) {
-                    console.log('⚠️ Animation stopped: card removed');
                     return;
                 }
                 
@@ -979,22 +946,15 @@
                 // Update transform
                 card.style.transform = `translate(${posX}px, ${posY}px) rotate(${rotation}deg)`;
                 
-                // Log every 10 frames for debugging
-                if (frameCount % 10 === 0) {
-                    console.log(`🎬 Frame ${frameCount}:`, { posX, posY, vx, vy, rotation });
-                }
-                
                 // Check if card has left the screen
                 const cardRect = card.getBoundingClientRect();
                 const screenWidth = window.innerWidth;
                 
                 if (isRight && cardRect.left > screenWidth) {
-                    console.log('✅ Card exited right - launching game');
                     // Card exited right - launch game
                     launchGame();
                     return;
                 } else if (!isRight && cardRect.right < 0) {
-                    console.log('✅ Card exited left - next game');
                     // Card exited left - next game
                     nextGame();
                     return;
@@ -1004,7 +964,6 @@
                 if (Math.abs(vx) > minVelocity || Math.abs(vy) > minVelocity) {
                     requestAnimationFrame(animate);
                 } else {
-                    console.log('🛑 Animation stopped: velocity too low', { vx, vy, minVelocity });
                     // Velocity too low, snap back
                     card.classList.remove('dragging');
                     card.style.transition = '';
@@ -1023,7 +982,6 @@
             }
             
             // Start animation immediately
-            console.log('▶️ Starting animation loop');
             requestAnimationFrame(animate);
         }
 
@@ -1047,19 +1005,46 @@
                 rightIndicator.classList.remove('initial-hint');
                 document.getElementById('swipe-overlay-right').classList.add('visible');
                 document.getElementById('swipe-overlay-left').classList.remove('visible');
-                // Simulate swipe right for animation
+                // Start animation immediately
                 const card = document.querySelector('.game-card:not(.hidden)');
                 if (card) {
                     currentCard = card;
-                    startX = window.innerWidth / 2;
-                    startY = window.innerHeight / 2;
-                    currentX = startX + 150; // Simulate right swipe
-                    currentY = startY;
+                    const stack = document.getElementById('card-stack');
+                    const stackRect = stack.getBoundingClientRect();
+                    const centerX = stackRect.left + stackRect.width / 2;
+                    const centerY = stackRect.top + stackRect.height / 2;
+                    const rightEdge = window.innerWidth;
+                    const targetX = rightEdge - centerX + 50;
+                    const targetY = centerY - (stackRect.top + stackRect.height / 2);
+                    
+                    // Get current transform to preserve scale if any
+                    const currentTransform = card.style.transform || '';
+                    const hasScale = currentTransform.includes('scale');
+                    const scaleValue = hasScale ? currentTransform.match(/scale\(([^)]+)\)/)?.[1] || '1' : '1';
+                    
+                    // Start animation immediately with smooth transition
+                    card.classList.add('exiting-right', 'swiping-right');
+                    card.style.opacity = '1';
+                    card.style.transition = 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease 0.3s';
+                    // Force reflow to ensure transition starts from current position
+                    card.offsetHeight;
+                    // Apply final transform with explicit scale to prevent size recalculation
+                    card.style.transform = `translate(${targetX}px, ${targetY}px) rotate(90deg) scale(${scaleValue})`;
+                    
+                    // Keep indicators visible during animation, hide them at the end
+                    setTimeout(() => {
+                        card.style.opacity = '0';
+                    }, 300);
+                    setTimeout(() => {
+                        // Hide indicators before redirect
+                        leftIndicator.classList.remove('visible');
+                        rightIndicator.classList.remove('visible');
+                        document.getElementById('swipe-overlay-left').classList.remove('visible');
+                        document.getElementById('swipe-overlay-right').classList.remove('visible');
+                        card.classList.add('hidden');
+                        window.location.href = availableGames[0].pageUrl;
+                    }, 600);
                 }
-                // Small delay to show the indicator before launching
-                setTimeout(() => {
-                    launchGame();
-                }, 200);
             } else if (e.key === 'ArrowLeft') {
                 e.preventDefault();
                 // Show swipe left indicator and overlay
@@ -1070,19 +1055,30 @@
                 leftIndicator.classList.remove('initial-hint');
                 document.getElementById('swipe-overlay-left').classList.add('visible');
                 document.getElementById('swipe-overlay-right').classList.remove('visible');
-                // Simulate swipe left for animation
+                // Start animation immediately
                 const card = document.querySelector('.game-card:not(.hidden)');
                 if (card) {
                     currentCard = card;
-                    startX = window.innerWidth / 2;
-                    startY = window.innerHeight / 2;
-                    currentX = startX - 150; // Simulate left swipe
-                    currentY = startY;
-                }
-                // Small delay to show the indicator before next game
-                setTimeout(() => {
+                    const exitX = -window.innerWidth - 500;
+                    
+                    // Get current transform to preserve scale if any
+                    const currentTransform = card.style.transform || '';
+                    const hasScale = currentTransform.includes('scale');
+                    const scaleValue = hasScale ? currentTransform.match(/scale\(([^)]+)\)/)?.[1] || '1' : '1';
+                    
+                    // Start animation immediately with smooth transition
+                    card.classList.add('exiting-left', 'swiping-left');
+                    card.style.opacity = '1';
+                    card.style.transition = 'transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease 0.5s';
+                    // Force reflow to ensure transition starts from current position
+                    card.offsetHeight;
+                    // Apply final transform with explicit scale to prevent size recalculation
+                    card.style.transform = `translate(${exitX}px, 0px) rotate(-30deg) scale(${scaleValue})`;
+                    
+                    // Call nextGame immediately to handle the logic
+                    // Indicators will be hidden by nextGame after animation completes
                     nextGame();
-                }, 200);
+                }
             }
         });
 
@@ -1119,13 +1115,8 @@
         function launchGame() {
             if (availableGames.length === 0 || isProcessingSwipe) return;
             isProcessingSwipe = true;
-            // Hide overlays and indicators
-            document.getElementById('swipe-overlay-left').classList.remove('visible');
-            document.getElementById('swipe-overlay-right').classList.remove('visible');
-            const leftIndicator = document.getElementById('swipe-left-indicator');
-            const rightIndicator = document.getElementById('swipe-right-indicator');
-            leftIndicator.classList.remove('visible', 'initial-hint');
-            rightIndicator.classList.remove('visible', 'initial-hint');
+            // Don't hide indicators here - they should stay visible during animation
+            // They will be hidden when the animation completes or redirect happens
             // Mark that first swipe is done
             if (isFirstSwipe) {
                 isFirstSwipe = false;
@@ -1138,9 +1129,9 @@
                 (parseInt(card.style.zIndex) === 10 || card.style.zIndex === '10' || (!card.style.zIndex && card === allCards[0]))
             );
             
-            if (card && !isMobileDevice()) {
-                // Desktop: rotate 90 degrees to the right edge
-                card.classList.add('exiting-right', 'hidden');
+            if (card && !isMobileDevice() && !card.classList.contains('exiting-right')) {
+                // Desktop: rotate 90 degrees to the right edge (only if not already animating)
+                card.classList.add('exiting-right');
                 const stackRect = stack.getBoundingClientRect();
                 const centerX = stackRect.left + stackRect.width / 2;
                 const centerY = stackRect.top + stackRect.height / 2;
@@ -1148,26 +1139,54 @@
                 const targetX = rightEdge - centerX + 50; // Add some padding
                 const targetY = centerY - (stackRect.top + stackRect.height / 2);
                 
-                // Rotate 90 degrees and move to right edge
-                card.style.transform = `translate(${targetX}px, ${targetY}px) rotate(90deg)`;
-                card.style.opacity = '0';
+                // Get current transform to preserve scale if any
+                const currentTransform = card.style.transform || '';
+                const hasScale = currentTransform.includes('scale');
+                const scaleValue = hasScale ? currentTransform.match(/scale\(([^)]+)\)/)?.[1] || '1' : '1';
                 
-                // Redirect after animation
+                // Keep opacity at 1 during translation, only fade at the end
+                card.style.opacity = '1';
+                card.style.transition = 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease 0.3s';
+                // Force reflow to ensure transition starts from current position
+                card.offsetHeight;
+                // Rotate 90 degrees and move to right edge with explicit scale to prevent size recalculation
+                card.style.transform = `translate(${targetX}px, ${targetY}px) rotate(90deg) scale(${scaleValue})`;
+                
+                // Fade out after a short delay, then hide and redirect
                 setTimeout(() => {
+                    card.style.opacity = '0';
+                }, 300);
+                setTimeout(() => {
+                    // Hide indicators before redirect
+                    const leftIndicator = document.getElementById('swipe-left-indicator');
+                    const rightIndicator = document.getElementById('swipe-right-indicator');
+                    leftIndicator.classList.remove('visible', 'initial-hint');
+                    rightIndicator.classList.remove('visible', 'initial-hint');
+                    document.getElementById('swipe-overlay-left').classList.remove('visible');
+                    document.getElementById('swipe-overlay-right').classList.remove('visible');
+                    card.classList.add('hidden');
                     window.location.href = game.pageUrl;
                 }, 600);
             } else {
                 // Mobile: simple fade out
                 if (card) {
-                    card.classList.add('exiting-right', 'hidden');
-                    card.style.opacity = '0';
-                    card.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+                    card.classList.add('exiting-right');
+                    card.style.opacity = '1';
+                    card.style.transition = 'transform 0.4s ease, opacity 0.2s ease 0.2s';
                     // Slight movement to right on mobile
                     card.style.transform = 'translate(50px, 0) scale(0.9)';
+                    setTimeout(() => {
+                        card.style.opacity = '0';
+                    }, 200);
+                    setTimeout(() => {
+                        card.classList.add('hidden');
+                        window.location.href = game.pageUrl;
+                    }, 400);
+                } else {
+                    setTimeout(() => {
+                        window.location.href = game.pageUrl;
+                    }, 400);
                 }
-                setTimeout(() => {
-                    window.location.href = game.pageUrl;
-                }, isMobileDevice() ? 400 : 600);
             }
             // Note: isProcessingSwipe will be reset on page navigation, so no need to unlock
         }
@@ -1177,13 +1196,8 @@
             
             // Lock to prevent rapid duplicate calls
             isProcessingSwipe = true;
-            // Hide overlays and indicators
-            document.getElementById('swipe-overlay-left').classList.remove('visible');
-            document.getElementById('swipe-overlay-right').classList.remove('visible');
-            const leftIndicator = document.getElementById('swipe-left-indicator');
-            const rightIndicator = document.getElementById('swipe-right-indicator');
-            leftIndicator.classList.remove('visible', 'initial-hint');
-            rightIndicator.classList.remove('visible', 'initial-hint');
+            // Don't hide indicators here - they should stay visible during animation
+            // They will be hidden when the animation completes
             // Mark that first swipe is done
             if (isFirstSwipe) {
                 isFirstSwipe = false;
@@ -1213,37 +1227,48 @@
                 availableGames = availableGames.filter(game => game.id !== currentGameId);
             }
             
-            if (activeCard) {
-                // Mark as exiting and animate out to the left
-                activeCard.classList.add('exiting-left', 'hidden');
+            if (activeCard && !activeCard.classList.contains('exiting-left')) {
+                // Mark as exiting and animate out to the left (only if not already animating)
+                activeCard.classList.add('exiting-left');
                 const exitX = -window.innerWidth - 500;
                 // Use actual position if dragging, otherwise 0
                 const deltaY = (isDragging && currentY && startY && currentY !== startY) ? currentY - startY : 0;
-                activeCard.style.transform = `translate(${exitX}px, ${deltaY}px) rotate(-30deg)`;
-                activeCard.style.opacity = '0';
+                // Get current transform to preserve scale if any
+                const currentTransform = activeCard.style.transform || '';
+                const hasScale = currentTransform.includes('scale');
+                const scaleValue = hasScale ? currentTransform.match(/scale\(([^)]+)\)/)?.[1] || '1' : '1';
+                // Keep opacity at 1 during translation, only fade at the end
+                activeCard.style.opacity = '1';
+                activeCard.style.transition = 'transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease 0.5s';
+                // Force reflow to ensure transition starts from current position
+                activeCard.offsetHeight;
+                // Apply transform with explicit scale to prevent size recalculation
+                activeCard.style.transform = `translate(${exitX}px, ${deltaY}px) rotate(-30deg) scale(${scaleValue})`;
+                // Fade out after translation has started
+                setTimeout(() => {
+                    activeCard.style.opacity = '0';
+                }, 500);
             }
 
-            // Animate next card (preview) coming from the top, but only if it's different
+            // Animate next card (preview) coming from the top immediately, but only if it's different
             if (previewCard && previewCard._gameData && previewCard._gameData.id !== currentGameId) {
                 // Remove any existing transition to set initial position immediately
                 previewCard.style.transition = 'none';
                 previewCard.style.zIndex = '10';
-                // Calculate position relative to card-stack center
-                // Start from above the screen (negative translateY)
-                const stackRect = stack.getBoundingClientRect();
-                const stackCenterY = stackRect.top + stackRect.height / 2;
-                // Distance from center of stack to top of screen, plus extra to ensure it's off-screen
-                const startY = -(stackCenterY + stackRect.height);
-                previewCard.style.transform = `translate(0px, ${startY}px) scale(1)`;
-                previewCard.style.opacity = '1';
+                previewCard.classList.remove('hidden');
+                // Position initiale : au-dessus du stack (relatif au conteneur)
+                previewCard.style.transform = 'translate(0px, -100%) scale(1)';
+                previewCard.style.opacity = '0';
                 // Force browser to apply the initial transform
                 previewCard.offsetHeight;
                 // Now add the entering class which has the transition, and animate to center
                 previewCard.classList.add('entering');
+                previewCard.style.transition = '';
                 // Use requestAnimationFrame to ensure the transition is applied
                 requestAnimationFrame(() => {
                     requestAnimationFrame(() => {
                         previewCard.style.transform = 'translate(0px, 0px) scale(1)';
+                        previewCard.style.opacity = '1';
                     });
                 });
             } else if (previewCard && previewCard._gameData && previewCard._gameData.id === currentGameId) {
@@ -1251,8 +1276,10 @@
                 previewCard.remove();
             }
             
+            // Start animation immediately, clean up after shorter delay
             setTimeout(() => {
                 if (activeCard) {
+                    activeCard.classList.add('hidden');
                     activeCard.remove();
                 }
                 // Clean up the card that just became active
@@ -1260,6 +1287,13 @@
                     previewCard.classList.remove('entering');
                     previewCard.style.transition = '';
                 }
+                // Hide indicators after animation completes
+                const leftIndicator = document.getElementById('swipe-left-indicator');
+                const rightIndicator = document.getElementById('swipe-right-indicator');
+                leftIndicator.classList.remove('visible', 'initial-hint');
+                rightIndicator.classList.remove('visible', 'initial-hint');
+                document.getElementById('swipe-overlay-left').classList.remove('visible');
+                document.getElementById('swipe-overlay-right').classList.remove('visible');
                 // Check if we need to reshuffle
                 checkAndReshuffle();
                 // Preload more images for upcoming games
@@ -1268,7 +1302,7 @@
                 showNextCard();
                 // Unlock after animation completes
                 isProcessingSwipe = false;
-            }, 800);
+            }, 400);
         }
 
         function showNextCard() {
@@ -1306,7 +1340,22 @@
                     }
                     const card = createGameCard(game);
                     card.style.zIndex = '10';
+                    card.style.transition = 'none';
+                    // Position initiale : au-dessus du stack (relatif au conteneur)
+                    card.style.transform = 'translate(0px, -100%)';
+                    card.style.opacity = '0';
                     stack.appendChild(card);
+                    // Force reflow
+                    card.offsetHeight;
+                    // Active la transition et anime vers le centre
+                    card.classList.add('entering');
+                    card.style.transition = '';
+                    requestAnimationFrame(() => {
+                        requestAnimationFrame(() => {
+                            card.style.transform = 'translate(0px, 0px)';
+                            card.style.opacity = '1';
+                        });
+                    });
                 }
             }
 
@@ -1329,21 +1378,17 @@
                     }
                     const card = createGameCard(nextGame);
                     card.style.zIndex = '9';
+                    // Hide preview card completely until it becomes active
+                    card.classList.add('hidden');
                     // Disable transition for initial positioning
                     card.style.transition = 'none';
-                    // Position preview card off-screen at the top
-                    // Calculate position relative to card-stack center
-                    const stackRect = stack.getBoundingClientRect();
-                    const stackCenterY = stackRect.top + stackRect.height / 2;
-                    // Distance from center of stack to top of screen, plus extra to ensure it's off-screen
-                    const startY = -(stackCenterY + stackRect.height);
-                    card.style.transform = `translate(0px, ${startY}px) scale(0.95)`;
-                    card.style.opacity = '0.7';
+                    // Position initiale : au-dessus du stack (relatif au conteneur)
+                    card.style.transform = 'translate(0px, -100%) scale(0.95)';
+                    card.style.opacity = '0';
                     stack.appendChild(card);
                     // Force browser to apply the initial transform
                     card.offsetHeight;
-                    // Re-enable transition after positioning
-                    card.style.transition = '';
+                    // Keep it hidden - it will be shown when it becomes active
                 }
             } else if (previewCard && previewCard._gameData && previewCard._gameData.id === activeGameId) {
                 // If preview is the same as active, remove it
@@ -1365,21 +1410,17 @@
                         }
                         const card = createGameCard(nextGame);
                         card.style.zIndex = '9';
+                        // Hide preview card completely until it becomes active
+                        card.classList.add('hidden');
                         // Disable transition for initial positioning
                         card.style.transition = 'none';
-                        // Position preview card off-screen at the top
-                        // Calculate position relative to card-stack center
-                        const stackRect = stack.getBoundingClientRect();
-                        const stackCenterY = stackRect.top + stackRect.height / 2;
-                        // Distance from center of stack to top of screen, plus extra to ensure it's off-screen
-                        const startY = -(stackCenterY + stackRect.height);
-                        card.style.transform = `translate(0px, ${startY}px) scale(0.95)`;
-                        card.style.opacity = '0.7';
+                        // Position initiale : au-dessus du stack (relatif au conteneur)
+                        card.style.transform = 'translate(0px, -100%) scale(0.95)';
+                        card.style.opacity = '0';
                         stack.appendChild(card);
                         // Force browser to apply the initial transform
                         card.offsetHeight;
-                        // Re-enable transition after positioning
-                        card.style.transition = '';
+                        // Keep it hidden - it will be shown when it becomes active
                     }
                 }
             }
@@ -1427,7 +1468,6 @@
         }
 
         // Initialize
-        console.log('🚀 Swipe page initialized');
         initTheme();
         loadGames();
     </script>

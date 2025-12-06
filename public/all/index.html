@@ -587,6 +587,7 @@
             <option value="system">Système</option>
             <option value="week">Jeux de la semaine</option>
             <option value="history">Historique</option>
+            <option value="missing-metadata">Métadonnées manquantes</option>
         </select>
         <input type="text" id="search-input" class="search-input" placeholder="Rechercher par titre..." style="border-radius: 0 8px 8px 0; border-left: none; flex: 1; min-width: 200px;">
         <select id="genre-select" style="display: none; padding: 0.75rem 1rem; border: 2px solid var(--border-color); border-radius: 0 8px 8px 0; font-size: 1rem; background: var(--card-bg); color: var(--text-color); border-left: none; cursor: pointer;">
@@ -688,12 +689,12 @@
             } else if (state.searchType === 'system' && state.system) {
                 systemEl.value = state.system;
                 filterGames(systemEl.value);
-            } else if (state.searchType === 'week' || state.searchType === 'history') {
+            } else if (state.searchType === 'week' || state.searchType === 'history' || state.searchType === 'missing-metadata') {
                 filterGames('');
             }
             if (state.sort) {
                 sortEl.value = state.sort;
-                const current = (filteredGamesData.length > 0 || searchInputEl.value || genreEl.value || developerEl.value || systemEl.value || searchTypeEl.value === 'week')
+                const current = (filteredGamesData.length > 0 || searchInputEl.value || genreEl.value || developerEl.value || systemEl.value || searchTypeEl.value === 'week' || searchTypeEl.value === 'history' || searchTypeEl.value === 'missing-metadata')
                     ? filteredGamesData
                     : gamesData;
                 renderGames(current);
@@ -865,13 +866,33 @@
         function filterGames(searchTerm) {
             const searchType = document.getElementById('search-type').value;
             
-            if (!searchTerm && searchType !== 'week' && searchType !== 'history') {
+            if (!searchTerm && searchType !== 'week' && searchType !== 'history' && searchType !== 'missing-metadata') {
                 filteredGamesData = gamesData;
                 updateSearchInfo();
                 renderGames(filteredGamesData);
                 showHeaderElements(); // Show header elements when search is cleared
                 showSectionHeaders(); // Show section headers when search is cleared
                 updateShareableUrl(); // Update URL when filter is cleared
+                return;
+            }
+            
+            // Handle missing metadata filter
+            if (searchType === 'missing-metadata') {
+                // Filter games that are missing title or cover image
+                filteredGamesData = gamesData.filter(game => {
+                    // Check if title is missing (no title or title equals game id)
+                    const hasTitle = game.title && game.title !== game.id;
+                    // Check if cover image is missing (no coverArt or equals placeholder)
+                    const hasCoverArt = game.coverArt && game.coverArt !== '/assets/images/placeholder_thumb.png';
+                    // Show games that are missing either title or cover image
+                    return !hasTitle || !hasCoverArt;
+                });
+                
+                updateSearchInfo();
+                renderGames(filteredGamesData);
+                hideHeaderElements(); // Hide header elements when filtering
+                hideSectionHeaders(); // Hide section headers when filtering
+                updateShareableUrl(); // Update URL with missing-metadata filter
                 return;
             }
             
@@ -1121,7 +1142,7 @@
             const systemSelect = document.getElementById('system-select');
             const sortSelect = document.getElementById('sort-select');
             const searchType = document.getElementById('search-type').value;
-            const isSearching = (searchInput && searchInput.value) || (genreSelect && genreSelect.value) || (developerSelect && developerSelect.value) || (systemSelect && systemSelect.value) || (searchType === 'week') || (searchType === 'history');
+            const isSearching = (searchInput && searchInput.value) || (genreSelect && genreSelect.value) || (developerSelect && developerSelect.value) || (systemSelect && systemSelect.value) || (searchType === 'week') || (searchType === 'history') || (searchType === 'missing-metadata');
             
             if (isSearching) {
                 // Simple grid layout for search results (no sections)
@@ -2071,7 +2092,8 @@
                                    (developerSelect && developerSelect.value) || 
                                    (systemSelect && systemSelect.value) || 
                                    (searchType === 'week') || 
-                                   (searchType === 'history');
+                                   (searchType === 'history') ||
+                                   (searchType === 'missing-metadata');
             
             // If there are active filters, save the filtered games to sessionStorage
             if (hasActiveFilter && filteredGamesData.length > 0) {
@@ -2114,7 +2136,7 @@
             if (!userHasChangedSort && sortSelect.value === 'random') {
                 sortSelect.value = 'alpha';
                 // Re-render games with new sort
-                const current = (filteredGamesData.length > 0 || document.getElementById('search-input').value || document.getElementById('genre-select').value || document.getElementById('developer-select').value || document.getElementById('system-select').value || document.getElementById('search-type').value === 'week')
+                const current = (filteredGamesData.length > 0 || document.getElementById('search-input').value || document.getElementById('genre-select').value || document.getElementById('developer-select').value || document.getElementById('system-select').value || document.getElementById('search-type').value === 'week' || document.getElementById('search-type').value === 'history' || document.getElementById('search-type').value === 'missing-metadata')
                     ? filteredGamesData
                     : gamesData;
                 renderGames(current);
@@ -2296,6 +2318,21 @@
                 autoSwitchToAlphabeticalSort();
                 updateShareableUrl();
                 return;
+            } else if (searchType === 'missing-metadata') {
+                searchInput.style.display = 'none';
+                genreSelect.style.display = 'none';
+                developerSelect.style.display = 'none';
+                systemSelect.style.display = 'none';
+                searchInput.value = '';
+                genreSelect.value = '';
+                developerSelect.value = '';
+                systemSelect.value = '';
+                
+                // Trigger missing-metadata filter
+                filterGames('');
+                autoSwitchToAlphabeticalSort();
+                updateShareableUrl();
+                return;
             }
             
             // Clear any existing search results
@@ -2350,7 +2387,7 @@
         document.getElementById('sort-select').addEventListener('change', () => {
             // Mark that user has manually changed the sort
             userHasChangedSort = true;
-            const current = (filteredGamesData.length > 0 || document.getElementById('search-input').value || document.getElementById('genre-select').value || document.getElementById('developer-select').value || document.getElementById('system-select').value || document.getElementById('search-type').value === 'week')
+            const current = (filteredGamesData.length > 0 || document.getElementById('search-input').value || document.getElementById('genre-select').value || document.getElementById('developer-select').value || document.getElementById('system-select').value || document.getElementById('search-type').value === 'week' || document.getElementById('search-type').value === 'history' || document.getElementById('search-type').value === 'missing-metadata')
                 ? filteredGamesData
                 : gamesData;
             renderGames(current);
@@ -2367,6 +2404,8 @@
                 urlParams.set('filter', 'week');
             } else if (searchType === 'history') {
                 urlParams.set('filter', 'history');
+            } else if (searchType === 'missing-metadata') {
+                urlParams.set('filter', 'missing-metadata');
             } else if (searchType === 'title') {
                 const searchInput = document.getElementById('search-input').value;
                 if (searchInput) {
@@ -2753,6 +2792,9 @@
                         searchTypeEl.dispatchEvent(new Event('change'));
                     } else if (filterParam === 'history') {
                         searchTypeEl.value = 'history';
+                        searchTypeEl.dispatchEvent(new Event('change'));
+                    } else if (filterParam === 'missing-metadata') {
+                        searchTypeEl.value = 'missing-metadata';
                         searchTypeEl.dispatchEvent(new Event('change'));
                     } else if (filterParam === 'title' && filterValue) {
                         searchTypeEl.value = 'title';

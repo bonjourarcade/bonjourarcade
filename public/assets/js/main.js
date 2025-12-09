@@ -237,12 +237,12 @@ async function fetchGameData() {
                     }
                 }
                 
-                // Sort by week (descending - most recent first) and limit to 10
+                // Sort by week (descending - most recent first) and limit to 11
                 previousWeekGames.sort((a, b) => b.week - a.week);
-                previousWeekGames = previousWeekGames.slice(0, 10);
+                previousWeekGames = previousWeekGames.slice(0, 11);
                 
                 console.log(`Found ${previousGotwGameIds.size} previous games of the week (current week: ${currentWeekSeed})`);
-                console.log(`Found ${previousWeekGames.length} games from previous weeks (showing last 10)`);
+                console.log(`Found ${previousWeekGames.length} games from previous weeks (showing last 11)`);
             }
         } catch (error) {
             console.warn('Could not fetch upcoming.yaml:', error);
@@ -651,9 +651,13 @@ function populateFeaturedGame(game) {
     // Game of the week is always considered new
     const isNew = isGameNew(game);
 
-    // Create container for cover and leaderboard
+    // Create container for three columns: cover+button, scores, metadata+announcement
     const gameContainer = document.createElement('div');
     gameContainer.className = 'featured-game-container';
+
+    // Column 1: Cover + JOUER button
+    const coverColumn = document.createElement('div');
+    coverColumn.className = 'featured-game-cover-column';
 
     // Create wrapper for the cover image
     const coverWrapper = document.createElement('div');
@@ -706,22 +710,43 @@ function populateFeaturedGame(game) {
     }
 
     coverWrapper.appendChild(gameLink);
-    gameContainer.appendChild(coverWrapper);
+    
+    // Add "JOUER" button underneath the game cover
+    const playButton = document.createElement('a');
+    playButton.href = game.pageUrl || ('/play?game=' + game.id);
+    playButton.className = 'featured-play-button';
+    playButton.textContent = 'JOUER';
+    
+    // Add click handler to use the same animation and sound as the game cover
+    playButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const featuredGameSection = document.getElementById('game-of-the-week');
+        if (featuredGameSection) {
+            handleGameClick(featuredGameSection);
+        }
+    });
+    
+    coverWrapper.appendChild(playButton);
+    
+    coverColumn.appendChild(coverWrapper);
+    gameContainer.appendChild(coverColumn);
 
-    // Add leaderboard if scores are enabled
+    // Column 2: Leaderboard (scores only)
+    const leaderboard = document.createElement('div');
+    leaderboard.className = 'featured-game-leaderboard';
+    leaderboard.id = 'featured-game-leaderboard';
+    
+    // Add scores section if scores are enabled
     const scoresEnabled = game.enable_score !== false && game.enable_score !== "false";
     console.log(`Featured game: ${game.id}, scores enabled: ${scoresEnabled}`);
     if (scoresEnabled) {
-        const leaderboard = document.createElement('div');
-        leaderboard.className = 'featured-game-leaderboard';
-        leaderboard.id = 'featured-game-leaderboard';
         leaderboard.innerHTML = `
             <h4>🏆 Meilleurs Scores</h4>
             <div class="featured-leaderboard-content">
                 <div class="featured-leaderboard-loading">Chargement...</div>
             </div>
         `;
-        gameContainer.appendChild(leaderboard);
         
         // Clear any existing refresh interval before creating a new one
         if (window.featuredGameLeaderboardRefreshInterval) {
@@ -754,10 +779,16 @@ function populateFeaturedGame(game) {
             });
             window.featuredGameLeaderboardCleanupAdded = true;
         }
+    } else {
+        leaderboard.innerHTML = '<h4>🏆 Meilleurs Scores</h4><div class="featured-leaderboard-content"><p style="text-align: center; opacity: 0.6;">Scores désactivés</p></div>';
     }
+    
+    gameContainer.appendChild(leaderboard);
 
-    contentContainer.appendChild(gameContainer); // Add container with cover and leaderboard
-
+    // Column 3: Metadata + Announcement
+    const metadataColumn = document.createElement('div');
+    metadataColumn.className = 'featured-game-metadata-column';
+    
     // Add metadata fields if present (as a table)
     const metaTable = document.createElement('table');
     metaTable.className = 'game-meta-table';
@@ -800,7 +831,7 @@ function populateFeaturedGame(game) {
         metaTable.appendChild(row);
     }
     if (metaTable.children.length > 0) {
-        contentContainer.appendChild(metaTable);
+        metadataColumn.appendChild(metaTable);
     }
 
     // Add announcement message if present (after metadata)
@@ -808,8 +839,11 @@ function populateFeaturedGame(game) {
         const announcementDiv = document.createElement('div');
         announcementDiv.className = 'game-announcement';
         announcementDiv.textContent = game.announcement_message;
-        contentContainer.appendChild(announcementDiv);
+        metadataColumn.appendChild(announcementDiv);
     }
+    
+    gameContainer.appendChild(metadataColumn);
+    contentContainer.appendChild(gameContainer); // Add container with three columns
 
     // Add mouse event listeners for featured game section (same as keyboard navigation)
     const featuredGameSection = document.getElementById('game-of-the-week');
@@ -1070,7 +1104,7 @@ function populatePreviousWeekGames(previousWeekGames, allGames) {
         return;
     }
 
-    // Games are already sorted by week (descending - most recent first) and limited to 10
+    // Games are already sorted by week (descending - most recent first) and limited to 11
 
     // Create game items for each previous week game
     previousWeekGames.forEach((prevGame, idx) => {
@@ -1177,60 +1211,12 @@ function populatePreviousWeekGames(previousWeekGames, allGames) {
         });
     });
 
-    // Add "Voir tous les jeux de la semaine" link at the bottom
+    // Add "Voir l'historique complet des jeux de la semaine" link at the bottom
     if (previousWeekGames.length > 0) {
         const viewAllLink = document.createElement('a');
         viewAllLink.href = '/all?filter=week';
-        viewAllLink.textContent = 'Voir tous les jeux de la semaine';
-        viewAllLink.style.display = 'block';
-        viewAllLink.style.textAlign = 'center';
-        viewAllLink.style.marginTop = '8px';
-        viewAllLink.style.padding = '12px';
-        viewAllLink.style.textDecoration = 'none';
-        viewAllLink.style.borderRadius = '8px';
-        viewAllLink.style.border = '2px solid var(--divider-color)';
-        viewAllLink.style.transition = 'all 0.2s ease-in-out';
-        viewAllLink.style.fontWeight = 'bold';
-        viewAllLink.style.width = '100%';
-        viewAllLink.style.boxSizing = 'border-box';
-        viewAllLink.style.gridColumn = '1 / -1'; /* Span all columns in the grid */
-        
-        // Set colors based on theme for better contrast in light mode
-        const isDarkMode = document.body.classList.contains('theme-dark');
-        if (isDarkMode) {
-            viewAllLink.style.backgroundColor = 'var(--background)';
-            viewAllLink.style.color = 'var(--text-color)';
-        } else {
-            // Light mode: use darker background and lighter text for better contrast
-            viewAllLink.style.backgroundColor = '#333';
-            viewAllLink.style.color = '#fff';
-            viewAllLink.style.border = '2px solid #222';
-        }
-        
-        // Hover effect
-        viewAllLink.addEventListener('mouseenter', () => {
-            if (isDarkMode) {
-                viewAllLink.style.backgroundColor = 'var(--text-color)';
-                viewAllLink.style.color = 'var(--background)';
-            } else {
-                viewAllLink.style.backgroundColor = '#222';
-                viewAllLink.style.color = '#fff';
-            }
-            viewAllLink.style.transform = 'translateY(-2px)';
-            viewAllLink.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
-        });
-        viewAllLink.addEventListener('mouseleave', () => {
-            if (isDarkMode) {
-                viewAllLink.style.backgroundColor = 'var(--background)';
-                viewAllLink.style.color = 'var(--text-color)';
-            } else {
-                viewAllLink.style.backgroundColor = '#333';
-                viewAllLink.style.color = '#fff';
-                viewAllLink.style.border = '2px solid #222';
-            }
-            viewAllLink.style.transform = 'translateY(0)';
-            viewAllLink.style.boxShadow = 'none';
-        });
+        viewAllLink.textContent = "Voir l'historique complet des jeux de la semaine";
+        viewAllLink.className = 'previous-week-view-all-link';
         
         container.appendChild(viewAllLink);
     }

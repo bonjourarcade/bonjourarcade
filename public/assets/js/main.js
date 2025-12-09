@@ -723,11 +723,37 @@ function populateFeaturedGame(game) {
         `;
         gameContainer.appendChild(leaderboard);
         
+        // Clear any existing refresh interval before creating a new one
+        if (window.featuredGameLeaderboardRefreshInterval) {
+            clearInterval(window.featuredGameLeaderboardRefreshInterval);
+            window.featuredGameLeaderboardRefreshInterval = null;
+        }
+        
         // Fetch leaderboard data - use setTimeout to ensure DOM is ready
         console.log(`Fetching leaderboard for featured game: ${game.id}`);
         setTimeout(() => {
             fetchFeaturedGameLeaderboard(game.id);
         }, 100);
+        
+        // Set up periodic refresh of leaderboard every 2 minutes
+        const scoreRefreshInterval = setInterval(() => {
+            console.log('Refreshing featured game leaderboard scores (2-minute interval)');
+            fetchFeaturedGameLeaderboard(game.id);
+        }, 120000); // 2 minutes = 120,000 milliseconds
+        
+        // Store interval ID for cleanup if needed
+        window.featuredGameLeaderboardRefreshInterval = scoreRefreshInterval;
+        
+        // Cleanup interval when page is unloaded
+        if (!window.featuredGameLeaderboardCleanupAdded) {
+            window.addEventListener('beforeunload', function() {
+                if (window.featuredGameLeaderboardRefreshInterval) {
+                    clearInterval(window.featuredGameLeaderboardRefreshInterval);
+                    window.featuredGameLeaderboardRefreshInterval = null;
+                }
+            });
+            window.featuredGameLeaderboardCleanupAdded = true;
+        }
     }
 
     contentContainer.appendChild(gameContainer); // Add container with cover and leaderboard

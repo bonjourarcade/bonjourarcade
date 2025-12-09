@@ -710,6 +710,7 @@ function populateFeaturedGame(game) {
 
     // Add leaderboard if scores are enabled
     const scoresEnabled = game.enable_score !== false && game.enable_score !== "false";
+    console.log(`Featured game: ${game.id}, scores enabled: ${scoresEnabled}`);
     if (scoresEnabled) {
         const leaderboard = document.createElement('div');
         leaderboard.className = 'featured-game-leaderboard';
@@ -722,8 +723,11 @@ function populateFeaturedGame(game) {
         `;
         gameContainer.appendChild(leaderboard);
         
-        // Fetch leaderboard data
-        fetchFeaturedGameLeaderboard(game.id);
+        // Fetch leaderboard data - use setTimeout to ensure DOM is ready
+        console.log(`Fetching leaderboard for featured game: ${game.id}`);
+        setTimeout(() => {
+            fetchFeaturedGameLeaderboard(game.id);
+        }, 100);
     }
 
     contentContainer.appendChild(gameContainer); // Add container with cover and leaderboard
@@ -823,11 +827,18 @@ function populateFeaturedGame(game) {
  * @param {string} gameId - The game ID to fetch scores for
  */
 async function fetchFeaturedGameLeaderboard(gameId) {
+    console.log(`fetchFeaturedGameLeaderboard called with gameId: ${gameId}`);
     const leaderboardContainer = document.getElementById('featured-game-leaderboard');
-    if (!leaderboardContainer) return;
+    if (!leaderboardContainer) {
+        console.warn('Leaderboard container not found: featured-game-leaderboard');
+        return;
+    }
     
     const leaderboardContent = leaderboardContainer.querySelector('.featured-leaderboard-content');
-    if (!leaderboardContent) return;
+    if (!leaderboardContent) {
+        console.warn('Leaderboard content not found');
+        return;
+    }
 
     // Show loading state
     leaderboardContent.innerHTML = '<div class="featured-leaderboard-loading">Chargement...</div>';
@@ -843,6 +854,7 @@ async function fetchFeaturedGameLeaderboard(gameId) {
         
         if (isLocalhost) {
             // Use mock data for localhost
+            console.log('Using mock leaderboard data for localhost');
             data = {
                 result: {
                     success: true,
@@ -851,6 +863,7 @@ async function fetchFeaturedGameLeaderboard(gameId) {
             };
         } else {
             // Use real API for production
+            console.log(`Fetching leaderboard from API for game: ${gameId}`);
             const response = await fetch('https://us-central1-alloarcade.cloudfunctions.net/listGameScores', {
                 method: 'POST',
                 headers: {
@@ -884,9 +897,11 @@ async function fetchFeaturedGameLeaderboard(gameId) {
             }
 
             data = await response.json();
+            console.log('Leaderboard API response received:', data);
         }
         
         if (!data.result || !data.result.success || !data.result.scores) {
+            console.error('Invalid response format:', data);
             throw new Error('Invalid response format');
         }
 
@@ -935,10 +950,13 @@ async function fetchFeaturedGameLeaderboard(gameId) {
         });
 
         leaderboardContent.innerHTML = leaderboardHTML;
+        console.log(`Leaderboard successfully displayed for game: ${gameId}, showing ${sortedScores.length} scores`);
 
     } catch (error) {
         console.error('Error fetching leaderboard:', error);
-        leaderboardContent.innerHTML = '<div class="featured-leaderboard-error">Erreur de chargement</div>';
+        if (leaderboardContent) {
+            leaderboardContent.innerHTML = '<div class="featured-leaderboard-error">Erreur de chargement</div>';
+        }
     }
 }
 

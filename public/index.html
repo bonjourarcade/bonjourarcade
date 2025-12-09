@@ -56,10 +56,10 @@
                 <a id="newsletter-subscribe"
                   class="newsletter-btn"
                   href="https://ko-fi.com/bonjourarcade"
-               target="_blank" rel="noopener">❤️ Supporter BonjourArcade</a>
+               target="_blank" rel="noopener">❤️ <span class="support-label-full">Supporter BonjourArcade</span><span class="support-label-short">Supporter</span></a>
                 <div class="header-actions">
                 </div>
-                <div style="position: relative;">
+                <div class="theme-toggle-wrapper" style="position: relative;">
                   <button id="theme-toggle-btn" class="theme-btn" aria-label="Changer le thème" type="button">
                     <span id="theme-toggle-icon" style="display:inline-flex;align-items:center;font-size:1.2em;">🌓</span>
                     <span id="theme-toggle-label">Thème</span>
@@ -83,20 +83,21 @@
                              src="" alt="Couverture du jeu sélectionné">
                     </div>
                 </section>
+            </div>
 
+            <div class="right-column">
                 <section id="previous-week-games" class="previous-week-section">
                     <center><h2>Jeux des semaines précédentes</h2></center>
                     <div id="previous-week-games-list" class="previous-week-games-list">
                         <p>Chargement des jeux...</p>
                     </div>
                 </section>
+                <section class="grid-section">
+                    <div id="previous-games-grid" class="game-grid">
+                        <!-- Search results will be displayed here -->
+                    </div>
+                </section>
             </div>
-
-            <section id="previous-games" class="grid-section">
-                <div id="previous-games-grid" class="game-grid">
-                    <p>Chargement des jeux...</p>
-                </div>
-            </section>
         </main>
     </div>
     <!-- <div class="all-games-link-container bottom-link">
@@ -193,11 +194,11 @@
           if (classToAdd === 'theme-dark') {
             themeBtn.style.background = '#222';
             themeBtn.style.color = '#fff';
-            themeBtn.style.border = '1px solid #fff2';
+            themeBtn.style.border = '2px solid rgba(255,255,255,0.2)';
           } else {
             themeBtn.style.background = '#fff';
             themeBtn.style.color = '#111';
-            themeBtn.style.border = '1px solid #ccc';
+            themeBtn.style.border = '2px solid #ccc';
           }
         }
     }
@@ -209,14 +210,34 @@
     // Dropdown logic
     const themeBtn = document.getElementById('theme-toggle-btn');
     const themeDropdown = document.getElementById('theme-dropdown');
-    themeBtn.addEventListener('click', function(e) {
-      e.stopPropagation();
-      themeDropdown.style.display = (themeDropdown.style.display === 'block') ? 'none' : 'block';
-    });
-    document.addEventListener('click', function(e) {
-      if (themeDropdown.style.display === 'block') themeDropdown.style.display = 'none';
-    });
-    themeDropdown.addEventListener('click', function(e) { e.stopPropagation(); });
+    
+    // Ensure dropdown is closed on page load
+    if (themeDropdown) {
+      themeDropdown.style.display = 'none';
+    }
+    
+    if (themeBtn && themeDropdown) {
+      themeBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const isOpen = themeDropdown.style.display === 'block';
+        themeDropdown.style.display = isOpen ? 'none' : 'block';
+      });
+      
+      // Close dropdown when clicking outside
+      document.addEventListener('click', function(e) {
+        if (themeDropdown && themeDropdown.style.display === 'block') {
+          // Don't close if clicking on the button or dropdown itself
+          if (!themeBtn.contains(e.target) && !themeDropdown.contains(e.target)) {
+            themeDropdown.style.display = 'none';
+          }
+        }
+      });
+      
+      // Prevent dropdown from closing when clicking inside it
+      themeDropdown.addEventListener('click', function(e) { 
+        e.stopPropagation(); 
+      });
+    }
     document.querySelectorAll('.theme-option').forEach(btn => {
       btn.addEventListener('click', function() {
         const selected = btn.dataset.theme;

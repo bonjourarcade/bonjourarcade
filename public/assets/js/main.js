@@ -374,7 +374,7 @@ async function fetchGameData() {
         // Store shuffled games globally for search/clear functionality
         window.allGamesData = filteredGames;
 
-        populatePreviousGames(filteredGames);
+        // populatePreviousGames removed - no longer displaying game grid on home page
 
         // Add search input listener
         const gameIdInput = document.getElementById('game-id-input');
@@ -408,33 +408,15 @@ async function fetchGameData() {
                         return titleMatch || idMatch;
                     });
                 }
-                populatePreviousGames(filteredGames);
-
-                const previousGamesGrid = document.getElementById('previous-games-grid');
-                const noResultsMessage = document.getElementById('no-results-message');
-                if (filteredGames.length === 0 && searchTerm.length > 0) {
-                    if (previousGamesGrid) {
-                        previousGamesGrid.innerHTML = ''; // Clear existing games
-                        // Add class to game-grid to handle no results display
-                        previousGamesGrid.classList.add('no-results-active');
-                        if (!noResultsMessage) {
-                            const p = document.createElement('p');
-                            p.id = 'no-results-message';
-                            p.textContent = 'Aucun jeu ne correspond à votre filtre!';
-                            previousGamesGrid.appendChild(p);
-                        } else {
-                            noResultsMessage.style.display = 'block';
-                            previousGamesGrid.appendChild(noResultsMessage); // Re-append if it exists but was hidden
-                        }
-                    }
+                // Display search results in the grid
+                if (searchTerm.length > 0) {
+                    populatePreviousGames(filteredGames);
                 } else {
-                    if (noResultsMessage) {
-                        noResultsMessage.style.display = 'none';
+                    // Clear the grid when search is empty
+                    const gridContainer = document.getElementById('previous-games-grid');
+                    if (gridContainer) {
+                        gridContainer.innerHTML = '';
                     }
-                    if (previousGamesGrid) {
-                        previousGamesGrid.classList.remove('no-results-active'); // Remove class when results are shown
-                    }
-                    // populatePreviousGames will handle displaying games if there are any
                 }
                 window.updateRandomButtonInfo(); // Update random button info after search input
             });
@@ -551,7 +533,7 @@ async function fetchGameData() {
         displayError('#featured-game-title', ' '); // Clear loading text
         // Display the actual error message in the content areas
         displayError('#featured-game-content', `Error loading data: ${error.message}`);
-        displayError('#previous-games-grid', `Error loading data: ${error.message}`);
+        // displayError('#previous-games-grid', `Error loading data: ${error.message}`); // Removed - no longer using grid
     }
 }
 
@@ -750,31 +732,36 @@ function populateFeaturedGame(game) {
     // Add mouse event listeners for featured game section (same as keyboard navigation)
     const featuredGameSection = document.getElementById('game-of-the-week');
     if (featuredGameSection) {
-        featuredGameSection.addEventListener('mouseenter', (e) => {
-            // Clear any existing highlights
-            clearHighlights();
-            removeTooltipWithTimeout();
-            
-            // Add highlight to featured section
-            featuredGameSection.classList.add('game-item--selected');
-            
-            // Show tooltip with delay (same as keyboard)
-            if (tooltipTimeout) clearTimeout(tooltipTimeout);
-            tooltipTimeout = setTimeout(() => {
-                showTooltipForItem(featuredGameSection);
-            }, 80);
-        });
-        featuredGameSection.addEventListener('mouseleave', () => {
-            // Remove highlight from featured section
-            featuredGameSection.classList.remove('game-item--selected');
-            removeTooltipWithTimeout();
-        });
-        
-        // --- Click behavior (same as Enter key) ---
-        featuredGameSection.addEventListener('click', (e) => {
-            e.preventDefault(); // Prevent default link behavior
-            handleGameClick(featuredGameSection);
-        });
+        // --- Hover and click behavior only on the cover image ---
+        const featuredImg = document.getElementById('featured-game-img');
+        if (featuredImg) {
+            // Find the parent link element
+            const gameLink = featuredImg.closest('a');
+            if (gameLink) {
+                // Add hover effect only on the image/link
+                gameLink.addEventListener('mouseenter', (e) => {
+                    // Clear any existing highlights
+                    clearHighlights();
+                    
+                    // Add highlight to featured section (for visual feedback)
+                    featuredGameSection.classList.add('game-item--selected');
+                    
+                    // Tooltips disabled on home page
+                });
+                gameLink.addEventListener('mouseleave', () => {
+                    // Remove highlight from featured section
+                    featuredGameSection.classList.remove('game-item--selected');
+                    removeTooltipWithTimeout();
+                });
+                
+                // Add click handler to use the exploding animation and sound
+                gameLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleGameClick(featuredGameSection);
+                });
+            }
+        }
     }
     
 }
@@ -853,6 +840,12 @@ function populatePreviousWeekGames(previousWeekGames, allGames) {
         img.style.objectFit = 'cover';
         img.style.flexShrink = '0';
 
+        const titleContainer = document.createElement('div');
+        titleContainer.style.display = 'flex';
+        titleContainer.style.flexDirection = 'column';
+        titleContainer.style.gap = '4px';
+        titleContainer.style.flex = '1';
+
         const title = document.createElement('div');
         title.className = 'previous-week-game-title';
 
@@ -869,26 +862,37 @@ function populatePreviousWeekGames(previousWeekGames, allGames) {
         title.style.fontWeight = 'bold';
         title.style.fontSize = '1.1em';
 
+        // Add YYYY-WW display
+        const weekDisplay = document.createElement('div');
+        weekDisplay.className = 'previous-week-game-week';
+        // Format YYYYWW to YYYY-WW
+        const weekStr = prevGame.week.toString();
+        const formattedWeek = weekStr.length === 6 
+            ? `${weekStr.substring(0, 4)}-${weekStr.substring(4, 6)}`
+            : prevGame.week.toString();
+        weekDisplay.textContent = formattedWeek;
+        weekDisplay.style.fontSize = '0.75em';
+        weekDisplay.style.opacity = '0.6';
+        weekDisplay.style.fontWeight = 'normal';
+
+        titleContainer.appendChild(title);
+        titleContainer.appendChild(weekDisplay);
+
         link.appendChild(img);
-        link.appendChild(title);
+        link.appendChild(titleContainer);
         gameItem.appendChild(link);
         container.appendChild(gameItem);
 
-        // Add mouse hover behavior
+        // Add mouse hover behavior (no tooltips on home page)
         gameItem.addEventListener('mouseenter', (e) => {
             e.stopPropagation(); // Prevent event from bubbling up
             clearHighlights();
-            removeTooltipWithTimeout();
             gameItem.classList.add('game-item--selected');
-            if (tooltipTimeout) clearTimeout(tooltipTimeout);
-            tooltipTimeout = setTimeout(() => {
-                showTooltipForItem(gameItem);
-            }, 80);
+            // Tooltips disabled on home page
         });
         gameItem.addEventListener('mouseleave', (e) => {
             e.stopPropagation(); // Prevent event from bubbling up
             gameItem.classList.remove('game-item--selected');
-            removeTooltipWithTimeout();
         });
         
         // Click behavior - stop propagation to prevent conflicts with parent sections
@@ -915,6 +919,9 @@ function populatePreviousWeekGames(previousWeekGames, allGames) {
         viewAllLink.style.border = '2px solid var(--divider-color)';
         viewAllLink.style.transition = 'all 0.2s ease-in-out';
         viewAllLink.style.fontWeight = 'bold';
+        viewAllLink.style.width = '100%';
+        viewAllLink.style.boxSizing = 'border-box';
+        viewAllLink.style.gridColumn = '1 / -1'; /* Span all columns in the grid */
         
         // Hover effect
         viewAllLink.addEventListener('mouseenter', () => {
@@ -1268,6 +1275,7 @@ function handleGameClick(element) {
     const main = container.querySelector('main');
     const footer = document.querySelector('footer');
     const allGameItems = Array.from(document.querySelectorAll('.game-item'));
+    const allPreviousWeekItems = Array.from(document.querySelectorAll('.previous-week-game-item'));
     const featured = document.getElementById('game-of-the-week');
 
     // Get center of selected element
@@ -1290,27 +1298,71 @@ function handleGameClick(element) {
     // Animate main children (sections)
     if (main) {
         Array.from(main.children).forEach(child => {
-            // If the featured section is selected, animate all .game-item elements outward, but NOT the grid section as a whole
-            if (element === featured && child.id === 'previous-games') {
-                const gridItems = child.querySelectorAll('.game-item');
-                gridItems.forEach(item => {
-                    if (item !== element) {
-                        const rect = item.getBoundingClientRect();
-                        const center = {
-                            x: rect.left + rect.width / 2,
-                            y: rect.top + rect.height / 2
-                        };
-                        const dx = center.x - selCenter.x;
-                        const dy = center.y - selCenter.y;
-                        const angle = Math.atan2(dy, dx);
-                        const dist = 1600 + Math.random() * 200;
-                        const tx = Math.cos(angle) * dist;
-                        const ty = Math.sin(angle) * dist;
-                        item.classList.add('radial-exit');
-                        item.style.transform = `translate(${tx}px, ${ty}px) scale(0.7)`;
-                    }
-                });
-            } else if (child !== element && !child.contains(element)) {
+            // If the featured section is selected, animate previous week games radially
+            if (element === featured) {
+                if (child.id === 'previous-week-games') {
+                    // Animate all previous week game items radially
+                    const previousWeekItems = child.querySelectorAll('.previous-week-game-item');
+                    previousWeekItems.forEach(item => {
+                        if (item !== element) {
+                            const rect = item.getBoundingClientRect();
+                            const center = {
+                                x: rect.left + rect.width / 2,
+                                y: rect.top + rect.height / 2
+                            };
+                            const dx = center.x - selCenter.x;
+                            const dy = center.y - selCenter.y;
+                            const angle = Math.atan2(dy, dx);
+                            const dist = 1600 + Math.random() * 200;
+                            const tx = Math.cos(angle) * dist;
+                            const ty = Math.sin(angle) * dist;
+                            item.classList.add('radial-exit');
+                            item.style.transform = `translate(${tx}px, ${ty}px) scale(0.7)`;
+                        }
+                    });
+                } else if (child.id === 'previous-games') {
+                    const gridItems = child.querySelectorAll('.game-item');
+                    gridItems.forEach(item => {
+                        if (item !== element) {
+                            const rect = item.getBoundingClientRect();
+                            const center = {
+                                x: rect.left + rect.width / 2,
+                                y: rect.top + rect.height / 2
+                            };
+                            const dx = center.x - selCenter.x;
+                            const dy = center.y - selCenter.y;
+                            const angle = Math.atan2(dy, dx);
+                            const dist = 1600 + Math.random() * 200;
+                            const tx = Math.cos(angle) * dist;
+                            const ty = Math.sin(angle) * dist;
+                            item.classList.add('radial-exit');
+                            item.style.transform = `translate(${tx}px, ${ty}px) scale(0.7)`;
+                        }
+                    });
+                } else if (child !== element && !child.contains(element)) {
+                    // For other sections, animate as a whole
+                    const rect = child.getBoundingClientRect();
+                    const dx = rect.left + rect.width / 2 - selCenter.x;
+                    const dir = dx < 0 ? -1 : 1;
+                    child.classList.add('radial-exit');
+                    child.style.transform = `translateX(${dir * 1600}px) scale(0.7)`;
+                }
+            } else if (child === featured && element !== featured && !child.contains(element)) {
+                // If clicking on a previous week game, animate the featured section radially
+                const rect = child.getBoundingClientRect();
+                const center = {
+                    x: rect.left + rect.width / 2,
+                    y: rect.top + rect.height / 2
+                };
+                const dx = center.x - selCenter.x;
+                const dy = center.y - selCenter.y;
+                const angle = Math.atan2(dy, dx);
+                const dist = 1600 + Math.random() * 200;
+                const tx = Math.cos(angle) * dist;
+                const ty = Math.sin(angle) * dist;
+                child.classList.add('radial-exit');
+                child.style.transform = `translate(${tx}px, ${ty}px) scale(0.7)`;
+            } else if (child !== element && !child.contains(element) && child !== featured) {
                 // For all other cases, animate the section as a whole
                 const rect = child.getBoundingClientRect();
                 const dx = rect.left + rect.width / 2 - selCenter.x;
@@ -1342,6 +1394,24 @@ function handleGameClick(element) {
     }
     // Animate all other game items radially (skip if already handled above)
     allGameItems.forEach(item => {
+        if (item !== element && !item.classList.contains('radial-exit')) {
+            const rect = item.getBoundingClientRect();
+            const center = {
+                x: rect.left + rect.width / 2,
+                y: rect.top + rect.height / 2
+            };
+            const dx = center.x - selCenter.x;
+            const dy = center.y - selCenter.y;
+            const angle = Math.atan2(dy, dx);
+            const dist = 1600 + Math.random() * 200; // px, much farther
+            const tx = Math.cos(angle) * dist;
+            const ty = Math.sin(angle) * dist;
+            item.classList.add('radial-exit');
+            item.style.transform = `translate(${tx}px, ${ty}px) scale(0.7)`;
+        }
+    });
+    // Animate all other previous week game items radially (skip if already handled above)
+    allPreviousWeekItems.forEach(item => {
         if (item !== element && !item.classList.contains('radial-exit')) {
             const rect = item.getBoundingClientRect();
             const center = {
@@ -1496,6 +1566,7 @@ function handleGameClick(element) {
         const main = container.querySelector('main');
         const footer = document.querySelector('footer');
         const allGameItems = Array.from(document.querySelectorAll('.game-item'));
+        const allPreviousWeekItems = Array.from(document.querySelectorAll('.previous-week-game-item'));
         const featured = document.getElementById('game-of-the-week');
 
         // Get center of selected element
@@ -1518,27 +1589,71 @@ function handleGameClick(element) {
         // Animate main children (sections)
         if (main) {
             Array.from(main.children).forEach(child => {
-                // If the featured section is selected, animate all .game-item elements outward, but NOT the grid section as a whole
-                if (selectedEl === featured && child.id === 'previous-games') {
-                    const gridItems = child.querySelectorAll('.game-item');
-                    gridItems.forEach(item => {
-                        if (item !== selectedEl) {
-                            const rect = item.getBoundingClientRect();
-                            const center = {
-                                x: rect.left + rect.width / 2,
-                                y: rect.top + rect.height / 2
-                            };
-                            const dx = center.x - selCenter.x;
-                            const dy = center.y - selCenter.y;
-                            const angle = Math.atan2(dy, dx);
-                            const dist = 1600 + Math.random() * 200;
-                            const tx = Math.cos(angle) * dist;
-                            const ty = Math.sin(angle) * dist;
-                            item.classList.add('radial-exit');
-                            item.style.transform = `translate(${tx}px, ${ty}px) scale(0.7)`;
-                        }
-                    });
-                } else if (child !== selectedEl && !child.contains(selectedEl)) {
+                // If the featured section is selected, animate previous week games radially
+                if (selectedEl === featured) {
+                    if (child.id === 'previous-week-games') {
+                        // Animate all previous week game items radially
+                        const previousWeekItems = child.querySelectorAll('.previous-week-game-item');
+                        previousWeekItems.forEach(item => {
+                            if (item !== selectedEl) {
+                                const rect = item.getBoundingClientRect();
+                                const center = {
+                                    x: rect.left + rect.width / 2,
+                                    y: rect.top + rect.height / 2
+                                };
+                                const dx = center.x - selCenter.x;
+                                const dy = center.y - selCenter.y;
+                                const angle = Math.atan2(dy, dx);
+                                const dist = 1600 + Math.random() * 200;
+                                const tx = Math.cos(angle) * dist;
+                                const ty = Math.sin(angle) * dist;
+                                item.classList.add('radial-exit');
+                                item.style.transform = `translate(${tx}px, ${ty}px) scale(0.7)`;
+                            }
+                        });
+                    } else if (child.id === 'previous-games') {
+                        const gridItems = child.querySelectorAll('.game-item');
+                        gridItems.forEach(item => {
+                            if (item !== selectedEl) {
+                                const rect = item.getBoundingClientRect();
+                                const center = {
+                                    x: rect.left + rect.width / 2,
+                                    y: rect.top + rect.height / 2
+                                };
+                                const dx = center.x - selCenter.x;
+                                const dy = center.y - selCenter.y;
+                                const angle = Math.atan2(dy, dx);
+                                const dist = 1600 + Math.random() * 200;
+                                const tx = Math.cos(angle) * dist;
+                                const ty = Math.sin(angle) * dist;
+                                item.classList.add('radial-exit');
+                                item.style.transform = `translate(${tx}px, ${ty}px) scale(0.7)`;
+                            }
+                        });
+                    } else if (child !== selectedEl && !child.contains(selectedEl)) {
+                        // For other sections, animate as a whole
+                        const rect = child.getBoundingClientRect();
+                        const dx = rect.left + rect.width / 2 - selCenter.x;
+                        const dir = dx < 0 ? -1 : 1;
+                        child.classList.add('radial-exit');
+                        child.style.transform = `translateX(${dir * 1600}px) scale(0.7)`;
+                    }
+                } else if (child === featured && selectedEl !== featured && !child.contains(selectedEl)) {
+                    // If clicking on a previous week game, animate the featured section radially
+                    const rect = child.getBoundingClientRect();
+                    const center = {
+                        x: rect.left + rect.width / 2,
+                        y: rect.top + rect.height / 2
+                    };
+                    const dx = center.x - selCenter.x;
+                    const dy = center.y - selCenter.y;
+                    const angle = Math.atan2(dy, dx);
+                    const dist = 1600 + Math.random() * 200;
+                    const tx = Math.cos(angle) * dist;
+                    const ty = Math.sin(angle) * dist;
+                    child.classList.add('radial-exit');
+                    child.style.transform = `translate(${tx}px, ${ty}px) scale(0.7)`;
+                } else if (child !== selectedEl && !child.contains(selectedEl) && child !== featured) {
                     // For all other cases, animate the section as a whole
                     const rect = child.getBoundingClientRect();
                     const dx = rect.left + rect.width / 2 - selCenter.x;
@@ -1570,6 +1685,24 @@ function handleGameClick(element) {
         }
         // Animate all other game items radially (skip if already handled above)
         allGameItems.forEach(item => {
+            if (item !== selectedEl && !item.classList.contains('radial-exit')) {
+                const rect = item.getBoundingClientRect();
+                const center = {
+                    x: rect.left + rect.width / 2,
+                    y: rect.top + rect.height / 2
+                };
+                const dx = center.x - selCenter.x;
+                const dy = center.y - selCenter.y;
+                const angle = Math.atan2(dy, dx);
+                const dist = 1600 + Math.random() * 200; // px, much farther
+                const tx = Math.cos(angle) * dist;
+                const ty = Math.sin(angle) * dist;
+                item.classList.add('radial-exit');
+                item.style.transform = `translate(${tx}px, ${ty}px) scale(0.7)`;
+            }
+        });
+        // Animate all other previous week game items radially (skip if already handled above)
+        allPreviousWeekItems.forEach(item => {
             if (item !== selectedEl && !item.classList.contains('radial-exit')) {
                 const rect = item.getBoundingClientRect();
                 const center = {
@@ -1640,19 +1773,7 @@ function handleGameClick(element) {
                 searchInput.value = '';
                 searchInput.blur();
                 document.body.classList.remove('search-active');
-                // Repopulate all games and reset grid state
-                if (window.allGamesData) {
-                    populatePreviousGames(window.allGamesData);
-                }
-                // Remove no-results and search-specific classes
-                const previousGamesGrid = document.getElementById('previous-games-grid');
-                if (previousGamesGrid) {
-                    previousGamesGrid.classList.remove('no-results-active');
-                }
-                const noResultsMessage = document.getElementById('no-results-message');
-                if (noResultsMessage) {
-                    noResultsMessage.remove();
-                }
+                // populatePreviousGames removed - no longer displaying game grid on home page
                 // Reset highlight to featured game
                 currentIndex = 0;
                 // Don't set userHasNavigated or highlight - just clear the search
@@ -1679,7 +1800,7 @@ function handleGameClick(element) {
             }
             updateGameItems();
             let prevIndex = currentIndex;
-            // Determine grid width
+            // Determine grid width (if grid exists, otherwise default to 1)
             const grid = document.getElementById('previous-games-grid');
             let gridCols = 1;
             if (grid) {
@@ -1747,7 +1868,10 @@ function handleGameClick(element) {
         updateGameItems();
         // Don't highlight when grid changes - only when user navigates
     });
-    observer.observe(document.getElementById('previous-games-grid'), {childList: true, subtree: false});
+    const gridElement = document.getElementById('previous-games-grid');
+    if (gridElement) {
+        observer.observe(gridElement, {childList: true, subtree: false});
+    }
 
     window.addEventListener('DOMContentLoaded', () => {
         updateGameItems();

@@ -428,16 +428,24 @@ body.theme-dark .featured-leaderboard-score {
     transform: translateY(-5px) scale(1.02);
 }
 
-#featured-game-title, .featured-title, .game-meta-table {
+#featured-game-title, .featured-title {
+    margin-bottom: 0;
+}
+
+.game-meta-table {
     margin-bottom: 10px;
 }
 
 .featured-section h2 {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
     margin-top: 0;
-    margin-bottom: 15px;
+    margin-bottom: 12px;
     border-bottom: 2px solid var(--divider-color);
-    padding-bottom: 10px;
-    text-align: center;
+    padding-bottom: 8px;
 }
 
 /* Add to public/assets/css/style.css */
@@ -530,11 +538,11 @@ body.theme-dark .featured-leaderboard-score {
 }
 
 .featured-title {
-    font-weight: bold;
-    margin-top: 8px;
-    margin-bottom: 16px;
-    font-size: 2em;
+    font-weight: 800;
+    margin: 0;
+    font-size: 1.2em;
     text-align: center;
+    line-height: 1.2;
 }
 
 /* Previous Week Games Section */

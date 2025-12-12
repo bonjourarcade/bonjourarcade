@@ -566,17 +566,15 @@ async function fetchGameData() {
  */
 function populateFeaturedGame(game) {
     const contentContainer = document.getElementById('featured-game-content');
-    const titleContainer = document.getElementById('featured-game-title');
 
     // Check if essential elements exist
-    if (!contentContainer || !titleContainer) {
+    if (!contentContainer) {
          // console.error("Required HTML elements for featured game not found."); // Removed for cleaner console
          return;
     }
 
     // Check if game data is valid (especially game.id)
     if (!game || !game.id) {
-        titleContainer.textContent = ' '; // Clear loading text
         displayError('#featured-game-content', 'Featured game data missing or invalid.');
         return;
     }
@@ -607,8 +605,6 @@ function populateFeaturedGame(game) {
     if (game.problem === "true") {
         displayTitle += ' (❌)';
     }
-    
-    titleContainer.textContent = displayTitle;
 
     // Add rom-missing class to parent container if needed
     const featuredSection = document.getElementById('game-of-the-week');
@@ -651,11 +647,11 @@ function populateFeaturedGame(game) {
     // Game of the week is always considered new
     const isNew = isGameNew(game);
 
-    // Create container for three columns: cover+button, scores, metadata+announcement
+    // Create container for two columns: left (cover+button), right (title+metadata+description+leaderboard)
     const gameContainer = document.createElement('div');
     gameContainer.className = 'featured-game-container';
 
-    // Column 1: Cover + JOUER button
+    // Left Column: Cover + JOUER button
     const coverColumn = document.createElement('div');
     coverColumn.className = 'featured-game-cover-column';
 
@@ -732,7 +728,78 @@ function populateFeaturedGame(game) {
     coverColumn.appendChild(coverWrapper);
     gameContainer.appendChild(coverColumn);
 
-    // Column 2: Leaderboard (scores only)
+    // Right Column: Title, Metadata, Description, and Leaderboard
+    const rightColumn = document.createElement('div');
+    rightColumn.className = 'featured-game-right-column';
+
+    // Game Title (large, bold)
+    const gameTitleDiv = document.createElement('div');
+    gameTitleDiv.className = 'featured-game-title-large';
+    gameTitleDiv.textContent = displayTitle;
+    rightColumn.appendChild(gameTitleDiv);
+
+    // Metadata and Description wrapper
+    const metadataWrapper = document.createElement('div');
+    metadataWrapper.className = 'featured-game-metadata-wrapper';
+    
+    // Metadata fields (left side of right column)
+    const metadataLeft = document.createElement('div');
+    metadataLeft.className = 'featured-game-metadata-left';
+    
+    // Get system name from core field
+    const systemName = getSystemName(game.core);
+    
+    const fields = [
+        { label: 'Développeur', key: 'developer' },
+        { label: 'Année', key: 'year' },
+        { label: 'Système', key: 'system', value: systemName },
+        { label: 'Genre', key: 'genre' }
+    ];
+    fields.forEach(field => {
+        let value = field.value !== undefined ? field.value : game[field.key];
+        if (value) {
+            const metaRow = document.createElement('div');
+            metaRow.className = 'featured-meta-row';
+            const label = document.createElement('span');
+            label.className = 'featured-meta-label';
+            label.textContent = field.label + ':';
+            const valueSpan = document.createElement('span');
+            valueSpan.className = 'featured-meta-value';
+            valueSpan.textContent = value;
+            metaRow.appendChild(label);
+            metaRow.appendChild(valueSpan);
+            metadataLeft.appendChild(metaRow);
+        }
+    });
+    
+    // Add controls if present
+    if (game.controls && summarizeControls(game.controls)) {
+        const metaRow = document.createElement('div');
+        metaRow.className = 'featured-meta-row';
+        const label = document.createElement('span');
+        label.className = 'featured-meta-label';
+        label.textContent = 'Contrôles:';
+        const valueSpan = document.createElement('span');
+        valueSpan.className = 'featured-meta-value';
+        valueSpan.textContent = summarizeControls(game.controls);
+        metaRow.appendChild(label);
+        metaRow.appendChild(valueSpan);
+        metadataLeft.appendChild(metaRow);
+    }
+    
+    metadataWrapper.appendChild(metadataLeft);
+
+    // Description (right side of right column)
+    if (game.announcement_message && game.announcement_message.trim()) {
+        const descriptionDiv = document.createElement('div');
+        descriptionDiv.className = 'featured-game-description';
+        descriptionDiv.textContent = game.announcement_message;
+        metadataWrapper.appendChild(descriptionDiv);
+    }
+    
+    rightColumn.appendChild(metadataWrapper);
+
+    // Leaderboard section
     const leaderboard = document.createElement('div');
     leaderboard.className = 'featured-game-leaderboard';
     leaderboard.id = 'featured-game-leaderboard';
@@ -741,12 +808,15 @@ function populateFeaturedGame(game) {
     const scoresEnabled = game.enable_score !== false && game.enable_score !== "false";
     console.log(`Featured game: ${game.id}, scores enabled: ${scoresEnabled}`);
     if (scoresEnabled) {
-        leaderboard.innerHTML = `
-            <h4>🏆 Meilleurs Scores</h4>
-            <div class="featured-leaderboard-content">
-                <div class="featured-leaderboard-loading">Chargement...</div>
-            </div>
-        `;
+        const leaderboardTitle = document.createElement('h4');
+        leaderboardTitle.className = 'featured-leaderboard-title';
+        leaderboardTitle.textContent = 'Classement';
+        leaderboard.appendChild(leaderboardTitle);
+        
+        const leaderboardContent = document.createElement('div');
+        leaderboardContent.className = 'featured-leaderboard-content';
+        leaderboardContent.innerHTML = '<div class="featured-leaderboard-loading">Chargement...</div>';
+        leaderboard.appendChild(leaderboardContent);
         
         // Clear any existing refresh interval before creating a new one
         if (window.featuredGameLeaderboardRefreshInterval) {
@@ -780,70 +850,20 @@ function populateFeaturedGame(game) {
             window.featuredGameLeaderboardCleanupAdded = true;
         }
     } else {
-        leaderboard.innerHTML = '<h4>🏆 Meilleurs Scores</h4><div class="featured-leaderboard-content"><p style="text-align: center; opacity: 0.6;">Scores désactivés</p></div>';
+        const leaderboardTitle = document.createElement('h4');
+        leaderboardTitle.className = 'featured-leaderboard-title';
+        leaderboardTitle.textContent = 'Classement';
+        leaderboard.appendChild(leaderboardTitle);
+        
+        const leaderboardContent = document.createElement('div');
+        leaderboardContent.className = 'featured-leaderboard-content';
+        leaderboardContent.innerHTML = '<p style="text-align: center; opacity: 0.6;">Scores désactivés</p>';
+        leaderboard.appendChild(leaderboardContent);
     }
     
-    gameContainer.appendChild(leaderboard);
-
-    // Column 3: Metadata + Announcement
-    const metadataColumn = document.createElement('div');
-    metadataColumn.className = 'featured-game-metadata-column';
-    
-    // Add metadata fields if present (as a table)
-    const metaTable = document.createElement('table');
-    metaTable.className = 'game-meta-table';
-    
-    // Get system name from core field
-    const systemName = getSystemName(game.core);
-    
-    const fields = [
-        { label: 'Développeur', key: 'developer' },
-        { label: 'Année', key: 'year' },
-        { label: 'Système', key: 'system', value: systemName },
-        { label: 'Genre', key: 'genre' }
-    ];
-    fields.forEach(field => {
-        let value = field.value !== undefined ? field.value : game[field.key];
-        if (value) {
-            const row = document.createElement('tr');
-            const labelCell = document.createElement('td');
-            labelCell.innerHTML = `<strong>${field.label}:</strong>`;
-            labelCell.className = 'meta-label';
-            const valueCell = document.createElement('td');
-            valueCell.textContent = value;
-            valueCell.className = 'meta-value';
-            row.appendChild(labelCell);
-            row.appendChild(valueCell);
-            metaTable.appendChild(row);
-        }
-    });
-    // Add summarized controls row if present
-    if (game.controls && summarizeControls(game.controls)) {
-        const row = document.createElement('tr');
-        const labelCell = document.createElement('td');
-        labelCell.innerHTML = `<strong>Contrôles:</strong>`;
-        labelCell.className = 'meta-label';
-        const valueCell = document.createElement('td');
-        valueCell.textContent = summarizeControls(game.controls);
-        valueCell.className = 'meta-value';
-        row.appendChild(labelCell);
-        row.appendChild(valueCell);
-        metaTable.appendChild(row);
-    }
-    if (metaTable.children.length > 0) {
-        metadataColumn.appendChild(metaTable);
-    }
-
-    // Add announcement message if present (after metadata)
-    if (game.announcement_message && game.announcement_message.trim()) {
-        const announcementDiv = document.createElement('div');
-        announcementDiv.className = 'game-announcement';
-        announcementDiv.textContent = game.announcement_message;
-        metadataColumn.appendChild(announcementDiv);
-    }
-    
-    gameContainer.appendChild(metadataColumn);
-    contentContainer.appendChild(gameContainer); // Add container with three columns
+    rightColumn.appendChild(leaderboard);
+    gameContainer.appendChild(rightColumn);
+    contentContainer.appendChild(gameContainer);
 
     // Add mouse event listeners for featured game section (same as keyboard navigation)
     const featuredGameSection = document.getElementById('game-of-the-week');
@@ -991,18 +1011,44 @@ async function fetchFeaturedGameLeaderboard(gameId) {
             return;
         }
 
+        // Helper function to get initial from player name
+        function getPlayerInitial(playerName) {
+            if (!playerName) return '?';
+            // Remove brackets and content inside them (e.g., [AP])
+            const cleaned = playerName.replace(/\[.*?\]/g, '').trim();
+            if (cleaned.length === 0) return '?';
+            // Get first letter, uppercase
+            return cleaned.charAt(0).toUpperCase();
+        }
+        
+        // Helper function to get avatar color based on player name
+        function getAvatarColor(playerName) {
+            if (!playerName) return '#999';
+            // Simple hash function to get consistent color
+            let hash = 0;
+            for (let i = 0; i < playerName.length; i++) {
+                hash = playerName.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            // Generate a color from the hash
+            const hue = Math.abs(hash) % 360;
+            return `hsl(${hue}, 70%, 50%)`;
+        }
+        
         // Build leaderboard HTML
         let leaderboardHTML = '';
         sortedScores.forEach((score, index) => {
             const rank = index + 1;
-            const rankEmoji = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `${rank}.`;
+            const rankText = rank.toString();
             
             // Escape HTML to prevent XSS
             const playerName = escapeHtml(score.player);
+            const initial = getPlayerInitial(score.player);
+            const avatarColor = getAvatarColor(score.player);
             
             leaderboardHTML += `
                 <div class="featured-leaderboard-entry">
-                    <div class="featured-leaderboard-rank">${rankEmoji}</div>
+                    <div class="featured-leaderboard-rank">${rankText}</div>
+                    <div class="featured-leaderboard-avatar" style="background-color: ${avatarColor}">${initial}</div>
                     <div class="featured-leaderboard-player">${playerName}</div>
                     <div class="featured-leaderboard-score">${score.score.toLocaleString()}</div>
                 </div>

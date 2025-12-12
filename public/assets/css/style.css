@@ -167,10 +167,10 @@ body.search-active .main-content {
     display: flex;
     flex-direction: row;
     align-items: flex-start;
-    gap: 2rem;
+    gap: 2.5rem;
     width: 100%;
     max-width: 100%;
-    justify-content: center;
+    justify-content: flex-start;
 }
 
 .featured-game-cover-column {
@@ -189,78 +189,150 @@ body.search-active .main-content {
     width: 100%;
 }
 
+/* Right Column: Title, Metadata, Description, Leaderboard */
+.featured-game-right-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    min-width: 0;
+}
+
+/* Large Game Title */
+.featured-game-title-large {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: var(--text-color);
+    margin: 0;
+    line-height: 1.2;
+}
+
+/* Metadata Wrapper */
+.featured-game-metadata-wrapper {
+    display: flex;
+    flex-direction: row;
+    gap: 2rem;
+    align-items: flex-start;
+}
+
+/* Metadata Left (labels and values) */
+.featured-game-metadata-left {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.featured-meta-row {
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+    align-items: baseline;
+}
+
+.featured-meta-label {
+    font-weight: bold;
+    color: var(--text-color);
+    opacity: 0.8;
+    white-space: nowrap;
+}
+
+.featured-meta-value {
+    color: var(--text-color);
+}
+
+/* Game Description */
+.featured-game-description {
+    flex: 1;
+    color: var(--text-color);
+    line-height: 1.6;
+    font-size: 1rem;
+}
+
+/* Leaderboard */
 .featured-game-leaderboard {
     flex: 0 0 auto;
-    width: 280px;
-    padding: 1.5rem;
-    background: var(--card-bg);
-    border-left: 2px solid var(--border-color);
-    border-radius: 0 8px 8px 0;
+    width: 100%;
+    padding: 0;
+    background: transparent;
+    border: none;
     font-size: 1rem;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    box-shadow: none;
+    margin-top: 1rem;
 }
 
-.featured-game-metadata-column {
-    flex: 0 0 auto;
-    width: 280px;
-    padding: 1.5rem;
-    background: var(--card-bg);
-    border-left: 2px solid var(--border-color);
-    border-radius: 0 8px 8px 0;
-    font-size: 1rem;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    gap: 1.5rem;
-}
-
-.featured-game-leaderboard h4 {
+.featured-leaderboard-title {
     margin: 0 0 1rem 0;
     font-size: 1.2rem;
     font-weight: bold;
     color: var(--text-color);
-    text-align: center;
+    text-align: left;
 }
 
 .featured-leaderboard-entry {
     display: flex;
     align-items: center;
     margin-bottom: 0.5rem;
-    padding: 0.5rem;
+    padding: 0.75rem;
     border-radius: 4px;
-    background-color: rgba(0, 0, 0, 0.05);
+    background-color: rgba(0, 0, 0, 0.03);
+    gap: 0.75rem;
+    transition: background-color 0.2s;
+}
+
+.featured-leaderboard-entry:hover {
+    background-color: rgba(0, 0, 0, 0.06);
 }
 
 body.theme-dark .featured-leaderboard-entry {
     background-color: rgba(255, 255, 255, 0.05);
 }
 
+body.theme-dark .featured-leaderboard-entry:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
 .featured-leaderboard-rank {
     font-weight: bold;
     color: var(--text-color);
-    margin-right: 0.75rem;
-    min-width: 32px;
+    min-width: 24px;
     flex-shrink: 0;
     font-size: 1rem;
+    text-align: left;
+}
+
+.featured-leaderboard-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 0.9rem;
+    flex-shrink: 0;
 }
 
 .featured-leaderboard-player {
     flex: 1;
-    margin-right: 0.75rem;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     min-width: 0;
     font-size: 1rem;
     font-weight: 500;
+    color: var(--text-color);
 }
 
 .featured-leaderboard-score {
     font-weight: bold;
     color: #4CAF50;
     font-size: 1rem;
+    margin-left: auto;
+    flex-shrink: 0;
 }
 
 body.theme-dark .featured-leaderboard-score {
@@ -283,6 +355,15 @@ body.theme-dark .featured-leaderboard-score {
 }
 
 @media (max-width: 768px) {
+    .game-of-the-week-title {
+        font-size: 1.5rem;
+    }
+    
+    #game-of-the-week {
+        padding: 1.5rem;
+        border-radius: 12px;
+    }
+    
     .featured-game-container {
         flex-direction: column;
         align-items: center;
@@ -299,33 +380,36 @@ body.theme-dark .featured-leaderboard-score {
         display: flex;
         justify-content: center;
     }
+    
+    .featured-game-right-column {
+        width: 100%;
+        gap: 1.25rem;
+    }
+    
+    .featured-game-title-large {
+        font-size: 1.75rem;
+        text-align: center;
+    }
+    
+    .featured-game-metadata-wrapper {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .featured-game-metadata-left {
+        width: 100%;
+    }
+    
+    .featured-game-description {
+        width: 100%;
+    }
 
     .featured-game-leaderboard {
         width: 100%;
-        max-width: 100%;
-        flex: 0 0 auto;
-        border-left: none;
-        border-top: 2px solid var(--border-color);
-        border-radius: 8px 8px 0 0;
-        max-height: none;
-        overflow: visible;
-        font-size: 0.9rem;
-        padding: 1rem;
+        margin-top: 0.5rem;
     }
 
-    .featured-game-metadata-column {
-        width: 100%;
-        max-width: 100%;
-        border-left: none;
-        border-top: 2px solid var(--border-color);
-        border-radius: 8px 8px 0 0;
-        max-height: none;
-        overflow: visible;
-        font-size: 0.9rem;
-        padding: 1rem;
-    }
-
-    .featured-game-leaderboard h4 {
+    .featured-leaderboard-title {
         font-size: 1rem;
         margin-bottom: 0.75rem;
     }
@@ -339,6 +423,12 @@ body.theme-dark .featured-leaderboard-score {
     .featured-leaderboard-player,
     .featured-leaderboard-score {
         font-size: 0.85rem;
+    }
+    
+    .featured-leaderboard-avatar {
+        width: 28px;
+        height: 28px;
+        font-size: 0.8rem;
     }
     
     #featured-game-content img {
@@ -1331,20 +1421,6 @@ body.theme-dark #game-id-input {
     .featured-game-leaderboard {
         width: 100%;
         max-width: 100%;
-        border-left: none;
-        border-top: 2px solid var(--border-color);
-        border-radius: 8px 8px 0 0;
-        max-height: none;
-        overflow: visible;
-    }
-    .featured-game-metadata-column {
-        width: 100%;
-        max-width: 100%;
-        border-left: none;
-        border-top: 2px solid var(--border-color);
-        border-radius: 8px 8px 0 0;
-        max-height: none;
-        overflow: visible;
     }
     #featured-game-content img {
         max-height: 50vh;
@@ -1401,14 +1477,24 @@ body.theme-light .game-item--selected {
     color: var(--text-color);
 }
 
+/* Game of the Week Title (outside the card) */
+.game-of-the-week-title {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--text-color);
+    margin: 0 0 1rem 0;
+    padding: 0;
+}
+
+/* Game of the Week Card */
 #game-of-the-week {
     background: #fff;
     color: var(--text-color);
-    border-radius: 10px;
+    border-radius: 16px;
     margin-bottom: 24px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-    border: 1px solid #ddd;
-    padding: 15px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    border: 1px solid #e0e0e0;
+    padding: 2rem;
     /* Remove hover effects from the card itself */
     transform: none !important; /* Ensure the section never moves */
     transition: none; /* Remove any transitions on the section */
@@ -1417,9 +1503,10 @@ body.theme-dark #game-of-the-week {
     background: #23272b;
     color: var(--text-color);
     border: 1px solid #444;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
 }
 body.theme-light #game-of-the-week {
-    background: #ececec;
+    background: #fff;
     border: 1px solid #e0e0e0;
 }
 /* Remove selection styles from the card - selection only applies to the image */

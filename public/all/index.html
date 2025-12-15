@@ -880,8 +880,13 @@
             if (searchType === 'missing-metadata') {
                 // Filter games that are missing title or cover image
                 filteredGamesData = gamesData.filter(game => {
-                    // Check if title is missing (no title or title equals game id)
-                    const hasTitle = game.title && game.title !== game.id;
+                    // Check if title is missing
+                    // A title is considered missing if:
+                    // - No title at all, OR
+                    // - Title equals game id AND no other metadata (developer, year, genre) exists
+                    const hasOtherMetadata = game.developer || game.year || game.genre;
+                    const hasTitle = game.title && (game.title !== game.id || hasOtherMetadata);
+                    
                     // Check if cover image is missing (no coverArt or equals placeholder)
                     const hasCoverArt = game.coverArt && game.coverArt !== '/assets/images/placeholder_thumb.png';
                     // Show games that are missing either title or cover image

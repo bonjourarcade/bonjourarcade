@@ -44,7 +44,10 @@
     </style>
 </head>
 <body>
-    <div class="container">
+    <!-- Loading overlay (will be populated by loading.js) -->
+    <div id="loading-overlay" class="loading-overlay"></div>
+    
+    <div class="container" id="main-container" style="display: none;">
         <header>
             <div class="header-flex">
                 <img src="assets/images/bonjourarcade-logo.png" alt="BonjourArcade Logo" class="header-logo">
@@ -105,6 +108,7 @@
         </a>
     </div> -->
 
+    <script src="assets/js/loading.js"></script>
     <script src="assets/js/game-history.js"></script>
     <script src="assets/js/screensaver.js"></script>
     <script src="/assets/js/banner.js"></script>
@@ -326,13 +330,14 @@
     <!-- Newsletter Subscription Modal -->
     <!-- The newsletter modal and form HTML have been removed. -->
     
-    <footer>
+    <footer id="main-footer" style="display: none;">
       <!-- Sorted from most exciting to most boring -->
       <div class="footer-row">
-        <a href="/swipe" class="footer-emoji-link" title="Swipez pour découvrir des jeux" aria-label="Swipe">🔄 Swipe</a>
+        <a href="#" id="footer-random-game-btn" class="footer-random-game-btn" title="Jouer à un jeu au hasard" aria-label="Jouer au hasard">🎲 Jouer au hasard</a>
+        <a href="/swipe" class="footer-emoji-link" title="Swipez pour découvrir des jeux" aria-label="Mode swipe">🔄 Mode swipe</a>
         <a href="/upcoming" class="footer-emoji-link" title="Découvrez les prochains jeux de la semaine" aria-label="Jeux à venir">🔮 Jeux à venir</a>
         <a href="/all" class="footer-emoji-link" title="Une clé mystérieuse?" aria-label="Accès aux jeux cachés">🗝️ Une clé?</a>
-        <a href="/screensaver" class="footer-emoji-link" title="Mode écran de veille - Jeux aléatoires toutes les 2.5 minutes" aria-label="Mode écran de veille">🌠 Écran de veille</a>
+        <a href="/screensaver" class="footer-emoji-link" title="Mode écran de veille - Jeux aléatoires toutes les 2.5 minutes" aria-label="Mode écran de veille">🌠 Mode écran de veille</a>
         <a href="https://amazon.ca/dp/B08GJC5WSS" class="footer-emoji-link" title="Manette officielle BonjourArcade sur Amazon" aria-label="Manette officielle BonjourArcade" target="_blank" rel="noopener">🕹️ Manette officielle</a>
         <a href="https://ko-fi.com/bonjourarcade" class="footer-emoji-link" title="Supportez BonjourArcade sur Ko-fi" aria-label="Supportez BonjourArcade sur Ko-fi" target="_blank" rel="noopener">❤️  Supporter</a>
         <a href="https://discord.gg/2E48gr5BNJ" class="footer-emoji-link" title="Rejoindre le Discord BonjourArcade" aria-label="Discord BonjourArcade" target="_blank" rel="noopener">

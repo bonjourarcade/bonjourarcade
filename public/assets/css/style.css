@@ -189,6 +189,14 @@ body.search-active .main-content {
     width: 100%;
 }
 
+.featured-game-week-label {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--text-color);
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+
 /* Right Column: Title, Metadata, Description, Leaderboard */
 .featured-game-right-column {
     flex: 1;
@@ -560,8 +568,19 @@ body.theme-dark .featured-leaderboard-score {
     text-align: center;
 }
 .random-game-btn {
-    background: linear-gradient(90deg, #ff0057, #fffd37, #00ff90, #00cfff, #a259ff, #ff0057);
-    background-size: 300% 300%;
+    background: linear-gradient(90deg,
+        #ff0057 0%,
+        #fffd37 10%,
+        #00ff90 20%,
+        #00cfff 30%,
+        #a259ff 40%,
+        #ff0057 50%,
+        #fffd37 60%,
+        #00ff90 70%,
+        #00cfff 80%,
+        #a259ff 90%,
+        #ff0057 100%);
+    background-size: 200% 100%;
     color: #fff;
     position: relative;
     z-index: 1;
@@ -573,8 +592,7 @@ body.theme-dark .featured-leaderboard-score {
 }
 @keyframes rainbow-move {
     0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+    100% { background-position: 100% 50%; }
 }
 .random-game-btn:hover {
     filter: brightness(1.2) drop-shadow(0 0 12px #fff6);
@@ -901,6 +919,13 @@ body.theme-dark footer {
     background: rgba(255, 255, 255, 0.6);
     color: var(--text-color);
     width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    margin: 0;
+    border: 0;
+    outline: none;
+    min-width: 0;
+    overflow: hidden;
 }
 
 body.theme-dark .footer-emoji-link {
@@ -921,15 +946,78 @@ body.theme-dark .footer-emoji-link:hover {
     outline-offset: 2px;
 }
 
+.footer-random-game-btn {
+    /* Base styles - identical to .footer-emoji-link */
+    text-decoration: none;
+    font-size: 1.1em;
+    transition: all 0.2s ease-in-out;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 16px;
+    border-radius: 6px;
+    white-space: nowrap;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    margin: 0;
+    border: 0;
+    outline: none;
+    min-width: 0;
+    overflow: hidden;
+    
+    /* Rainbow gradient */
+    background: linear-gradient(90deg,
+        #ff0057 0%,
+        #fffd37 10%,
+        #00ff90 20%,
+        #00cfff 30%,
+        #a259ff 40%,
+        #ff0057 50%,
+        #fffd37 60%,
+        #00ff90 70%,
+        #00cfff 80%,
+        #a259ff 90%,
+        #ff0057 100%);
+    background-size: 200% 100%;
+    color: #fff;
+    animation: rainbow-move 4s linear infinite;
+}
+
+.footer-random-game-btn:hover {
+    filter: brightness(1.2);
+    transform: translateY(-2px);
+    animation-duration: 2s;
+}
+
+.footer-random-game-btn.rolling {
+    animation: dice-roll 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    pointer-events: none;
+}
+
+.footer-random-game-btn:focus {
+    outline: 2px solid var(--text-color);
+    outline-offset: 2px;
+}
+
 /* Footer layout improvements */
 .footer-row {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
     margin-bottom: 15px;
     max-width: 800px;
     margin-left: auto;
     margin-right: auto;
+    align-items: stretch;
+}
+
+.footer-row > * {
+    min-width: 0;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
 }
 
 .footer-row:last-child {
@@ -1001,6 +1089,18 @@ body.theme-dark .footer-emoji-link:hover {
     }
     
     .footer-emoji-link {
+        width: 100%;
+        max-width: 100%;
+        justify-content: center;
+        padding: 8px 4px;
+        font-size: 0.85em;
+        box-sizing: border-box;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .footer-random-game-btn {
         width: 100%;
         max-width: 100%;
         justify-content: center;
@@ -1108,17 +1208,30 @@ body.theme-dark .footer-emoji-link:hover {
     min-width: 300px; /* Minimum width for usability */
     box-sizing: border-box; /* Include padding and border in the element's total width and height */
     vertical-align: middle;
-    transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+    color: var(--text-color);
 }
 
 body.theme-light #game-id-input {
     background: #f7f9fc;
     border-color: #d6deec;
+    color: #222;
 }
 
 body.theme-dark #game-id-input {
     background: #1f2227;
     border-color: #444;
+    color: #f4f4f4;
+}
+
+#game-id-input::placeholder {
+    color: #999;
+    opacity: 0.8;
+}
+
+body.theme-dark #game-id-input::placeholder {
+    color: #bbb;
+    opacity: 0.7;
 }
 
 #game-id-input:focus {
@@ -1477,13 +1590,9 @@ body.theme-light .game-item--selected {
     color: var(--text-color);
 }
 
-/* Game of the Week Title (outside the card) */
+/* Game of the Week Title (outside the card) - Hidden as label is now above the image */
 .game-of-the-week-title {
-    font-size: 2rem;
-    font-weight: bold;
-    color: var(--text-color);
-    margin: 0 0 1rem 0;
-    padding: 0;
+    display: none;
 }
 
 /* Game of the Week Card */
@@ -1979,6 +2088,82 @@ body.theme-dark .game-external {
 body.theme-light .game-external {
     border: 2.5px solid #4CAF50 !important;
     box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1), 0 2px 8px rgba(76, 175, 80, 0.3);
+}
+
+/* Loading overlay styles */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--background);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    transition: opacity 0.5s ease-out, visibility 0.5s ease-out;
+}
+
+.loading-overlay.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.loading-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+}
+
+.loading-logo-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.loading-logo {
+    max-width: 250px;
+    height: auto;
+}
+
+.loading-animation-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.loading-text {
+    color: #666;
+    font-size: 1.2rem;
+    font-weight: 500;
+    text-align: center;
+}
+
+/* Couleur lisible dans les deux thèmes */
+body.theme-light .loading-text {
+    color: #666;
+}
+
+body.theme-dark .loading-text {
+    color: #999;
+}
+
+.loading-pacman {
+    width: 200px;
+    height: 120px;
+    /* Bordure noire solide fine avec drop-shadow dans toutes les directions */
+    filter: drop-shadow(-1px -1px 0 #000) 
+            drop-shadow(1px -1px 0 #000) 
+            drop-shadow(-1px 1px 0 #000) 
+            drop-shadow(1px 1px 0 #000)
+            drop-shadow(-1px 0 0 #000)
+            drop-shadow(1px 0 0 #000)
+            drop-shadow(0 -1px 0 #000)
+            drop-shadow(0 1px 0 #000);
 }
 
 .featured-game-new {

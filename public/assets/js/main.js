@@ -154,6 +154,17 @@ function isFirefox() {
 
 // Check browser when page loads
 // window.addEventListener('DOMContentLoaded', checkBrowser);
+
+/**
+ * Updates the search input placeholder with the total number of games available
+ */
+function updateSearchPlaceholder() {
+    const gameIdInput = document.getElementById('game-id-input');
+    if (gameIdInput && window.allGamesData && window.allGamesData.length > 0) {
+        gameIdInput.placeholder = `Recherche parmi les ${window.allGamesData.length} jeux disponibles`;
+    }
+}
+
 async function fetchGameData() {
     try {
         // Use local gamelist.json for development, Google Cloud Storage for production
@@ -374,6 +385,9 @@ async function fetchGameData() {
         // Store shuffled games globally for search/clear functionality
         window.allGamesData = filteredGames;
 
+        // Update search placeholder with game count
+        updateSearchPlaceholder();
+
         // populatePreviousGames removed - no longer displaying game grid on home page
 
         // Add search input listener
@@ -429,24 +443,32 @@ async function fetchGameData() {
 
         // Add randomizer button logic
         const randomBtn = document.getElementById('random-game-btn');
+        const footerRandomBtn = document.getElementById('footer-random-game-btn');
         // Filter out hidden games for randomizer (using already filtered games)
         const visibleGames = filteredGames.filter(game => !(game.hide === true || game.hide === 'yes'));
-        if (randomBtn && Array.isArray(visibleGames) && visibleGames.length > 0) {
-            randomBtn.onclick = () => {
+        
+        // Function to handle random game button click (reusable for both buttons)
+        const setupRandomButton = (button) => {
+            if (!button || !Array.isArray(visibleGames) || visibleGames.length === 0) return;
+            
+            button.onclick = (e) => {
+                // Prevent default link behavior
+                e.preventDefault();
+                
                 // Prevent multiple clicks during animation
-                if (randomBtn.classList.contains('rolling')) {
+                if (button.classList.contains('rolling')) {
                     return;
                 }
                 
                 // Add rolling animation class
-                randomBtn.classList.add('rolling');
+                button.classList.add('rolling');
                 
                 // Get current search term to determine which games to randomize from
                 const searchInput = document.getElementById('game-id-input');
                 // Always exclude external games from random selection
                 let gamesToRandomizeFrom = visibleGames.filter(game => game.core !== 'external');
                 
-                    if (searchInput && searchInput.value.trim()) {
+                if (searchInput && searchInput.value.trim()) {
                     const searchTerm = searchInput.value.toLowerCase();
 
                     // Filter games by search term for random selection (include hidden games in search)
@@ -471,7 +493,7 @@ async function fetchGameData() {
                 
                 // If no games match the filter, show a message or fall back to all games
                 if (gamesToRandomizeFrom.length === 0) {
-                    randomBtn.classList.remove('rolling');
+                    button.classList.remove('rolling');
                     alert('Aucun jeu ne correspond à votre recherche pour la sélection aléatoire.');
                     return;
                 }
@@ -487,9 +509,9 @@ async function fetchGameData() {
                             window.open(randomGame.pageUrl, '_blank');
                             // Reset button after a delay
                             setTimeout(() => {
-                                randomBtn.classList.remove('rolling');
-                                randomBtn.style.transform = '';
-                                randomBtn.style.opacity = '';
+                                button.classList.remove('rolling');
+                                button.style.transform = '';
+                                button.style.opacity = '';
                             }, 100);
                         } else {
                             // Track game in history and navigate for regular games
@@ -498,55 +520,63 @@ async function fetchGameData() {
                         }
                     } else {
                         // Reset button if navigation fails
-                        randomBtn.classList.remove('rolling');
-                        randomBtn.style.transform = '';
-                        randomBtn.style.opacity = '';
+                        button.classList.remove('rolling');
+                        button.style.transform = '';
+                        button.style.opacity = '';
                     }
                 }, 1200); // Match animation duration
             };
-            
-            // Function to update random button info text
-            window.updateRandomButtonInfo = function() {
-                const infoText = document.querySelector('.random-info-text');
-                if (infoText) {
-                    const searchInput = document.getElementById('game-id-input');
-                    // Always exclude external games from random selection count
-                    let gamesToRandomizeFrom = visibleGames.filter(game => game.core !== 'external');
-                    
-                    if (searchInput && searchInput.value.trim()) {
-                        const searchTerm = searchInput.value.toLowerCase();
-                        const normalizedSearch = removeAccents(searchTerm);
-
-                        // Filter games by search term (include hidden games in search)
-                        gamesToRandomizeFrom = window.allGamesData.filter(game => {
-                            // Always exclude external games from random selection
-                            if (game.core === 'external') return false;
-
-                            let displayTitle = game.title;
-                            if (!displayTitle || displayTitle === game.id) {
-                                displayTitle = capitalizeFirst(game.id);
-                            }
-                            // Normalize title for display (move "The" to the end)
-                            displayTitle = normalizeTitleForSorting(displayTitle);
-
-                            // Match title or id partially (accent-insensitive)
-                            const titleMatch = removeAccents(displayTitle).includes(normalizedSearch);
-                            const idMatch = game.id && removeAccents(game.id).includes(normalizedSearch);
-                            return titleMatch || idMatch;
-                        });
-
-                        // Calculate total available games (excluding external games)
-                        const totalAvailableGames = window.allGamesData.filter(game => game.core !== 'external').length;
-                        infoText.textContent = `Respecte votre recherche actuelle (${gamesToRandomizeFrom.length}/${totalAvailableGames} jeux)`;
-                    } else {
-                        infoText.textContent = `Respecte votre recherche actuelle (${visibleGames.length} jeux)`;
-                    }
-                }
-            };
-            
-            // Initialize the random button info
-            window.updateRandomButtonInfo();
+        };
+        
+        // Setup both buttons
+        if (randomBtn) {
+            setupRandomButton(randomBtn);
         }
+        if (footerRandomBtn) {
+            setupRandomButton(footerRandomBtn);
+        }
+        
+        // Function to update random button info text
+        window.updateRandomButtonInfo = function() {
+            const infoText = document.querySelector('.random-info-text');
+            if (infoText) {
+                const searchInput = document.getElementById('game-id-input');
+                // Always exclude external games from random selection count
+                let gamesToRandomizeFrom = visibleGames.filter(game => game.core !== 'external');
+                
+                if (searchInput && searchInput.value.trim()) {
+                    const searchTerm = searchInput.value.toLowerCase();
+                    const normalizedSearch = removeAccents(searchTerm);
+
+                    // Filter games by search term (include hidden games in search)
+                    gamesToRandomizeFrom = window.allGamesData.filter(game => {
+                        // Always exclude external games from random selection
+                        if (game.core === 'external') return false;
+
+                        let displayTitle = game.title;
+                        if (!displayTitle || displayTitle === game.id) {
+                            displayTitle = capitalizeFirst(game.id);
+                        }
+                        // Normalize title for display (move "The" to the end)
+                        displayTitle = normalizeTitleForSorting(displayTitle);
+
+                        // Match title or id partially (accent-insensitive)
+                        const titleMatch = removeAccents(displayTitle).includes(normalizedSearch);
+                        const idMatch = game.id && removeAccents(game.id).includes(normalizedSearch);
+                        return titleMatch || idMatch;
+                    });
+
+                    // Calculate total available games (excluding external games)
+                    const totalAvailableGames = window.allGamesData.filter(game => game.core !== 'external').length;
+                    infoText.textContent = `Respecte votre recherche actuelle (${gamesToRandomizeFrom.length}/${totalAvailableGames} jeux)`;
+                } else {
+                    infoText.textContent = `Respecte votre recherche actuelle (${visibleGames.length} jeux)`;
+                }
+            }
+        };
+        
+        // Initialize the random button info
+        window.updateRandomButtonInfo();
 
     } catch (error) {
         // Log the error to the browser console for debugging
@@ -658,6 +688,12 @@ function populateFeaturedGame(game) {
     // Create wrapper for the cover image
     const coverWrapper = document.createElement('div');
     coverWrapper.className = 'featured-game-cover-wrapper';
+
+    // Add "Jeu de la semaine" label above the image
+    const weekLabel = document.createElement('div');
+    weekLabel.className = 'featured-game-week-label';
+    weekLabel.textContent = 'Jeu de la semaine';
+    coverWrapper.appendChild(weekLabel);
 
     // Create link container for the image
     const gameLink = document.createElement('a');
@@ -985,6 +1021,20 @@ async function fetchFeaturedGameLeaderboard(gameId) {
             throw new Error('Invalid response format');
         }
 
+        // Find the oldest score (first submitted) among all scores
+        let oldestScore = null;
+        let oldestTimestamp = Infinity;
+        
+        data.result.scores.forEach(score => {
+            if (score.date && score.date._seconds) {
+                const timestamp = score.date._seconds;
+                if (timestamp < oldestTimestamp) {
+                    oldestTimestamp = timestamp;
+                    oldestScore = score;
+                }
+            }
+        });
+        
         // Get best score for each unique player
         const playerBestScores = new Map();
         
@@ -996,7 +1046,8 @@ async function fetchFeaturedGameLeaderboard(gameId) {
                 playerBestScores.set(userId, {
                     player: score.player,
                     score: score.score,
-                    rank: score.rank
+                    rank: score.rank,
+                    userId: userId
                 });
             }
         });
@@ -1010,6 +1061,10 @@ async function fetchFeaturedGameLeaderboard(gameId) {
             leaderboardContent.innerHTML = '<div class="featured-leaderboard-loading">Aucun score trouvé</div>';
             return;
         }
+
+        // Identify if the oldest score's player is in the top 10
+        const oldestPlayerId = oldestScore ? oldestScore.userId : null;
+        const isOldestInTop10 = oldestPlayerId && sortedScores.some(score => score.userId === oldestPlayerId);
 
         // Helper function to get initial from player name
         function getPlayerInitial(playerName) {
@@ -1045,17 +1100,32 @@ async function fetchFeaturedGameLeaderboard(gameId) {
             const initial = getPlayerInitial(score.player);
             const avatarColor = getAvatarColor(score.player);
             
+            // Check if this is the player with the oldest score
+            const isOldestPlayer = isOldestInTop10 && score.userId === oldestPlayerId;
+            
             leaderboardHTML += `
-                <div class="featured-leaderboard-entry">
+                <div class="featured-leaderboard-entry" data-game-id="${escapeHtml(gameId)}" style="cursor: pointer;">
                     <div class="featured-leaderboard-rank">${rankText}</div>
                     <div class="featured-leaderboard-avatar" style="background-color: ${avatarColor}">${initial}</div>
-                    <div class="featured-leaderboard-player">${playerName}</div>
+                    <div class="featured-leaderboard-player">${playerName}${isOldestPlayer ? ' 🍪' : ''}</div>
                     <div class="featured-leaderboard-score">${score.score.toLocaleString()}</div>
                 </div>
             `;
         });
 
         leaderboardContent.innerHTML = leaderboardHTML;
+        
+        // Add click handlers to each leaderboard entry
+        const leaderboardEntries = leaderboardContent.querySelectorAll('.featured-leaderboard-entry');
+        leaderboardEntries.forEach(entry => {
+            entry.addEventListener('click', () => {
+                const entryGameId = entry.getAttribute('data-game-id');
+                if (entryGameId) {
+                    window.location.href = `https://alloarcade.web.app/leaderboards/${entryGameId}`;
+                }
+            });
+        });
+        
         console.log(`Leaderboard successfully displayed for game: ${gameId}, showing ${sortedScores.length} scores`);
 
     } catch (error) {
@@ -1151,9 +1221,12 @@ function populatePreviousWeekGames(previousWeekGames, allGames) {
     }
 
     // Games are already sorted by week (descending - most recent first) and limited to 11
+    // Limit to 4 games for display on homepage
+    const gamesToDisplay = previousWeekGames.slice(0, 4);
+    const hasMoreGames = previousWeekGames.length > 4;
 
-    // Create game items for each previous week game
-    previousWeekGames.forEach((prevGame, idx) => {
+    // Create game items for each previous week game (limited to 4)
+    gamesToDisplay.forEach((prevGame, idx) => {
         const game = allGames.find(g => g.id === prevGame.gameId);
         if (!game || !game.id) {
             return; // Skip if game not found
@@ -1258,6 +1331,7 @@ function populatePreviousWeekGames(previousWeekGames, allGames) {
     });
 
     // Add "Voir l'historique complet des jeux de la semaine" link at the bottom
+    // Show the link if there are any games (even if only 4 or less, in case there are more available)
     if (previousWeekGames.length > 0) {
         const viewAllLink = document.createElement('a');
         viewAllLink.href = '/all?filter=week';
@@ -1278,16 +1352,7 @@ function populatePreviousWeekGames(previousWeekGames, allGames) {
 function addRandomAndLeaderboardButtons(container) {
     if (!container) return;
     
-    let randomBtn = document.getElementById('random-game-btn');
     let leaderboardLink = document.getElementById('leaderboard-link');
-    
-    // Create random button if it doesn't exist
-    if (!randomBtn) {
-        randomBtn = document.createElement('button');
-        randomBtn.id = 'random-game-btn';
-        randomBtn.className = 'random-game-btn';
-        randomBtn.textContent = '🎲 Jouer au hasard';
-    }
     
     // Create leaderboard link if it doesn't exist
     if (!leaderboardLink) {
@@ -1298,36 +1363,12 @@ function addRandomAndLeaderboardButtons(container) {
         leaderboardLink.textContent = 'Classements';
     }
     
-    if (randomBtn) {
-        // Remove from current location if it exists elsewhere
-        if (randomBtn.parentNode && randomBtn.parentNode !== container) {
-            randomBtn.parentNode.removeChild(randomBtn);
-        }
-        // Style the button for grid placement
-        randomBtn.style.gridColumn = '1 / -1';
-        randomBtn.style.width = '100%';
-        randomBtn.style.marginTop = '8px';
-        if (!container.contains(randomBtn)) {
-            container.appendChild(randomBtn);
-        }
-        // Ensure the onclick handler is attached (in case button was created dynamically)
-        // The handler is already set in fetchGameData, but we ensure it's there
-        if (!randomBtn.onclick && window.allGamesData) {
-            // Re-attach the handler if needed (this should not happen normally)
-            const visibleGames = window.allGamesData.filter(game => !(game.hide === true || game.hide === 'yes'));
-            if (visibleGames.length > 0) {
-                // The onclick handler will be set by fetchGameData, so we don't duplicate it here
-                // Just ensure the button is ready
-            }
-        }
-    }
-    
     if (leaderboardLink) {
         // Remove from current location if it exists elsewhere
         if (leaderboardLink.parentNode && leaderboardLink.parentNode !== container) {
             leaderboardLink.parentNode.removeChild(leaderboardLink);
         }
-        // Style the link for grid placement
+        // Style the link to take full width
         leaderboardLink.style.gridColumn = '1 / -1';
         leaderboardLink.style.width = '100%';
         leaderboardLink.style.marginTop = '8px';

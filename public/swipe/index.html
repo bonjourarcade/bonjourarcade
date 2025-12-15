@@ -109,35 +109,71 @@
 
         .swipe-overlay {
             position: absolute;
-            top: 0;
-            bottom: 0;
-            width: 50%;
             pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.3s ease;
             z-index: 1;
+            border-radius: 50%;
+            width: 0;
+            height: 0;
+            opacity: 0;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1), 
+                        height 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+                        opacity 0.3s ease;
         }
 
         .swipe-overlay.left {
             left: 0;
-            background: rgba(255, 68, 68, 0.2);
+            top: 50%;
+            margin-top: 0;
+            transform: translateY(-50%);
+            transform-origin: left center;
+            background: rgba(255, 68, 68, 0.6);
         }
 
         .swipe-overlay.right {
             right: 0;
-            background: rgba(76, 175, 80, 0.2);
+            top: 50%;
+            margin-top: 0;
+            transform: translateY(-50%);
+            transform-origin: right center;
+            background: rgba(76, 175, 80, 0.6);
         }
 
         .swipe-overlay.visible {
-            opacity: 1;
+            /* Size large enough to cover entire screen (diagonal) */
+            width: 200vw;
+            height: 200vw;
+            /* Opacity starts high and decreases as circle grows */
+            animation: circleExplosion 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        @keyframes circleExplosion {
+            0% {
+                opacity: 0.6;
+            }
+            100% {
+                opacity: 0.1;
+            }
         }
 
         body.theme-dark .swipe-overlay.left {
-            background: rgba(255, 102, 102, 0.25);
+            background: rgba(255, 102, 102, 0.6);
         }
 
         body.theme-dark .swipe-overlay.right {
-            background: rgba(102, 187, 106, 0.25);
+            background: rgba(102, 187, 106, 0.6);
+        }
+
+        body.theme-dark .swipe-overlay.visible {
+            animation: circleExplosionDark 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        @keyframes circleExplosionDark {
+            0% {
+                opacity: 0.7;
+            }
+            100% {
+                opacity: 0.15;
+            }
         }
 
         .card-stack {
@@ -1487,6 +1523,42 @@
 
         // Load games
         async function loadGames() {
+            // Reset all state variables on page load/refresh
+            passedGameIds.clear();
+            currentGameIndex = 0;
+            cardsPassedCount = 0;
+            isDragging = false;
+            currentCard = null;
+            isProcessingSwipe = false;
+            isFirstSwipe = true;
+            isCardEntering = false;
+            imagePreloadCache.clear();
+            
+            // Clear existing cards from DOM
+            const stack = document.getElementById('card-stack');
+            const existingCards = stack.querySelectorAll('.game-card');
+            existingCards.forEach(card => card.remove());
+            
+            // Reset indicators
+            const leftIndicator = document.getElementById('swipe-left-indicator');
+            const rightIndicator = document.getElementById('swipe-right-indicator');
+            leftIndicator.classList.remove('visible');
+            rightIndicator.classList.remove('visible');
+            if (!isMobileDevice()) {
+                leftIndicator.classList.add('initial-hint');
+                rightIndicator.classList.add('initial-hint');
+            }
+            document.getElementById('swipe-overlay-left').classList.remove('visible');
+            document.getElementById('swipe-overlay-right').classList.remove('visible');
+            
+            // Show loading
+            const loadingElement = document.getElementById('loading');
+            loadingElement.style.display = 'block';
+            loadingElement.textContent = 'Chargement des jeux...';
+            
+            // Reset counter display
+            updateCardsPassedCounter();
+            
             try {
                 const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.startsWith('192.168.');
                 const cacheBuster = '?v=' + Date.now();

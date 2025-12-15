@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loading Animation - BonjourArcade</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--background);
+        }
+        
+        .loading-demo-container {
+            text-align: center;
+        }
+        
+        .loading-demo-title {
+            color: var(--text-color);
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            font-weight: bold;
+        }
+        
+        /* S'assurer que l'overlay reste visible */
+        #loading-overlay {
+            position: relative !important;
+            background-color: transparent !important;
+            display: flex !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+        
+        .loading-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        
+        /* Theme toggle button styles */
+        .theme-toggle-wrapper {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        .theme-btn {
+            background: #fff;
+            color: #111;
+            font-size: 1em;
+            font-weight: bold;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            padding: 10px 22px;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.2);
+            transition: background 0.18s, box-shadow 0.18s, color 0.18s, border-color 0.18s;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-family: inherit;
+            line-height: 1.2;
+            height: auto;
+            box-sizing: border-box;
+        }
+        
+        body.theme-dark .theme-btn {
+            background: #222;
+            color: #fff;
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+        
+        .theme-btn:hover {
+            background: #ffe600;
+            color: #111;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.3);
+            border-color: #000;
+        }
+        
+        body.theme-dark .theme-btn:hover {
+            background: #ffe600;
+            color: #111;
+        }
+        
+        .theme-btn span {
+            display: inline-flex;
+            align-items: center;
+            line-height: 1;
+        }
+        
+        #theme-dropdown {
+            position: absolute !important;
+            top: calc(100% + 8px) !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+            background: #222 !important;
+            color: #fff !important;
+            border: 1px solid #444 !important;
+            border-radius: 8px !important;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.2) !important;
+            min-width: 170px !important;
+            z-index: 10002 !important;
+            padding: 8px 0 !important;
+        }
+        
+        body.theme-light #theme-dropdown {
+            background: #fff !important;
+            color: #111 !important;
+            border: 1px solid #ccc !important;
+        }
+        
+        .theme-option {
+            display: flex !important;
+            align-items: center !important;
+            width: 100% !important;
+            background: none !important;
+            border: none !important;
+            color: inherit !important;
+            font: inherit !important;
+            padding: 8px 18px !important;
+            gap: 10px !important;
+            cursor: pointer !important;
+        }
+        
+        .theme-option:hover {
+            background: rgba(255,255,255,0.1) !important;
+        }
+        
+        body.theme-light .theme-option:hover {
+            background: rgba(0,0,0,0.05) !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-demo-container">
+        <h1 class="loading-demo-title">Animation de chargement</h1>
+        <!-- Loading overlay (sera rempli par loading.js) -->
+        <div id="loading-overlay" class="loading-overlay"></div>
+    </div>
+    
+    <!-- Theme toggle button -->
+    <div class="theme-toggle-wrapper" style="position: fixed; top: 20px; right: 20px; z-index: 1000;">
+        <button id="theme-toggle-btn" class="theme-btn" aria-label="Changer le thème" type="button">
+            <span id="theme-toggle-icon" style="display:inline-flex;align-items:center;font-size:1.2em;">🌓</span>
+            <span id="theme-toggle-label">Thème</span>
+        </button>
+        <div id="theme-dropdown" style="display:none;position:absolute;top:110%;left:50%;transform:translateX(-50%);background:#222;color:#fff;border:1px solid #444;border-radius:8px;box-shadow:0 4px 16px #0002;min-width:170px;z-index:10000;padding:8px 0;">
+            <button class="theme-option" data-theme="system" style="display:flex;align-items:center;width:100%;background:none;border:none;color:inherit;font:inherit;padding:8px 18px;gap:10px;cursor:pointer;"><span style='font-size:1.2em;'>🌓</span>Système</button>
+            <button class="theme-option" data-theme="light" style="display:flex;align-items:center;width:100%;background:none;border:none;color:inherit;font:inherit;padding:8px 18px;gap:10px;cursor:pointer;"><span style='font-size:1.2em;'>☀️</span>Clair</button>
+            <button class="theme-option" data-theme="dark" style="display:flex;align-items:center;width:100%;background:none;border:none;color:inherit;font:inherit;padding:8px 18px;gap:10px;cursor:pointer;"><span style='font-size:1.2em;'>🌙</span>Sombre</button>
+        </div>
+    </div>
+    
+    <script>
+        // Theme toggling logic
+        function setTheme(theme) {
+            document.body.classList.remove('theme-light', 'theme-dark');
+            let classToAdd;
+            if (theme === 'system') {
+                classToAdd = getSystemTheme();
+            } else if (theme === 'dark') {
+                classToAdd = 'theme-dark';
+            } else {
+                classToAdd = 'theme-light';
+            }
+            document.body.classList.add(classToAdd);
+            // Update button icon and label
+            const icon = document.getElementById('theme-toggle-icon');
+            const label = document.getElementById('theme-toggle-label');
+            if (icon && label) {
+                if (theme === 'dark') {
+                    icon.textContent = '🌙';
+                    label.textContent = 'Sombre';
+                } else if (theme === 'light') {
+                    icon.textContent = '☀️';
+                    label.textContent = 'Clair';
+                } else {
+                    icon.textContent = '🌓';
+                    label.textContent = 'Thème';
+                }
+            }
+            // Highlight current in dropdown
+            document.querySelectorAll('.theme-option').forEach(btn => {
+                btn.style.background = (btn.dataset.theme === theme) ? '#444' : 'none';
+            });
+            // Update button style for dark/light
+            const themeBtn = document.getElementById('theme-toggle-btn');
+            if (themeBtn) {
+                if (classToAdd === 'theme-dark') {
+                    themeBtn.style.background = '#222';
+                    themeBtn.style.color = '#fff';
+                    themeBtn.style.border = '2px solid rgba(255,255,255,0.2)';
+                } else {
+                    themeBtn.style.background = '#fff';
+                    themeBtn.style.color = '#111';
+                    themeBtn.style.border = '2px solid #ccc';
+                }
+            }
+        }
+
+        function getSystemTheme() {
+            return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'theme-dark' : 'theme-light';
+        }
+
+        // Dropdown logic
+        const themeBtn = document.getElementById('theme-toggle-btn');
+        const themeDropdown = document.getElementById('theme-dropdown');
+        
+        // Ensure dropdown is closed on page load
+        if (themeDropdown) {
+            themeDropdown.style.display = 'none';
+        }
+        
+        if (themeBtn && themeDropdown) {
+            themeBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const isOpen = themeDropdown.style.display === 'block';
+                themeDropdown.style.display = isOpen ? 'none' : 'block';
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (themeDropdown && themeDropdown.style.display === 'block') {
+                    // Don't close if clicking on the button or dropdown itself
+                    if (!themeBtn.contains(e.target) && !themeDropdown.contains(e.target)) {
+                        themeDropdown.style.display = 'none';
+                    }
+                }
+            });
+            
+            // Prevent dropdown from closing when clicking inside it
+            themeDropdown.addEventListener('click', function(e) { 
+                e.stopPropagation(); 
+            });
+        }
+        
+        document.querySelectorAll('.theme-option').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const selected = btn.dataset.theme;
+                if (selected === 'system') {
+                    localStorage.removeItem('theme');
+                } else {
+                    localStorage.setItem('theme', selected);
+                }
+                setTheme(selected);
+                themeDropdown.style.display = 'none';
+            });
+        });
+
+        // On load: use localStorage or system preference
+        const savedTheme = localStorage.getItem('theme');
+        const initialTheme = savedTheme || 'system';
+        setTheme(initialTheme);
+        // Listen for system theme changes if user hasn't chosen
+        if (!savedTheme) {
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+                setTheme('system');
+            });
+        }
+    </script>
+    
+    <script src="../assets/js/loading.js"></script>
+    <script>
+        // Utiliser loading.js pour créer l'overlay avec le logo et le texte
+        // Mais ne pas appeler initLoading() pour que l'animation reste visible
+        (function() {
+            function init() {
+                // Créer l'overlay avec le logo et le texte (via loading.js)
+                createLoadingOverlay();
+                
+                // S'assurer que l'overlay reste visible (ne pas le cacher)
+                const overlay = document.getElementById('loading-overlay');
+                if (overlay) {
+                    overlay.classList.remove('hidden');
+                    overlay.style.display = 'flex';
+                    overlay.style.opacity = '1';
+                    overlay.style.visibility = 'visible';
+                }
+            }
+            
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                // Attendre un peu pour que loading.js soit chargé
+                setTimeout(init, 50);
+            }
+        })();
+    </script>
+</body>
+</html>

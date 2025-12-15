@@ -54,6 +54,17 @@
             padding-bottom: env(safe-area-inset-bottom, 16px);
             transition: top 0.2s, height 0.2s;
         }
+        
+        /* Loading overlay styling for play page */
+        #game-container .loading-overlay {
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            background-color: #000 !important;
+            z-index: 10 !important;
+        }
         #game { 
             width: 100% !important; 
             height: 100% !important; 
@@ -561,7 +572,9 @@
     <div id="controls-overlay" style="display:none;position:fixed;top:62px;left:10px;z-index:1999;background:rgba(0,0,0,0.85);color:#fff;padding:8px 14px 8px 12px;border-radius:6px;font-size:18px;font-family:sans-serif;box-shadow:0 2px 8px #0005;min-width:40px;max-width:220px;line-height:1.5;pointer-events:none;"></div>
 
     <div id="game-container">
-        <div id="game"><p style="text-align: center; padding-top: 50px;">Initializing...</p></div>
+        <!-- Loading overlay (sera rempli par loading.js) -->
+        <div id="loading-overlay" class="loading-overlay"></div>
+        <div id="game"></div>
     </div>
 
     <!-- QR Code Container -->
@@ -598,6 +611,7 @@
         </div>
     </div>
 
+    <script src="../assets/js/loading.js"></script>
     <script src="../assets/js/banner.js"></script>
     <script src="../assets/js/game-history.js"></script>
     <script src="../assets/js/utils.js"></script>
@@ -1168,6 +1182,15 @@
                   console.log('Using EJS_defaultControls from per-game config.json');
                 }
 
+                // Initialize loading overlay
+                initLoading({
+                    createOverlay: true,
+                    containerSelector: '#game',
+                    footerSelector: null,
+                    delay: 0,
+                    hideOnLoad: false // We'll hide it manually when the game is ready
+                });
+
                 // Step 10: Load the main EmulatorJS engine (loader.js)
                 // This now happens sequentially after successfully fetching/setting up everything else
                 if (window.EJS_pathtodata) {
@@ -1178,17 +1201,33 @@
                     loaderScript.onerror = () => {
                         console.error("CRITICAL: Error loading EmulatorJS 'loader.js' from:", loaderScript.src);
                         showLauncherError("Could not load the core emulator engine. Check network connection and EJS_pathtodata setting.");
+                        // Hide loading on error
+                        hideLoading({ containerSelector: '#game' });
                     };
+                    
+                    // Hide loading when the script loads successfully
+                    loaderScript.onload = () => {
+                        console.log("EmulatorJS 'loader.js' loaded successfully.");
+                        // Wait a bit for EmulatorJS to initialize, then hide loading
+                        setTimeout(() => {
+                            hideLoading({ containerSelector: '#game' });
+                        }, 500);
+                    };
+                    
                     document.body.appendChild(loaderScript);
                     console.log("EmulatorJS 'loader.js' script added to page.");
                 } else {
                      console.error("EJS_pathtodata is not defined after loading settings. Cannot load emulator engine.");
                      showLauncherError("Emulator configuration error: Path to required emulator data is missing.");
+                     // Hide loading on error
+                     hideLoading({ containerSelector: '#game' });
                 }
 
             } catch (error) { // Catch errors from initial fetches (gamelist, settings) or setup logic
                 console.error("Error during game loading process:", error);
                 showLauncherError(error.message || "An unexpected error occurred while preparing the game.");
+                // Hide loading on error
+                hideLoading({ containerSelector: '#game' });
             }
         }
 

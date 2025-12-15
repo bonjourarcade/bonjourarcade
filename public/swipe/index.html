@@ -43,58 +43,147 @@
         }
 
         .header {
-            padding: 1rem;
+            padding: 0.5rem 1rem;
             text-align: center;
             border-bottom: 1px solid var(--border-color);
             background: var(--card-bg);
             z-index: 10;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
         }
 
         .header h1 {
-            margin: 0 0 0.5rem 0;
-            font-size: 1.5rem;
+            margin: 0;
+            font-size: 1.1rem;
+            flex: 1;
         }
 
         .header-controls {
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 1rem;
-            flex-wrap: wrap;
+            gap: 0.5rem;
+            flex-wrap: nowrap;
         }
 
-        .theme-toggle {
+        .theme-toggle, .help-btn, .back-btn {
             background: none;
             border: 2px solid var(--text-color);
             color: var(--text-color);
-            padding: 0.5rem 1rem;
+            padding: 0.4rem 0.8rem;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             transition: all 0.3s;
-        }
-
-        .theme-toggle:hover {
-            background: var(--text-color);
-            color: var(--background);
-        }
-
-        .back-btn {
-            background: none;
-            border: 2px solid var(--text-color);
-            color: var(--text-color);
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.9rem;
             text-decoration: none;
             display: inline-block;
-            transition: all 0.3s;
         }
 
-        .back-btn:hover {
+        .theme-toggle:hover, .help-btn:hover, .back-btn:hover {
             background: var(--text-color);
             color: var(--background);
+        }
+
+        /* Help modal */
+        .help-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+
+        .help-modal.active {
+            display: flex;
+        }
+
+        .help-modal-content {
+            background: var(--card-bg);
+            color: var(--text-color);
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: var(--card-shadow);
+            position: relative;
+        }
+
+        .help-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .help-modal-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .help-modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-color);
+            padding: 0;
+            width: 2rem;
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+
+        .help-modal-close:hover {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        body.theme-dark .help-modal-close:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .help-instructions {
+            line-height: 1.6;
+        }
+
+        .help-instructions h3 {
+            margin: 1.5rem 0 0.5rem 0;
+            font-size: 1.1rem;
+        }
+
+        .help-instructions h3:first-child {
+            margin-top: 0;
+        }
+
+        .help-instructions ul {
+            margin: 0.5rem 0;
+            padding-left: 1.5rem;
+        }
+
+        .help-instructions li {
+            margin: 0.5rem 0;
+        }
+
+        .help-instructions .key-hint {
+            display: inline-block;
+            background: var(--background);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-family: monospace;
+            font-weight: bold;
+            border: 1px solid var(--border-color);
         }
 
         .swipe-container {
@@ -112,38 +201,38 @@
             pointer-events: none;
             z-index: 1;
             border-radius: 50%;
-            width: 0;
-            height: 0;
+            width: 200vw;
+            height: 200vw;
             opacity: 0;
-            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1), 
-                        height 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+            transform: scale(0);
+            transform-origin: center center;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1),
                         opacity 0.3s ease;
         }
 
         .swipe-overlay.left {
             left: 0;
             top: 50%;
-            margin-top: 0;
-            transform: translateY(-50%);
-            transform-origin: left center;
+            transform: translateX(-50%) translateY(-50%) scale(0);
             background: rgba(255, 68, 68, 0.6);
         }
 
         .swipe-overlay.right {
             right: 0;
             top: 50%;
-            margin-top: 0;
-            transform: translateY(-50%);
-            transform-origin: right center;
+            transform: translateX(50%) translateY(-50%) scale(0);
             background: rgba(76, 175, 80, 0.6);
         }
 
         .swipe-overlay.visible {
-            /* Size large enough to cover entire screen (diagonal) */
-            width: 200vw;
-            height: 200vw;
+            /* Scale up to cover entire screen, center stays at edge */
+            transform: translateX(-50%) translateY(-50%) scale(1);
             /* Opacity starts high and decreases as circle grows */
             animation: circleExplosion 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        .swipe-overlay.right.visible {
+            transform: translateX(50%) translateY(-50%) scale(1);
         }
 
         @keyframes circleExplosion {
@@ -335,10 +424,11 @@
         }
 
         .cards-passed-counter {
-            font-size: 0.9rem;
+            font-size: 0.75rem;
             color: var(--text-color);
-            opacity: 0.7;
-            margin-left: 1rem;
+            opacity: 0.6;
+            margin-left: 0.5rem;
+            font-weight: normal;
         }
 
         .reshuffle-animation {
@@ -450,6 +540,38 @@
         }
 
         @media (max-width: 768px) {
+            .header {
+                padding: 0.4rem 0.8rem;
+                flex-wrap: wrap;
+            }
+
+            .header h1 {
+                font-size: 1rem;
+                width: 100%;
+                order: 1;
+            }
+
+            .header-controls {
+                width: 100%;
+                justify-content: center;
+                order: 2;
+                margin-top: 0.3rem;
+            }
+
+            .theme-toggle, .help-btn, .back-btn {
+                padding: 0.3rem 0.6rem;
+                font-size: 0.8rem;
+            }
+
+            .help-modal-content {
+                padding: 1.5rem;
+                max-height: 90vh;
+            }
+
+            .help-modal-header h2 {
+                font-size: 1.2rem;
+            }
+
             .card-stack {
                 max-width: 100%;
                 height: 500px;
@@ -487,8 +609,40 @@
     <div class="header">
         <h1>🔄 Swipe <span class="cards-passed-counter" id="cards-passed-counter">0 cartes passées</span></h1>
         <div class="header-controls">
+            <button id="help-btn" class="help-btn" title="Aide">❓</button>
             <a href="../" class="back-btn">← Retour</a>
             <button id="theme-toggle" class="theme-toggle">🌙</button>
+        </div>
+    </div>
+
+    <!-- Help Modal -->
+    <div class="help-modal" id="help-modal">
+        <div class="help-modal-content">
+            <div class="help-modal-header">
+                <h2>Comment utiliser le mode Swipe</h2>
+                <button class="help-modal-close" id="help-modal-close">×</button>
+            </div>
+            <div class="help-instructions">
+                <h3>📱 Sur mobile</h3>
+                <ul>
+                    <li><strong>Glisser vers la gauche</strong> : Passer le jeu (← PASSER)</li>
+                    <li><strong>Glisser vers la droite</strong> : Lancer le jeu (→ LANCER)</li>
+                </ul>
+
+                <h3>💻 Sur ordinateur</h3>
+                <ul>
+                    <li><strong>Glisser la carte</strong> avec la souris vers la gauche ou la droite</li>
+                    <li><strong>Flèche gauche</strong> <span class="key-hint">←</span> : Passer le jeu</li>
+                    <li><strong>Flèche droite</strong> <span class="key-hint">→</span> : Lancer le jeu</li>
+                </ul>
+
+                <h3>💡 Astuces</h3>
+                <ul>
+                    <li>Les jeux passés ne réapparaîtront pas jusqu'à ce que tous les jeux aient été vus</li>
+                    <li>Quand tous les jeux ont été passés, le paquet est automatiquement rebrassé</li>
+                    <li>Un cercle coloré apparaît du côté choisi pour indiquer votre action</li>
+                </ul>
+            </div>
         </div>
     </div>
 
@@ -557,6 +711,32 @@
         }
 
         document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+
+        // Help modal management
+        function openHelpModal() {
+            document.getElementById('help-modal').classList.add('active');
+        }
+
+        function closeHelpModal() {
+            document.getElementById('help-modal').classList.remove('active');
+        }
+
+        document.getElementById('help-btn').addEventListener('click', openHelpModal);
+        document.getElementById('help-modal-close').addEventListener('click', closeHelpModal);
+        
+        // Close modal when clicking outside
+        document.getElementById('help-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'help-modal') {
+                closeHelpModal();
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && document.getElementById('help-modal').classList.contains('active')) {
+                closeHelpModal();
+            }
+        });
 
         // Helper functions
         function capitalizeFirst(str) {
@@ -1224,23 +1404,71 @@
                 }, 600);
             } else {
                 // Mobile: simple fade out
-                if (card) {
-                    card.classList.add('exiting-right');
-                    card.style.opacity = '1';
-                    card.style.transition = 'transform 0.4s ease, opacity 0.2s ease 0.2s';
-                    // Slight movement to right on mobile
-                    card.style.transform = 'translate(50px, 0) scale(0.9)';
-                    setTimeout(() => {
-                        card.style.opacity = '0';
-                    }, 200);
-                    setTimeout(() => {
-                        card.classList.add('hidden');
+                if (card && !card.classList.contains('exiting-right')) {
+                    // Check if card is already off screen (from momentum animation)
+                    const cardRect = card.getBoundingClientRect();
+                    const screenWidth = window.innerWidth;
+                    const isAlreadyOffScreen = cardRect.left > screenWidth || cardRect.right < 0;
+                    
+                    if (isAlreadyOffScreen) {
+                        // Card already off screen, just hide and redirect immediately
+                        card.classList.add('hidden', 'exiting-right');
+                        // Hide indicators
+                        const leftIndicator = document.getElementById('swipe-left-indicator');
+                        const rightIndicator = document.getElementById('swipe-right-indicator');
+                        leftIndicator.classList.remove('visible', 'initial-hint');
+                        rightIndicator.classList.remove('visible', 'initial-hint');
+                        document.getElementById('swipe-overlay-left').classList.remove('visible');
+                        document.getElementById('swipe-overlay-right').classList.remove('visible');
                         window.location.href = game.pageUrl;
-                    }, 400);
+                    } else {
+                        // Card still on screen, animate it out
+                        // Clean up drag state first
+                        card.classList.remove('dragging', 'swiping-left', 'swiping-right');
+                        card.classList.add('exiting-right');
+                        
+                        // Get current position
+                        const currentCardRect = card.getBoundingClientRect();
+                        const rightEdge = window.innerWidth;
+                        // Calculate how far to move to get off screen
+                        const targetX = rightEdge - currentCardRect.left + 100;
+                        
+                        // Set opacity first
+                        card.style.opacity = '1';
+                        // Override CSS transition with inline style for mobile
+                        card.style.transition = 'transform 0.3s ease, opacity 0.2s ease 0.1s';
+                        
+                        // Force reflow to ensure we start from current position
+                        card.offsetHeight;
+                        
+                        // Apply final transform - move off screen to the right
+                        card.style.transform = `translate(${targetX}px, 0) scale(0.9)`;
+                        
+                        setTimeout(() => {
+                            card.style.opacity = '0';
+                        }, 100);
+                        setTimeout(() => {
+                            // Hide indicators before redirect
+                            const leftIndicator = document.getElementById('swipe-left-indicator');
+                            const rightIndicator = document.getElementById('swipe-right-indicator');
+                            leftIndicator.classList.remove('visible', 'initial-hint');
+                            rightIndicator.classList.remove('visible', 'initial-hint');
+                            document.getElementById('swipe-overlay-left').classList.remove('visible');
+                            document.getElementById('swipe-overlay-right').classList.remove('visible');
+                            // Ensure card is hidden and not visible
+                            card.style.display = 'none';
+                            card.classList.add('hidden');
+                            // Small delay before redirect to ensure card is hidden
+                            setTimeout(() => {
+                                window.location.href = game.pageUrl;
+                            }, 50);
+                        }, 300);
+                    }
                 } else {
+                    // Card already exiting, just redirect
                     setTimeout(() => {
                         window.location.href = game.pageUrl;
-                    }, 400);
+                    }, 100);
                 }
             }
             // Note: isProcessingSwipe will be reset on page navigation, so no need to unlock

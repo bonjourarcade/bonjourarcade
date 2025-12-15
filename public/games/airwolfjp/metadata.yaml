@@ -1,7 +1,7 @@
-title: 
-developer: 
-year: 
-genre: 
+title: Airwolf (JP)
+developer: Kyugo Trading
+year: 1988
+genre: Shooter
 controls:
 #  - 🕹️ Déplacer
 #  - 1️⃣  Tirer
@@ -9,9 +9,9 @@ controls:
 #  - 3️⃣ ...
 #  - 4️⃣ ...
 
-#to_start: Select -> Start
+to_start: Start
 
 enable_score: true
 hide: yes
 
-added: DATE_PLACEHOLDER
+added: 2025-12-14

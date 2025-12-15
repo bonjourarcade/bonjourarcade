@@ -1107,8 +1107,8 @@ async function fetchFeaturedGameLeaderboard(gameId) {
                 <div class="featured-leaderboard-entry" data-game-id="${escapeHtml(gameId)}" style="cursor: pointer;">
                     <div class="featured-leaderboard-rank">${rankText}</div>
                     <div class="featured-leaderboard-avatar" style="background-color: ${avatarColor}">${initial}</div>
-                    <div class="featured-leaderboard-player">${playerName}${isOldestPlayer ? ' 🍪' : ''}</div>
-                    <div class="featured-leaderboard-score">${score.score.toLocaleString()}</div>
+                    <div class="featured-leaderboard-player">${playerName}</div>
+                    <div class="featured-leaderboard-score">${isOldestPlayer ? '🍪 ' : ''}${score.score.toLocaleString()}</div>
                 </div>
             `;
         });

@@ -1,7 +1,7 @@
-title: 
-developer: 
-year: 
-genre: 
+title: Densha de Go!
+developer: Taito GM R&D Sect 2
+year: 1999
+genre: Simulation
 controls:
 #  - 🕹️ Déplacer
 #  - 1️⃣  Tirer
@@ -14,4 +14,4 @@ controls:
 enable_score: true
 hide: yes
 
-added: DATE_PLACEHOLDER
+added: 2025-12-14

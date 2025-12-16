@@ -1,0 +1,17 @@
+title: Haradius Zero
+developer: Impact Soft
+year: 2020
+genre: Shooter
+controls:
+#  - 🕹️ Déplacer
+#  - 1️⃣  Tirer
+#  - 2️⃣  Bombe
+#  - 3️⃣ ...
+#  - 4️⃣ ...
+
+#to_start: Select -> Start
+
+enable_score: true
+hide: yes
+
+added: 2025-12-15

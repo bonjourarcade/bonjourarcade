@@ -18,43 +18,19 @@
             position: relative;
         }
 
-        /* Redirect overlay */
+        /* Redirect overlay - reuses loading.js classes */
         .redirect-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.9);
+            z-index: 10000;
             display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
         }
 
         .redirect-overlay.active {
             display: flex;
-        }
-
-        .redirect-message {
-            font-size: 2rem;
-            margin-bottom: 20px;
-            color: #00ff90;
-            font-family: 'Courier New', monospace;
-        }
-
-        .redirect-spinner {
-            border: 4px solid rgba(0, 255, 144, 0.1);
-            border-left-color: #00ff90;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
         }
 
         /* Game covers container */
@@ -277,11 +253,8 @@
     </style>
 </head>
 <body>
-    <!-- Redirect overlay -->
-    <div class="redirect-overlay" id="redirectOverlay">
-        <div class="redirect-message">Redirection en cours...</div>
-        <div class="redirect-spinner"></div>
-    </div>
+    <!-- Redirect overlay - reuses loading-overlay from loading.js -->
+    <div class="redirect-overlay loading-overlay" id="redirectOverlay"></div>
 
     <!-- Loading screen (hidden by default) -->
     <div class="loading-screen hidden" id="loadingScreen">
@@ -301,6 +274,10 @@
         <a href="/" class="arcade-btn">🏠 Accueil</a>
     </div>
 
+    <!-- Load CSS and loading.js to reuse its functionality -->
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <script src="/assets/js/loading.js"></script>
+    
     <script>
         // Redirect logic (runs first)
         (function() {
@@ -313,8 +290,35 @@
                 // Extract the game_id from the path
                 const gameId = match[1];
                 
-                // Show redirect overlay
-                document.getElementById('redirectOverlay').classList.add('active');
+                const redirectOverlay = document.getElementById('redirectOverlay');
+                
+                // Use loading.js function to create loading content - no code duplication
+                function setupRedirectLoading() {
+                    if (window.createLoadingOverlay) {
+                        // Create a temporary loading overlay to get the content structure
+                        const tempOverlay = window.createLoadingOverlay();
+                        const loadingContent = tempOverlay.querySelector('.loading-content');
+                        
+                        if (loadingContent) {
+                            // Copy the content to our redirect overlay
+                            redirectOverlay.innerHTML = loadingContent.outerHTML;
+                            
+                            // Update the text
+                            const textElement = redirectOverlay.querySelector('.loading-text');
+                            if (textElement) {
+                                textElement.textContent = 'Redirection en cours...';
+                            }
+                            
+                            // Show the overlay
+                            redirectOverlay.classList.add('active');
+                        }
+                    } else {
+                        // Retry if loading.js hasn't loaded yet
+                        setTimeout(setupRedirectLoading, 50);
+                    }
+                }
+                
+                setupRedirectLoading();
                 
                 // Redirect to /play/?game=game_id
                 setTimeout(() => {

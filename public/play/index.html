@@ -787,14 +787,16 @@
             }
 
             // Leaderboard fetching logic
-            async function fetchLeaderboard(gameId) {
+            async function fetchLeaderboard(gameId, isRefresh = false) {
                 const leaderboardContainer = document.getElementById('leaderboard-container');
                 const leaderboardContent = document.getElementById('leaderboard-content');
                 
                 if (!leaderboardContainer || !leaderboardContent) return;
 
-                // Show loading state
-                leaderboardContent.innerHTML = '<div class="leaderboard-loading">Chargement...</div>';
+                // Show loading state only on initial load, not on refresh
+                if (!isRefresh) {
+                    leaderboardContent.innerHTML = '<div class="leaderboard-loading">Chargement...</div>';
+                }
                 
                 try {
                     // Check if we're on localhost and use mock data
@@ -877,8 +879,38 @@
                         .slice(0, 10); // Show top 10 players
 
                     if (sortedScores.length === 0) {
-                        leaderboardContent.innerHTML = '<div class="leaderboard-loading">Aucun score trouvé</div>';
+                        if (!isRefresh) {
+                            leaderboardContent.innerHTML = '<div class="leaderboard-loading">Aucun score trouvé</div>';
+                        }
                         return;
+                    }
+
+                    // On refresh, compare with current scores to avoid unnecessary DOM updates
+                    if (isRefresh) {
+                        const currentEntries = leaderboardContent.querySelectorAll('.leaderboard-entry');
+                        let scoresChanged = false;
+                        
+                        // Check if scores have changed
+                        if (currentEntries.length !== sortedScores.length) {
+                            scoresChanged = true;
+                        } else {
+                            for (let i = 0; i < sortedScores.length; i++) {
+                                const currentPlayer = currentEntries[i]?.querySelector('.leaderboard-player')?.textContent;
+                                const currentScore = currentEntries[i]?.querySelector('.leaderboard-score')?.textContent?.replace(/\s/g, '');
+                                const newPlayer = sortedScores[i].player;
+                                const newScore = sortedScores[i].score.toLocaleString();
+                                
+                                if (currentPlayer !== newPlayer || currentScore !== newScore) {
+                                    scoresChanged = true;
+                                    break;
+                                }
+                            }
+                        }
+                        
+                        // Only update if scores have changed
+                        if (!scoresChanged) {
+                            return;
+                        }
                     }
 
                     // Build leaderboard HTML
@@ -935,7 +967,11 @@
                                     `;
                                 });
                                 mobileContent.innerHTML = mobileLeaderboardHTML;
-                                mobilePopup.style.display = 'flex';
+                                
+                                // Only show popup on initial load, not on refresh
+                                if (!isRefresh) {
+                                    mobilePopup.style.display = 'flex';
+                                }
                                 
                                 // Add click handler to mobile leaderboard title (only once)
                                 const mobileLeaderboardTitle = document.querySelector('#mobile-leaderboard-content h3');
@@ -1001,7 +1037,7 @@
             // Set up periodic refresh of leaderboard every 2 minutes
             const scoreRefreshInterval = setInterval(() => {
                 console.log('Refreshing leaderboard scores (2-minute interval)');
-                fetchLeaderboard(gameId);
+                fetchLeaderboard(gameId, true); // Pass isRefresh=true for silent refresh
             }, 120000); // 2 minutes = 120,000 milliseconds
             
             // Store interval ID for cleanup if needed

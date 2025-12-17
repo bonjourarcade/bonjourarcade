@@ -38,13 +38,14 @@
             height: 100%;
             z-index: 10000;
             display: none;
-            background-color: var(--background, #000);
+            background-color: #000 !important;
             justify-content: center;
             align-items: center;
         }
 
         .redirect-overlay.active {
             display: flex;
+            background-color: #000 !important;
         }
         
         /* Prevent loading.js overlay from showing on 404 page */
@@ -55,9 +56,18 @@
             pointer-events: none !important;
         }
         
-        /* Ensure redirect overlay uses loading.js styles when active */
+        /* Ensure redirect overlay uses black background when active */
         #redirectOverlay.active {
-            background-color: var(--background, #000);
+            background-color: #000 !important;
+        }
+        
+        /* Ensure loading-content has proper styling */
+        #redirectOverlay .loading-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
         }
 
         /* Game covers container */

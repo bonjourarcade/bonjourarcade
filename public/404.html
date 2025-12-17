@@ -13,9 +13,20 @@
 
         body {
             min-height: 100vh;
-            background: #000;
+            background: #000 !important;
             overflow: hidden;
             position: relative;
+            color: #fff;
+        }
+        
+        /* Ensure 404 text is always visible */
+        #errorOverlay {
+            display: flex !important;
+        }
+        
+        /* Ensure buttons are always visible */
+        #actionButtons {
+            display: flex !important;
         }
 
         /* Redirect overlay - reuses loading.js classes */
@@ -27,10 +38,26 @@
             height: 100%;
             z-index: 10000;
             display: none;
+            background-color: var(--background, #000);
+            justify-content: center;
+            align-items: center;
         }
 
         .redirect-overlay.active {
             display: flex;
+        }
+        
+        /* Prevent loading.js overlay from showing on 404 page */
+        #loading-overlay:not(#redirectOverlay) {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+        
+        /* Ensure redirect overlay uses loading.js styles when active */
+        #redirectOverlay.active {
+            background-color: var(--background, #000);
         }
 
         /* Game covers container */
@@ -254,7 +281,10 @@
 </head>
 <body>
     <!-- Redirect overlay - reuses loading-overlay from loading.js -->
-    <div class="redirect-overlay loading-overlay" id="redirectOverlay"></div>
+    <div class="redirect-overlay" id="redirectOverlay"></div>
+    
+    <!-- Prevent loading.js from auto-initializing: create hidden overlay so it doesn't create its own -->
+    <div id="loading-overlay" class="loading-overlay" style="display: none !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important;"></div>
 
     <!-- Loading screen (hidden by default) -->
     <div class="loading-screen hidden" id="loadingScreen">
@@ -264,19 +294,18 @@
     <!-- Game covers rain -->
     <div class="covers-container" id="coversContainer"></div>
 
-    <!-- 404 Overlay -->
-    <div class="error-overlay">
+    <!-- 404 Overlay - Always visible -->
+    <div class="error-overlay" id="errorOverlay">
         <div class="error-text">404</div>
     </div>
 
-    <!-- Action buttons -->
-    <div class="action-buttons">
+    <!-- Action buttons - Always visible -->
+    <div class="action-buttons" id="actionButtons">
         <a href="/" class="arcade-btn">🏠 Accueil</a>
     </div>
 
-    <!-- Load CSS and loading.js to reuse its functionality -->
+    <!-- Load CSS -->
     <link rel="stylesheet" href="/assets/css/style.css">
-    <script src="/assets/js/loading.js"></script>
     
     <script>
         // Redirect logic (runs first)
@@ -290,14 +319,31 @@
                 // Extract the game_id from the path
                 const gameId = match[1];
                 
-                const redirectOverlay = document.getElementById('redirectOverlay');
-                
-                // Use loading.js function to create loading content - no code duplication
-                function setupRedirectLoading() {
+                // Only load loading.js when we need to redirect
+                const script = document.createElement('script');
+                script.src = '/assets/js/loading.js';
+                script.onload = function() {
+                    // Hide the main loading overlay that loading.js might have created/auto-initialized
+                    const mainOverlay = document.getElementById('loading-overlay');
+                    if (mainOverlay) {
+                        mainOverlay.style.display = 'none';
+                        mainOverlay.style.visibility = 'hidden';
+                        mainOverlay.style.opacity = '0';
+                        mainOverlay.classList.add('hidden');
+                    }
+                    
+                    const redirectOverlay = document.getElementById('redirectOverlay');
+                    
+                    // Use loading.js function to create loading content
                     if (window.createLoadingOverlay) {
-                        // Create a temporary loading overlay to get the content structure
+                        // Temporarily create overlay to get content, then hide it
                         const tempOverlay = window.createLoadingOverlay();
-                        const loadingContent = tempOverlay.querySelector('.loading-content');
+                        if (tempOverlay) {
+                            tempOverlay.style.display = 'none';
+                            tempOverlay.classList.add('hidden');
+                        }
+                        
+                        const loadingContent = tempOverlay?.querySelector('.loading-content');
                         
                         if (loadingContent) {
                             // Copy the content to our redirect overlay
@@ -312,18 +358,14 @@
                             // Show the overlay
                             redirectOverlay.classList.add('active');
                         }
-                    } else {
-                        // Retry if loading.js hasn't loaded yet
-                        setTimeout(setupRedirectLoading, 50);
                     }
-                }
-                
-                setupRedirectLoading();
-                
-                // Redirect to /play/?game=game_id
-                setTimeout(() => {
-                    window.location.href = `/play/?game=${encodeURIComponent(gameId)}`;
-                }, 500);
+                    
+                    // Redirect to /play/?game=game_id
+                    setTimeout(() => {
+                        window.location.href = `/play/?game=${encodeURIComponent(gameId)}`;
+                    }, 500);
+                };
+                document.head.appendChild(script);
                 return;
             }
         })();
@@ -341,46 +383,66 @@
                                window.location.hostname === '127.0.0.1' || 
                                window.location.hostname.startsWith('192.168.');
             const cacheBuster = '?v=' + Date.now();
-            const gamelistUrl = isLocalhost ? 
-                '../gamelist.json' + cacheBuster : 
-                'https://storage.googleapis.com/bonjourarcade/gamelist.json' + cacheBuster;
+            
+            // Try multiple paths for gamelist.json
+            const possiblePaths = isLocalhost ? [
+                'gamelist.json',
+                '../gamelist.json',
+                '/gamelist.json'
+            ] : [
+                'https://storage.googleapis.com/bonjourarcade/gamelist.json'
+            ];
 
-            try {
-                const response = await fetch(gamelistUrl);
-                if (!response.ok) {
-                    throw new Error(`Failed to fetch gamelist: ${response.statusText}`);
+            let data = null;
+            let lastError = null;
+
+            // Try each path until one works
+            for (const path of possiblePaths) {
+                try {
+                    const url = path + cacheBuster;
+                    const response = await fetch(url);
+                    if (response.ok) {
+                        data = await response.json();
+                        break;
+                    }
+                } catch (error) {
+                    lastError = error;
+                    continue;
                 }
-
-                const data = await response.json();
-                
-                // Filter games: must have coverArt and pageUrl (for clickability)
-                games = (data.games || []).filter(game => 
-                    game.coverArt && 
-                    game.coverArt.trim() !== '' &&
-                    game.pageUrl && 
-                    game.pageUrl.trim() !== ''
-                );
-
-                if (games.length === 0) {
-                    throw new Error('No games with covers found');
-                }
-
-                // Shuffle games for variety
-                shuffleArray(games);
-
-                // Create columns
-                createColumns();
-                
-                // Start animation
-                animate();
-            } catch (error) {
-                console.error('Error loading games:', error);
-                document.getElementById('loadingScreen').querySelector('.loading-message').textContent = 
-                    'Erreur de chargement. Redirection...';
-                setTimeout(() => {
-                    window.location.href = '/';
-                }, 2000);
             }
+
+            if (!data) {
+                console.error('Error loading games from all paths:', lastError);
+                // Show error but don't redirect - show the 404 page anyway
+                const errorMsg = document.createElement('div');
+                errorMsg.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #fff; text-align: center; z-index: 300;';
+                errorMsg.innerHTML = '<p>Erreur de chargement des jeux</p><p style="font-size: 0.8rem; opacity: 0.7;">La page 404 s\'affiche quand même</p>';
+                document.body.appendChild(errorMsg);
+                return;
+            }
+                
+            // Filter games: must have coverArt and pageUrl (for clickability)
+            games = (data.games || []).filter(game => 
+                game.coverArt && 
+                game.coverArt.trim() !== '' &&
+                game.pageUrl && 
+                game.pageUrl.trim() !== ''
+            );
+
+            if (games.length === 0) {
+                console.warn('No games with covers found, but showing 404 page anyway');
+                // Don't redirect, just show the page
+                return;
+            }
+
+            // Shuffle games for variety
+            shuffleArray(games);
+
+            // Create columns
+            createColumns();
+            
+            // Start animation
+            animate();
         }
 
         // Shuffle array
@@ -650,7 +712,25 @@
         }, 2000);
 
         // Initialize on load
-        init();
+        function startInit() {
+            try {
+                init();
+            } catch (error) {
+                console.error('Error in init():', error);
+                // Even if init fails, show the 404 page
+                const errorOverlay = document.getElementById('errorOverlay');
+                const actionButtons = document.getElementById('actionButtons');
+                if (errorOverlay) errorOverlay.style.display = 'flex';
+                if (actionButtons) actionButtons.style.display = 'flex';
+            }
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', startInit);
+        } else {
+            // DOM already ready
+            startInit();
+        }
     </script>
 </body>
 </html>

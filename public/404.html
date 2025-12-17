@@ -431,12 +431,13 @@
                 return;
             }
                 
-            // Filter games: must have coverArt and pageUrl (for clickability)
+            // Filter games: must have coverArt and pageUrl (for clickability), and exclude games with problems
             games = (data.games || []).filter(game => 
                 game.coverArt && 
                 game.coverArt.trim() !== '' &&
                 game.pageUrl && 
-                game.pageUrl.trim() !== ''
+                game.pageUrl.trim() !== '' &&
+                !game.problem // Exclude games with problems
             );
 
             if (games.length === 0) {

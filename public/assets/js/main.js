@@ -866,10 +866,11 @@ function populateFeaturedGame(game) {
             fetchFeaturedGameLeaderboard(game.id);
         }, 100);
         
-        // Set up periodic refresh of leaderboard every 2 minutes
+        // Set up periodic refresh of leaderboard every 2 minutes (silent background refresh)
         const scoreRefreshInterval = setInterval(() => {
             console.log('Refreshing featured game leaderboard scores (2-minute interval)');
-            fetchFeaturedGameLeaderboard(game.id);
+            // Use silent refresh to avoid flashing "Chargement..." message
+            fetchFeaturedGameLeaderboard(game.id, true);
         }, 120000); // 2 minutes = 120,000 milliseconds
         
         // Store interval ID for cleanup if needed
@@ -939,10 +940,14 @@ function populateFeaturedGame(game) {
 }
 
 /**
- * Fetches and displays leaderboard for the featured game
+ * Fetches and displays leaderboard for the featured game.
+ * On initial load, shows a loading message.
+ * On periodic refresh (isRefresh=true), fetches in background and only updates
+ * the DOM if the scores actually changed, to avoid a flashing effect.
  * @param {string} gameId - The game ID to fetch scores for
+ * @param {boolean} [isRefresh=false] - Whether this is a silent background refresh
  */
-async function fetchFeaturedGameLeaderboard(gameId) {
+async function fetchFeaturedGameLeaderboard(gameId, isRefresh = false) {
     console.log(`fetchFeaturedGameLeaderboard called with gameId: ${gameId}`);
     const leaderboardContainer = document.getElementById('featured-game-leaderboard');
     if (!leaderboardContainer) {
@@ -956,8 +961,10 @@ async function fetchFeaturedGameLeaderboard(gameId) {
         return;
     }
 
-    // Show loading state
-    leaderboardContent.innerHTML = '<div class="featured-leaderboard-loading">Chargement...</div>';
+    // Show loading state only on initial load, not on silent refresh
+    if (!isRefresh) {
+        leaderboardContent.innerHTML = '<div class="featured-leaderboard-loading">Chargement...</div>';
+    }
     
     try {
         // Check if we're on localhost and use mock data
@@ -1058,7 +1065,10 @@ async function fetchFeaturedGameLeaderboard(gameId) {
             .slice(0, 10); // Show top 10 players
 
         if (sortedScores.length === 0) {
-            leaderboardContent.innerHTML = '<div class="featured-leaderboard-loading">Aucun score trouvé</div>';
+            // Only show "no scores" on initial load; keep existing content on silent refresh
+            if (!isRefresh) {
+                leaderboardContent.innerHTML = '<div class="featured-leaderboard-loading">Aucun score trouvé</div>';
+            }
             return;
         }
 
@@ -1089,6 +1099,39 @@ async function fetchFeaturedGameLeaderboard(gameId) {
             return `hsl(${hue}, 70%, 50%)`;
         }
         
+        // On refresh, compare with current scores to avoid unnecessary DOM updates
+        if (isRefresh) {
+            const currentEntries = leaderboardContent.querySelectorAll('.featured-leaderboard-entry');
+            let scoresChanged = false;
+
+            if (currentEntries.length !== sortedScores.length) {
+                scoresChanged = true;
+            } else {
+                for (let i = 0; i < sortedScores.length; i++) {
+                    const currentPlayer = currentEntries[i]?.querySelector('.featured-leaderboard-player')?.textContent;
+                    const currentScore = currentEntries[i]?.querySelector('.featured-leaderboard-score')?.textContent?.replace(/\s/g, '');
+
+                    const score = sortedScores[i];
+                    const isOldestPlayer = isOldestInTop10 && score.userId === oldestPlayerId;
+                    const newScoreText = `${isOldestPlayer ? '🍪 ' : ''}${score.score.toLocaleString()}`;
+
+                    const newPlayer = score.player;
+                    const normalizedNewScore = newScoreText.replace(/\s/g, '');
+
+                    if (currentPlayer !== newPlayer || currentScore !== normalizedNewScore) {
+                        scoresChanged = true;
+                        break;
+                    }
+                }
+            }
+
+            // Only update if scores have changed
+            if (!scoresChanged) {
+                console.log('Featured leaderboard refresh: no score changes detected, skipping DOM update');
+                return;
+            }
+        }
+
         // Build leaderboard HTML
         let leaderboardHTML = '';
         sortedScores.forEach((score, index) => {

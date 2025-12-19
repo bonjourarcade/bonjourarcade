@@ -19,14 +19,30 @@
             color: #fff;
         }
         
-        /* Ensure 404 text is always visible */
+        /* Hide 404 content initially - will be shown only if not redirecting */
         #errorOverlay {
+            display: none !important;
+        }
+        
+        #actionButtons {
+            display: none !important;
+        }
+        
+        #coversContainer {
+            display: none !important;
+        }
+        
+        /* Show 404 content when it's a real 404 */
+        #errorOverlay.show-404 {
             display: flex !important;
         }
         
-        /* Ensure buttons are always visible */
-        #actionButtons {
+        #actionButtons.show-404 {
             display: flex !important;
+        }
+        
+        #coversContainer.show-404 {
+            display: block !important;
         }
 
         /* Redirect overlay - reuses loading.js classes */
@@ -37,7 +53,7 @@
             width: 100%;
             height: 100%;
             z-index: 10000;
-            display: none;
+            display: flex;
             background-color: #000 !important;
             justify-content: center;
             align-items: center;
@@ -46,6 +62,11 @@
         .redirect-overlay.active {
             display: flex;
             background-color: #000 !important;
+        }
+        
+        /* Hide redirect overlay when showing 404 */
+        .redirect-overlay.hide {
+            display: none !important;
         }
         
         /* Prevent loading.js overlay from showing on 404 page */
@@ -329,6 +350,10 @@
                 // Extract the game_id from the path
                 const gameId = match[1];
                 
+                // Show redirect overlay immediately (it's already visible by default)
+                const redirectOverlay = document.getElementById('redirectOverlay');
+                redirectOverlay.classList.add('active');
+                
                 // Only load loading.js when we need to redirect
                 const script = document.createElement('script');
                 script.src = '/assets/js/loading.js';
@@ -341,8 +366,6 @@
                         mainOverlay.style.opacity = '0';
                         mainOverlay.classList.add('hidden');
                     }
-                    
-                    const redirectOverlay = document.getElementById('redirectOverlay');
                     
                     // Use loading.js function to create loading content
                     if (window.createLoadingOverlay) {
@@ -364,9 +387,6 @@
                             if (textElement) {
                                 textElement.textContent = 'Redirection en cours...';
                             }
-                            
-                            // Show the overlay
-                            redirectOverlay.classList.add('active');
                         }
                     }
                     
@@ -377,6 +397,19 @@
                 };
                 document.head.appendChild(script);
                 return;
+            } else {
+                // Not a redirect - hide redirect overlay and show 404 content
+                const redirectOverlay = document.getElementById('redirectOverlay');
+                redirectOverlay.classList.add('hide');
+                
+                // Show 404 content
+                const errorOverlay = document.getElementById('errorOverlay');
+                const actionButtons = document.getElementById('actionButtons');
+                const coversContainer = document.getElementById('coversContainer');
+                
+                if (errorOverlay) errorOverlay.classList.add('show-404');
+                if (actionButtons) actionButtons.classList.add('show-404');
+                if (coversContainer) coversContainer.classList.add('show-404');
             }
         })();
 
@@ -724,6 +757,15 @@
 
         // Initialize on load
         function startInit() {
+            // Only initialize if we're not redirecting
+            const path = window.location.pathname;
+            const match = path.match(/^\/b\/([^\/]+)$/);
+            
+            if (match) {
+                // We're redirecting, don't initialize 404 content
+                return;
+            }
+            
             try {
                 init();
             } catch (error) {
@@ -731,8 +773,11 @@
                 // Even if init fails, show the 404 page
                 const errorOverlay = document.getElementById('errorOverlay');
                 const actionButtons = document.getElementById('actionButtons');
-                if (errorOverlay) errorOverlay.style.display = 'flex';
-                if (actionButtons) actionButtons.style.display = 'flex';
+                const coversContainer = document.getElementById('coversContainer');
+                
+                if (errorOverlay) errorOverlay.classList.add('show-404');
+                if (actionButtons) actionButtons.classList.add('show-404');
+                if (coversContainer) coversContainer.classList.add('show-404');
             }
         }
 

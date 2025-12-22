@@ -47,7 +47,7 @@ import questionary
 
 # Configuration - Only keep what's needed
 DEFAULT_API_URL = 'https://api.convertkit.com/v3'
-BASE_URL = 'https://bonjourarcade-f11f7f.gitlab.io'
+BASE_URL = 'https://bonjourarcade.com'
 
 class NewsletterSender:
     def __init__(self, api_secret, api_url=DEFAULT_API_URL, dry_run=False, webhook_only=False, week_seed=None):
@@ -514,7 +514,7 @@ class NewsletterSender:
         from datetime import datetime
         import re
         cover_url = f'{BASE_URL}/games/{game_id}/cover.png'
-        play_url = f'https://f-l.ca/b/{game_id}'
+        play_url = f'{BASE_URL}/b/{game_id}'
         leaderboard_url = f'https://alloarcade.web.app/leaderboards/{game_id}'
         title = meta.get('title', game_id)
         # Remove parenthetical content for display in email body
@@ -712,7 +712,7 @@ class NewsletterSender:
             except Exception as e:
                 print(f"⚠️  Failed to parse webhook map JSON: {e}. Skipping webhook notification.")
                 return
-        play_url = f'https://f-l.ca/b/{game_id}'
+        play_url = f'{BASE_URL}/b/{game_id}'
         cover_url = f'{BASE_URL}/games/{game_id}/cover.png'
         leaderboard_url = f'https://alloarcade.web.app/leaderboards/{game_id}'
         title = meta.get('title', game_id)

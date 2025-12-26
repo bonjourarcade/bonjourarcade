@@ -572,7 +572,6 @@ class NewsletterSender:
                                 <li style="margin:6px 0;"><b>Développeur :</b> {developer}</li>
                                 <li style="margin:6px 0;"><b>Année :</b> {year}</li>
                                 <li style="margin:6px 0;"><b>Genre :</b> {genre}</li>
-                                <li style="margin:6px 0;"><b>Contrôles :</b> {controls}</li>
                             </ul>
                         </div>
                     </td>
@@ -750,7 +749,6 @@ Annonce du jeu de la semaine!
 {{b}}Développeur :{{b}} {developer}
 {{b}}Année :{{b}} {year}
 {{b}}Genre :{{b}} {genre}
-{{b}}Contrôles :{{b}} {controls}
 {{b}}Image :{{b}} {cover_url}
 
 {{b}}Jouez ici :{{b}} {play_url}

@@ -91,7 +91,7 @@
 202603:
   game_id: flicky
 202604:
-  game_id: gunsmoke
+  game_id: missile
 202605:
   game_id: snake
 202606:
@@ -204,4 +204,6 @@
   game_id: viewpoin
 202650:
   game_id: toki
+202651:
+  game_id: gunsmoke
 

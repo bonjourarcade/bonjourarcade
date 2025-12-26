@@ -1,0 +1,17 @@
+title: Hanii in the Sky
+developer: FACE
+year: 1989
+genre: Shooter
+controls:
+#  - 🕹️ Déplacer
+#  - 1️⃣  Tirer
+#  - 2️⃣  Bombe
+#  - 3️⃣ ...
+#  - 4️⃣ ...
+
+#to_start: Select -> Start
+
+enable_score: true
+hide: yes
+
+added: 2025-12-26

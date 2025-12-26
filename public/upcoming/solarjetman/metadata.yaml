@@ -1,0 +1,17 @@
+title: "Solar Jetman: Hunt for the golden Warpship"
+developer: Zippo Games
+year: 1990
+genre: Action, Sci-fi
+controls:
+#  - 🕹️ Déplacer
+#  - 1️⃣  Tirer
+#  - 2️⃣  Bombe
+#  - 3️⃣ ...
+#  - 4️⃣ ...
+
+#to_start: Select -> Start
+
+enable_score: true
+hide: yes
+
+added: 2025-12-26

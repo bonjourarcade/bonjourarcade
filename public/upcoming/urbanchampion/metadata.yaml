@@ -1,0 +1,17 @@
+title: Urban Champion
+developer: Nintendo R&D1
+year: 1984
+genre: Fighting
+controls:
+#  - 🕹️ Déplacer
+#  - 1️⃣  Tirer
+#  - 2️⃣  Bombe
+#  - 3️⃣ ...
+#  - 4️⃣ ...
+
+#to_start: Select -> Start
+
+enable_score: true
+hide: yes
+
+added: 2025-12-26

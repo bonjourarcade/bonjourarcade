@@ -3,12 +3,12 @@ import os
 
 def generate_gamelist():
     """
-    Scans for JSDOS games in the 'public/dos' folder and generates a
-    gamelist.json file in 'public/dos'.
+    Scans for JSDOS games in the 'public/dos-games' folder and generates a
+    gamelist.json file in 'public/dos-games'.
     """
     games = []
     public_dir = 'public'
-    dos_dir = os.path.join(public_dir, 'dos')
+    dos_dir = os.path.join(public_dir, 'dos-games')
 
     if os.path.isdir(dos_dir):
         for filename in sorted(os.listdir(dos_dir)):
@@ -17,11 +17,11 @@ def generate_gamelist():
                 game_name = os.path.splitext(filename)[0].replace('_', ' ').replace('-', ' ').title()
                 games.append({
                     'name': game_name,
-                    # The path is relative to the public/dos/index.html file
+                    # The path is relative to the public/dos-games/index.html file
                     'path': filename
                 })
 
-    # Ensure the 'public/dos' directory exists
+    # Ensure the 'public/dos-games' directory exists
     if not os.path.exists(dos_dir):
         os.makedirs(dos_dir)
 

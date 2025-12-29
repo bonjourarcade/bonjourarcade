@@ -12,8 +12,8 @@ from datetime import datetime
 def get_current_week_seed():
     """Get the current week's seed in YYYYWW format."""
     now = datetime.now()
-    week = now.isocalendar()[1]
-    return f"{now.year}{week:02d}"
+    iso_year, week, _ = now.isocalendar()
+    return f"{iso_year}{week:02d}"
 
 def get_game_from_seed(seed):
     """Get the game info (title and game_id) that would be selected for a given seed using the upcoming.yaml file."""

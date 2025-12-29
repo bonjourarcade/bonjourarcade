@@ -41,6 +41,7 @@ pages:
         #- scripts/generate_gamelist_parallel.sh
         - scripts/generate_gamelist_sequential.sh
         - scripts/generate_thumbnails.sh
+        - scripts/get_current_week_game.py
 
 send_newsletter:
   stage: newsletter

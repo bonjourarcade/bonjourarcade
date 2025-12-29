@@ -190,22 +190,22 @@ async function fetchGameData() {
         let previousWeekGames = []; // Array to store previous week games with their week numbers
         try {
             // Get current week in YYYYWW format
-            function getISOWeek(date) {
+            function getISOWeekInfo(date) {
                 const target = new Date(date.valueOf());
                 const dayNr = (date.getDay() + 6) % 7;
                 target.setDate(target.getDate() - dayNr + 3);
+                const isoYear = target.getFullYear();
                 const firstThursday = target.valueOf();
                 target.setMonth(0, 1);
                 if (target.getDay() !== 4) {
                     target.setMonth(0, 1 + ((4 - target.getDay()) + 7) % 7);
                 }
                 const weekNumber = 1 + Math.ceil((firstThursday - target) / 604800000);
-                return weekNumber;
+                return { week: weekNumber, year: isoYear };
             }
             
             const now = new Date();
-            const currentYear = now.getFullYear();
-            const currentWeek = getISOWeek(now);
+            const { week: currentWeek, year: currentYear } = getISOWeekInfo(now);
             const currentWeekSeed = currentYear * 100 + currentWeek;
             
             const predictionsUrl = '/upcoming/upcoming.yaml';

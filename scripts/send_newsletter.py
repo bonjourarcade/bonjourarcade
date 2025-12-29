@@ -61,38 +61,37 @@ class NewsletterSender:
         else:
             from datetime import datetime
             now = datetime.now()
-            week = now.isocalendar()[1]
-            plinko_seed = f"{now.year}{week:02d}"
+            iso_year, week, _ = now.isocalendar()
+            plinko_seed = f"{iso_year}{week:02d}"
         self.plinko_url = f"https://f-l.ca/plinko/{plinko_seed}"
 
     def get_previous_week_seed(self, current_seed=None):
         """Calculate the previous week's seed in YYYYWW format."""
         if current_seed:
-            # Parse the current seed to get year and week
             try:
                 year = int(current_seed[:4])
                 week = int(current_seed[4:])
-                # Go back one week
-                if week == 1:
-                    # If it's week 1, go to last week of previous year
-                    prev_year = year - 1
-                    # Calculate the last week of the previous year
-                    # This is a simplified approach - in reality, the last week might be 52 or 53
-                    prev_week = 52
-                else:
-                    prev_year = year
-                    prev_week = week - 1
-                return f"{prev_year}{prev_week:02d}"
+                
+                # Create a date object for the Thursday of the given ISO week.
+                d = datetime.strptime(f'{year}-{week}-4', '%G-%V-%u')
+                
+                # Go back one week from that date.
+                previous_week_date = d - timedelta(weeks=1)
+                
+                # Get the ISO calendar info for the new date.
+                iso_year, iso_week, _ = previous_week_date.isocalendar()
+                return f"{iso_year}{iso_week:02d}"
+
             except (ValueError, IndexError):
-                print(f"⚠️  Warning: Invalid seed format '{current_seed}', using current week calculation")
-                pass
+                print(f"⚠️  Warning: Invalid seed format '{current_seed}', using current date for previous week calculation.")
+                # Fallthrough to fallback using current date
         
-        # Fallback to current week calculation
+        # Fallback to current week calculation if no seed is provided or seed is invalid
         now = datetime.now()
         # Go back one week
         previous_week = now - timedelta(weeks=1)
-        week = previous_week.isocalendar()[1]
-        return f"{previous_week.year}{week:02d}"
+        iso_year, week, _ = previous_week.isocalendar()
+        return f"{iso_year}{week:02d}"
 
     def get_game_id_from_seed(self, seed):
         """Get the game_id that would be selected for a given seed using the upcoming.yaml file."""
@@ -408,8 +407,8 @@ class NewsletterSender:
                 print(f"🎯 Using specified week seed: {seed}")
             else:
                 now = datetime.now()
-                week = now.isocalendar()[1]
-                seed = f"{now.year}{week:02d}"
+                iso_year, week, _ = now.isocalendar()
+                seed = f"{iso_year}{week:02d}"
                 print(f"🎯 Using current week seed: {seed}")
             
             # Get the game_id directly from upcoming.yaml
@@ -429,8 +428,8 @@ class NewsletterSender:
         try:
             # Get current week's seed
             now = datetime.now()
-            week = now.isocalendar()[1]
-            current_seed = f"{now.year}{week:02d}"
+            iso_year, week, _ = now.isocalendar()
+            current_seed = f"{iso_year}{week:02d}"
             
             # Get the game title for the current seed
             game_title = self.get_game_from_seed(current_seed)
@@ -788,12 +787,12 @@ Bonne semaine ! ☀️
                     "content": genre
                 }
             })
-            widgets.append({
-                "keyValue": {
-                    "topLabel": "Contrôles",
-                    "content": controls
-                }
-            })
+            #widgets.append({
+            #    "keyValue": {
+            #        "topLabel": "Contrôles",
+            #        "content": controls
+            #    }
+            #})
             
             # Add last week's highlight if available
             if last_week_highlight:

@@ -3,4 +3,10 @@ developer: Nintendo
 year: 1989
 genre: Puzzle
 enable_score: true
+controls:
+  - 🕹️ Déplacer
+  - 1️⃣  Rotation anti-horaire
+  - 2️⃣  Rotation horaire
+
+to_start: Start
 announcement_message: "Tetris est, probablement, le jeu vidéo le plus apprécié au monde. Il a su charmer petits et grands dès sa sortie en 1989 et demeure à ce jour l'un des jeux vidéos les plus populaires et compétitifs. Le défi consiste initialement à utiliser les blocs qui tombent pour faire des lignes horizontales au fond de l'aire de jeu. Une fois que vous aurez compris le principe, vous peinerez à déposer votre manette et à cesser de chanter sa musique!"

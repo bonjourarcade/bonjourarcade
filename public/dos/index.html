@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>DOS Games</title>
+    <link rel="stylesheet" href="https://v8.js-dos.com/latest/js-dos.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #1a1a1a;
+            color: #f0f0f0;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        #game-selection {
+            text-align: center;
+        }
+        h1 {
+            font-size: 3rem;
+            color: #ffc107;
+        }
+        #game-list {
+            list-style: none;
+            padding: 0;
+        }
+        #game-list li {
+            margin: 1rem 0;
+        }
+        #game-list a {
+            font-size: 1.5rem;
+            color: #f0f0f0;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border: 2px solid #f0f0f0;
+            border-radius: 5px;
+            transition: all 0.2s ease-in-out;
+        }
+        #game-list a:hover {
+            background-color: #ffc107;
+            color: #1a1a1a;
+            border-color: #ffc107;
+        }
+        #dos-container {
+            width: 100vw;
+            height: 100vh;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-selection">
+        <h1>Select a Game</h1>
+        <ul id="game-list">
+            <!--
+              To add a new DOS game to this list:
+              1. Add a new <li> item below.
+              2. Set the `data-game-path` attribute to the path of the .jsdos file
+                 relative to the `public` directory.
+              3. Add the name of the game as the link text.
+
+              Example:
+              <li><a href="#" data-game-path="../newgame/newgame.jsdos">New Awesome Game</a></li>
+            -->
+        </ul>
+    </div>
+
+    <div id="dos-container"></div>
+
+    <script src="https://v8.js-dos.com/latest/js-dos.js"></script>
+    <script>
+        const gameSelection = document.getElementById("game-selection");
+        const gameList = document.getElementById("game-list");
+        const dosContainer = document.getElementById("dos-container");
+
+        function launchGame(path) {
+            gameSelection.style.display = "none";
+            dosContainer.style.display = "block";
+
+            Dos(dosContainer, {
+                url: path,
+                theme: "dark",
+                autostart: true,
+                mouseCapture: true,
+            }).ready(ci => {
+                window.ci = ci;
+            });
+        }
+
+        function buildGameList(games) {
+            games.forEach(game => {
+                const li = document.createElement("li");
+                const a = document.createElement("a");
+                // Using a query string is a cleaner way to handle launching
+                a.href = `?game=${encodeURIComponent(game.path)}`;
+                a.textContent = game.name;
+                li.appendChild(a);
+                gameList.appendChild(li);
+            });
+        }
+
+        // Check for a game in the URL query string
+        const urlParams = new URLSearchParams(window.location.search);
+        const gamePath = urlParams.get('game');
+
+        if (gamePath) {
+            launchGame(decodeURIComponent(gamePath));
+        } else {
+            // If no game in query string, fetch the list and build the menu
+            fetch('gamelist.json')
+                .then(response => response.json())
+                .then(games => {
+                    buildGameList(games);
+                })
+                .catch(error => {
+                    console.error('Error loading gamelist:', error);
+                    gameList.innerHTML = '<li>Error loading game list.</li>';
+                });
+        }
+    </script>
+</body>
+</html>

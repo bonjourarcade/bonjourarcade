@@ -90,14 +90,14 @@ if [ -n "$ROMS_MANIFEST_URL" ]; then
     fi
     ROM_FILES=$(cat "$TEMP_MANIFEST" \
         | grep -v "/bios/" \
-        | grep -viE '(^|/)(README|upload-files)(\.|$)' \
+        | grep -viE '(^|/)(README|upload-files|roms-manifest)(\.|$)' \
         | grep -viE '\\.(md|markdown|txt|sh|bash|zsh|ps1|bat)$' \
         | sort)
 elif [ -n "$ROMS_MANIFEST_PATH" ] && [ -f "$ROMS_MANIFEST_PATH" ]; then
     echo -e "${BLUE}📄 Using local manifest file: $ROMS_MANIFEST_PATH${NC}"
     ROM_FILES=$(cat "$ROMS_MANIFEST_PATH" \
         | grep -v "/bios/" \
-        | grep -viE '(^|/)(README|upload-files)(\.|$)' \
+        | grep -viE '(^|/)(README|upload-files|roms-manifest)(\.|$)' \
         | grep -viE '\\.(md|markdown|txt|sh|bash|zsh|ps1|bat)$' \
         | sort)
 else
@@ -105,7 +105,7 @@ else
     echo -e "${BLUE}🗂️  Scanning roms directory: $ROMS_DIR${NC}"
     ROM_FILES=$(find -L "$ROMS_DIR" -maxdepth 2 -type f -not -path "*/\.*" \
         | grep -v "/bios/" \
-        | grep -viE '(^|/)(README|upload-files)(\.|$)' \
+        | grep -viE '(^|/)(README|upload-files|roms-manifest)(\.|$)' \
         | grep -viE '\\.(md|markdown|txt|sh|bash|zsh|ps1|bat)$' \
         | sed "s#^$ROMS_DIR/##" \
         | sort)

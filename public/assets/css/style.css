@@ -1172,6 +1172,24 @@ body.theme-dark .footer-emoji-link:hover {
     height: auto;
     display: block;
     margin: 0 auto; /* Center the logo */
+    transition: transform 0.2s ease-in-out;
+}
+
+.header-flex .header-logo:hover {
+    transform: rotate(-5deg);
+}
+
+.logo-spin {
+    animation: spin 0.5s ease-in-out;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
 }
 .header-actions {
     display: flex;

@@ -142,6 +142,27 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Initialize newsletter functionality
     initializeNewsletter();
+
+    // Clear search when logo is clicked
+    const logo = document.querySelector('.header-logo');
+    const searchInput = document.getElementById('game-id-input');
+
+    if (logo && searchInput) {
+        logo.style.cursor = 'pointer'; // Make it look clickable
+        logo.addEventListener('click', () => {
+            searchInput.value = '';
+            // Manually trigger the input event to clear the search results
+            searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+
+            // Add spin animation
+            logo.classList.add('logo-spin');
+
+            // Remove the class after the animation finishes
+            logo.addEventListener('animationend', () => {
+                logo.classList.remove('logo-spin');
+            }, { once: true });
+        });
+    }
 });
 
 /**

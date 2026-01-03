@@ -1660,7 +1660,7 @@
                 justify-content: center;
                 gap: 6px;
             `;
-            backToScreensaverBtn.innerHTML = '🏠 Back to Screensaver';
+            backToScreensaverBtn.innerHTML = '🏠 Retour aux paramètres';
             backToScreensaverBtn.addEventListener('click', () => {
                 exitScreensaverMode(true); // true = redirect to screensaver
             });
@@ -1682,7 +1682,7 @@
                 justify-content: center;
                 gap: 6px;
             `;
-            disableScreensaverBtn.innerHTML = '⏹️ Disable Screensaver';
+            disableScreensaverBtn.innerHTML = '⏹️ Rester sur ce jeu';
             disableScreensaverBtn.addEventListener('click', () => {
                 disableScreensaverMode();
             });
@@ -1705,7 +1705,7 @@
                 justify-content: center;
                 gap: 6px;
             `;
-            nextGameBtn.innerHTML = '⏭️ Next Game';
+            nextGameBtn.innerHTML = '⏭️ Prochain jeu';
             nextGameBtn.addEventListener('click', () => {
                 console.log('Manual next game requested');
                 window.location.href = '/randomgame/';

@@ -682,6 +682,7 @@
         let dragStartTime = 0;
         let isCardEntering = false; // Track if card is currently entering from top
         let currentGameOfTheWeekId = null; // Store the current game of the week ID
+        let hasLoaded = false;
 
         // Theme management
         function initTheme() {
@@ -1751,6 +1752,8 @@
 
         // Load games
         async function loadGames() {
+            if (hasLoaded) return;
+            hasLoaded = true;
             // Reset all state variables on page load/refresh
             passedGameIds.clear();
             currentGameIndex = 0;
@@ -1842,6 +1845,16 @@
         }
 
         // Initialize
+        window.addEventListener('pageshow', function(event) {
+            // Pageshow is fired when navigating back to the page.
+            // We want to reload the games to ensure the state is fresh,
+            // especially after playing a game and returning.
+            if (event.persisted) {
+                // If the page is from the cache, we absolutely need to reload.
+                hasLoaded = false;
+                loadGames();
+            }
+        });
         initTheme();
         // Remove initial hints on mobile
         if (isMobileDevice()) {

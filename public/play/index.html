@@ -1152,6 +1152,8 @@
                 console.log(`Setting EJS Vars - Core: ${selectedGame.core}, ROM: ${selectedGame.romPath}`);
                 window.EJS_player = "#game";        // Emulator renders in the #game div
                 window.EJS_core = selectedGame.core;    // Core name from gamelist.json
+                window.EJS_gameName = selectedGame.title;
+                window.EJS_gameID = gameId;
                 window.EJS_gameUrl = selectedGame.romPath; // ROM path from gamelist.json
                 window.EJS_loadStateURL = selectedGame.saveState !== '' ? selectedGame.saveState : undefined;
 

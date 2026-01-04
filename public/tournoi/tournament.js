@@ -811,29 +811,16 @@ const countdownText = document.getElementById('countdown-text');
             }).sort((a, b) => b.totalScore - a.totalScore); // Sort by cumulative score
 
             scoreboardEntriesEl.innerHTML = cumulativeScores.map((p, i) => {
-                let statusText = '';
                 let statusClass = '';
+                // No statusText during pause, as requested by user
+                
                 if (p.eliminated) {
-                    statusText = 'Éliminé (précédent)'; // Clarified status
-                    statusClass = 'eliminated';
-                } else if (nextCutoff !== undefined && i < nextCutoff) { // Qualifies for the next round
-                    statusText = 'Qualifié';
-                    statusClass = 'safe';
-                } else if (nextCutoff !== undefined) {
-                    // This is the player in the 'danger' zone
-                    // If it's the pause AFTER warmup (currentRoundIndex is 0),
-                    // they are not 'eliminated' but just didn't make the cut for the *next* round.
-                    if (currentRoundIndex === 0) { // Specific text for pause after warmup
-                        statusText = 'Non qualifié pour la ronde suivante';
-                    } else { // Normal elimination round pause
-                        statusText = 'Éliminé (cette ronde)';
-                    }
-                    statusClass = 'danger';
-                } else { // Handle cases where nextCutoff might be undefined (e.g., final round pause)
-                    statusText = 'N/A';
-                    statusClass = '';
+                    statusClass = 'eliminated'; // Only mark truly eliminated players
                 }
-                return `<div class="scoreboard-entry ${statusClass}"><span class="rank">${i + 1}.</span><span class="player-name">${p.name}</span><span class="score">${p.totalScore.toLocaleString()}</span><span class="status">${statusText}</span></div>`;
+                // Suppress safe/danger classes for next round qualification during pause
+                // No 'Éliminé (cette ronde)' or 'Non qualifié pour la ronde suivante' text here either
+                
+                return `<div class="scoreboard-entry ${statusClass}"><span class="rank">${i + 1}.</span><span class="player-name">${p.name}</span><span class="score">${p.totalScore.toLocaleString()}</span></div>`; // Removed <span class="status">
             }).join('');
 
         } else { // Normal round display
@@ -848,22 +835,22 @@ const countdownText = document.getElementById('countdown-text');
 
             scoreboardEntriesEl.innerHTML = playersArray.map((p, i) => {
                 let statusClass = '';
-                let statusText = ''; // New statusText for during round
+                // let statusText = ''; // Removed statusText for during round as well, per user request
                 if (p.eliminated) {
                     statusClass = 'eliminated';
-                    statusText = 'Éliminé'; // During round, just show "Eliminé"
+                    // statusText = 'Éliminé';
                 } else if (isEliminationRound && cutoff > 0) {
-                    // Find the player's rank among non-eliminated players
                     const activeRank = playersArray.filter(pl => !pl.eliminated).findIndex(pl => pl.name === p.name);
                     if (activeRank < cutoff) {
                         statusClass = 'safe';
-                        statusText = 'Qualifié'; // During round, show "Qualifié"
+                        // statusText = 'Qualifié';
                     } else {
                         statusClass = 'danger';
-                        statusText = 'Non qualifié'; // During round, show "Non qualifié"
+                        // statusText = 'Non qualifié';
                     }
                 }
-                return `<div class="scoreboard-entry ${statusClass}"><span class="rank">${i + 1}.</span><span class="player-name">${p.name}</span><span class="score">${p.score.toLocaleString()}</span>${statusText ? `<span class="status">${statusText}</span>` : ''}</div>`;
+                // Removed `${statusText ? `<span class="status">${statusText}</span>` : ''}`
+                return `<div class="scoreboard-entry ${statusClass}"><span class="rank">${i + 1}.</span><span class="player-name">${p.name}</span><span class="score">${p.score.toLocaleString()}</span></div>`;
             }).join('');
         }
     }

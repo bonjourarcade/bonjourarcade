@@ -863,6 +863,8 @@ const countdownText = document.getElementById('countdown-text');
             }
             scoreboardEntriesEl.innerHTML = scoreboardHTML;
         } // Correctly closes the else block.
+    } // Correctly closes the renderScoreboard function.
+
     function startScoreFetching() { stopScoreFetching(); fetchScores(); const i = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 5000 : 30000; scoreFetchingInterval = setInterval(fetchScores, i); } 
     function stopScoreFetching() { clearInterval(scoreFetchingInterval); }
 

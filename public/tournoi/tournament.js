@@ -1090,11 +1090,23 @@ const countdownText = document.getElementById('countdown-text');
 
 
         // --- Podium Display ---
-        let podiumHtml = '<h3 style="text-align: center;">Podium</h3><div id="podium-container" style="text-align: center;"><div id="podium-third-place"></div><div id="podium-second-place"></div><div id="podium-first-place"></div></div>';
-        winnerResultsEl.innerHTML += podiumHtml; // Add the container for podium
-        const podiumFirstPlace = document.getElementById('podium-first-place');
-        const podiumSecondPlace = document.getElementById('podium-second-place');
-        const podiumThirdPlace = document.getElementById('podium-third-place');
+        const podiumContainer = document.createElement('div');
+        podiumContainer.id = 'podium-container';
+        podiumContainer.style.textAlign = 'center';
+        winnerResultsEl.innerHTML += '<h3 style="text-align: center;">Podium</h3>';
+        winnerResultsEl.appendChild(podiumContainer);
+
+        const podiumFirstPlace = document.createElement('div');
+        podiumFirstPlace.id = 'podium-first-place';
+        const podiumSecondPlace = document.createElement('div');
+        podiumSecondPlace.id = 'podium-second-place';
+        const podiumThirdPlace = document.createElement('div');
+        podiumThirdPlace.id = 'podium-third-place';
+
+        // Append in visual order: 1st, 2nd, 3rd (top to bottom)
+        podiumContainer.appendChild(podiumFirstPlace);
+        podiumContainer.appendChild(podiumSecondPlace);
+        podiumContainer.appendChild(podiumThirdPlace);
 
         const podiumEmojis = ['🥇', '🥈', '🥉'];
         const medalColorsClasses = ['gold', 'silver', 'bronze'];
@@ -1138,11 +1150,13 @@ const countdownText = document.getElementById('countdown-text');
         if (cumulativeScores.length > 0) {
             await delay(3000); // Delay before cumulative section
             winnerResultsEl.innerHTML += '<h3 style="margin-top: 30px; text-align: center;">Champion Cumulatif</h3>';
-            let cumulativeChampionHtml = '<div id="cumulative-champion-container" style="text-align: center;"></div>';
-            winnerResultsEl.innerHTML += cumulativeChampionHtml;
-            const cumulativeChampionContainer = document.getElementById('cumulative-champion-container');
+            let cumulativeChampionContainer = document.createElement('div');
+            cumulativeChampionContainer.id = 'cumulative-champion-container';
+            cumulativeChampionContainer.style.textAlign = 'center';
+            winnerResultsEl.appendChild(cumulativeChampionContainer);
 
             const overallChampion = cumulativeScores[0];
+            console.log("Overall Cumulative Champion:", overallChampion); // Debugging
             await delay(1000); // Delay before showing cumulative champion
             const championElement = document.createElement('div');
             championElement.className = `winner-entry celebrate-winner fade-in-up`; // Add celebration and animation class

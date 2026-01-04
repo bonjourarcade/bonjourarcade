@@ -1022,7 +1022,13 @@ const countdownText = document.getElementById('countdown-text');
 
         renderScoreboard();
         saveState();
-        startPause();
+
+        // New condition to skip pause after the final round
+        if (roundIndex === tournamentState.games.length - 1) {
+            endTournament();
+        } else {
+            startPause();
+        }
     }
     
 

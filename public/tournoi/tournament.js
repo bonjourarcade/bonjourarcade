@@ -1275,7 +1275,10 @@ const countdownText = document.getElementById('countdown-text');
 
     async function fetchGamelist() {
         try {
-            const response = await fetch('/gamelist.json');
+            const cacheBuster = '?v=' + new Date().getTime();
+            const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+            const gamelistUrl = isLocalhost ? '/gamelist.json' + cacheBuster : 'https://storage.googleapis.com/bonjourarcade/gamelist.json' + cacheBuster;
+            const response = await fetch(gamelistUrl);
             const data = await response.json();
             gamelist = data.games || [];
         } catch (error) {

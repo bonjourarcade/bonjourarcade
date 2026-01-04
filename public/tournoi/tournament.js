@@ -977,7 +977,8 @@ const countdownText = document.getElementById('countdown-text');
         if (roundIndex === tournamentState.games.length - 1) { // Final round
             roundSubtitleEl.textContent = "Finale";
         } else if (roundIndex > 0) {
-            const playersToQualify = tournamentState.cutoffs[roundIndex + 1];
+            // Use the current round's cutoff, which is already set in startNextRound()
+            const playersToQualify = tournamentState.currentCutoff;
             roundSubtitleEl.textContent = `Top ${playersToQualify} se qualifient`;
         } else {
             roundSubtitleEl.textContent = "Échauffement";

@@ -783,7 +783,7 @@ const countdownText = document.getElementById('countdown-text');
             const r = await fetch('https://us-central1-alloarcade.cloudfunctions.net/listGameScores', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ data: { timeRange: "week", gameId: gameId } }) });
             if (!r.ok) throw new Error(`API response not OK: ${r.status}`);
             const apiResponse = await r.json();
-            const scores = apiResponse.data;
+            const scores = apiResponse.result.scores;
             const roundStartTime = new Date(tournamentState.roundStartTime);
             scores.forEach(s => {
                 if (new Date(s.timestamp) > roundStartTime) {

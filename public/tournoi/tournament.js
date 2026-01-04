@@ -819,8 +819,15 @@ const countdownText = document.getElementById('countdown-text');
                 } else if (nextCutoff !== undefined && i < nextCutoff) { // Qualifies for the next round
                     statusText = 'Qualifié';
                     statusClass = 'safe';
-                } else if (nextCutoff !== undefined) { // Does not qualify
-                    statusText = 'Éliminé (cette ronde)'; // Clarified status
+                } else if (nextCutoff !== undefined) {
+                    // This is the player in the 'danger' zone
+                    // If it's the pause AFTER warmup (currentRoundIndex is 0),
+                    // they are not 'eliminated' but just didn't make the cut for the *next* round.
+                    if (currentRoundIndex === 0) { // Specific text for pause after warmup
+                        statusText = 'Non qualifié pour la ronde suivante';
+                    } else { // Normal elimination round pause
+                        statusText = 'Éliminé (cette ronde)';
+                    }
                     statusClass = 'danger';
                 } else { // Handle cases where nextCutoff might be undefined (e.g., final round pause)
                     statusText = 'N/A';

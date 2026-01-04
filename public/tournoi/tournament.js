@@ -815,6 +815,9 @@ const countdownText = document.getElementById('countdown-text');
 
             let scoreboardHTML = '';
 
+            // Add clarification for cumulative scores
+            scoreboardHTML += '<div class="cumulative-score-clarification">Scores cumulés jusqu\'à la ronde actuelle.</div>';
+
             // Section for Active Players
             if (activePlayersCumulative.length > 0) {
                 scoreboardHTML += '<div class="scoreboard-section-title">Joueurs Actifs</div>';

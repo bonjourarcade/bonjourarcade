@@ -159,6 +159,14 @@ textarea { resize: vertical; }
     border-bottom-color: #dc3545;
     margin-top: 30px; /* More space before eliminated section */
 }
+
+.cumulative-score-clarification {
+    font-size: 0.9em;
+    color: #ccc;
+    text-align: center;
+    margin-bottom: 15px;
+    font-style: italic;
+}
 .scoreboard-entry { 
     display: flex; 
     align-items: center; 

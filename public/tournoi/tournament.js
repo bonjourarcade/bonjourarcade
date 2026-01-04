@@ -1088,8 +1088,10 @@ const countdownText = document.getElementById('countdown-text');
         let winnerHTML = '<h3 style="text-align: center;">Podium</h3>';
         winnerHTML += '<div style="text-align: center;">'; // Add centering div for podium
         const podiumEmojis = ['🥇', '🥈', '🥉'];
+        const medalColorsClasses = ['gold', 'silver', 'bronze']; // New array for classes
         finalRoundScores.slice(0, 3).forEach((player, i) => {
-            winnerHTML += `<div class="winner-entry"><span class="rank">${podiumEmojis[i]}</span><span class="player-name">${player.name}</span></div>`;
+            const medalClass = medalColorsClasses[i] || ''; // Get class based on rank
+            winnerHTML += `<div class="winner-entry ${medalClass}"><span class="rank">${podiumEmojis[i]}</span><span class="player-name">${player.name}</span></div>`;
         });
         winnerHTML += '</div>'; // Close centering div
 

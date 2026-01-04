@@ -244,6 +244,11 @@ textarea { resize: vertical; }
 .winner-entry .score { font-family: monospace; color: #ddd; }
 #restart-tournament-btn { margin-top: 20px; }
 
+/* Medal Colors for Winner View */
+.winner-entry.gold { color: #FFD700; } /* Gold */
+.winner-entry.silver { color: #C0C0C0; } /* Silver */
+.winner-entry.bronze { color: #CD7F32; } /* Bronze */
+
 #winner-view .modal-content {
     max-height: 80vh;
     overflow-y: auto;

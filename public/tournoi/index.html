@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tournoi BonjourArcade</title>
+    <link rel="stylesheet" href="tournament.css">
+</head>
+<body>
+    <div id="app-container">
+        <!-- Setup View -->
+        <div id="setup-view">
+            <h1>Configuration du Tournoi</h1>
+            <div class="setup-form">
+                <div class="form-group">
+                    <label for="game-ids">Jeux du tournoi (un ID de jeu par ligne):</label>
+                    <textarea id="game-ids" rows="5" placeholder="pacman
+galaga
+dkong
+frogger"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="round-duration">Durée d'une ronde (minutes):</label>
+                    <input type="number" id="round-duration" value="10" min="0.1" step="0.5">
+                </div>
+                <div class="form-group">
+                    <label for="pause-duration">Durée d'une pause (minutes):</label>
+                    <input type="number" id="pause-duration" value="2" min="0" step="0.5">
+                </div>
+                <button id="start-tournament-btn">Démarrer le Tournoi</button>
+            </div>
+        </div>
+
+        <!-- Tournament View (Hidden by default) -->
+        <div id="tournament-view" style="display: none;">
+            <header class="tournament-header">
+                <div class="header-left-panel">
+                    <h1 id="round-title"></h1>
+                    <p id="round-subtitle"></p>
+                </div>
+                <div class="header-center-panel">
+                    <a id="game-link" href="" target="_blank">
+                        <span id="game-link-text"></span>
+                    </a>
+                </div>
+                <div class="header-right-panel">
+                    <div id="timer-container">
+                        <div id="timer-label">Temps restant</div>
+                        <div id="timer">00:00</div>
+                    </div>
+                </div>
+            </header>
+            <main class="tournament-main">
+                <div id="game-info-container">
+                    <h3 id="game-title"></h3>
+                    <img id="game-cover" src="" alt="Couverture du jeu">
+                </div>
+                <div id="scoreboard-container">
+                    <div id="scoreboard-entries"></div>
+                </div>
+            </main>
+            <footer class="tournament-footer">
+                <button id="cancel-tournament-btn" class="footer-btn">Annuler le tournoi</button>
+                <div id="round-tabs-container"></div>
+            </footer>
+        </div>
+
+        <!-- Elimination Modal -->
+        <div id="elimination-modal" class="modal-overlay" style="display: none;">
+            <div class="modal-content">
+                <h2 id="modal-title">Configuration de la Ronde</h2>
+                <p id="modal-text">Combien de joueurs se qualifieront à la fin de cette ronde ?</p>
+                <p id="cutoff-suggestion"></p>
+                <div class="form-group">
+                    <label for="cutoff-number">Garder le Top :</label>
+                    <input type="number" id="cutoff-number" min="1">
+                </div>
+                <button id="confirm-elimination-btn">Démarrer la Ronde</button>
+            </div>
+        </div>
+
+        <!-- Winner Screen -->
+        <div id="winner-view" class="modal-overlay" style="display: none;">
+            <div class="modal-content">
+                <h2>Tournoi Terminé !</h2>
+                <div id="winner-results"></div>
+                <hr style="margin: 20px 0;">
+                <div id="review-container">
+                    <h4>Revoir les rondes</h4>
+                    <div id="review-tabs"></div>
+                    <div id="review-scoreboard"></div>
+                </div>
+                <button id="restart-tournament-btn">Nouveau Tournoi</button>
+            </div>
+        </div>
+
+    </div>
+
+    <audio id="end-round-sound" src="assets/end_round.mp3" preload="auto"></audio>
+    <audio id="go-sound" src="assets/go.mp3" preload="auto"></audio>
+    <script src="tournament.js"></script>
+</body>
+</html>

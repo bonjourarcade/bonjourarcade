@@ -782,7 +782,8 @@ const countdownText = document.getElementById('countdown-text');
         try {
             const r = await fetch('https://us-central1-alloarcade.cloudfunctions.net/listGameScores', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ data: { timeRange: "week", gameId: gameId } }) });
             if (!r.ok) throw new Error(`API response not OK: ${r.status}`);
-            const scores = await r.json();
+            const apiResponse = await r.json();
+            const scores = apiResponse.data;
             const roundStartTime = new Date(tournamentState.roundStartTime);
             scores.forEach(s => {
                 if (new Date(s.timestamp) > roundStartTime) {
@@ -1000,7 +1001,7 @@ const countdownText = document.getElementById('countdown-text');
         }, endRound);
     }
     
-    function endRound() {
+    async function endRound() {
         stopScoreFetching();
         endRoundSound.play().catch(e => console.log("Audio play failed, user interaction needed."));
 
@@ -1042,6 +1043,7 @@ const countdownText = document.getElementById('countdown-text');
         if (roundIndex === tournamentState.games.length - 1) {
             endTournament();
         } else {
+            await fetchScores(); // Fetch scores one last time before pausing
             startPause();
         }
     }

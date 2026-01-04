@@ -128,8 +128,37 @@ textarea { resize: vertical; }
     text-align: right;
 }
 
-#scoreboard-container { flex-basis: 70%; background: rgba(44, 44, 44, 0.8); padding: 20px; border-radius: 8px; min-height: 500px; overflow-y: auto; }
-#scoreboard-entries { display: flex; flex-direction: column; gap: 8px; }
+#scoreboard-container { 
+    flex-basis: 70%; 
+    background: rgba(44, 44, 44, 0.8); 
+    padding: 20px; 
+    border-radius: 8px; 
+    min-height: 500px; 
+    overflow-y: auto; 
+    display: flex; /* Make it a flex container */
+    flex-direction: column; /* Arrange content vertically */
+}
+#scoreboard-entries { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 8px; 
+}
+.scoreboard-section-title {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #ffc107;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    text-align: center;
+    border-bottom: 2px solid #ffc107;
+    padding-bottom: 5px;
+}
+
+.eliminated-section-title {
+    color: #dc3545; /* Red color for eliminated section title */
+    border-bottom-color: #dc3545;
+    margin-top: 30px; /* More space before eliminated section */
+}
 .scoreboard-entry { 
     display: flex; 
     align-items: center; 

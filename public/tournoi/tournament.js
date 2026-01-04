@@ -810,18 +810,32 @@ const countdownText = document.getElementById('countdown-text');
                 return { name, totalScore, eliminated: data.eliminated };
             }).sort((a, b) => b.totalScore - a.totalScore); // Sort by cumulative score
 
-            scoreboardEntriesEl.innerHTML = cumulativeScores.map((p, i) => {
-                let statusClass = '';
-                // No statusText during pause, as requested by user
-                
-                if (p.eliminated) {
-                    statusClass = 'eliminated'; // Only mark truly eliminated players
-                }
-                // Suppress safe/danger classes for next round qualification during pause
-                // No 'Éliminé (cette ronde)' or 'Non qualifié pour la ronde suivante' text here either
-                
-                return `<div class="scoreboard-entry ${statusClass}"><span class="rank">${i + 1}.</span><span class="player-name">${p.name}</span><span class="score">${p.totalScore.toLocaleString()}</span></div>`; // Removed <span class="status">
-            }).join('');
+            const activePlayersCumulative = cumulativeScores.filter(p => !p.eliminated);
+            const eliminatedPlayersCumulative = cumulativeScores.filter(p => p.eliminated);
+
+            let scoreboardHTML = '';
+
+            // Section for Active Players
+            if (activePlayersCumulative.length > 0) {
+                scoreboardHTML += '<div class="scoreboard-section-title">Joueurs Actifs</div>';
+                scoreboardHTML += activePlayersCumulative.map((p, i) => {
+                    // No statusClass for active players during pause, as per previous decision
+                    return `<div class="scoreboard-entry"><span class="rank">${i + 1}.</span><span class="player-name">${p.name}</span><span class="score">${p.totalScore.toLocaleString()}</span></div>`;
+                }).join('');
+            }
+
+            // Section for Eliminated Players
+            if (eliminatedPlayersCumulative.length > 0) {
+                // Add a visual separator or different styling for eliminated players
+                scoreboardHTML += '<div class="scoreboard-section-title eliminated-section-title">Joueurs Éliminés</div>';
+                scoreboardHTML += eliminatedPlayersCumulative.map((p, i) => {
+                    // Mark eliminated players with 'eliminated' class
+                    // Their rank continues from the last active player
+                    return `<div class="scoreboard-entry eliminated"><span class="rank">${activePlayersCumulative.length + i + 1}.</span><span class="player-name">${p.name}</span><span class="score">${p.totalScore.toLocaleString()}</span></div>`;
+                }).join('');
+            }
+
+            scoreboardEntriesEl.innerHTML = scoreboardHTML;
 
         } else { // Normal round display
             const roundIndex = tournamentState.currentRoundIndex;

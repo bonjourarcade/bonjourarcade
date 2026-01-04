@@ -386,3 +386,43 @@ textarea { resize: vertical; }
     font-weight: bold;
     text-align: right;
 }
+
+/* Animation for elements appearing gradually */
+.fade-in-up {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.5s ease-out forwards;
+}
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Celebration effect for winners */
+.celebrate-winner {
+    animation: pulse 1.0s infinite alternate, sparkle 0.5s forwards; /* pulse for continuous, sparkle for initial */
+}
+
+@keyframes pulse {
+    from {
+        transform: scale(1);
+        box-shadow: 0 0 5px rgba(255, 193, 7, 0.4);
+    }
+    to {
+        transform: scale(1.05);
+        box-shadow: 0 0 20px rgba(255, 193, 7, 0.8);
+    }
+}
+
+/* Basic sparkle effect (can be enhanced with pseudo-elements or more complex animations) */
+@keyframes sparkle {
+    from {
+        background-color: transparent;
+    }
+    to {
+        background-color: rgba(255, 223, 0, 0.2); /* Light gold shimmer */
+    }
+}

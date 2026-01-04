@@ -1061,11 +1061,21 @@ const countdownText = document.getElementById('countdown-text');
         startTimer(tournamentState.pauseDuration, updateTimerDisplay, startNextRound);
     }
 
-    function endTournament() {
+    // Helper function for delays in async operations
+    function delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    async function endTournament() {
         tournamentState.status = 'finished';
         saveState();
+        winnerView.style.display = 'flex'; // Show winner view immediately
+        tournamentView.style.display = 'none';
+
+        // Clear previous content of winnerResultsEl to prepare for dynamic rendering
+        winnerResultsEl.innerHTML = '';
         
-        // --- Winner Calculation ---
+        // --- Winner Calculation (existing logic, remains largely the same) ---
         const finalRoundIndex = tournamentState.games.length - 1;
         const finalRoundScores = Object.entries(tournamentState.players)
             .filter(([, data]) => !data.eliminated)
@@ -1075,44 +1085,92 @@ const countdownText = document.getElementById('countdown-text');
         const cumulativeScores = Object.entries(tournamentState.players).map(([name, data]) => {
             const totalScore = data.scores.reduce((sum, score) => sum + score, 0);
             data.totalScore = totalScore;
-            return { name, totalScore };
+            return { name, totalScore, photoURL: data.photoURL }; // Keep photoURL for cumulative
         }).sort((a, b) => b.totalScore - a.totalScore);
-        
-        // --- Render Winners ---
-        let winnerHTML = '<h3 style="text-align: center;">Podium</h3>';
-        winnerHTML += '<div style="text-align: center;">'; // Add centering div for podium
+
+
+        // --- Podium Display ---
+        let podiumHtml = '<h3 style="text-align: center;">Podium</h3><div id="podium-container" style="text-align: center;"></div>';
+        winnerResultsEl.innerHTML += podiumHtml; // Add the container for podium
+        const podiumContainer = document.getElementById('podium-container');
+
         const podiumEmojis = ['🥇', '🥈', '🥉'];
-        const medalColorsClasses = ['gold', 'silver', 'bronze']; // New array for classes
-        finalRoundScores.slice(0, 3).forEach((player, i) => {
-            const medalClass = medalColorsClasses[i] || ''; // Get class based on rank
-            winnerHTML += `<div class="winner-entry ${medalClass}"><span class="rank">${podiumEmojis[i]}</span><span class="player-name">${player.name}</span></div>`;
-        });
-        winnerHTML += '</div>'; // Close centering div
+        const medalColorsClasses = ['gold', 'silver', 'bronze'];
+        const podiumPlayers = finalRoundScores.slice(0, 3);
 
+        // Display 3rd place
+        if (podiumPlayers[2]) {
+            await delay(1000); // Delay before showing 3rd
+            const p = podiumPlayers[2];
+            const medalClass = medalColorsClasses[2];
+            const playerElement = document.createElement('div');
+            playerElement.className = `winner-entry ${medalClass} fade-in-up`; // Add animation class
+            playerElement.innerHTML = `<span class="rank">${podiumEmojis[2]}</span><span class="player-name">${p.name}</span>`;
+            podiumContainer.appendChild(playerElement);
+        }
+
+        // Display 2nd place
+        if (podiumPlayers[1]) {
+            await delay(1500); // Delay before showing 2nd
+            const p = podiumPlayers[1];
+            const medalClass = medalColorsClasses[1];
+            const playerElement = document.createElement('div');
+            playerElement.className = `winner-entry ${medalClass} fade-in-up`; // Add animation class
+            playerElement.innerHTML = `<span class="rank">${podiumEmojis[1]}</span><span class="player-name">${p.name}</span>`;
+            podiumContainer.appendChild(playerElement);
+        }
+
+        // Display 1st place with celebration
+        if (podiumPlayers[0]) {
+            await delay(2000); // Delay before showing 1st
+            const p = podiumPlayers[0];
+            const medalClass = medalColorsClasses[0];
+            const playerElement = document.createElement('div');
+            playerElement.className = `winner-entry ${medalClass} celebrate-winner fade-in-up`; // Add celebration and animation class
+            playerElement.innerHTML = `<span class="rank">${podiumEmojis[0]}</span><span class="player-name">${p.name}</span>`;
+            podiumContainer.appendChild(playerElement);
+        }
+
+
+        // --- Cumulative Champion Reveal ---
         if (cumulativeScores.length > 0) {
-            winnerHTML += '<h3 style="margin-top: 30px; text-align: center;">Champion Cumulatif</h3>';
-            winnerHTML += '<div style="text-align: center;">'; // Add centering div for cumulative champion
-            winnerHTML += `<div class="winner-entry"><span class="rank">🏆</span><span class="player-name">${cumulativeScores[0].name}</span> <span class="score">(${cumulativeScores[0].totalScore.toLocaleString()})</span></div>`;
-            winnerHTML += '</div>'; // Close centering div
-        }
-        
-        // --- Render Cumulative Scores Table ---
-        if (cumulativeScores.length > 1) { // Only show table if there's more than one player
-            winnerHTML += '<h3 style="margin-top: 30px; text-align: center;">Tous les scores cumulatifs</h3>';
-            winnerHTML += '<div class="cumulative-scores-table-container">';
-            winnerHTML += '<table class="cumulative-scores-table">';
-            winnerHTML += '<thead><tr><th>Rang</th><th>Joueur</th><th>Score Total</th></tr></thead>';
-            winnerHTML += '<tbody>';
-            cumulativeScores.forEach((player, i) => {
-                winnerHTML += `<tr><td>${i + 1}.</td><td>${player.name}</td><td>${player.totalScore.toLocaleString()}</td></tr>`;
-            });
-            winnerHTML += '</tbody>';
-            winnerHTML += '</table>';
-            winnerHTML += '</div>';
-        }
-        
-        winnerResultsEl.innerHTML = winnerHTML;
+            await delay(3000); // Delay before cumulative section
+            winnerResultsEl.innerHTML += '<h3 style="margin-top: 30px; text-align: center;">Champion Cumulatif</h3>';
+            let cumulativeChampionHtml = '<div id="cumulative-champion-container" style="text-align: center;"></div>';
+            winnerResultsEl.innerHTML += cumulativeChampionHtml;
+            const cumulativeChampionContainer = document.getElementById('cumulative-champion-container');
 
+            const overallChampion = cumulativeScores[0];
+            await delay(1000); // Delay before showing cumulative champion
+            const championElement = document.createElement('div');
+            championElement.className = `winner-entry celebrate-winner fade-in-up`; // Add celebration and animation class
+            championElement.innerHTML = `<span class="rank">🏆</span><span class="player-name">${overallChampion.name}</span> <span class="score">(${overallChampion.totalScore.toLocaleString()})</span>`;
+            cumulativeChampionContainer.appendChild(championElement);
+        }
+
+        // --- Render Cumulative Scores Table Gradually ---
+        if (cumulativeScores.length > 1) {
+            await delay(3000); // Delay before table starts
+            winnerResultsEl.innerHTML += '<h3 style="margin-top: 30px; text-align: center;">Tous les scores cumulatifs</h3>';
+            winnerResultsEl.innerHTML += '<div class="cumulative-scores-table-container"><table class="cumulative-scores-table"><thead><tr><th>Rang</th><th>Joueur</th><th>Score Total</th></tr></thead><tbody id="cumulative-scores-tbody"></tbody></table></div>';
+            const cumulativeTbody = document.getElementById('cumulative-scores-tbody');
+
+            // Sort cumulative scores from smallest to largest for gradual reveal
+            const sortedCumulativeScores = [...cumulativeScores].sort((a, b) => a.totalScore - b.totalScore);
+            
+            for (let i = 0; i < sortedCumulativeScores.length; i++) {
+                await delay(500); // Delay between each row reveal
+                const player = sortedCumulativeScores[i];
+                const originalRank = cumulativeScores.findIndex(p => p.name === player.name) + 1; // Get original rank
+                const row = document.createElement('tr');
+                row.className = 'fade-in-up'; // Add animation class to row
+                row.innerHTML = `<td>${originalRank}.</td><td>${player.name}</td><td>${player.totalScore.toLocaleString()}</td>`;
+                cumulativeTbody.appendChild(row);
+            }
+        }
+        
+        // --- Review Rounds (existing logic, after all animations) ---
+        await delay(3000); // Final delay before showing review rounds
         const reviewContainer = document.getElementById('review-container');
         reviewContainer.innerHTML = '<h4>Revoir les rondes</h4>'; // Clear previous content
 
@@ -1149,7 +1207,7 @@ const countdownText = document.getElementById('countdown-text');
         });
 
         reviewContainer.appendChild(tableContainer);
-
+        // Ensure winnerView is still visible and tournamentView is hidden
         winnerView.style.display = 'flex';
         tournamentView.style.display = 'none';
     }

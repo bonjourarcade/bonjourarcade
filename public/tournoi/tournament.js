@@ -1,4 +1,3 @@
-let steamAnimationInterval = null; // Declared globally
 let gamelist = []; // Declared globally
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -37,26 +36,8 @@ const localTestingOnlyDiv = document.getElementById('local-testing-only');
 const simulatedPlayersInput = document.getElementById('simulated-players');
 const numGamesInput = document.getElementById('num-games');
 const generateGamesBtn = document.getElementById('generate-games-btn');
-const pauseAnimationSvg = document.getElementById('pause-animation-svg');
-const steam1 = document.getElementById('steam1');
-const steam2 = document.getElementById('steam2');
 const countdownOverlay = document.getElementById('countdown-overlay');
 const countdownText = document.getElementById('countdown-text');
-
-    // Make steam animation functions globally accessible
-    window.startSteamAnimation = function() {
-        steam1.style.animation = 'steam-puff 2s infinite linear';
-        steam2.style.animation = 'steam-puff 2s 1s infinite linear';
-        pauseAnimationSvg.style.display = 'block';
-    }
-
-    window.stopSteamAnimation = function() {
-        clearInterval(steamAnimationInterval); // Clear any existing interval
-        steamAnimationInterval = null;
-        steam1.style.animation = 'none';
-        steam2.style.animation = 'none';
-        pauseAnimationSvg.style.display = 'none';
-    }
 
 
     // --- Config & State ---
@@ -785,9 +766,15 @@ const countdownText = document.getElementById('countdown-text');
             const apiResponse = await r.json();
             const scores = apiResponse.result.scores;
             const roundStartTime = new Date(tournamentState.roundStartTime);
+            // Timezone note: Date comparisons in JavaScript are based on milliseconds since epoch (UTC).
+            // `new Date(s.date._seconds * 1000)` creates a Date object from a UTC timestamp.
+            // `roundStartTime` is created from an ISO string, which is also UTC.
+            // Therefore, the comparison `new Date(s.date._seconds * 1000) > roundStartTime` is
+            // inherently UTC-based and timezone-agnostic, ensuring correct chronological order
+            // regardless of the user's local timezone setting.
             scores.forEach(s => {
                 if (new Date(s.date._seconds * 1000) > roundStartTime) {
-                    if (!tournamentState.players[s.player]) { tournamentState.players[s.player] = { scores: Array(tournamentState.games.length).fill(0), totalScore: 0, eliminated: false, eliminatedRound: null }; }
+                    if (!tournamentState.players[s.player]) { tournamentState.players[s.player] = { scores: Array(tournamentState.games.length).fill(0), totalScore: 0, eliminated: false, eliminatedRound: null, photoURL: s.photoURL }; } else if (!tournamentState.players[s.player].photoURL) { tournamentState.players[s.player].photoURL = s.photoURL; }
                     const p = tournamentState.players[s.player];
                     if (s.score > p.scores[tournamentState.currentRoundIndex]) { p.scores[tournamentState.currentRoundIndex] = s.score; }
                 }
@@ -800,48 +787,46 @@ const countdownText = document.getElementById('countdown-text');
     function renderScoreboard() {
         if (!tournamentState.players || tournamentState.currentRoundIndex < 0) return;
 
+        let scoreboardHTML = ''; // Declare scoreboardHTML here
+        
         if (tournamentState.status === 'pause') {
             const currentRoundIndex = tournamentState.currentRoundIndex;
             const nextCutoff = tournamentState.cutoffs[currentRoundIndex + 1]; // Cutoff for the round that just ended
 
             const cumulativeScores = Object.entries(tournamentState.players).map(([name, data]) => {
                 const totalScore = data.scores.slice(0, currentRoundIndex + 1).reduce((sum, score) => sum + score, 0); // Scores up to and including the current round
-                return { name, totalScore, eliminated: data.eliminated };
+                return { name, totalScore, eliminated: data.eliminated, photoURL: data.photoURL };
             }).sort((a, b) => b.totalScore - a.totalScore); // Sort by cumulative score
 
             const activePlayersCumulative = cumulativeScores.filter(p => !p.eliminated);
             const eliminatedPlayersCumulative = cumulativeScores.filter(p => p.eliminated);
 
-            let scoreboardHTML = '';
-
-            // Add clarification for cumulative scores
             scoreboardHTML += '<div class="cumulative-score-clarification">Scores cumulés jusqu\'à la ronde actuelle.</div>';
 
-            // Section for Active Players
             if (activePlayersCumulative.length > 0) {
                 scoreboardHTML += '<div class="scoreboard-section-title">Joueurs Actifs</div>';
                 scoreboardHTML += activePlayersCumulative.map((p, i) => {
-                    // No statusClass for active players during pause, as per previous decision
-                    return `<div class="scoreboard-entry"><span class="rank">${i + 1}.</span><span class="player-name">${p.name}</span><span class="score">${p.totalScore.toLocaleString()}</span></div>`;
+                    const avatarSrc = p.photoURL ? p.photoURL : 'assets/default-avatar.png'; // Fallback avatar
+                    return `<div class="scoreboard-entry"><span class="rank">${i + 1}.</span><img src="${avatarSrc}" alt="${p.name}" class="player-avatar" style="width: 24px; height: 24px; border-radius: 50%; margin-right: 8px; vertical-align: middle;"><span class="player-name">${p.name}</span><span class="score">${p.totalScore.toLocaleString()}</span></div>`;
                 }).join('');
             }
 
-            // Section for Eliminated Players
             if (eliminatedPlayersCumulative.length > 0) {
-                // Add a visual separator or different styling for eliminated players
                 scoreboardHTML += '<div class="scoreboard-section-title eliminated-section-title">Joueurs Éliminés</div>';
+                // Only access activePlayersCumulative.length if it's guaranteed to be defined (which it is here)
+                const rankOffset = activePlayersCumulative.length;
                 scoreboardHTML += eliminatedPlayersCumulative.map((p, i) => {
-                    // Mark eliminated players with 'eliminated' class
-                    // Their rank continues from the last active player
-                    return `<div class="scoreboard-entry eliminated"><span class="rank">${activePlayersCumulative.length + i + 1}.</span><span class="player-name">${p.name}</span><span class="score">${p.totalScore.toLocaleString()}</span></div>`;
+                    const avatarSrc = p.photoURL ? p.photoURL : 'assets/default-avatar.png'; // Fallback avatar
+                    return `<div class="scoreboard-entry eliminated"><span class="rank">${rankOffset + i + 1}.</span><img src="${avatarSrc}" alt="${p.name}" class="player-avatar" style="width: 24px; height: 24px; border-radius: 50%; margin-right: 8px; vertical-align: middle;"><span class="player-name">${p.name}</span><span class="score">${p.totalScore.toLocaleString()}</span></div>`;
                 }).join('');
             }
+
 
             scoreboardEntriesEl.innerHTML = scoreboardHTML;
 
         } else { // Normal round display
             const roundIndex = tournamentState.currentRoundIndex;
-            const playersArray = Object.entries(tournamentState.players).map(([name, data]) => ({ name, score: data.scores[roundIndex] || 0, eliminated: data.eliminated }));
+            const playersArray = Object.entries(tournamentState.players).map(([name, data]) => ({ name, score: data.scores[roundIndex] || 0, eliminated: data.eliminated, photoURL: data.photoURL }));
             
             // Sort players by score
             playersArray.sort((a, b) => b.score - a.score);
@@ -849,26 +834,34 @@ const countdownText = document.getElementById('countdown-text');
             const cutoff = tournamentState.currentCutoff;
             const isEliminationRound = tournamentState.status === 'round' && tournamentState.currentRoundIndex > 0;
 
-            scoreboardEntriesEl.innerHTML = playersArray.map((p, i) => {
-                let statusClass = '';
-                // let statusText = ''; // Removed statusText for during round as well, per user request
-                if (p.eliminated) {
-                    statusClass = 'eliminated';
-                    // statusText = 'Éliminé';
-                } else if (isEliminationRound && cutoff > 0) {
-                    const activeRank = playersArray.filter(pl => !pl.eliminated).findIndex(pl => pl.name === p.name);
-                    if (activeRank < cutoff) {
-                        statusClass = 'safe';
-                        // statusText = 'Qualifié';
-                    } else {
-                        statusClass = 'danger';
-                        // statusText = 'Non qualifié';
+            const activePlayersRound = playersArray.filter(p => !p.eliminated);
+            const eliminatedPlayersRound = playersArray.filter(p => p.eliminated);
+
+            if (activePlayersRound.length > 0) {
+                scoreboardHTML += '<div class="scoreboard-section-title">Joueurs Actifs</div>';
+                scoreboardHTML += activePlayersRound.map((p, i) => {
+                    let statusClass = '';
+                    if (isEliminationRound && cutoff > 0) {
+                        if (i < cutoff) {
+                            statusClass = 'safe';
+                        } else {
+                            statusClass = 'danger';
+                        }
                     }
-                }
-                // Removed `${statusText ? `<span class="status">${statusText}</span>` : ''}`
-                return `<div class="scoreboard-entry ${statusClass}"><span class="rank">${i + 1}.</span><span class="player-name">${p.name}</span><span class="score">${p.score.toLocaleString()}</span></div>`;
-            }).join('');
-        }
+                    const avatarSrc = p.photoURL ? p.photoURL : 'assets/default-avatar.png';
+                    return `<div class="scoreboard-entry ${statusClass}"><span class="rank">${i + 1}.</span><img src="${avatarSrc}" alt="${p.name}" class="player-avatar" style="width: 24px; height: 24px; border-radius: 50%; margin-right: 8px; vertical-align: middle;"><span class="player-name">${p.name}</span><span class="score">${p.score.toLocaleString()}</span></div>`;
+                }).join('');
+            }
+
+            if (eliminatedPlayersRound.length > 0) {
+                scoreboardHTML += '<div class="scoreboard-section-title eliminated-section-title">Joueurs Éliminés</div>';
+                const rankOffset = activePlayersRound.length; // Rank continues from active players
+                scoreboardHTML += eliminatedPlayersRound.map((p, i) => {
+                    const avatarSrc = p.photoURL ? p.photoURL : 'assets/default-avatar.png';
+                    return `<div class="scoreboard-entry eliminated"><span class="rank">${rankOffset + i + 1}.</span><img src="${avatarSrc}" alt="${p.name}" class="player-avatar" style="width: 24px; height: 24px; border-radius: 50%; margin-right: 8px; vertical-align: middle;"><span class="player-name">${p.name}</span><span class="score">${p.score.toLocaleString()}</span></div>`;
+                }).join('');
+            }
+            scoreboardEntriesEl.innerHTML = scoreboardHTML;
     }
 
     function startScoreFetching() { stopScoreFetching(); fetchScores(); const i = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 5000 : 30000; scoreFetchingInterval = setInterval(fetchScores, i); } 
@@ -908,15 +901,16 @@ const countdownText = document.getElementById('countdown-text');
         gameLinkEl.style.display = 'none';
         gameMetadataEl.style.display = 'none';
         scoreboardEntriesEl.style.display = 'none';
-        pauseAnimationSvg.style.display = 'none';
-        stopSteamAnimation();
+
+        // Clear game title and metadata from previous rounds/tournaments
+        gameTitleEl.textContent = '';
+        gameMetadataEl.innerHTML = '';
 
         // Show the countdown overlay and static.gif
         countdownOverlay.style.display = 'flex';
         gameCoverEl.src = 'assets/static.gif';
         gameCoverEl.alt = 'Animation statique de compte à rebours'; // Set alt attribute
         gameCoverEl.style.display = 'block';
-        console.log('startCountdown: gameCoverEl src set to', gameCoverEl.src, 'display:', gameCoverEl.style.display);
 
         let count = 3;
         goSound.play().catch(e => console.log("Audio play failed for GO!, user interaction needed."));
@@ -946,8 +940,6 @@ const countdownText = document.getElementById('countdown-text');
     };
     
     function runRound() {
-        stopSteamAnimation();
-        pauseAnimationSvg.style.display = 'none';
         gameCoverEl.style.display = 'block'; // Ensure game cover is visible
 
 
@@ -1060,9 +1052,6 @@ const countdownText = document.getElementById('countdown-text');
         gameCoverEl.src = 'assets/static.gif';
         gameCoverEl.alt = 'Animation statique de pause'; // Set alt attribute
         gameCoverEl.style.display = 'block';
-        console.log('startPause: gameCoverEl src set to', gameCoverEl.src, 'display:', gameCoverEl.style.display);
-        pauseAnimationSvg.style.display = 'none';
-        stopSteamAnimation();
         renderScoreboard(); // Call renderScoreboard to display cumulative results and qualification status
         startTimer(tournamentState.pauseDuration, updateTimerDisplay, startNextRound);
     }
@@ -1264,12 +1253,9 @@ const countdownText = document.getElementById('countdown-text');
              roundSubtitleEl.textContent = "";
              gameTitleEl.textContent = "";
              gameMetadataEl.innerHTML = "";
-             gameCoverEl.src = '/assets/static.gif'; // Display static.gif
+             gameCoverEl.src = 'assets/static.gif'; // Display static.gif
              gameCoverEl.alt = 'Animation statique de pause (reprise)'; // Set alt attribute
              gameCoverEl.style.display = 'block';
-             console.log('resumeTournament (pause): gameCoverEl src set to', gameCoverEl.src, 'display:', gameCoverEl.style.display);
-             pauseAnimationSvg.style.display = 'none'; // Hide SVG
-             startSteamAnimation(); // Keep steam animation for pause
              renderScoreboard();
              startTimer(tournamentState.remainingTime, onTick, startNextRound);
         }

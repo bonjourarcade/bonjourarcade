@@ -191,7 +191,6 @@ textarea { resize: vertical; }
 
 .scoreboard-entry.eliminated .player-name,
 .scoreboard-entry.eliminated .score { /* Apply strike-through to both name and score */
-    text-decoration: line-through;
     color: #ccc; /* Dim the text color slightly to show it's "out" */
 }
 .scoreboard-entry .rank { font-weight: bold; color: #ffc107; flex-basis: 50px; flex-shrink: 0; }

@@ -765,9 +765,7 @@ const countdownText = document.getElementById('countdown-text');
         if (!tournamentState.simulatedScoresGeneratedForRound && roundIndex !== -1) { // roundIndex !== -1 to avoid generating scores before tournament starts
             Object.keys(tournamentState.players).forEach(playerName => {
                 const p = tournamentState.players[playerName];
-                if (!p.eliminated) {
-                    p.scores[roundIndex] = Math.floor(Math.random() * 5000) + 100;
-                }
+                p.scores[roundIndex] = Math.floor(Math.random() * 5000) + 100;
             });
             tournamentState.simulatedScoresGeneratedForRound = true;
         }

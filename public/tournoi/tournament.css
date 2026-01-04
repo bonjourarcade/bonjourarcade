@@ -10,8 +10,8 @@ body {
 }
 
 #app-container {
-    width: 100%;
-    max-width: 1200px;
+    width: 95%; /* Use a percentage of the viewport width */
+    max-width: 1600px; /* Increased max-width */
     margin: 0 auto;
 }
 
@@ -106,6 +106,28 @@ textarea { resize: vertical; }
     background-color: #1a1a1a;
     min-height: 200px; /* Give it some height so it doesn't collapse */
 }
+#game-metadata {
+    font-size: 0.9em;
+    color: #ccc;
+    text-align: left;
+    width: 100%;
+    max-width: 300px;
+}
+#game-metadata p {
+    margin: 5px 0;
+    display: flex;
+    justify-content: space-between;
+}
+#game-metadata .meta-label {
+    font-weight: bold;
+    color: #999;
+    margin-right: 10px;
+}
+#game-metadata .meta-value {
+    color: #fff;
+    text-align: right;
+}
+
 #scoreboard-container { flex-basis: 70%; background: rgba(44, 44, 44, 0.8); padding: 20px; border-radius: 8px; min-height: 500px; overflow-y: auto; }
 #scoreboard-entries { display: flex; flex-direction: column; gap: 8px; }
 .scoreboard-entry { 
@@ -138,6 +160,36 @@ textarea { resize: vertical; }
 .modal-content button { width: 100%; padding: 15px; font-size: 1.2em; font-weight: bold; color: #1a1a1a; background-color: #ffc107; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.3s; }
 .modal-content button:hover { background-color: #ffca2c; }
 
+#countdown-text {
+    font-size: 15vw;
+    font-weight: bold;
+    color: #ffc107;
+    text-shadow: 0 0 20px rgba(0,0,0,0.7);
+}
+
+/* Specific styles for the countdown overlay */
+#countdown-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5); /* Less dark background to see UI elements behind */
+    display: flex;
+    flex-direction: column; /* To center both image and text */
+    justify-content: center;
+    align-items: center;
+    z-index: 2000; /* Ensure it's on top */
+}
+
+#countdown-overlay #game-cover {
+    max-width: 50vw; /* Adjust size of static.gif during countdown */
+    max-height: 50vh;
+    object-fit: contain;
+    margin-bottom: 20px; /* Space between image and text */
+}
+
+
 #winner-results { margin-bottom: 30px; text-align: left; }
 .winner-entry { font-size: 1.5em; margin-bottom: 15px; }
 .winner-entry .rank { font-weight: bold; color: #ffc107; margin-right: 10px; }
@@ -145,36 +197,65 @@ textarea { resize: vertical; }
 .winner-entry .score { font-family: monospace; color: #ddd; }
 #restart-tournament-btn { margin-top: 20px; }
 
+#winner-view .modal-content {
+    max-height: 80vh;
+    overflow-y: auto;
+    max-width: 90%; /* Utilize more width for the winner modal */
+}
+
 /* --- Review Section --- */
+#review-container {
+    text-align: left;
+}
 #review-container h4 {
     margin-top: 0;
     margin-bottom: 15px;
     font-size: 1.2em;
+    text-align: center;
 }
-#review-tabs {
+.review-round-table {
+    flex-shrink: 0;
+    width: 350px; /* Increased width */
+    background-color: #3a3a3a;
+    border-radius: 6px;
+    padding: 10px;
     display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    justify-content: center;
-    margin-bottom: 20px;
+    flex-direction: column;
+    gap: 5px;
 }
-.review-tab-btn {
-    padding: 8px 12px;
-    background-color: #555;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
+.review-round-title {
+    font-weight: bold;
+    color: #ffc107;
+    text-align: center;
+    margin-bottom: 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
-.review-tab-btn.active {
-    background-color: #ffc107;
-    color: #1a1a1a;
+.review-entry {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px;
+    border-radius: 3px;
+}
+.review-entry:nth-child(odd) {
+    background-color: #4a4a4a;
+}
+.review-entry .player-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.9em;
+}
+.review-entry .score {
+    font-family: monospace;
+    font-size: 0.9em;
     font-weight: bold;
 }
-#review-scoreboard {
-    max-height: 300px;
-    overflow-y: auto;
-    padding-right: 10px; /* for scrollbar */
+.review-entry.eliminated-in-review .player-name,
+.review-entry.eliminated-in-review .score {
+    color: #dc3545; /* Red color for eliminated players */
+    text-decoration: line-through;
 }
 
 /* --- Footer & Buttons --- */
@@ -199,4 +280,58 @@ textarea { resize: vertical; }
 
 #cancel-tournament-btn:hover {
     background-color: #c9302c;
+}
+
+.cumulative-scores-table-container {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center; /* Center the table itself */
+    width: 100%;
+}
+
+.cumulative-scores-table {
+    width: auto; /* Allow table to shrink to content */
+    border-collapse: collapse;
+    margin: 0 auto; /* Center the table in its container */
+    background-color: #333;
+    border-radius: 8px;
+    overflow: hidden; /* Ensures rounded corners clip table content */
+}
+
+.cumulative-scores-table th,
+.cumulative-scores-table td {
+    padding: 10px 15px;
+    text-align: left;
+    border-bottom: 1px solid #444;
+}
+
+.cumulative-scores-table th {
+    background-color: #ffc107;
+    color: #1a1a1a;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.cumulative-scores-table tr:last-child td {
+    border-bottom: none;
+}
+
+.cumulative-scores-table tbody tr:nth-child(odd) {
+    background-color: #3a3a3a;
+}
+
+.cumulative-scores-table tbody tr:hover {
+    background-color: #4a4a4a;
+}
+
+.cumulative-scores-table td:nth-child(1) { /* Rank column */
+    font-weight: bold;
+    color: #ffc107;
+    text-align: center;
+}
+
+.cumulative-scores-table td:nth-child(3) { /* Score column */
+    font-family: monospace;
+    font-weight: bold;
+    text-align: right;
 }

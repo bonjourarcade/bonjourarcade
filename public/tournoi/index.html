@@ -13,19 +13,29 @@
             <h1>Configuration du Tournoi</h1>
             <div class="setup-form">
                 <div class="form-group">
+                    <label for="num-games">Combien de jeux pour le tournoi ?</label>
+                    <div style="display: flex; align-items: center;">
+                        <input type="number" id="num-games" value="4" min="1">
+                        <button id="generate-games-btn" style="margin-left: 10px;">Générer une liste aléatoire</button>
+                    </div>
+                </div>
+                <div class="form-group">
                     <label for="game-ids">Jeux du tournoi (un ID de jeu par ligne):</label>
-                    <textarea id="game-ids" rows="5" placeholder="pacman
-galaga
-dkong
-frogger"></textarea>
+                    <textarea id="game-ids" rows="5" placeholder="Cliquez sur 'Générer' ou entrez les IDs de jeu manuellement"></textarea>
                 </div>
                 <div class="form-group">
                     <label for="round-duration">Durée d'une ronde (minutes):</label>
-                    <input type="number" id="round-duration" value="10" min="0.1" step="0.5">
+                    <input type="number" id="round-duration" value="25" min="0.1" step="0.5">
                 </div>
                 <div class="form-group">
                     <label for="pause-duration">Durée d'une pause (minutes):</label>
-                    <input type="number" id="pause-duration" value="2" min="0" step="0.5">
+                    <input type="number" id="pause-duration" value="5" min="0" step="0.5">
+                </div>
+                <div id="local-testing-only" style="display: none;">
+                    <div class="form-group">
+                        <label for="simulated-players">Nombre de joueurs simulés:</label>
+                        <input type="number" id="simulated-players" value="16" min="1">
+                    </div>
                 </div>
                 <button id="start-tournament-btn">Démarrer le Tournoi</button>
             </div>
@@ -54,6 +64,13 @@ frogger"></textarea>
                 <div id="game-info-container">
                     <h3 id="game-title"></h3>
                     <img id="game-cover" src="" alt="Couverture du jeu">
+                    <div id="game-metadata"></div>
+                    <svg id="pause-animation-svg" width="100" height="150" viewBox="0 0 100 150" style="display: none;">
+                        <path d="M10,50 h80 v60 h-80 Z" fill="#444" stroke="white" stroke-width="2"/>
+                        <path d="M90,60 C 105,70 105,90 90,100" fill="none" stroke="white" stroke-width="2"/>
+                        <path id="steam1" d="M30,40 Q 35,20 40,40 T 50,40" fill="none" stroke="white" stroke-width="2" style="opacity: 0;"/>
+                        <path id="steam2" d="M60,45 Q 65,25 70,45 T 80,45" fill="none" stroke="white" stroke-width="2" style="opacity: 0;"/>
+                    </svg>
                 </div>
                 <div id="scoreboard-container">
                     <div id="scoreboard-entries"></div>
@@ -65,20 +82,6 @@ frogger"></textarea>
             </footer>
         </div>
 
-        <!-- Elimination Modal -->
-        <div id="elimination-modal" class="modal-overlay" style="display: none;">
-            <div class="modal-content">
-                <h2 id="modal-title">Configuration de la Ronde</h2>
-                <p id="modal-text">Combien de joueurs se qualifieront à la fin de cette ronde ?</p>
-                <p id="cutoff-suggestion"></p>
-                <div class="form-group">
-                    <label for="cutoff-number">Garder le Top :</label>
-                    <input type="number" id="cutoff-number" min="1">
-                </div>
-                <button id="confirm-elimination-btn">Démarrer la Ronde</button>
-            </div>
-        </div>
-
         <!-- Winner Screen -->
         <div id="winner-view" class="modal-overlay" style="display: none;">
             <div class="modal-content">
@@ -87,11 +90,14 @@ frogger"></textarea>
                 <hr style="margin: 20px 0;">
                 <div id="review-container">
                     <h4>Revoir les rondes</h4>
-                    <div id="review-tabs"></div>
-                    <div id="review-scoreboard"></div>
                 </div>
                 <button id="restart-tournament-btn">Nouveau Tournoi</button>
             </div>
+        </div>
+
+        <!-- Countdown Overlay -->
+        <div id="countdown-overlay" class="modal-overlay" style="display: none;">
+            <div id="countdown-text"></div>
         </div>
 
     </div>

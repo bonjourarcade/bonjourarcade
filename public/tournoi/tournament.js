@@ -1,31 +1,63 @@
+let steamAnimationInterval = null; // Declared globally
+let gamelist = []; // Declared globally
 document.addEventListener('DOMContentLoaded', () => {
-    // --- DOM Elements ---
-    const setupView = document.getElementById('setup-view');
-    const tournamentView = document.getElementById('tournament-view');
-    const gameIdsTextarea = document.getElementById('game-ids');
-    const roundDurationInput = document.getElementById('round-duration');
-    const pauseDurationInput = document.getElementById('pause-duration');
-    const startTournamentBtn = document.getElementById('start-tournament-btn');
 
-    const roundTitleEl = document.getElementById('round-title');
-    const roundSubtitleEl = document.getElementById('round-subtitle');
-    const timerEl = document.getElementById('timer');
-    const gameCoverEl = document.getElementById('game-cover');
-    const gameLinkEl = document.getElementById('game-link');
-    const gameLinkTextEl = document.getElementById('game-link-text');
-    const scoreboardEntriesEl = document.getElementById('scoreboard-entries');
 
-    const eliminationModal = document.getElementById('elimination-modal');
-    const cutoffSuggestionEl = document.getElementById('cutoff-suggestion');
-    const cutoffNumberInput = document.getElementById('cutoff-number');
-    const confirmEliminationBtn = document.getElementById('confirm-elimination-btn');
+// --- DOM Elements (Globally Accessible) ---
+const setupView = document.getElementById('setup-view');
+const tournamentView = document.getElementById('tournament-view');
+const gameIdsTextarea = document.getElementById('game-ids');
+const roundDurationInput = document.getElementById('round-duration');
+const pauseDurationInput = document.getElementById('pause-duration');
+const startTournamentBtn = document.getElementById('start-tournament-btn');
 
-    const winnerView = document.getElementById('winner-view');
-    const winnerResultsEl = document.getElementById('winner-results');
-    const restartTournamentBtn = document.getElementById('restart-tournament-btn');
+const roundTitleEl = document.getElementById('round-title');
+const roundSubtitleEl = document.getElementById('round-subtitle');
+const timerEl = document.getElementById('timer');
+const gameCoverEl = document.getElementById('game-cover');
+const gameLinkEl = document.getElementById('game-link');
+const gameLinkTextEl = document.getElementById('game-link-text');
+const gameTitleEl = document.getElementById('game-title');
+const gameMetadataEl = document.getElementById('game-metadata');
+const scoreboardEntriesEl = document.getElementById('scoreboard-entries');
 
-    const endRoundSound = document.getElementById('end-round-sound');
-    const cancelTournamentBtn = document.getElementById('cancel-tournament-btn');
+const eliminationModal = document.getElementById('elimination-modal');
+const cutoffSuggestionEl = document.getElementById('cutoff-suggestion');
+const cutoffNumberInput = document.getElementById('cutoff-number');
+const confirmEliminationBtn = document.getElementById('confirm-elimination-btn');
+
+const winnerView = document.getElementById('winner-view');
+const winnerResultsEl = document.getElementById('winner-results');
+const restartTournamentBtn = document.getElementById('restart-tournament-btn');
+
+const endRoundSound = document.getElementById('end-round-sound');
+const goSound = document.getElementById('go-sound');
+const cancelTournamentBtn = document.getElementById('cancel-tournament-btn');
+const localTestingOnlyDiv = document.getElementById('local-testing-only');
+const simulatedPlayersInput = document.getElementById('simulated-players');
+const numGamesInput = document.getElementById('num-games');
+const generateGamesBtn = document.getElementById('generate-games-btn');
+const pauseAnimationSvg = document.getElementById('pause-animation-svg');
+const steam1 = document.getElementById('steam1');
+const steam2 = document.getElementById('steam2');
+const countdownOverlay = document.getElementById('countdown-overlay');
+const countdownText = document.getElementById('countdown-text');
+
+    // Make steam animation functions globally accessible
+    window.startSteamAnimation = function() {
+        steam1.style.animation = 'steam-puff 2s infinite linear';
+        steam2.style.animation = 'steam-puff 2s 1s infinite linear';
+        pauseAnimationSvg.style.display = 'block';
+    }
+
+    window.stopSteamAnimation = function() {
+        clearInterval(steamAnimationInterval); // Clear any existing interval
+        steamAnimationInterval = null;
+        steam1.style.animation = 'none';
+        steam2.style.animation = 'none';
+        pauseAnimationSvg.style.display = 'none';
+    }
+
 
     // --- Config & State ---
     const TOURNAMENT_STATE_KEY = 'bonjourarcade_tournament_state';
@@ -700,17 +732,46 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- State Management ---
     function saveState() { try { sessionStorage.setItem(TOURNAMENT_STATE_KEY, JSON.stringify(tournamentState)); } catch (e) { console.error("Could not save state:", e); } } 
     function loadState() { try { const s = sessionStorage.getItem(TOURNAMENT_STATE_KEY); if (s) { tournamentState = JSON.parse(s); return true; } } catch (e) { console.error("Could not load state:", e); } return false; } 
-    function clearState() { sessionStorage.removeItem(TOURNAMENT_STATE_KEY); tournamentState = {}; }
+    function clearState() {
+        sessionStorage.removeItem(TOURNAMENT_STATE_KEY);
+        tournamentState = { players: {} }; // Re-initialize tournamentState to ensure a clean slate, especially for players
+        simulatedPlayerNames = [];
+        tournamentState.simulatedScoresGeneratedForRound = false;
+    }
 
     // --- Localhost Simulation ---
-    const fakePlayers = ["PlayerA", "PlayerB", "PlayerC", "PlayerD", "PlayerE", "PlayerF", "PlayerG", "PlayerH", "PlayerI", "PlayerJ", "PlayerK", "PlayerL", "PlayerM", "PlayerN", "PlayerO", "PlayerP"];
+    let simulatedPlayerNames = []; // Keep track of potential simulated players
+
     function simulateScoreUpdates() {
-        if (Object.keys(tournamentState.players).length === 0) {
-            fakePlayers.forEach(name => { tournamentState.players[name] = { scores: Array(tournamentState.games.length).fill(0), totalScore: 0, eliminated: false }; });
+        const roundIndex = tournamentState.currentRoundIndex;
+
+        // Initialize players if simulatedPlayerNames is empty (e.g., initial setup)
+        if (simulatedPlayerNames.length === 0) {
+            const numPlayers = parseInt(simulatedPlayersInput.value, 10) || 16;
+            for (let i = 1; i <= numPlayers; i++) {
+                simulatedPlayerNames.push(`Player${i}`);
+            }
+            // Ensure all newly created players have their objects in tournamentState.players
+            simulatedPlayerNames.forEach(playerName => {
+                if (!tournamentState.players[playerName]) {
+                    tournamentState.players[playerName] = { scores: Array(tournamentState.games.length).fill(0), totalScore: 0, eliminated: false, eliminatedRound: null };
+                }
+            });
         }
-        Object.values(tournamentState.players).forEach(p => {
-            if (!p.eliminated && Math.random() < 0.3) { p.scores[tournamentState.currentRoundIndex] += Math.floor(Math.random() * 5000) + 100; }
-        });
+        
+        // Always generate a new score for active players at the beginning of a round
+        // This logic runs only once per round because of simulatedScoresGeneratedForRound flag,
+        // which is reset in startNextRound()
+        if (!tournamentState.simulatedScoresGeneratedForRound && roundIndex !== -1) { // roundIndex !== -1 to avoid generating scores before tournament starts
+            Object.keys(tournamentState.players).forEach(playerName => {
+                const p = tournamentState.players[playerName];
+                if (!p.eliminated) {
+                    p.scores[roundIndex] = Math.floor(Math.random() * 5000) + 100;
+                }
+            });
+            tournamentState.simulatedScoresGeneratedForRound = true;
+        }
+
         renderScoreboard();
         saveState();
     }
@@ -727,7 +788,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const roundStartTime = new Date(tournamentState.roundStartTime);
             scores.forEach(s => {
                 if (new Date(s.timestamp) > roundStartTime) {
-                    if (!tournamentState.players[s.player]) { tournamentState.players[s.player] = { scores: Array(tournamentState.games.length).fill(0), totalScore: 0, eliminated: false }; }
+                    if (!tournamentState.players[s.player]) { tournamentState.players[s.player] = { scores: Array(tournamentState.games.length).fill(0), totalScore: 0, eliminated: false, eliminatedRound: null }; }
                     const p = tournamentState.players[s.player];
                     if (s.score > p.scores[tournamentState.currentRoundIndex]) { p.scores[tournamentState.currentRoundIndex] = s.score; }
                 }
@@ -739,30 +800,65 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderScoreboard() {
         if (!tournamentState.players || tournamentState.currentRoundIndex < 0) return;
-        const roundIndex = tournamentState.currentRoundIndex;
-        const playersArray = Object.entries(tournamentState.players).map(([name, data]) => ({ name, score: data.scores[roundIndex] || 0, eliminated: data.eliminated }));
-        
-        // Sort players by score
-        playersArray.sort((a, b) => b.score - a.score);
 
-        const cutoff = tournamentState.currentCutoff;
-        const isEliminationRound = tournamentState.status === 'round' && tournamentState.currentRoundIndex > 0;
+        if (tournamentState.status === 'pause') {
+            const currentRoundIndex = tournamentState.currentRoundIndex;
+            const nextCutoff = tournamentState.cutoffs[currentRoundIndex + 1]; // Cutoff for the round that just ended
 
-        scoreboardEntriesEl.innerHTML = playersArray.map((p, i) => {
-            let statusClass = '';
-            if (p.eliminated) {
-                statusClass = 'eliminated';
-            } else if (isEliminationRound && cutoff > 0) {
-                // Find the player's rank among non-eliminated players
-                const activeRank = playersArray.filter(pl => !pl.eliminated).findIndex(pl => pl.name === p.name);
-                if (activeRank < cutoff) {
+            const cumulativeScores = Object.entries(tournamentState.players).map(([name, data]) => {
+                const totalScore = data.scores.slice(0, currentRoundIndex + 1).reduce((sum, score) => sum + score, 0); // Scores up to and including the current round
+                return { name, totalScore, eliminated: data.eliminated };
+            }).sort((a, b) => b.totalScore - a.totalScore); // Sort by cumulative score
+
+            scoreboardEntriesEl.innerHTML = cumulativeScores.map((p, i) => {
+                let statusText = '';
+                let statusClass = '';
+                if (p.eliminated) {
+                    statusText = 'Éliminé (précédent)'; // Clarified status
+                    statusClass = 'eliminated';
+                } else if (nextCutoff !== undefined && i < nextCutoff) { // Qualifies for the next round
+                    statusText = 'Qualifié';
                     statusClass = 'safe';
-                } else {
+                } else if (nextCutoff !== undefined) { // Does not qualify
+                    statusText = 'Éliminé (cette ronde)'; // Clarified status
                     statusClass = 'danger';
+                } else { // Handle cases where nextCutoff might be undefined (e.g., final round pause)
+                    statusText = 'N/A';
+                    statusClass = '';
                 }
-            }
-            return `<div class="scoreboard-entry ${statusClass}"><span class="rank">${i + 1}.</span><span class="player-name">${p.name}</span><span class="score">${p.score.toLocaleString()}</span></div>`;
-        }).join('');
+                return `<div class="scoreboard-entry ${statusClass}"><span class="rank">${i + 1}.</span><span class="player-name">${p.name}</span><span class="score">${p.totalScore.toLocaleString()}</span><span class="status">${statusText}</span></div>`;
+            }).join('');
+
+        } else { // Normal round display
+            const roundIndex = tournamentState.currentRoundIndex;
+            const playersArray = Object.entries(tournamentState.players).map(([name, data]) => ({ name, score: data.scores[roundIndex] || 0, eliminated: data.eliminated }));
+            
+            // Sort players by score
+            playersArray.sort((a, b) => b.score - a.score);
+
+            const cutoff = tournamentState.currentCutoff;
+            const isEliminationRound = tournamentState.status === 'round' && tournamentState.currentRoundIndex > 0;
+
+            scoreboardEntriesEl.innerHTML = playersArray.map((p, i) => {
+                let statusClass = '';
+                let statusText = ''; // New statusText for during round
+                if (p.eliminated) {
+                    statusClass = 'eliminated';
+                    statusText = 'Éliminé'; // During round, just show "Eliminé"
+                } else if (isEliminationRound && cutoff > 0) {
+                    // Find the player's rank among non-eliminated players
+                    const activeRank = playersArray.filter(pl => !pl.eliminated).findIndex(pl => pl.name === p.name);
+                    if (activeRank < cutoff) {
+                        statusClass = 'safe';
+                        statusText = 'Qualifié'; // During round, show "Qualifié"
+                    } else {
+                        statusClass = 'danger';
+                        statusText = 'Non qualifié'; // During round, show "Non qualifié"
+                    }
+                }
+                return `<div class="scoreboard-entry ${statusClass}"><span class="rank">${i + 1}.</span><span class="player-name">${p.name}</span><span class="score">${p.score.toLocaleString()}</span>${statusText ? `<span class="status">${statusText}</span>` : ''}</div>`;
+            }).join('');
+        }
     }
 
     function startScoreFetching() { stopScoreFetching(); fetchScores(); const i = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 5000 : 30000; scoreFetchingInterval = setInterval(fetchScores, i); } 
@@ -774,6 +870,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function startNextRound() {
         tournamentState.currentRoundIndex++;
+        tournamentState.simulatedScoresGeneratedForRound = false; // Reset for the new round
         const roundIndex = tournamentState.currentRoundIndex;
 
         if (roundIndex >= tournamentState.games.length) {
@@ -781,36 +878,100 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // For warmup or final round, we don't ask for a cutoff.
-        if (roundIndex === 0 || roundIndex >= tournamentState.games.length -1) {
-            const activePlayers = Object.values(tournamentState.players).filter(p => !p.eliminated);
-            tournamentState.currentCutoff = activePlayers.length; // Everyone is safe
-            runRound();
+        // The cutoff for the *current* round was determined by the *end* of the previous round.
+        // For the first round (warmup), everyone qualifies.
+        if (roundIndex > 0) {
+            tournamentState.currentCutoff = tournamentState.cutoffs[roundIndex];
         } else {
-            showPreRoundModal();
+             const activePlayers = Object.values(tournamentState.players).filter(p => !p.eliminated);
+             tournamentState.currentCutoff = activePlayers.length;
         }
+        
+        startCountdown(runRound);
     }
 
+    // Making startCountdown global to fix ReferenceError
+    window.startCountdown = function(callback) {
+        // Hide elements that shouldn't be visible during countdown
+        roundTitleEl.style.display = 'none';
+        roundSubtitleEl.style.display = 'none';
+        gameLinkEl.style.display = 'none';
+        gameMetadataEl.style.display = 'none';
+        scoreboardEntriesEl.style.display = 'none';
+        pauseAnimationSvg.style.display = 'none';
+        stopSteamAnimation();
+
+        // Show the countdown overlay and static.gif
+        countdownOverlay.style.display = 'flex';
+        gameCoverEl.src = 'assets/static.gif';
+        gameCoverEl.alt = 'Animation statique de compte à rebours'; // Set alt attribute
+        gameCoverEl.style.display = 'block';
+        console.log('startCountdown: gameCoverEl src set to', gameCoverEl.src, 'display:', gameCoverEl.style.display);
+
+        let count = 3;
+        goSound.play().catch(e => console.log("Audio play failed for GO!, user interaction needed."));
+        countdownText.textContent = count;
+        const countdownInterval = setInterval(() => {
+            count--;
+            if (count > 0) {
+                countdownText.textContent = count;
+            } else if (count === 0) {
+                countdownText.textContent = 'GO!';
+                goSound.play().catch(e => console.log("Audio play failed for GO!, user interaction needed."));
+            } else {
+                clearInterval(countdownInterval);
+                countdownOverlay.style.display = 'none';
+                gameCoverEl.style.display = 'none'; // Hide static.gif after countdown
+
+                // Restore visibility of tournamentView elements
+                roundTitleEl.style.display = '';
+                roundSubtitleEl.style.display = '';
+                gameLinkEl.style.display = '';
+                gameMetadataEl.style.display = '';
+                scoreboardEntriesEl.style.display = '';
+                
+                callback(); // Start the round or next phase
+            }
+        }, 1000);
+    };
+    
     function runRound() {
-        eliminationModal.style.display = 'none';
-        goSound.play().catch(e => console.log("Audio play failed"));
+        stopSteamAnimation();
+        pauseAnimationSvg.style.display = 'none';
+        gameCoverEl.style.display = 'block'; // Ensure game cover is visible
+
 
         if (backgroundImages.length > 0) {
             const newBg = backgroundImages[Math.floor(Math.random() * backgroundImages.length)];
             tournamentState.currentBackground = newBg;
             document.body.style.backgroundImage = `url('${newBg}')`;
         }
-
         const roundIndex = tournamentState.currentRoundIndex;
         const gameId = tournamentState.games[roundIndex];
+        const gameData = gamelist.find(g => g.id === gameId);
         tournamentState.status = 'round';
         tournamentState.roundStartTime = new Date().toISOString();
         
         // Set titles
         roundTitleEl.textContent = `Ronde ${roundIndex + 1}`;
-        gameTitleEl.textContent = gameId;
-        if (roundIndex > 0) {
-            roundSubtitleEl.textContent = `Top ${tournamentState.currentCutoff} se qualifient`;
+        if (gameData) {
+            gameTitleEl.textContent = gameData.title;
+            gameMetadataEl.innerHTML = `
+                <p><strong>Développeur:</strong> ${gameData.developer || 'N/A'}</p>
+                <p><strong>Année:</strong> ${gameData.year || 'N/A'}</p>
+                <p><strong>Genre:</strong> ${gameData.genre || 'N/A'}</p>
+                <p><strong>Console:</strong> ${gameData.core || 'N/A'}</p>
+            `;
+        } else {
+            gameTitleEl.textContent = gameId;
+            gameMetadataEl.innerHTML = '';
+        }
+
+        if (roundIndex === tournamentState.games.length - 1) { // Final round
+            roundSubtitleEl.textContent = "Finale";
+        } else if (roundIndex > 0) {
+            const playersToQualify = tournamentState.cutoffs[roundIndex + 1];
+            roundSubtitleEl.textContent = `Top ${playersToQualify} se qualifient`;
         } else {
             roundSubtitleEl.textContent = "Échauffement";
         }
@@ -833,8 +994,22 @@ document.addEventListener('DOMContentLoaded', () => {
         stopScoreFetching();
         endRoundSound.play().catch(e => console.log("Audio play failed, user interaction needed."));
 
-        const cutoff = tournamentState.currentCutoff;
         const roundIndex = tournamentState.currentRoundIndex;
+
+        // After warmup, calculate the cutoffs for all subsequent rounds
+        if (roundIndex === 0) {
+            tournamentState.initialPlayerCount = Object.keys(tournamentState.players).length;
+            tournamentState.cutoffs = [];
+            const Y = tournamentState.initialPlayerCount;
+            const X = tournamentState.games.length;
+            for (let i = 1; i < X; i++) {
+                //This is the formula for the number of players who will advance to the next round.
+                const playersAfter = Math.max(1, Math.ceil(Y * (X - i) / X));
+                tournamentState.cutoffs[i] = playersAfter;
+            }
+        }
+        
+        const cutoff = tournamentState.cutoffs[roundIndex + 1];
 
         if (roundIndex > 0 && roundIndex < tournamentState.games.length - 1) { // No eliminations for warmup or final round
             const playersSorted = Object.entries(tournamentState.players)
@@ -845,6 +1020,7 @@ document.addEventListener('DOMContentLoaded', () => {
             activePlayersSorted.forEach(([name], index) => {
                 if (index >= cutoff) {
                     tournamentState.players[name].eliminated = true;
+                    tournamentState.players[name].eliminatedRound = roundIndex; // Mark the round they were eliminated
                 }
             });
         }
@@ -854,37 +1030,22 @@ document.addEventListener('DOMContentLoaded', () => {
         startPause();
     }
     
-    function showPreRoundModal() {
-        tournamentState.status = 'elimination'; // New state
-        saveState();
 
-        const activePlayers = Object.values(tournamentState.players).filter(p => !p.eliminated);
-        
-        let suggestion = Math.ceil(activePlayers.length / 2);
-        suggestion = Math.max(suggestion, 2);
-
-        cutoffSuggestionEl.textContent = `Suggestion: Top ${suggestion} (sur ${activePlayers.length} joueurs actifs)`;
-        cutoffNumberInput.value = suggestion;
-        eliminationModal.style.display = 'flex';
-    }
-
-    confirmEliminationBtn.addEventListener('click', () => {
-        const cutoff = parseInt(cutoffNumberInput.value, 10);
-        if (isNaN(cutoff) || cutoff < 1) {
-            alert("Veuillez entrer un nombre valide.");
-            return;
-        }
-        tournamentState.currentCutoff = cutoff;
-        runRound();
-    });
 
     function startPause() {
-        eliminationModal.style.display = 'none';
         tournamentState.status = 'pause';
         saveState();
         roundTitleEl.textContent = "Pause";
-        roundSubtitleEl.textContent = "La prochaine ronde commence bientôt...";
-        gameTitleEl.textContent = ""; // Clear game title during pause
+        roundSubtitleEl.textContent = "";
+        gameTitleEl.textContent = "";
+        gameMetadataEl.innerHTML = "";
+        gameCoverEl.src = 'assets/static.gif';
+        gameCoverEl.alt = 'Animation statique de pause'; // Set alt attribute
+        gameCoverEl.style.display = 'block';
+        console.log('startPause: gameCoverEl src set to', gameCoverEl.src, 'display:', gameCoverEl.style.display);
+        pauseAnimationSvg.style.display = 'none';
+        stopSteamAnimation();
+        renderScoreboard(); // Call renderScoreboard to display cumulative results and qualification status
         startTimer(tournamentState.pauseDuration, updateTimerDisplay, startNextRound);
     }
 
@@ -906,88 +1067,113 @@ document.addEventListener('DOMContentLoaded', () => {
         }).sort((a, b) => b.totalScore - a.totalScore);
         
         // --- Render Winners ---
-        let winnerHTML = '<h3>Podium</h3>';
+        let winnerHTML = '<h3 style="text-align: center;">Podium</h3>';
+        winnerHTML += '<div style="text-align: center;">'; // Add centering div for podium
         const podiumEmojis = ['🥇', '🥈', '🥉'];
         finalRoundScores.slice(0, 3).forEach((player, i) => {
-            winnerHTML += `<div class="winner-entry"><span class="rank">${podiumEmojis[i]}</span><span class="player-name">${player.name}</span> <span class="score">(${player.score.toLocaleString()})</span></div>`;
+            winnerHTML += `<div class="winner-entry"><span class="rank">${podiumEmojis[i]}</span><span class="player-name">${player.name}</span></div>`;
         });
-        
+        winnerHTML += '</div>'; // Close centering div
+
         if (cumulativeScores.length > 0) {
-            winnerHTML += '<h3 style="margin-top: 30px;">Champion Cumulatif</h3>';
+            winnerHTML += '<h3 style="margin-top: 30px; text-align: center;">Champion Cumulatif</h3>';
+            winnerHTML += '<div style="text-align: center;">'; // Add centering div for cumulative champion
             winnerHTML += `<div class="winner-entry"><span class="rank">🏆</span><span class="player-name">${cumulativeScores[0].name}</span> <span class="score">(${cumulativeScores[0].totalScore.toLocaleString()})</span></div>`;
+            winnerHTML += '</div>'; // Close centering div
+        }
+        
+        // --- Render Cumulative Scores Table ---
+        if (cumulativeScores.length > 1) { // Only show table if there's more than one player
+            winnerHTML += '<h3 style="margin-top: 30px; text-align: center;">Tous les scores cumulatifs</h3>';
+            winnerHTML += '<div class="cumulative-scores-table-container">';
+            winnerHTML += '<table class="cumulative-scores-table">';
+            winnerHTML += '<thead><tr><th>Rang</th><th>Joueur</th><th>Score Total</th></tr></thead>';
+            winnerHTML += '<tbody>';
+            cumulativeScores.forEach((player, i) => {
+                winnerHTML += `<tr><td>${i + 1}.</td><td>${player.name}</td><td>${player.totalScore.toLocaleString()}</td></tr>`;
+            });
+            winnerHTML += '</tbody>';
+            winnerHTML += '</table>';
+            winnerHTML += '</div>';
         }
         
         winnerResultsEl.innerHTML = winnerHTML;
 
-        // --- Render Review Tabs ---
-        reviewTabsEl.innerHTML = '';
-        reviewScoreboardEl.innerHTML = '';
-        tournamentState.games.forEach((gameId, index) => {
-            const tab = document.createElement('button');
-            tab.className = 'review-tab-btn';
-            tab.textContent = `Ronde ${index + 1}`;
-            tab.addEventListener('click', () => {
-                showRoundResults(index);
-                // Set active class
-                document.querySelectorAll('.review-tab-btn').forEach(btn => btn.classList.remove('active'));
-                tab.classList.add('active');
+        const reviewContainer = document.getElementById('review-container');
+        reviewContainer.innerHTML = '<h4>Revoir les rondes</h4>'; // Clear previous content
+
+        const allPlayers = Object.keys(tournamentState.players);
+        
+        const tableContainer = document.createElement('div');
+        tableContainer.style.display = 'flex';
+        tableContainer.style.gap = '20px';
+        tableContainer.style.overflowX = 'auto';
+
+        tournamentState.games.forEach((gameId, roundIndex) => {
+            const gameData = gamelist.find(g => g.id === gameId);
+            const roundTable = document.createElement('div');
+            roundTable.className = 'review-round-table';
+
+            let tableHTML = `<div class="review-round-title">${gameData ? gameData.title : gameId}</div>`;
+            
+            const playersForRound = allPlayers.map(name => {
+                return {
+                    name,
+                    score: tournamentState.players[name].scores[roundIndex] || 0
+                };
+            }).sort((a, b) => b.score - a.score);
+
+            playersForRound.forEach(p => {
+                const playerEliminatedRound = tournamentState.players[p.name].eliminatedRound;
+                const isEliminatedInThisRoundOrEarlier = (typeof playerEliminatedRound === 'number' && playerEliminatedRound <= roundIndex);
+                const eliminatedClass = isEliminatedInThisRoundOrEarlier ? 'eliminated-in-review' : '';
+                tableHTML += `<div class="review-entry ${eliminatedClass}"><span class="player-name">${p.name}</span><span class="score">${p.score.toLocaleString()}</span></div>`;
             });
-            reviewTabsEl.appendChild(tab);
+            
+            roundTable.innerHTML = tableHTML;
+            tableContainer.appendChild(roundTable);
         });
 
-        // Show first round by default
-        if (tournamentState.games.length > 0) {
-            showRoundResults(0);
-            reviewTabsEl.firstChild.classList.add('active');
-        }
+        reviewContainer.appendChild(tableContainer);
 
         winnerView.style.display = 'flex';
         tournamentView.style.display = 'none';
     }
 
-    function showRoundResults(roundIndex) {
-        const players = Object.entries(tournamentState.players).map(([name, data]) => {
-            // Find out if the player was eliminated *after* this specific round
-            let wasEliminatedAfterThisRound = false;
-            if (data.eliminated) {
-                // Find the first round the player has a zero score after a non-zero score
-                let foundScore = false;
-                for(let i = roundIndex + 1; i < tournamentState.games.length; i++) {
-                    if (data.scores[i] > 0) {
-                        foundScore = true;
-                        break;
-                    }
-                }
-                if (!foundScore) { // This is a bit complex, let's simplify
-                    // A simpler proxy: if they are eliminated now, were they active in this round?
-                    // This isn't perfect, but good enough for review.
-                }
-            }
-            return {
-                name,
-                score: data.scores[roundIndex] || 0,
-                eliminated: data.eliminated // We'll just show their final eliminated status
-            };
-        });
-
-        players.sort((a,b) => b.score - a.score);
-
-        reviewScoreboardEl.innerHTML = players.map((p, i) => 
-            `<div class="scoreboard-entry ${p.score === 0 ? 'eliminated' : ''}">
-                <span class="rank">${i + 1}.</span>
-                <span class="player-name">${p.name}</span>
-                <span class="score">${p.score.toLocaleString()}</span>
-            </div>`
-        ).join('');
-    }
-
     // --- Init & Event Listeners ---
+    generateGamesBtn.addEventListener('click', () => {
+        const numGames = parseInt(numGamesInput.value, 10);
+        if (isNaN(numGames) || numGames < 1) {
+            alert("Veuillez entrer un nombre de jeux valide.");
+            return;
+        }
+
+        const scoreEnabledGames = gamelist.filter(g => g.enable_score);
+        
+        // Shuffle the array
+        for (let i = scoreEnabledGames.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [scoreEnabledGames[i], scoreEnabledGames[j]] = [scoreEnabledGames[j], scoreEnabledGames[i]];
+        }
+
+        const selectedGames = scoreEnabledGames.slice(0, numGames);
+        gameIdsTextarea.value = selectedGames.map(g => g.id).join('\n');
+    });
+
     startTournamentBtn.addEventListener('click', () => {
         const gameIds = gameIdsTextarea.value.split('\n').map(id => id.trim()).filter(id => id);
         if (gameIds.length === 0) { alert("Veuillez entrer au moins un ID de jeu."); return; }
+
+        const allGamesValid = gameIds.every(id => gamelist.some(g => g.id === id));
+        if (!allGamesValid) {
+            alert("Un ou plusieurs ID de jeu sont invalides. Veuillez vérifier la liste.");
+            return;
+        }
+
         tournamentState = {
             games: gameIds, roundDuration: parseFloat(roundDurationInput.value) * 60, pauseDuration: parseFloat(pauseDurationInput.value) * 60,
-            currentRoundIndex: -1, players: {}, roundHistory: [], status: 'setup', remainingTime: 0, currentCutoff: 0
+            currentRoundIndex: -1, players: {}, roundHistory: [], status: 'setup', remainingTime: 0, currentCutoff: 0,
+            simulatedScoresGeneratedForRound: false
         };
         showTournamentView();
         startNextRound();
@@ -1030,8 +1216,23 @@ document.addEventListener('DOMContentLoaded', () => {
         if (tournamentState.status === 'round') {
             const roundIndex = tournamentState.currentRoundIndex;
             const gameId = tournamentState.games[roundIndex];
+            const gameData = gamelist.find(g => g.id === gameId);
+
             roundTitleEl.textContent = `Ronde ${roundIndex + 1}`;
-            roundSubtitleEl.textContent = roundIndex === 0 ? "Échauffement" : `Jeu: ${gameId}`;
+            if (gameData) {
+                gameTitleEl.textContent = gameData.title;
+                gameMetadataEl.innerHTML = `
+                    <p><strong>Développeur:</strong> ${gameData.developer || 'N/A'}</p>
+                    <p><strong>Année:</strong> ${gameData.year || 'N/A'}</p>
+                    <p><strong>Genre:</strong> ${gameData.genre || 'N/A'}</p>
+                    <p><strong>Console:</strong> ${gameData.core || 'N/A'}</p>
+                `;
+            } else {
+                gameTitleEl.textContent = gameId;
+                gameMetadataEl.innerHTML = '';
+            }
+
+            roundSubtitleEl.textContent = roundIndex === 0 ? "Échauffement" : `Top ${tournamentState.currentCutoff} se qualifient`;
             gameCoverEl.src = `/games/${gameId}/cover.png`;
             const url = `https://bonjourarcade.com/b/${gameId}`;
             gameLinkEl.href = url; gameLinkTextEl.textContent = url;
@@ -1040,16 +1241,36 @@ document.addEventListener('DOMContentLoaded', () => {
             startTimer(tournamentState.remainingTime, onTick, endRound);
         } else if (tournamentState.status === 'pause') {
              roundTitleEl.textContent = "Pause";
-             roundSubtitleEl.textContent = "La prochaine ronde commence bientôt...";
+             roundSubtitleEl.textContent = "";
+             gameTitleEl.textContent = "";
+             gameMetadataEl.innerHTML = "";
+             gameCoverEl.src = '/assets/static.gif'; // Display static.gif
+             gameCoverEl.alt = 'Animation statique de pause (reprise)'; // Set alt attribute
+             gameCoverEl.style.display = 'block';
+             console.log('resumeTournament (pause): gameCoverEl src set to', gameCoverEl.src, 'display:', gameCoverEl.style.display);
+             pauseAnimationSvg.style.display = 'none'; // Hide SVG
+             startSteamAnimation(); // Keep steam animation for pause
              renderScoreboard();
              startTimer(tournamentState.remainingTime, onTick, startNextRound);
-        } else if (tournamentState.status === 'elimination') {
-            renderScoreboard();
-            showPreRoundModal();
         }
     }
 
-    function init() {
+    async function fetchGamelist() {
+        try {
+            const response = await fetch('/gamelist.json');
+            const data = await response.json();
+            gamelist = data.games || [];
+        } catch (error) {
+            console.error('Error fetching gamelist:', error);
+        }
+    }
+
+    async function init() {
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            localTestingOnlyDiv.style.display = 'block';
+            simulatedPlayersInput.value = Math.floor(Math.random() * (20 - 4 + 1)) + 4;
+        }
+        await fetchGamelist();
         if (loadState() && tournamentState.status && tournamentState.status !== 'setup' && tournamentState.status !== 'finished') {
             resumeTournament();
         } else {

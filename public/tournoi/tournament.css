@@ -426,3 +426,40 @@ textarea { resize: vertical; }
         background-color: rgba(255, 223, 0, 0.2); /* Light gold shimmer */
     }
 }
+
+#podium-container {
+    display: flex;
+    flex-direction: column; /* Stack elements vertically */
+    align-items: center; /* Center horizontally */
+    margin-top: 20px;
+    gap: 10px; /* Space between podium entries */
+}
+
+#podium-first-place .winner-entry {
+    font-size: 2.5em; /* Larger for 1st place */
+    padding: 15px 25px;
+    margin-bottom: 10px; /* More space above 2nd/3rd */
+}
+
+#podium-second-place .winner-entry {
+    font-size: 2em; /* Medium for 2nd place */
+    padding: 10px 20px;
+}
+
+#podium-third-place .winner-entry {
+    font-size: 1.5em; /* Smaller for 3rd place */
+    padding: 8px 15px;
+}
+
+/* Adjustments for winner-entry size consistency within podium */
+#podium-container .winner-entry {
+    width: 80%; /* Ensure they take up a reasonable width */
+    max-width: 400px; /* Limit overall width */
+    justify-content: center; /* Center rank/name/score within the entry */
+}
+
+/* Specific styling for the rank emoji to ensure it aligns well */
+#podium-container .winner-entry .rank {
+    font-size: 1.2em;
+    margin-right: 15px;
+}

@@ -1090,9 +1090,11 @@ const countdownText = document.getElementById('countdown-text');
 
 
         // --- Podium Display ---
-        let podiumHtml = '<h3 style="text-align: center;">Podium</h3><div id="podium-container" style="text-align: center;"></div>';
+        let podiumHtml = '<h3 style="text-align: center;">Podium</h3><div id="podium-container" style="text-align: center;"><div id="podium-third-place"></div><div id="podium-second-place"></div><div id="podium-first-place"></div></div>';
         winnerResultsEl.innerHTML += podiumHtml; // Add the container for podium
-        const podiumContainer = document.getElementById('podium-container');
+        const podiumFirstPlace = document.getElementById('podium-first-place');
+        const podiumSecondPlace = document.getElementById('podium-second-place');
+        const podiumThirdPlace = document.getElementById('podium-third-place');
 
         const podiumEmojis = ['🥇', '🥈', '🥉'];
         const medalColorsClasses = ['gold', 'silver', 'bronze'];
@@ -1106,7 +1108,7 @@ const countdownText = document.getElementById('countdown-text');
             const playerElement = document.createElement('div');
             playerElement.className = `winner-entry ${medalClass} fade-in-up`; // Add animation class
             playerElement.innerHTML = `<span class="rank">${podiumEmojis[2]}</span><span class="player-name">${p.name}</span>`;
-            podiumContainer.appendChild(playerElement);
+            podiumThirdPlace.appendChild(playerElement);
         }
 
         // Display 2nd place
@@ -1117,7 +1119,7 @@ const countdownText = document.getElementById('countdown-text');
             const playerElement = document.createElement('div');
             playerElement.className = `winner-entry ${medalClass} fade-in-up`; // Add animation class
             playerElement.innerHTML = `<span class="rank">${podiumEmojis[1]}</span><span class="player-name">${p.name}</span>`;
-            podiumContainer.appendChild(playerElement);
+            podiumSecondPlace.appendChild(playerElement);
         }
 
         // Display 1st place with celebration
@@ -1128,7 +1130,7 @@ const countdownText = document.getElementById('countdown-text');
             const playerElement = document.createElement('div');
             playerElement.className = `winner-entry ${medalClass} celebrate-winner fade-in-up`; // Add celebration and animation class
             playerElement.innerHTML = `<span class="rank">${podiumEmojis[0]}</span><span class="player-name">${p.name}</span>`;
-            podiumContainer.appendChild(playerElement);
+            podiumFirstPlace.appendChild(playerElement);
         }
 
 
@@ -1165,7 +1167,7 @@ const countdownText = document.getElementById('countdown-text');
                 const row = document.createElement('tr');
                 row.className = 'fade-in-up'; // Add animation class to row
                 row.innerHTML = `<td>${originalRank}.</td><td>${player.name}</td><td>${player.totalScore.toLocaleString()}</td>`;
-                cumulativeTbody.appendChild(row);
+                cumulativeTbody.prepend(row); // Use prepend instead of appendChild
             }
         }
         

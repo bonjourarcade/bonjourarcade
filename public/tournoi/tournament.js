@@ -885,10 +885,14 @@ const countdownText = document.getElementById('countdown-text');
         // The cutoff for the *current* round was determined by the *end* of the previous round.
         // For the first round (warmup), everyone qualifies.
         if (roundIndex > 0) {
-            tournamentState.currentCutoff = tournamentState.cutoffs[roundIndex];
-        } else {
+            // The cutoff for display should indicate how many players will qualify from *this* round to the *next*.
+            // tournamentState.cutoffs[roundIndex + 1] stores the number of players who will advance to round (roundIndex + 2)
+            // But if roundIndex is the current round, then cutoffs[roundIndex + 1] refers to players advancing to next round.
+            // So, for roundIndex, we should use cutoffs[roundIndex + 1] for display purposes.
+            tournamentState.currentCutoff = tournamentState.cutoffs[roundIndex + 1]; 
+        } else { // Warmup round
              const activePlayers = Object.values(tournamentState.players).filter(p => !p.eliminated);
-             tournamentState.currentCutoff = activePlayers.length;
+             tournamentState.currentCutoff = activePlayers.length; // Everyone qualifies for warmup
         }
         
         startCountdown(runRound);

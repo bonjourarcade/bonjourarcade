@@ -780,7 +780,7 @@ const countdownText = document.getElementById('countdown-text');
         const gameId = tournamentState.games[tournamentState.currentRoundIndex];
         if (!gameId) return;
         try {
-            const r = await fetch('https://us-central1-alloarcade.cloudfunctions.net/listGameScores', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ "game_id": gameId }) });
+            const r = await fetch('https://us-central1-alloarcade.cloudfunctions.net/listGameScores', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ data: { timeRange: "week", gameId: gameId } }) });
             if (!r.ok) throw new Error(`API response not OK: ${r.status}`);
             const scores = await r.json();
             const roundStartTime = new Date(tournamentState.roundStartTime);

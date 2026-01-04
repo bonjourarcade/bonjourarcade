@@ -786,7 +786,7 @@ const countdownText = document.getElementById('countdown-text');
             const scores = apiResponse.result.scores;
             const roundStartTime = new Date(tournamentState.roundStartTime);
             scores.forEach(s => {
-                if (new Date(s.timestamp) > roundStartTime) {
+                if (new Date(s.date._seconds * 1000) > roundStartTime) {
                     if (!tournamentState.players[s.player]) { tournamentState.players[s.player] = { scores: Array(tournamentState.games.length).fill(0), totalScore: 0, eliminated: false, eliminatedRound: null }; }
                     const p = tournamentState.players[s.player];
                     if (s.score > p.scores[tournamentState.currentRoundIndex]) { p.scores[tournamentState.currentRoundIndex] = s.score; }

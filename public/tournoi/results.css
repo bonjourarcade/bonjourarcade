@@ -33,7 +33,7 @@
     background-image: url('assets/backgrounds/cyber.jpg'); /* Example textured background */
     background-size: cover;
     background-position: center;
-    color: black; /* Adjust text color for better contrast on textured background */
+    color: white; /* Adjust text color for better contrast on textured background */
 }
 .light-bg {
     background-color: #f0f0f0;
@@ -98,14 +98,14 @@
 .section-title {
     font-size: 3em;
     margin-bottom: 1em;
-    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.7); /* Lighter glow for dark bg */
 }
 
 .section-subtitle {
     font-size: 2em;
     margin-top: 2em;
     margin-bottom: 1em;
-    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.5); /* Lighter glow */
 }
 
 .overall-champion-display {
@@ -113,10 +113,11 @@
     font-weight: bold;
     margin-top: 30px;
     padding: 20px;
-    background: rgba(255, 255, 255, 0.8);
-    color: #4CAF50; /* A celebratory color */
+    background: rgba(0, 0, 0, 0.7); /* Dark translucent background */
+    color: #FFD700; /* Gold color for the champion */
     border-radius: 15px;
-    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.6); /* Gold glow */
     display: flex;
     align-items: center;
     gap: 20px;
@@ -136,33 +137,34 @@
     overflow-y: auto; /* Keep auto overflow for potential inner scrolling if table is huge */
     width: 80%;
     margin-top: 20px;
-    background: rgba(255, 255, 255, 0.8);
+    background: rgba(0, 0, 0, 0.7); /* Dark translucent background */
     border-radius: 10px;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle light border */
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
 }
 
 .cumulative-scores-table {
     width: 100%;
     border-collapse: collapse;
-    color: black;
+    color: white; /* Light text for dark background */
 }
 
 .cumulative-scores-table th,
 .cumulative-scores-table td {
     padding: 15px;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15); /* Lighter border */
     text-align: left;
 }
 
 .cumulative-scores-table th {
-    background-color: #333;
+    background-color: rgba(0, 0, 0, 0.5); /* Slightly more transparent header */
     color: white;
     position: sticky;
     top: 0;
 }
 
 .cumulative-scores-table tbody tr:hover {
-    background-color: #f1f1f1;
+    background-color: rgba(255, 255, 255, 0.1); /* Highlight on hover */
 }
 
 /* Round summaries section */

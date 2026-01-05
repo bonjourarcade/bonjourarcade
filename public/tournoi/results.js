@@ -5,12 +5,6 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
     const defaultAvatar = 'assets/default-avatar.png'; // Fallback avatar
 
-    function getRandomBackground() {
-        if (backgroundImages.length === 0) return '';
-        const randomIndex = Math.floor(Math.random() * backgroundImages.length);
-        return `url('${backgroundImages[randomIndex]}')`; // Adjust path for results.html location
-    }
-
     if (!resultsDataString) {
         document.body.innerHTML = '<h1>No tournament results found.</h1><p>Please start a tournament first.</p>';
         return;
@@ -117,36 +111,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Set a random background for the cumulative section
+    // Set a static background for the cumulative section
     const cumulativeSection = document.getElementById('cumulative-section');
     if (cumulativeSection) {
-        cumulativeSection.style.backgroundImage = getRandomBackground();
+        cumulativeSection.style.backgroundImage = "url('assets/backgrounds/55.png')";
     }
 
     populateResults(); // Fill data into all sections
 
-    // Initialize Intersection Observer
-    const observerOptions = {
-        root: null, // viewport
-        rootMargin: '0px',
-        threshold: 0.5 // Trigger when 50% of the item is visible
-    };
-
-    const observer = new IntersectionObserver((entries, observer) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.remove('initially-invisible');
-                entry.target.classList.add('visible');
-                // Optionally, unobserve once it's visible if it's a one-time animation
-                // observer.unobserve(entry.target);
-            }
-        });
-    }, observerOptions);
-
-    // Observe all sections except the first one (intro-section)
-    sections.slice(1).forEach(section => {
-        section.classList.add('initially-invisible'); // Ensure they start invisible
-        observer.observe(section);
+    // Make all sections visible by default without the scroll effect
+    sections.forEach(section => {
+        section.classList.remove('initially-invisible');
+        section.classList.add('visible');
     });
 
     // Ensure initial state: intro is visible and has the 'visible' class

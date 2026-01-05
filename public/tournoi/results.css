@@ -64,6 +64,13 @@
     animation: fadeIn 2s ease-out forwards;
 }
 
+#drumroll-gif {
+    margin-top: 20px;
+    width: 300px;
+    height: auto;
+    border-radius: 10px;
+}
+
 /* Podium display */
 .podium-rank {
     font-size: 4em;

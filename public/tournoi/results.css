@@ -224,8 +224,9 @@
 
 .eliminated-in-review .player-name,
 .eliminated-in-review .score {
-    color: #aaa;
+    color: #c90000;
     text-decoration: line-through;
+    font-weight: normal;
 }
 
 /* Animations */

@@ -67,12 +67,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const cumulativeScoresTbody = document.getElementById('cumulative-scores-tbody');
         if (cumulativeScoresTbody && resultsData.cumulativeScoresTable) {
             cumulativeScoresTbody.innerHTML = ''; // Clear existing
-            // Sort cumulative scores in ascending order for suspense
+            // Sort cumulative scores in ascending order for suspense, with rank inverted.
             const sortedCumulativeScores = [...resultsData.cumulativeScoresTable].sort((a, b) => a.totalScore - b.totalScore);
+            const totalPlayers = sortedCumulativeScores.length;
             sortedCumulativeScores.forEach((player, index) => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${index + 1}.</td>
+                    <td>${totalPlayers - index}.</td>
                     <td>
                         <img src="${player.photoURL ? player.photoURL : defaultAvatar}" alt="${player.name}" class="player-avatar" style="width: 30px; height: 30px; border-radius: 50%; vertical-align: middle; margin-right: 10px;">
                         ${player.name}

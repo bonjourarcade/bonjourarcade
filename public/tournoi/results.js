@@ -127,4 +127,17 @@ document.addEventListener('DOMContentLoaded', () => {
     sections[0].classList.add('visible');
     // Optionally, clear the session storage after results are loaded to prevent stale data on refresh
     // sessionStorage.removeItem('bonjourarcade_tournament_results');
+
+    // Event listener for the end tournament button
+    const endTournamentBtn = document.getElementById('end-tournament-btn');
+    if (endTournamentBtn) {
+        endTournamentBtn.addEventListener('click', (e) => {
+            e.preventDefault(); // Prevent any default button action
+            // Clear all tournament data from session storage
+            sessionStorage.removeItem('bonjourarcade_tournament_results');
+            sessionStorage.removeItem('bonjourarcade_tournament_state'); // Also clear the main tournament state
+            // Redirect back to the tournament setup page
+            window.location.href = '/tournoi/';
+        });
+    }
 });

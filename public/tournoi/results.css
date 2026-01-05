@@ -304,3 +304,26 @@
         font-size: 0.9em;
     }
 }
+
+/* End tournament button */
+#end-tournament-section {
+    padding-bottom: 40px; /* Add some space at the bottom */
+}
+
+.end-tournament-button {
+    background-color: #d9534f; /* A shade of red */
+    color: white;
+    font-size: 1.5em;
+    font-weight: bold;
+    padding: 15px 30px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.end-tournament-button:hover {
+    background-color: #c9302c; /* A darker red on hover */
+    transform: translateY(-2px); /* Slight lift on hover */
+}

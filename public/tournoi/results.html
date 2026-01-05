@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Résultats du Tournoi - Bonjour Arcade</title>
+    <link rel="stylesheet" href="../assets/css/style.css"> <!-- Existing global styles -->
+    <link rel="stylesheet" href="results.css">
+</head>
+<body>
+    <div id="results-container">
+        <!-- Section 1: Intro - "Résultats" -->
+        <section id="intro-section" class="results-section black-bg">
+            <h1 class="centered-text fade-in">Résultats</h1>
+        </section>
+
+        <!-- Section 2: 3rd Place (Bronze) -->
+        <section id="bronze-section" class="results-section bronze-bg initially-invisible">
+            <h2 class="podium-rank">3ème Place</h2>
+            <div id="bronze-player" class="player-display"></div>
+        </section>
+
+        <!-- Section 3: 2nd Place (Silver) -->
+        <section id="silver-section" class="results-section silver-bg initially-invisible">
+            <h2 class="podium-rank">2ème Place</h2>
+            <div id="silver-player" class="player-display"></div>
+        </section>
+
+        <!-- Section 4: 1st Place (Gold) -->
+        <section id="gold-section" class="results-section gold-bg initially-invisible">
+            <h2 class="podium-rank">1ère Place</h2>
+            <div id="gold-player" class="player-display"></div>
+        </section>
+
+        <!-- Section 5: Cumulative Scores Table & Overall Champion -->
+        <section id="cumulative-section" class="results-section textured-bg initially-invisible">
+            <h2 class="section-title">Scores Cumulatifs</h2> <!-- Changed title -->
+            <div id="cumulative-table-container">
+                <table class="cumulative-scores-table">
+                    <thead>
+                        <tr>
+                            <th>Rang</th>
+                            <th>Joueur</th>
+                            <th>Score Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cumulative-scores-tbody">
+                        <!-- Cumulative scores will be inserted here by JS -->
+                    </tbody>
+                </table>
+            </div>
+            <h3 class="section-subtitle">Champion Cumulatif</h3> <!-- New title for winner -->
+            <div id="overall-champion-display" class="overall-champion-display"></div>
+        </section>
+
+        <!-- Section 6: Round Summaries -->
+        <section id="round-summaries-section" class="results-section light-bg initially-invisible">
+            <h2 class="section-title">Revoir les rondes</h2>
+            <div id="round-summaries-container" class="round-summaries-container">
+                <!-- Round summary tables will be inserted here by JS -->
+            </div>
+        </section>
+    </div>
+
+    <script src="results.js"></script>
+</body>
+</html>

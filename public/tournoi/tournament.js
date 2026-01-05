@@ -1061,171 +1061,57 @@ const countdownText = document.getElementById('countdown-text');
         startTimer(tournamentState.pauseDuration, updateTimerDisplay, startNextRound);
     }
 
-    // Helper function for delays in async operations
-    function delay(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }
-
     async function endTournament() {
         tournamentState.status = 'finished';
-        saveState();
-        winnerView.style.display = 'flex'; // Show winner view immediately
-        tournamentView.style.display = 'none';
 
-        // Clear previous content of winnerResultsEl to prepare for dynamic rendering
-        winnerResultsEl.innerHTML = '';
-        
-        // --- Winner Calculation (existing logic, remains largely the same) ---
+        // --- Data preparation for results.html ---
         const finalRoundIndex = tournamentState.games.length - 1;
+
+        // Final Round Scores (for podium)
         const finalRoundScores = Object.entries(tournamentState.players)
             .filter(([, data]) => !data.eliminated)
-            .map(([name, data]) => ({ name, score: data.scores[finalRoundIndex] || 0 }))
+            .map(([name, data]) => ({ name, score: data.scores[finalRoundIndex] || 0, photoURL: data.photoURL }))
             .sort((a, b) => b.score - a.score);
 
+        // Cumulative Scores
         const cumulativeScores = Object.entries(tournamentState.players).map(([name, data]) => {
             const totalScore = data.scores.reduce((sum, score) => sum + score, 0);
-            data.totalScore = totalScore;
-            return { name, totalScore, photoURL: data.photoURL }; // Keep photoURL for cumulative
+            return { name, totalScore, photoURL: data.photoURL };
         }).sort((a, b) => b.totalScore - a.totalScore);
 
-
-        // --- Podium Display ---
-        const podiumContainer = document.createElement('div');
-        podiumContainer.id = 'podium-container';
-        podiumContainer.style.textAlign = 'center';
-        winnerResultsEl.innerHTML += '<h3 style="text-align: center;">Podium</h3>';
-        winnerResultsEl.appendChild(podiumContainer);
-
-        const podiumFirstPlace = document.createElement('div');
-        podiumFirstPlace.id = 'podium-first-place';
-        const podiumSecondPlace = document.createElement('div');
-        podiumSecondPlace.id = 'podium-second-place';
-        const podiumThirdPlace = document.createElement('div');
-        podiumThirdPlace.id = 'podium-third-place';
-
-        // Append in visual order: 1st, 2nd, 3rd (top to bottom)
-        podiumContainer.appendChild(podiumFirstPlace);
-        podiumContainer.appendChild(podiumSecondPlace);
-        podiumContainer.appendChild(podiumThirdPlace);
-
-        const podiumEmojis = ['🥇', '🥈', '🥉'];
-        const medalColorsClasses = ['gold', 'silver', 'bronze'];
-        const podiumPlayers = finalRoundScores.slice(0, 3);
-
-        // Display 3rd place
-        if (podiumPlayers[2]) {
-            await delay(1000); // Delay before showing 3rd
-            const p = podiumPlayers[2];
-            const medalClass = medalColorsClasses[2];
-            const playerElement = document.createElement('div');
-            playerElement.className = `winner-entry ${medalClass} fade-in-up`; // Add animation class
-            playerElement.innerHTML = `<span class="rank">${podiumEmojis[2]}</span><span class="player-name">${p.name}</span>`;
-            podiumThirdPlace.appendChild(playerElement);
-        }
-
-        // Display 2nd place
-        if (podiumPlayers[1]) {
-            await delay(1500); // Delay before showing 2nd
-            const p = podiumPlayers[1];
-            const medalClass = medalColorsClasses[1];
-            const playerElement = document.createElement('div');
-            playerElement.className = `winner-entry ${medalClass} fade-in-up`; // Add animation class
-            playerElement.innerHTML = `<span class="rank">${podiumEmojis[1]}</span><span class="player-name">${p.name}</span>`;
-            podiumSecondPlace.appendChild(playerElement);
-        }
-
-        // Display 1st place with celebration
-        if (podiumPlayers[0]) {
-            await delay(2000); // Delay before showing 1st
-            const p = podiumPlayers[0];
-            const medalClass = medalColorsClasses[0];
-            const playerElement = document.createElement('div');
-            playerElement.className = `winner-entry ${medalClass} celebrate-winner fade-in-up`; // Add celebration and animation class
-            playerElement.innerHTML = `<span class="rank">${podiumEmojis[0]}</span><span class="player-name">${p.name}</span>`;
-            podiumFirstPlace.appendChild(playerElement);
-        }
-
-
-        // --- Cumulative Champion Reveal ---
-        if (cumulativeScores.length > 0) {
-            await delay(3000); // Delay before cumulative section
-            winnerResultsEl.innerHTML += '<h3 style="margin-top: 30px; text-align: center;">Champion Cumulatif</h3>';
-            let cumulativeChampionContainer = document.createElement('div');
-            cumulativeChampionContainer.id = 'cumulative-champion-container';
-            cumulativeChampionContainer.style.textAlign = 'center';
-            winnerResultsEl.appendChild(cumulativeChampionContainer);
-
-            const overallChampion = cumulativeScores[0];
-            console.log("Overall Cumulative Champion:", overallChampion); // Debugging
-            await delay(1000); // Delay before showing cumulative champion
-            const championElement = document.createElement('div');
-            championElement.className = `winner-entry celebrate-winner fade-in-up`; // Add celebration and animation class
-            championElement.innerHTML = `<span class="rank">🏆</span><span class="player-name">${overallChampion.name}</span> <span class="score">(${overallChampion.totalScore.toLocaleString()})</span>`;
-            cumulativeChampionContainer.appendChild(championElement);
-        }
-
-        // --- Render Cumulative Scores Table Gradually ---
-        if (cumulativeScores.length > 1) {
-            await delay(3000); // Delay before table starts
-            winnerResultsEl.innerHTML += '<h3 style="margin-top: 30px; text-align: center;">Tous les scores cumulatifs</h3>';
-            winnerResultsEl.innerHTML += '<div class="cumulative-scores-table-container"><table class="cumulative-scores-table"><thead><tr><th>Rang</th><th>Joueur</th><th>Score Total</th></tr></thead><tbody id="cumulative-scores-tbody"></tbody></table></div>';
-            const cumulativeTbody = document.getElementById('cumulative-scores-tbody');
-
-            // Sort cumulative scores from smallest to largest for gradual reveal
-            const sortedCumulativeScores = [...cumulativeScores].sort((a, b) => a.totalScore - b.totalScore);
-            
-            for (let i = 0; i < sortedCumulativeScores.length; i++) {
-                await delay(500); // Delay between each row reveal
-                const player = sortedCumulativeScores[i];
-                const originalRank = cumulativeScores.findIndex(p => p.name === player.name) + 1; // Get original rank
-                const row = document.createElement('tr');
-                row.className = 'fade-in-up'; // Add animation class to row
-                row.innerHTML = `<td>${originalRank}.</td><td>${player.name}</td><td>${player.totalScore.toLocaleString()}</td>`;
-                cumulativeTbody.prepend(row); // Use prepend instead of appendChild
-            }
-        }
-        
-        // --- Review Rounds (existing logic, after all animations) ---
-        await delay(3000); // Final delay before showing review rounds
-        const reviewContainer = document.getElementById('review-container');
-        reviewContainer.innerHTML = '<h4>Revoir les rondes</h4>'; // Clear previous content
-
-        const allPlayers = Object.keys(tournamentState.players);
-        
-        const tableContainer = document.createElement('div');
-        tableContainer.style.display = 'flex';
-        tableContainer.style.gap = '20px';
-        tableContainer.style.overflowX = 'auto';
-
-        tournamentState.games.forEach((gameId, roundIndex) => {
+        // Round Summaries
+        const roundSummaries = tournamentState.games.map((gameId, roundIndex) => {
             const gameData = gamelist.find(g => g.id === gameId);
-            const roundTable = document.createElement('div');
-            roundTable.className = 'review-round-table';
-
-            let tableHTML = `<div class="review-round-title">${gameData ? gameData.title : gameId}</div>`;
-            
-            const playersForRound = allPlayers.map(name => {
+            const playersForRound = Object.keys(tournamentState.players).map(name => {
+                const player = tournamentState.players[name];
                 return {
                     name,
-                    score: tournamentState.players[name].scores[roundIndex] || 0
+                    score: player.scores[roundIndex] || 0,
+                    photoURL: player.photoURL,
+                    eliminatedInThisRoundOrEarlier: (typeof player.eliminatedRound === 'number' && player.eliminatedRound <= roundIndex)
                 };
-            }).sort((a, b) => b.score - a.score);
+            }).sort((a, b) => b.score - a.score); // Sort by score for this round
 
-            playersForRound.forEach(p => {
-                const playerEliminatedRound = tournamentState.players[p.name].eliminatedRound;
-                const isEliminatedInThisRoundOrEarlier = (typeof playerEliminatedRound === 'number' && playerEliminatedRound <= roundIndex);
-                const eliminatedClass = isEliminatedInThisRoundOrEarlier ? 'eliminated-in-review' : '';
-                tableHTML += `<div class="review-entry ${eliminatedClass}"><span class="player-name">${p.name}</span><span class="score">${p.score.toLocaleString()}</span></div>`;
-            });
-            
-            roundTable.innerHTML = tableHTML;
-            tableContainer.appendChild(roundTable);
+            return {
+                roundNumber: roundIndex + 1,
+                gameTitle: gameData ? gameData.title : gameId,
+                gameId: gameId,
+                players: playersForRound
+            };
         });
 
-        reviewContainer.appendChild(tableContainer);
-        // Ensure winnerView is still visible and tournamentView is hidden
-        winnerView.style.display = 'flex';
-        tournamentView.style.display = 'none';
+        const resultsData = {
+            podiumPlayers: finalRoundScores.slice(0, 3), // Top 3 for the final round podium
+            overallChampion: cumulativeScores[0], // The absolute top player by cumulative score
+            cumulativeScoresTable: cumulativeScores, // All players with their cumulative scores
+            roundSummaries: roundSummaries
+        };
+
+        // Store data in sessionStorage
+        sessionStorage.setItem('bonjourarcade_tournament_results', JSON.stringify(resultsData));
+
+        // Redirect to the new results page
+        window.location.href = 'results.html';
     }
 
     // --- Init & Event Listeners ---
@@ -1236,15 +1122,15 @@ const countdownText = document.getElementById('countdown-text');
             return;
         }
 
-        const scoreEnabledGames = gamelist.filter(g => g.enable_score);
+        const eligibleGames = gamelist.filter(g => g.enable_score && !g.problem);
         
         // Shuffle the array
-        for (let i = scoreEnabledGames.length - 1; i > 0; i--) {
+        for (let i = eligibleGames.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
-            [scoreEnabledGames[i], scoreEnabledGames[j]] = [scoreEnabledGames[j], scoreEnabledGames[i]];
+            [eligibleGames[i], eligibleGames[j]] = [eligibleGames[j], eligibleGames[i]];
         }
 
-        const selectedGames = scoreEnabledGames.slice(0, numGames);
+        const selectedGames = eligibleGames.slice(0, numGames);
         gameIdsTextarea.value = selectedGames.map(g => g.id).join('\n');
     });
 

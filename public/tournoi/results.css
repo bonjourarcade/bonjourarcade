@@ -1,0 +1,296 @@
+#results-container {
+    width: 100vw;
+    min-height: 100vh; /* Ensure container is at least viewport height, allows it to grow */
+}
+
+.results-section {
+    width: 100vw;
+    min-height: 100vh; /* Ensure it takes at least full height, but can grow */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+    padding: 20px; /* Add some padding */
+}
+
+/* Explicitly set 100vh for podium sections for dramatic full-screen reveals */
+#intro-section,
+#bronze-section,
+#silver-section,
+#gold-section {
+    height: 100vh;
+}
+
+/* Backgrounds */
+.black-bg { background-color: black; }
+.bronze-bg { background-color: #CD7F32; } /* Bronze color */
+.silver-bg { background-color: #C0C0C0; } /* Silver color */
+.gold-bg { background-color: #FFD700; } /* Gold color */
+.textured-bg {
+    background-image: url('assets/backgrounds/cyber.jpg'); /* Example textured background */
+    background-size: cover;
+    background-position: center;
+    color: black; /* Adjust text color for better contrast on textured background */
+}
+.light-bg {
+    background-color: #f0f0f0;
+    color: black;
+}
+
+/* Hidden utility class - REMOVED: using 'initially-invisible' for scroll reveal */
+
+/* For elements that should fade in and slide up when they become visible */
+.initially-invisible {
+    opacity: 0;
+    transform: translateY(50px);
+    transition: opacity 1s ease-out, transform 1s ease-out;
+    z-index: 1; /* Ensure these elements are above the intro-section if it has a lower z-index */
+    position: relative; /* Needed for z-index to work with flex/grid containers */
+}
+
+.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Intro text */
+.centered-text {
+    font-size: 8em;
+    color: white;
+    text-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
+    animation: fadeIn 2s ease-out forwards;
+}
+
+/* Podium display */
+.podium-rank {
+    font-size: 4em;
+    margin-bottom: 20px;
+    text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
+}
+
+.player-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.player-avatar {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 5px solid white;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+}
+
+.player-name-podium {
+    font-size: 3em;
+    font-weight: bold;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+/* Cumulative section */
+.section-title {
+    font-size: 3em;
+    margin-bottom: 1em;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.section-subtitle {
+    font-size: 2em;
+    margin-top: 2em;
+    margin-bottom: 1em;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.overall-champion-display {
+    font-size: 4em;
+    font-weight: bold;
+    margin-top: 30px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.8);
+    color: #4CAF50; /* A celebratory color */
+    border-radius: 15px;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.overall-champion-display .player-avatar {
+    width: 100px;
+    height: 100px;
+}
+
+.overall-champion-display span {
+    display: block;
+}
+
+.cumulative-scores-table-container {
+    /* max-height: 50vh; REMOVED to allow full content display */
+    overflow-y: auto; /* Keep auto overflow for potential inner scrolling if table is huge */
+    width: 80%;
+    margin-top: 20px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+}
+
+.cumulative-scores-table {
+    width: 100%;
+    border-collapse: collapse;
+    color: black;
+}
+
+.cumulative-scores-table th,
+.cumulative-scores-table td {
+    padding: 15px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+}
+
+.cumulative-scores-table th {
+    background-color: #333;
+    color: white;
+    position: sticky;
+    top: 0;
+}
+
+.cumulative-scores-table tbody tr:hover {
+    background-color: #f1f1f1;
+}
+
+/* Round summaries section */
+.round-summaries-container {
+    display: flex;
+    flex-wrap: nowrap; /* Prevent wrapping */
+    justify-content: flex-start; /* Align items to the start for horizontal scrolling */
+    gap: 30px;
+    width: 90%;
+    /* max-height: 80vh; REMOVED to allow full content display */
+    overflow-x: auto; /* Enable horizontal scrolling */
+    overflow-y: hidden; /* Hide vertical overflow for horizontal scroll container */
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+}
+
+.review-round-table {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    width: 300px; /* Fixed width for each round table */
+    flex-shrink: 0; /* Prevent tables from shrinking */
+    text-align: left;
+    color: black;
+}
+
+.review-round-title {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin-bottom: 15px;
+    color: #333;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+}
+
+.review-entry {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px dotted #eee;
+}
+
+.review-entry:last-child {
+    border-bottom: none;
+}
+
+.review-entry .player-name {
+    font-weight: bold;
+}
+
+.review-entry .score {
+    color: #555;
+}
+
+.eliminated-in-review .player-name,
+.eliminated-in-review .score {
+    color: #aaa;
+    text-decoration: line-through;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Media Queries for Responsiveness */
+@media (max-width: 768px) {
+    .centered-text {
+        font-size: 4em;
+    }
+
+    .podium-rank {
+        font-size: 2.5em;
+    }
+
+    .player-avatar {
+        width: 100px;
+        height: 100px;
+    }
+
+    .player-name-podium {
+        font-size: 2em;
+    }
+
+    .section-title {
+        font-size: 2em;
+    }
+
+    .section-subtitle {
+        font-size: 1.5em;
+    }
+
+    .overall-champion-display {
+        font-size: 2.5em;
+        flex-direction: column;
+    }
+
+    .overall-champion-display .player-avatar {
+        width: 80px;
+        height: 80px;
+    }
+
+    .cumulative-scores-table-container {
+        width: 95%;
+    }
+
+    .cumulative-scores-table th,
+    .cumulative-scores-table td {
+        padding: 10px;
+        font-size: 0.9em;
+    }
+
+    .round-summaries-container {
+        width: 95%;
+        gap: 15px;
+    }
+
+    .review-round-table {
+        width: 90%; /* Take more width on smaller screens */
+    }
+    .review-round-title {
+        font-size: 1.2em;
+    }
+    .review-entry {
+        font-size: 0.9em;
+    }
+}

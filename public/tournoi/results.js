@@ -67,8 +67,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const cumulativeScoresTbody = document.getElementById('cumulative-scores-tbody');
         if (cumulativeScoresTbody && resultsData.cumulativeScoresTable) {
             cumulativeScoresTbody.innerHTML = ''; // Clear existing
-            // Sort cumulative scores in ascending order for suspense
-            const sortedCumulativeScores = [...resultsData.cumulativeScoresTable].sort((a, b) => a.totalScore - b.totalScore);
+            // Sort cumulative scores in descending order
+            const sortedCumulativeScores = [...resultsData.cumulativeScoresTable].sort((a, b) => b.totalScore - a.totalScore);
             sortedCumulativeScores.forEach((player, index) => {
                 const row = document.createElement('tr');
                 row.innerHTML = `

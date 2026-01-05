@@ -112,7 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Set a static background for the cumulative section
     const cumulativeSection = document.getElementById('cumulative-section');
     if (cumulativeSection) {
-        cumulativeSection.style.backgroundImage = "url('assets/backgrounds/55.png')";
+        cumulativeSection.style.backgroundImage = "url('assets/backgrounds/34.png')";
     }
 
     populateResults(); // Fill data into all sections

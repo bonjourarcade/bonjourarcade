@@ -2,6 +2,22 @@
 
 Merci de jouer ! :)
 
+
+# If this little project brought you joy, please support it!
+
+[![Support me on Ko-Fi](public/assets/images/kofi.png)](https://ko-fi.com/felleg)
+
+
+This repo would not be possible without
+[EmulatorJS](https://github.com/EmulatorJS/EmulatorJS), the backbone of
+this project. Please support them!
+
+<a href="https://github.com/EmulatorJS/EmulatorJS/">
+<img width = 150 src = https://github.com/EmulatorJS/EmulatorJS/raw/main/docs/Logo.png#gh-light-mode-only>
+</a>
+
+
+
 - **Jeu de la semaine** : sélectionné automatiquement chaque semaine via le système Plinko
 - `metadata.yaml` : fichier modèle de métadonnées à placer dans
   `public/games/<game_id>/`

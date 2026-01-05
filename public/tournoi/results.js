@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const resultsDataString = sessionStorage.getItem('bonjourarcade_tournament_results');
-    const defaultAvatar = 'assets/default-avatar.png'; // Fallback avatar
+    const defaultAvatar = '../assets/default-avatar.png'; // Fallback avatar
 
     if (!resultsDataString) {
         document.body.innerHTML = '<h1>No tournament results found.</h1><p>Please start a tournament first.</p>';
@@ -112,7 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Set a static background for the cumulative section
     const cumulativeSection = document.getElementById('cumulative-section');
     if (cumulativeSection) {
-        cumulativeSection.style.backgroundImage = "url('assets/backgrounds/34.png')";
+        cumulativeSection.style.backgroundImage = "url('../assets/backgrounds/34.png')";
     }
 
     populateResults(); // Fill data into all sections

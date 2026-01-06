@@ -3,7 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>404 - BonjourArcade</title>
+    <title>BonjourArcade</title>
+    <script>
+        // Set title early to prevent 404 flash
+        (function() {
+            const path = window.location.pathname;
+            const isRedirect = path.match(/^\/b\/([^\/]+)$/);
+            if (isRedirect) {
+                document.title = 'Redirection...';
+            } else {
+                document.title = '404 - Page non trouvée';
+            }
+        })();
+    </script>
     <style>
         * {
             margin: 0;

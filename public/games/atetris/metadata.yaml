@@ -1,16 +1,17 @@
-title: Tetris (Sega MD)
-developer: Sanritsu Denki
+title: Tetris (Atari)
+developer: Atari
+year: 1988
 genre: Puzzle
-#controls:
+controls:
 #  - 🕹️ Déplacer
 #  - 1️⃣  Tirer
 #  - 2️⃣  Bombe
 #  - 3️⃣ ...
 #  - 4️⃣ ...
 
-#to_start: Select -> Start
+to_start: Select -> Start
 
 enable_score: true
 hide: yes
 
-added: 2025-11-05
+added: 2026-01-07

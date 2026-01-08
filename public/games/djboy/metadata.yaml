@@ -1,7 +1,8 @@
-title: Tetris (Sega MD)
-developer: Sanritsu Denki
-genre: Puzzle
-#controls:
+title: DJ Boy
+developer: Kaneko
+year: 1989
+genre: Beat 'em up
+controls:
 #  - 🕹️ Déplacer
 #  - 1️⃣  Tirer
 #  - 2️⃣  Bombe
@@ -13,4 +14,4 @@ genre: Puzzle
 enable_score: true
 hide: yes
 
-added: 2025-11-05
+added: 2026-01-07

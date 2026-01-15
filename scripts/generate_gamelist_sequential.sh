@@ -522,6 +522,16 @@ else
     echo -e "${YELLOW}⚠️  No current game found, created placeholder${NC}"
 fi
 
+echo -e "${BLUE}📝 Creating previous-games API endpoint...${NC}"
+PREVIOUS_GAMES=$(python3 scripts/get_current_week_game.py --previous-games)
+if [ $? -eq 0 ] && [ -n "$PREVIOUS_GAMES" ]; then
+    echo "$PREVIOUS_GAMES" > public/api/previous-games
+    echo -e "${GREEN}✅ Created public/api/previous-games${NC}"
+else
+    echo "[]" > public/api/previous-games
+    echo -e "${YELLOW}⚠️  No previous games found, created empty list${NC}"
+fi
+
 echo -e "${BLUE}🔍 Scanning for external games...${NC}"
 EXTERNAL_GAMES_COUNT=0
 

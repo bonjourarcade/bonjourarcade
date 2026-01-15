@@ -8,11 +8,11 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from get_current_week_game import get_current_week_game_id
+from get_current_week_game import get_current_game_id
 
 if __name__ == '__main__':
     try:
-        game_id = get_current_week_game_id()
+        game_id = get_current_game_id()
         print(game_id)
     except Exception as e:
         print(f"Error: Could not determine current game ID: {e}", file=sys.stderr)

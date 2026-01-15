@@ -206,79 +206,23 @@ async function fetchGameData() {
             console.warn('Could not fetch current game from API:', error);
         }
         
-        // Load upcoming.yaml to get list of previous games of the week
+        // Load previous games from the new API endpoint
         let previousGotwGameIds = new Set();
-        let previousWeekGames = []; // Array to store previous week games with their week numbers
+        let previousWeekGames = [];
         try {
-            // Get current week in YYYYWW format
-            function getISOWeekInfo(date) {
-                const target = new Date(date.valueOf());
-                const dayNr = (date.getDay() + 6) % 7;
-                target.setDate(target.getDate() - dayNr + 3);
-                const isoYear = target.getFullYear();
-                const firstThursday = target.valueOf();
-                target.setMonth(0, 1);
-                if (target.getDay() !== 4) {
-                    target.setMonth(0, 1 + ((4 - target.getDay()) + 7) % 7);
-                }
-                const weekNumber = 1 + Math.ceil((firstThursday - target) / 604800000);
-                return { week: weekNumber, year: isoYear };
-            }
-            
-            const now = new Date();
-            const { week: currentWeek, year: currentYear } = getISOWeekInfo(now);
-            const currentWeekSeed = currentYear * 100 + currentWeek;
-            
-            const predictionsUrl = '/upcoming/upcoming.yaml';
-            const predictionsResponse = await fetch(predictionsUrl);
-            if (predictionsResponse.ok) {
-                const predictionsText = await predictionsResponse.text();
-                // Parse YAML format: YYYYWW: (week number) followed by game_id:
-                const blockPattern = /^(\d{6}):\s*$/gm;
-                let match;
-                let currentWeekInFile = null;
-                
-                while ((match = blockPattern.exec(predictionsText)) !== null) {
-                    const weekSeed = parseInt(match[1]);
-                    currentWeekInFile = weekSeed;
-                }
-                
-                // Now parse game_id lines and associate them with the week
-                const lines = predictionsText.split('\n');
-                currentWeekInFile = null;
-                for (let i = 0; i < lines.length; i++) {
-                    const line = lines[i];
-                    const weekMatch = line.match(/^(\d{6}):\s*$/);
-                    if (weekMatch) {
-                        currentWeekInFile = parseInt(weekMatch[1]);
-                    } else if (currentWeekInFile !== null) {
-                        // Match both "game_id:" and "  game_id:" (with indentation)
-                        const gameIdMatch = line.match(/^\s*game_id:\s*(.+)$/);
-                        if (gameIdMatch) {
-                            const gameId = gameIdMatch[1].trim().replace(/^["']|["']$/g, '');
-                            // Only include if this week is in the past
-                            if (gameId && currentWeekInFile < currentWeekSeed) {
-                                previousGotwGameIds.add(gameId);
-                                // Store all previous week games (not just the previous week)
-                                previousWeekGames.push({
-                                    gameId: gameId,
-                                    week: currentWeekInFile
-                                });
-                            }
-                        }
-                    }
-                }
-                
-                // Sort by week (descending - most recent first) and limit to 11
-                previousWeekGames.sort((a, b) => b.week - a.week);
-                previousWeekGames = previousWeekGames.slice(0, 11);
-                
-                console.log(`Found ${previousGotwGameIds.size} previous games of the week (current week: ${currentWeekSeed})`);
-                console.log(`Found ${previousWeekGames.length} games from previous weeks (showing last 11)`);
+            const previousGamesResponse = await fetch('/api/previous-games');
+            if (previousGamesResponse.ok) {
+                const previousGamesList = await previousGamesResponse.json();
+                // The API returns game IDs in reverse chronological order.
+                // We just need the IDs for the Set, and a simplified object for the list.
+                previousWeekGames = previousGamesList.map(gameId => ({ gameId: gameId }));
+                previousGotwGameIds = new Set(previousGamesList);
+                console.log(`Found ${previousGotwGameIds.size} previous games from API.`);
             }
         } catch (error) {
-            console.warn('Could not fetch upcoming.yaml:', error);
+            console.warn('Could not fetch previous games from API:', error);
         }
+
         const cacheBuster = '?v=' + Date.now();
         const gamelistUrl = isLocalhost ? 'gamelist.json' + cacheBuster : 'https://storage.googleapis.com/bonjourarcade/gamelist.json' + cacheBuster;
         const response = await fetch(gamelistUrl);
@@ -713,7 +657,7 @@ function populateFeaturedGame(game) {
     // Add "Jeu de la semaine" label above the image
     const weekLabel = document.createElement('div');
     weekLabel.className = 'featured-game-week-label';
-    weekLabel.textContent = 'Jeu de la semaine';
+    weekLabel.textContent = 'Jeu en vedette';
     coverWrapper.appendChild(weekLabel);
 
     // Create link container for the image
@@ -1261,7 +1205,7 @@ function escapeHtml(text) {
  * @param {Array} previousWeekGames - An array of objects with gameId and week properties.
  * @param {Array} allGames - An array of all game objects from gamelist.json.
  */
-function populatePreviousWeekGames(previousWeekGames, allGames) {
+function populatePreviousWeekGames(previousGames, allGames) {
     const container = document.getElementById('previous-week-games-list');
     if (!container) {
         console.warn("Element with ID 'previous-week-games-list' not found.");
@@ -1271,29 +1215,25 @@ function populatePreviousWeekGames(previousWeekGames, allGames) {
     // Clear placeholder/loading content
     container.innerHTML = '';
 
-    // Show the section (even if no previous games, we'll show the buttons)
+    // Show the section
     const section = document.getElementById('previous-week-games');
     if (section) {
         section.style.display = 'block';
     }
 
-    // If no previous week games, just add the buttons and return
-    if (!previousWeekGames || previousWeekGames.length === 0) {
-        // Add buttons to empty container
+    if (!previousGames || previousGames.length === 0) {
         addRandomAndLeaderboardButtons(container);
         return;
     }
 
-    // Games are already sorted by week (descending - most recent first) and limited to 11
-    // Limit to 4 games for display on homepage
-    const gamesToDisplay = previousWeekGames.slice(0, 4);
-    const hasMoreGames = previousWeekGames.length > 4;
+    // The API returns games in reverse chronological order, so we just take the first few.
+    const gamesToDisplay = previousGames.slice(0, 4);
 
-    // Create game items for each previous week game (limited to 4)
+    // Create game items for each previous game
     gamesToDisplay.forEach((prevGame, idx) => {
         const game = allGames.find(g => g.id === prevGame.gameId);
         if (!game || !game.id) {
-            return; // Skip if game not found
+            return; // Skip if game not found in the main gamelist
         }
 
         const gameItem = document.createElement('div');
@@ -1301,12 +1241,10 @@ function populatePreviousWeekGames(previousWeekGames, allGames) {
         gameItem.dataset.gameId = game.id;
         gameItem._gameData = game; // Attach game data directly
 
-        // Add the 'rom-missing' class if the flag is true
         if (game.romMissing === true) {
             gameItem.classList.add('rom-missing');
         }
 
-        // Add external game styling if it's an external game
         if (game.game_type === 'external' || game.core === 'external') {
             gameItem.classList.add('game-external');
         }
@@ -1319,7 +1257,6 @@ function populatePreviousWeekGames(previousWeekGames, allGames) {
         link.style.gap = '15px';
         link.style.textDecoration = 'none';
         link.style.color = 'inherit';
-        // No event listener needed - gameItem handles the click
 
         const img = document.createElement('img');
         const coverSrc = game.coverArt || '/assets/images/placeholder_thumb.png';
@@ -1340,72 +1277,46 @@ function populatePreviousWeekGames(previousWeekGames, allGames) {
         const title = document.createElement('div');
         title.className = 'previous-week-game-title';
 
-        // Set the title (capitalize if using default)
-        let displayTitle = game.title;
-        if (!displayTitle || displayTitle === game.id) {
-            displayTitle = capitalizeFirst(game.id);
-        }
-        
-        // Normalize title for display (move "The" to the end)
+        let displayTitle = game.title || capitalizeFirst(game.id);
         displayTitle = normalizeTitleForSorting(displayTitle);
         
         title.textContent = displayTitle;
         title.style.fontWeight = 'bold';
         title.style.fontSize = '1.1em';
-
-        // Add YYYY-WW display
-        const weekDisplay = document.createElement('div');
-        weekDisplay.className = 'previous-week-game-week';
-        // Format YYYYWW to YYYY-WW
-        const weekStr = prevGame.week.toString();
-        const formattedWeek = weekStr.length === 6 
-            ? `${weekStr.substring(0, 4)}-${weekStr.substring(4, 6)}`
-            : prevGame.week.toString();
-        weekDisplay.textContent = formattedWeek;
-        weekDisplay.style.fontSize = '0.75em';
-        weekDisplay.style.opacity = '0.6';
-        weekDisplay.style.fontWeight = 'normal';
-
+        
         titleContainer.appendChild(title);
-        titleContainer.appendChild(weekDisplay);
-
         link.appendChild(img);
         link.appendChild(titleContainer);
         gameItem.appendChild(link);
         container.appendChild(gameItem);
 
-        // Add mouse hover behavior (no tooltips on home page)
+        // Add mouse hover behavior
         gameItem.addEventListener('mouseenter', (e) => {
-            e.stopPropagation(); // Prevent event from bubbling up
+            e.stopPropagation();
             clearHighlights();
             gameItem.classList.add('game-item--selected');
-            // Tooltips disabled on home page
         });
         gameItem.addEventListener('mouseleave', (e) => {
-            e.stopPropagation(); // Prevent event from bubbling up
+            e.stopPropagation();
             gameItem.classList.remove('game-item--selected');
         });
         
-        // Click behavior - stop propagation to prevent conflicts with parent sections
+        // Click behavior
         gameItem.addEventListener('click', (e) => {
             e.preventDefault();
-            e.stopPropagation(); // Prevent event from bubbling up to parent sections
+            e.stopPropagation();
             handleGameClick(gameItem);
         });
     });
 
-    // Add "Voir l'historique complet des jeux de la semaine" link at the bottom
-    // Show the link if there are any games (even if only 4 or less, in case there are more available)
-    if (previousWeekGames.length > 0) {
+    if (previousGames.length > 0) {
         const viewAllLink = document.createElement('a');
         viewAllLink.href = '/all?filter=week';
-        viewAllLink.textContent = "Voir l'historique complet des jeux de la semaine";
+        viewAllLink.textContent = "Voir l'historique complet des jeux en vedette";
         viewAllLink.className = 'previous-week-view-all-link';
-        
         container.appendChild(viewAllLink);
     }
     
-    // Add Random Game and Leaderboard buttons to the same grid
     addRandomAndLeaderboardButtons(container);
 }
 

@@ -531,22 +531,22 @@
                 const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.startsWith('192.168.');
                 const cacheBuster = '?v=' + Date.now();
                 const gamelistUrl = isLocalhost ? '../gamelist.json' + cacheBuster : 'https://storage.googleapis.com/bonjourarcade/gamelist.json' + cacheBuster;
-                
-                // Load both predictions and game data
-                const [predictionsResponse, gamesResponse] = await Promise.all([
-                    fetch('upcoming.yaml'),
+                const upcomingGamesUrl = isLocalhost ? '../api/upcoming-games.json' + cacheBuster : 'https://storage.googleapis.com/bonjourarcade/api/upcoming-games.json' + cacheBuster;
+
+                // Load both upcoming games and game data
+                const [upcomingGamesResponse, gamesResponse] = await Promise.all([
+                    fetch(upcomingGamesUrl),
                     fetch(gamelistUrl)
                 ]);
                 
-                if (!predictionsResponse.ok || !gamesResponse.ok) {
+                if (!upcomingGamesResponse.ok || !gamesResponse.ok) {
                     throw new Error('Failed to fetch data');
                 }
                 
-                const yamlText = await predictionsResponse.text();
+                const upcomingGames = await upcomingGamesResponse.json();
                 const gamesData = await gamesResponse.json();
                 
-                const predictions = parseYamlPredictions(yamlText);
-                const enrichedGames = enrichPredictionsWithGameData(predictions, gamesData.games);
+                const enrichedGames = enrichUpcomingGamesWithGameData(upcomingGames, gamesData.games);
                 
                 displayUpcomingGames(enrichedGames);
             } catch (error) {
@@ -555,67 +555,17 @@
             }
         }
 
-        function parseYamlPredictions(yamlText) {
-            const games = [];
-            const lines = yamlText.split('\n');
-            
-            let currentWeek = null;
-            let currentGame = {};
-            
-            for (let i = 0; i < lines.length; i++) {
-                const line = lines[i].trim();
-                
-                // Skip comments and empty lines
-                if (line.startsWith('#') || line === '') {
-                    continue;
-                }
-                
-                // Check if line is a week number (YYYYWW format)
-                if (/^\d{6}:$/.test(line)) {
-                    // Save previous game if exists. Include entries that at least have a game_id;
-                    // title may be missing in upcoming.yaml and will be filled from gamelist.json later.
-                    if (currentWeek && currentGame.game_id) {
-                        games.push({
-                            week: currentWeek,
-                            title: currentGame.title || null,
-                            game_id: currentGame.game_id
-                        });
-                    }
-                    
-                    // Start new week
-                    currentWeek = line.replace(':', '');
-                    currentGame = {};
-                } else if (line.startsWith('title:')) {
-                    currentGame.title = line.replace('title:', '').trim().replace(/^["']|["']$/g, '');
-                } else if (line.startsWith('game_id:')) {
-                    currentGame.game_id = line.replace('game_id:', '').trim().replace(/^["']|["']$/g, '');
-                }
-            }
-            
-            // Don't forget the last game - include if game_id is present
-            if (currentWeek && currentGame.game_id) {
-                games.push({
-                    week: currentWeek,
-                    title: currentGame.title || null,
-                    game_id: currentGame.game_id
-                });
-            }
-            
-            // Filter out past games
-            return filterFutureGames(games);
-        }
-
-        function enrichPredictionsWithGameData(predictions, gamesData) {
-            return predictions.map(prediction => {
+        function enrichUpcomingGamesWithGameData(upcomingGames, gamesData) {
+            return upcomingGames.map(upcomingGame => {
                 // Find matching game data
-                const gameData = gamesData.find(game => game.id === prediction.game_id);
+                const gameData = gamesData.find(game => game.id === upcomingGame.game_id);
                 
                 if (gameData) {
                     return {
-                        ...prediction,
-                        title: gameData.title || prediction.title,
+                        ...upcomingGame,
+                        title: gameData.title || upcomingGame.game_id,
                         coverArt: gameData.coverArt,
-                        pageUrl: gameData.pageUrl || `/play?game=${prediction.game_id}`,
+                        pageUrl: gameData.pageUrl || `/play?game=${upcomingGame.game_id}`,
                         developer: gameData.developer,
                         year: gameData.year,
                         genre: gameData.genre,
@@ -625,9 +575,10 @@
                 } else {
                     // Fallback if game data not found
                     return {
-                        ...prediction,
+                        ...upcomingGame,
+                        title: upcomingGame.game_id,
                         coverArt: '/assets/images/placeholder_thumb.png',
-                        pageUrl: `/play?game=${prediction.game_id}`,
+                        pageUrl: `/play?game=${upcomingGame.game_id}`,
                         developer: '',
                         year: '',
                         genre: '',
@@ -760,38 +711,6 @@
             }));
         }
 
-        function getCurrentWeek() {
-            const now = new Date();
-            const year = now.getFullYear();
-            
-            // Calculate ISO week number
-            const target = new Date(now.valueOf());
-            const dayNr = (now.getDay() + 6) % 7;
-            target.setDate(target.getDate() - dayNr + 3);
-            const firstThursday = target.valueOf();
-            target.setMonth(0, 1);
-            if (target.getDay() !== 4) {
-                target.setMonth(0, 1 + ((4 - target.getDay()) + 7) % 7);
-            }
-            const weekNumber = 1 + Math.ceil((firstThursday - target) / 604800000);
-            
-            // Format as YYYYWW
-            return year.toString() + weekNumber.toString().padStart(2, '0');
-        }
-
-        function filterFutureGames(games) {
-            const currentWeek = getCurrentWeek();
-            
-            return games.filter(game => {
-                // Compare week strings (YYYYWW format)
-                // Convert to numbers for proper comparison
-                const gameWeekNum = parseInt(game.week);
-                const currentWeekNum = parseInt(currentWeek);
-                // Exclude the current week so upcoming starts after this week
-                return gameWeekNum > currentWeekNum;
-            });
-        }
-
         async function displayUpcomingGames(games) {
             const loadingMessage = document.getElementById('loading-message');
             const gamesGrid = document.getElementById('upcoming-games-grid');
@@ -812,7 +731,7 @@
                 
                 // Display games first, then load leaderboards
                 gamesGrid.innerHTML = games.map(game => {
-                    const weekFormatted = formatWeek(game.week);
+                    const dateFormatted = formatDate(game.date);
                     const coverSrc = getThumbnailSrc(game.coverArt);
                     const gameInfo = getGameInfo(game);
                     const announcement = getAnnouncement(game);
@@ -827,7 +746,7 @@
                                                 <img src="${coverSrc}" alt="${game.title}" loading="lazy">
                                             </div>
                                             <div class="upcoming-game-details">
-                                                <div class="upcoming-game-week">Semaine ${weekFormatted}</div>
+                                                <div class="upcoming-game-week">À partir du ${dateFormatted}</div>
                                                 <div class="upcoming-game-title">${game.title}</div>
                                                 ${gameInfo}
                                                 <div class="upcoming-game-id">ID: ${game.game_id}</div>
@@ -894,10 +813,10 @@
             }
         }
 
-        function formatWeek(weekString) {
-            const year = weekString.substring(0, 4);
-            const week = weekString.substring(4, 6);
-            return `${week}/${year}`;
+        function formatDate(dateString) {
+            const date = new Date(dateString + 'T00:00:00');
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            return date.toLocaleDateString('fr-FR', options);
         }
 
         function getThumbnailSrc(coverArt) {
@@ -976,5 +895,3 @@
             }
         }
     </script>
-</body>
-</html>

@@ -207,17 +207,15 @@ async function fetchGameData() {
         }
         
         // Load previous games from the new API endpoint
-        let previousGotwGameIds = new Set();
         let previousWeekGames = [];
         try {
-            const previousGamesResponse = await fetch('/api/previous-games');
+            const previousGamesResponse = await fetch('/api/previous-games.json');
             if (previousGamesResponse.ok) {
                 const previousGamesList = await previousGamesResponse.json();
                 // The API returns game IDs in reverse chronological order.
                 // We just need the IDs for the Set, and a simplified object for the list.
                 previousWeekGames = previousGamesList.map(gameId => ({ gameId: gameId }));
-                previousGotwGameIds = new Set(previousGamesList);
-                console.log(`Found ${previousGotwGameIds.size} previous games from API.`);
+                console.log(`Found ${previousWeekGames.length} previous games from API.`);
             }
         } catch (error) {
             console.warn('Could not fetch previous games from API:', error);
@@ -266,6 +264,7 @@ async function fetchGameData() {
 
         // Store filtered games globally for filtering purposes
         // Override hide value for previous games of the week
+        const previousGotwGameIds = new Set(previousWeekGames.map(g => g.gameId));
         filteredGames = filteredGames.map(game => {
             if (previousGotwGameIds.has(game.id)) {
                 return { ...game, hide: false };

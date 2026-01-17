@@ -8,3 +8,4 @@ public/games/*/*_thumb.*g
 public/assets/*/*_thumb.*g
 public/assets/*_thumb.*g
 public/dos/gamelist.json
+public/api

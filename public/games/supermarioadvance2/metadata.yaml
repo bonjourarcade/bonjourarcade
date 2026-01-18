@@ -1,0 +1,17 @@
+title: "Super Mario World: Super Mario Advance 2"
+developer: Nintendo R&D2
+year: 2001
+genre: Platform
+controls:
+#  - 🕹️ Déplacer
+#  - 1️⃣  Tirer
+#  - 2️⃣  Bombe
+#  - 3️⃣ ...
+#  - 4️⃣ ...
+
+#to_start: Select -> Start
+
+enable_score: true
+hide: yes
+
+added: 2026-01-18

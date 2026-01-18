@@ -38,6 +38,8 @@ const numGamesInput = document.getElementById('num-games');
 const generateGamesBtn = document.getElementById('generate-games-btn');
 const countdownOverlay = document.getElementById('countdown-overlay');
 const countdownText = document.getElementById('countdown-text');
+const nextRoundBtn = document.getElementById('next-round-btn');
+const finalizeBtn = document.getElementById('finalize-btn');
 
 
     // --- Config & State ---
@@ -786,16 +788,19 @@ const countdownText = document.getElementById('countdown-text');
     function renderScoreboard() {
         if (!tournamentState.players || tournamentState.currentRoundIndex < 0) return;
 
-        let scoreboardHTML = ''; // Declare scoreboardHTML here
-        
-        if (tournamentState.status === 'pause') {
+        let scoreboardHTML = '';
+
+        // During a break or at the very end, we show cumulative scores.
+        if (tournamentState.status === 'break' || tournamentState.status === 'awaiting_confirmation') {
             const currentRoundIndex = tournamentState.currentRoundIndex;
-            const nextCutoff = tournamentState.cutoffs[currentRoundIndex + 1]; // Cutoff for the round that just ended
+            // The cutoff that matters is the one for the round that just finished.
+            const nextCutoff = tournamentState.cutoffs ? tournamentState.cutoffs[currentRoundIndex + 1] : 0;
 
             const cumulativeScores = Object.entries(tournamentState.players).map(([name, data]) => {
-                const totalScore = data.scores.slice(0, currentRoundIndex + 1).reduce((sum, score) => sum + score, 0); // Scores up to and including the current round
+                // Sum scores up to and including the current round.
+                const totalScore = data.scores.slice(0, currentRoundIndex + 1).reduce((sum, score) => sum + score, 0);
                 return { name, totalScore, eliminated: data.eliminated, photoURL: data.photoURL };
-            }).sort((a, b) => b.totalScore - a.totalScore); // Sort by cumulative score
+            }).sort((a, b) => b.totalScore - a.totalScore);
 
             const activePlayersCumulative = cumulativeScores.filter(p => !p.eliminated);
             const eliminatedPlayersCumulative = cumulativeScores.filter(p => p.eliminated);
@@ -805,63 +810,56 @@ const countdownText = document.getElementById('countdown-text');
             if (activePlayersCumulative.length > 0) {
                 scoreboardHTML += '<div class="scoreboard-section-title">Joueurs Actifs</div>';
                 scoreboardHTML += activePlayersCumulative.map((p, i) => {
-                    const avatarSrc = p.photoURL ? p.photoURL : '../assets/default-avatar.png'; // Fallback avatar
-                    return `<div class="scoreboard-entry"><span class="rank">${i + 1}.</span><img src="${avatarSrc}" alt="${p.name}" class="player-avatar" style="width: 24px; height: 24px; border-radius: 50%; margin-right: 8px; vertical-align: middle;"><span class="player-name">${p.name}</span><span class="score">${p.totalScore.toLocaleString()}</span></div>`;
+                    let statusClass = '';
+                    // Show danger/safe only during a break, not at the final confirmation screen.
+                    // And only if it's an elimination round (not after the warmup round if cutoffs apply)
+                    if (tournamentState.status === 'break' && nextCutoff > 0 && currentRoundIndex > 0) {
+                        statusClass = i < nextCutoff ? 'safe' : 'danger';
+                    }
+                    const avatarSrc = p.photoURL ? p.photoURL : '../assets/default-avatar.png';
+                    return `<div class="scoreboard-entry ${statusClass}"><span class="rank">${i + 1}.</span><img src="${avatarSrc}" alt="${p.name}" class="player-avatar" style="width: 24px; height: 24px; border-radius: 50%; margin-right: 8px; vertical-align: middle;"><span class="player-name">${p.name}</span><span class="score">${p.totalScore.toLocaleString()}</span></div>`;
                 }).join('');
             }
 
             if (eliminatedPlayersCumulative.length > 0) {
                 scoreboardHTML += '<div class="scoreboard-section-title eliminated-section-title">Joueurs Éliminés</div>';
-                // Only access activePlayersCumulative.length if it's guaranteed to be defined (which it is here)
                 const rankOffset = activePlayersCumulative.length;
                 scoreboardHTML += eliminatedPlayersCumulative.map((p, i) => {
-                    const avatarSrc = p.photoURL ? p.photoURL : '../assets/default-avatar.png'; // Fallback avatar
+                    const avatarSrc = p.photoURL ? p.photoURL : '../assets/default-avatar.png';
                     return `<div class="scoreboard-entry eliminated"><span class="rank">${rankOffset + i + 1}.</span><img src="${avatarSrc}" alt="${p.name}" class="player-avatar" style="width: 24px; height: 24px; border-radius: 50%; margin-right: 8px; vertical-align: middle;"><span class="player-name">${p.name}</span><span class="score">${p.totalScore.toLocaleString()}</span></div>`;
                 }).join('');
             }
 
-
             scoreboardEntriesEl.innerHTML = scoreboardHTML;
 
-        } else { // Normal round display
+        } else { // Normal round display (status === 'round')
             const roundIndex = tournamentState.currentRoundIndex;
             const playersArray = Object.entries(tournamentState.players).map(([name, data]) => ({ name, score: data.scores[roundIndex] || 0, eliminated: data.eliminated, photoURL: data.photoURL }));
             
-            // Sort players by score
             playersArray.sort((a, b) => b.score - a.score);
-
-            const cutoff = tournamentState.currentCutoff;
-            const isEliminationRound = tournamentState.status === 'round' && tournamentState.currentRoundIndex > 0;
 
             const activePlayersRound = playersArray.filter(p => !p.eliminated);
             const eliminatedPlayersRound = playersArray.filter(p => p.eliminated);
 
             if (activePlayersRound.length > 0) {
+                // During a round, we don't show safe/danger, as it's based on cumulative score at the end.
                 scoreboardHTML += '<div class="scoreboard-section-title">Joueurs Actifs</div>';
                 scoreboardHTML += activePlayersRound.map((p, i) => {
-                    let statusClass = '';
-                    if (isEliminationRound && cutoff > 0) {
-                        if (i < cutoff) {
-                            statusClass = 'safe';
-                        } else {
-                            statusClass = 'danger';
-                        }
-                    }
                     const avatarSrc = p.photoURL ? p.photoURL : '../assets/default-avatar.png';
-                    return `<div class="scoreboard-entry ${statusClass}"><span class="rank">${i + 1}.</span><img src="${avatarSrc}" alt="${p.name}" class="player-avatar" style="width: 24px; height: 24px; border-radius: 50%; margin-right: 8px; vertical-align: middle;"><span class="player-name">${p.name}</span><span class="score">${p.score.toLocaleString()}</span></div>`;
+                    return `<div class="scoreboard-entry"><span class="rank">${i + 1}.</span><img src="${avatarSrc}" alt="${p.name}" class="player-avatar" style="width: 24px; height: 24px; border-radius: 50%; margin-right: 8px; vertical-align: middle;"><span class="player-name">${p.name}</span><span class="score">${p.score.toLocaleString()}</span></div>`;
                 }).join('');
             }
 
             if (eliminatedPlayersRound.length > 0) {
                 scoreboardHTML += '<div class="scoreboard-section-title eliminated-section-title">Joueurs Éliminés</div>';
-                const rankOffset = activePlayersRound.length; // Rank continues from active players
+                const rankOffset = activePlayersRound.length;
                 scoreboardHTML += eliminatedPlayersRound.map((p, i) => {
                     const avatarSrc = p.photoURL ? p.photoURL : '../assets/default-avatar.png';
                     return `<div class="scoreboard-entry eliminated"><span class="rank">${rankOffset + i + 1}.</span><img src="${avatarSrc}" alt="${p.name}" class="player-avatar" style="width: 24px; height: 24px; border-radius: 50%; margin-right: 8px; vertical-align: middle;"><span class="player-name">${p.name}</span><span class="score">${p.score.toLocaleString()}</span></div>`;
                 }).join('');
             }
             scoreboardEntriesEl.innerHTML = scoreboardHTML;
-        } // Correctly closes the else block.
+        }
     } // Correctly closes the renderScoreboard function.
 
     function startScoreFetching() { stopScoreFetching(); fetchScores(); const i = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 5000 : 30000; scoreFetchingInterval = setInterval(fetchScores, i); } 
@@ -872,6 +870,10 @@ const countdownText = document.getElementById('countdown-text');
     function updateTimerDisplay(time) { if (time < 0) time = 0; timerEl.textContent = `${String(Math.floor(time / 60)).padStart(2, '0')}:${String(time % 60).padStart(2, '0')}`; }
 
     function startNextRound() {
+        // Stop fetching scores from the break period before starting a new round.
+        stopScoreFetching();
+        nextRoundBtn.style.display = 'none'; // Hide button when round starts
+
         tournamentState.currentRoundIndex++;
         tournamentState.simulatedScoresGeneratedForRound = false; // Reset for the new round
         const roundIndex = tournamentState.currentRoundIndex;
@@ -998,69 +1000,109 @@ const countdownText = document.getElementById('countdown-text');
     }
     
     async function endRound() {
-        stopScoreFetching();
+        // We no longer stop fetching, to allow for last-minute score approvals.
+        // stopScoreFetching();
         endRoundSound.play().catch(e => console.log("Audio play failed, user interaction needed."));
 
         const roundIndex = tournamentState.currentRoundIndex;
 
-        // After warmup, calculate the cutoffs for all subsequent rounds
-        if (roundIndex === 0) {
+        // After warmup, calculate the cutoffs for all subsequent rounds if not already done.
+        if (roundIndex === 0 && (!tournamentState.cutoffs || tournamentState.cutoffs.length === 0)) {
             tournamentState.initialPlayerCount = Object.keys(tournamentState.players).length;
             tournamentState.cutoffs = [];
             const Y = tournamentState.initialPlayerCount;
             const X = tournamentState.games.length;
             for (let i = 1; i < X; i++) {
-                //This is the formula for the number of players who will advance to the next round.
                 const playersAfter = Math.max(1, Math.ceil(Y * (X - i) / X));
                 tournamentState.cutoffs[i] = playersAfter;
             }
         }
-        
+
+        // NO MORE ELIMINATIONS HERE. This will be done manually.
+
+        // We always fetch scores one last time to get the most recent state.
+        await fetchScores();
+        renderScoreboard();
+        saveState();
+
+        if (roundIndex === tournamentState.games.length - 1) {
+            // This is the final round. Move to a state awaiting final confirmation.
+            awaitFinalConfirmation();
+        } else {
+            // For all other rounds, start the break period.
+            startBreak();
+        }
+    }
+
+    function manuallyStartNextRound() {
+        const roundIndex = tournamentState.currentRoundIndex;
+        // The cutoff is for the round that JUST ended, to determine who moves to the NEXT round.
+        // cutoffs array is 1-indexed for rounds, so for round 0 (index 0), we look at cutoffs[1]
         const cutoff = tournamentState.cutoffs[roundIndex + 1];
 
-        if (roundIndex > 0 && roundIndex < tournamentState.games.length - 1) { // No eliminations for warmup or final round
-            const playersSorted = Object.entries(tournamentState.players)
-                .sort(([, a], [, b]) => (b.scores[roundIndex] || 0) - (a.scores[roundIndex] || 0));
-            
-            const activePlayersSorted = playersSorted.filter(([, data]) => !data.eliminated);
+        // Perform eliminations now, based on CUMULATIVE score.
+        if (roundIndex >= 0 && roundIndex < tournamentState.games.length - 1 && cutoff) { // No eliminations for final round
+            // We need cumulative scores to decide who is eliminated
+            const cumulativeScores = Object.entries(tournamentState.players).map(([name, data]) => {
+                const totalScore = data.scores.slice(0, roundIndex + 1).reduce((sum, score) => sum + score, 0);
+                return { name, totalScore, eliminated: data.eliminated };
+            }).sort((a, b) => b.totalScore - a.totalScore);
 
-            activePlayersSorted.forEach(([name], index) => {
+
+            const activePlayersSorted = cumulativeScores.filter(p => !p.eliminated);
+
+            activePlayersSorted.forEach((player, index) => {
+                // The index is 0-based, cutoff is 1-based number of players
                 if (index >= cutoff) {
-                    tournamentState.players[name].eliminated = true;
-                    tournamentState.players[name].eliminatedRound = roundIndex; // Mark the round they were eliminated
+                    tournamentState.players[player.name].eliminated = true;
+                    tournamentState.players[player.name].eliminatedRound = roundIndex; // Mark the round they were eliminated IN
                 }
             });
         }
 
         renderScoreboard();
         saveState();
-
-        // New condition to skip pause after the final round
-        if (roundIndex === tournamentState.games.length - 1) {
-            endTournament();
-        } else {
-            await fetchScores(); // Fetch scores one last time before pausing
-            startPause();
-        }
+        startNextRound();
     }
-    
 
-
-    function startPause() {
-        tournamentState.status = 'pause';
+    function startBreak() {
+        tournamentState.status = 'break';
+        startScoreFetching(); // Keep fetching scores during the break.
         saveState();
+
         roundTitleEl.textContent = "Pause";
-        roundSubtitleEl.textContent = "";
+        roundSubtitleEl.textContent = "Approbation des scores en cours...";
         gameTitleEl.textContent = "";
         gameMetadataEl.innerHTML = "";
         gameCoverEl.src = '../assets/static.gif';
-        gameCoverEl.alt = 'Animation statique de pause'; // Set alt attribute
+        gameCoverEl.alt = 'Animation statique de pause';
         gameCoverEl.style.display = 'block';
-        renderScoreboard(); // Call renderScoreboard to display cumulative results and qualification status
-        startTimer(tournamentState.pauseDuration, updateTimerDisplay, startNextRound);
+
+        renderScoreboard();
+
+        // The timer now just reveals the button at the end.
+        startTimer(tournamentState.pauseDuration, updateTimerDisplay, () => {
+            nextRoundBtn.style.display = 'block'; // Show the button
+            roundSubtitleEl.textContent = "En attente du lancement de la prochaine ronde...";
+        });
     }
 
+    function awaitFinalConfirmation() {
+        tournamentState.status = 'awaiting_confirmation'; // Use a more descriptive status
+        startScoreFetching(); // Keep fetching for final approvals
+        saveState();
+
+        roundTitleEl.textContent = "Tournoi Terminé";
+        roundSubtitleEl.textContent = "En attente de la confirmation des résultats finaux...";
+        finalizeBtn.style.display = 'block'; // Show finalize button
+        nextRoundBtn.style.display = 'none';
+
+        renderScoreboard(); // Show final cumulative scores
+    }
+
+
     async function endTournament() {
+        stopScoreFetching(); // Now we can stop fetching.
         tournamentState.status = 'finished';
 
         // --- Data preparation for results.html ---
@@ -1169,6 +1211,16 @@ const countdownText = document.getElementById('countdown-text');
         }
     });
 
+    nextRoundBtn.addEventListener('click', () => {
+        manuallyStartNextRound();
+    });
+
+    finalizeBtn.addEventListener('click', () => {
+        if (confirm("Êtes-vous sûr de vouloir finaliser le tournoi ? Les résultats seront définitifs.")) {
+            endTournament();
+        }
+    });
+
     function showSetupView() { setupView.style.display = 'block'; tournamentView.style.display = 'none'; winnerView.style.display = 'none'; } 
     function showTournamentView() { setupView.style.display = 'none'; tournamentView.style.display = 'block'; winnerView.style.display = 'none'; }
 
@@ -1212,16 +1264,22 @@ const countdownText = document.getElementById('countdown-text');
             renderScoreboard();
             startScoreFetching();
             startTimer(tournamentState.remainingTime, onTick, endRound);
-        } else if (tournamentState.status === 'pause') {
+        } else if (tournamentState.status === 'pause' || tournamentState.status === 'break') { // Updated to handle 'break'
              roundTitleEl.textContent = "Pause";
-             roundSubtitleEl.textContent = "";
+             roundSubtitleEl.textContent = "Approbation des scores en cours...";
              gameTitleEl.textContent = "";
              gameMetadataEl.innerHTML = "";
-             gameCoverEl.src = '../assets/static.gif'; // Display static.gif
-             gameCoverEl.alt = 'Animation statique de pause (reprise)'; // Set alt attribute
+             gameCoverEl.src = '../assets/static.gif';
+             gameCoverEl.alt = 'Animation statique de pause (reprise)';
              gameCoverEl.style.display = 'block';
              renderScoreboard();
-             startTimer(tournamentState.remainingTime, onTick, startNextRound);
+             startScoreFetching(); // Ensure fetching continues on resume
+             startTimer(tournamentState.remainingTime, updateTimerDisplay, () => {
+                nextRoundBtn.style.display = 'block';
+                roundSubtitleEl.textContent = "En attente du lancement de la prochaine ronde...";
+             });
+        } else if (tournamentState.status === 'awaiting_confirmation') {
+            awaitFinalConfirmation(); // This will set up the final confirmation screen correctly
         }
     }
 

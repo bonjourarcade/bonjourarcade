@@ -181,7 +181,7 @@ class AnnouncementGenerator:
         # Create a comprehensive prompt in French
         prompt = f"""Tu es un expert en jeux vidéo rétro qui écrit des annonces pour une newsletter hebdomadaire en français invitant les joueurs à tester ce jeu.
 
-Voici les informations sur le jeu de la semaine :
+Voici les informations sur le jeu en vedette :
 
 Titre : {game_title}
 Développeur : {developer}

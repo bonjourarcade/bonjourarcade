@@ -639,6 +639,14 @@ else
     echo -e "${YELLOW}⚠️  No current game found, created placeholder${NC}"
 fi
 
+# Generate upcoming games list
+echo -e "${BLUE}📝 Creating upcoming-games API endpoint...${NC}"
+python3 scripts/generate_upcoming_games.py
+
+# Generate history list
+echo -e "${BLUE}📝 Creating previous-games API endpoint...${NC}"
+python3 scripts/generate_history.py
+
 # Clean up only if successful
 rm -rf "$TEMP_DIR"
 

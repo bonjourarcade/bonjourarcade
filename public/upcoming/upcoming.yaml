@@ -1,209 +1,95 @@
-# les autres: voir Barcode Arcade dans docs job
-
-202511:
-  game_id: vanguard
-202512:
-  game_id: dohitagain
-202513:
-  game_id: pacman
-202514:
-  game_id: gyruss
-202515:
-  game_id: berzerk
-202516:
-  game_id: scramble
-202517:
-  game_id: 1943
-202518:
-  game_id: pacmance
-202519:
-  game_id: findluigi
-202520:
-  game_id: ddonpach
-202521:
-  game_id: contranes
-202522:
-  game_id: joust
-202523:
-  game_id: bubbles
-202524:
-  game_id: excitebike
-202525: 
-  game_id: clucluland
-202526: 
-  game_id: kungfu
-202527: 
-  game_id: iceclimber
-202528: 
-  game_id: chopcom
-202529: 
-  game_id: batsugun
-202530: 
-  game_id: rcproam
-202531: 
-  game_id: "pitfall2"
-202532: 
-  game_id: "aliensyn"
-202533: 
-  game_id: "shinobi3"
-202534: 
-  game_id: "balloon"
-202535: 
-  game_id: "hero"
-202536: 
-  game_id: "mslug3"
-202537: 
-  game_id: "mplanets"
-202538: 
-  game_id: "gunbird2"
-202539: 
-  game_id: "rocketk"
-202540: 
-  game_id: "raiden2"
-202541: 
-  game_id: "kicklecubiclenes"
-202542: 
-  game_id: flappybird
-202543: 
-  game_id: "futari15"
-202544: 
-  game_id: "nibbler"
-202545: 
-  game_id: "undeadline"
-202546: 
-  game_id: junofrst
-202547: 
-  game_id: "elmaster"
-202548: 
-  game_id: "parodius"
-202549: 
-  game_id: "gogomile"
-202550: 
-  game_id: "locomotn"
-202551: 
-  game_id: mm
-202552:
-  game_id: dazebeforechristmas
-202601:
-  game_id: tetris
-202602:
-  game_id: ket
-202603:
-  game_id: flicky
-202604:
-  game_id: missile
-202605:
-  game_id: snake
-202606:
-  game_id: sstriker
-202607:
-  game_id: mrdriller
-202608:
-  game_id: lastduel
-202609:
-  game_id: batrider
-202610:
-  game_id: crbaloon
-202611:
-  game_id: spcinv95
-202612:
-  game_id: altbeast
-202613:
-  game_id: zpf
-202614:
-  game_id: truxton2
-202615:
-  game_id: s1945iii
-202616:
-  game_id: sf2hf
-202617:
-  game_id: turfmast
-202618:
-  game_id: karnovr
-202619:
-  game_id: batmangb
-202620:
-  game_id: aligator
-202621:
-  game_id: frenzy
-202622:
-  game_id: drgnunit
-202623:
-  game_id: espgal2
-202624:
-  game_id: astyanax
-202625:
-  game_id: tutankhm
-202626:
-  game_id: wardner
-202627:
-  game_id: growl
-202628:
-  game_id: roadf
-202629:
-  game_id: gauntlet4
-202630:
-  game_id: machrider
-202631:
-  game_id: rayforce
-202632:
-  game_id: cyberlip
-202633:
-  game_id: darius2
-202634:
-  game_id: fireshrk
-202635:
-  game_id: renstimpy
-202636:
-  game_id: ganryu
-202637:
-  game_id: crossbow
-202628:
-  game_id: asterix
-202629:
-  game_id: lastbld2
-202630:
-  game_id: pstrike2
-202631:
-  game_id: asoldier
-202632:
-  game_id: mslugx
-202633:
-  game_id: mutnat
-202634:
-  game_id: battleg
-202635:
-  game_id: loht
-202636:
-  game_id: exerion
-202637:
-  game_id: slapfight
-202638:
-  game_id: commando
-202639:
-  game_id: yoshi
-202640:
-  game_id: pengo
-202641:
-  game_id: runsaber
-202642:
-  game_id: darwin
-202643:
-  game_id: sfa
-202644:
-  game_id: deathsml
-202645:
-  game_id: arabian
-202646:
-  game_id: spectar
-202647:
-  game_id: battlemania2
-202648:
-  game_id: megabomberman
-202649:
-  game_id: viewpoin
-202650:
-  game_id: toki
-202651:
-  game_id: gunsmoke
-
+- vanguard
+- dohitagain
+- pacman
+- gyruss
+- berzerk
+- scramble
+- 1943
+- pacmance
+- findluigi
+- ddonpach
+- contranes
+- joust
+- bubbles
+- excitebike
+- clucluland
+- kungfu
+- iceclimber
+- chopcom
+- batsugun
+- rcproam
+- pitfall2
+- aliensyn
+- shinobi3
+- balloon
+- hero
+- mslug3
+- mplanets
+- gunbird2
+- rocketk
+- raiden2
+- kicklecubiclenes
+- flappybird
+- futari15
+- nibbler
+- undeadline
+- junofrst
+- elmaster
+- parodius
+- gogomile
+- locomotn
+- mm
+- dazebeforechristmas
+- tetris
+- ket
+- flicky
+- shinobi
+- mmaze
+- missile
+- snake
+- sstriker
+- mrdriller
+- lastduel
+- batrider
+- crbaloon
+- spcinv95
+- altbeast
+- zpf
+- truxton2
+- s1945iii
+- sf2hf
+- turfmast
+- karnovr
+- batmangb
+- aligator
+- frenzy
+- drgnunit
+- espgal2
+- astyanax
+- tutankhm
+- wardner
+- growl
+- asterix
+- lastbld2
+- pstrike2
+- asoldier
+- mslugx
+- mutnat
+- battleg
+- loht
+- exerion
+- slapfight
+- commando
+- yoshi
+- pengo
+- runsaber
+- darwin
+- sfa
+- deathsml
+- arabian
+- spectar
+- battlemania2
+- megabomberman
+- viewpoin
+- toki
+- gunsmoke

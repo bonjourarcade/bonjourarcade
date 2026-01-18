@@ -139,7 +139,7 @@ python3 scripts/send_newsletter.py --dry-run
 ### Debug Commands
 
 ```bash
-# Check current game of the week
+# Check current game of the week (returns game_id)
 python3 scripts/get_current_week_game.py
 
 # Validate metadata for a specific game

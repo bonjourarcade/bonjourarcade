@@ -18,7 +18,7 @@ this project. Please support them!
 
 
 
-- **Jeu de la semaine** : sélectionné automatiquement chaque semaine via le système Plinko
+- **Jeu en vedette** : sélectionné automatiquement chaque semaine via le système Plinko
 - `metadata.yaml` : fichier modèle de métadonnées à placer dans
   `public/games/<game_id>/`
 - ROMs: https://archive.org/details/roms_bonjourarcade
@@ -57,9 +57,9 @@ Créez un fichier d’état en cliquant sur le bouton « disquette » dans
 l’émulateur. Déplacez puis renommez ce fichier en
 `public/games/<game_id>/save.state`.
 
-# Système « Jeu de la semaine »
+# Système « Jeu en vedette »
 
-Le jeu de la semaine est sélectionné automatiquement à l’aide de :
+jeux en vedette est sélectionné automatiquement à l’aide de :
 - **Système Plinko** : des graines hebdomadaires (format YYYYWW) déterminent la sélection
 - **Prédictions** : jeux présélectionnés dans `public/upcoming/upcoming.yaml`
 - **Automatique** : aucune modification manuelle de fichiers nécessaire

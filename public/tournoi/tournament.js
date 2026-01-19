@@ -39,6 +39,7 @@ const generateGamesBtn = document.getElementById('generate-games-btn');
 const countdownOverlay = document.getElementById('countdown-overlay');
 const countdownText = document.getElementById('countdown-text');
 const nextRoundBtn = document.getElementById('next-round-btn');
+const skipToBreakBtn = document.getElementById('skip-to-break-btn');
 const finalizeBtn = document.getElementById('finalize-btn');
 
 
@@ -791,7 +792,7 @@ const finalizeBtn = document.getElementById('finalize-btn');
         let scoreboardHTML = '';
 
         // During a break or at the very end, we show cumulative scores.
-        if (tournamentState.status === 'break' || tournamentState.status === 'awaiting_confirmation') {
+        if (tournamentState.status === 'break' || tournamentState.status === 'awaiting_confirmation' || tournamentState.status === 'round_over') {
             const currentRoundIndex = tournamentState.currentRoundIndex;
             // The cutoff that matters is the one for the round that just finished.
             const nextCutoff = tournamentState.cutoffs ? tournamentState.cutoffs[currentRoundIndex + 1] : 0;
@@ -1000,13 +1001,13 @@ const finalizeBtn = document.getElementById('finalize-btn');
     }
     
     async function endRound() {
-        // We no longer stop fetching, to allow for last-minute score approvals.
-        // stopScoreFetching();
+        // This function is now called when the ROUND timer ends.
+        // We keep fetching scores, but we wait for manual intervention to start the break.
         endRoundSound.play().catch(e => console.log("Audio play failed, user interaction needed."));
-
+    
         const roundIndex = tournamentState.currentRoundIndex;
-
-        // After warmup, calculate the cutoffs for all subsequent rounds if not already done.
+    
+        // Calculate cutoffs after the warmup round.
         if (roundIndex === 0 && (!tournamentState.cutoffs || tournamentState.cutoffs.length === 0)) {
             tournamentState.initialPlayerCount = Object.keys(tournamentState.players).length;
             tournamentState.cutoffs = [];
@@ -1017,21 +1018,21 @@ const finalizeBtn = document.getElementById('finalize-btn');
                 tournamentState.cutoffs[i] = playersAfter;
             }
         }
-
-        // NO MORE ELIMINATIONS HERE. This will be done manually.
-
-        // We always fetch scores one last time to get the most recent state.
-        await fetchScores();
-        renderScoreboard();
-        saveState();
-
+    
+        await fetchScores(); // Fetch one last time.
+        renderScoreboard(); // Show final scores for the round.
+    
         if (roundIndex === tournamentState.games.length - 1) {
             // This is the final round. Move to a state awaiting final confirmation.
             awaitFinalConfirmation();
         } else {
-            // For all other rounds, start the break period.
-            startBreak();
+            // For all other rounds, enter a "round_over" state and wait for the user to start the break.
+            tournamentState.status = 'round_over';
+            roundSubtitleEl.textContent = "Ronde terminée. En attente de la pause...";
+            skipToBreakBtn.style.display = 'block'; // Show the button to start the break.
         }
+        
+        saveState();
     }
 
     function manuallyStartNextRound() {
@@ -1066,6 +1067,7 @@ const finalizeBtn = document.getElementById('finalize-btn');
     }
 
     function startBreak() {
+        skipToBreakBtn.style.display = 'none'; // Hide this button when break starts
         tournamentState.status = 'break';
         startScoreFetching(); // Keep fetching scores during the break.
         saveState();
@@ -1215,6 +1217,10 @@ const finalizeBtn = document.getElementById('finalize-btn');
         manuallyStartNextRound();
     });
 
+    skipToBreakBtn.addEventListener('click', () => {
+        startBreak();
+    });
+
     finalizeBtn.addEventListener('click', () => {
         if (confirm("Êtes-vous sûr de vouloir finaliser le tournoi ? Les résultats seront définitifs.")) {
             endTournament();
@@ -1278,6 +1284,12 @@ const finalizeBtn = document.getElementById('finalize-btn');
                 nextRoundBtn.style.display = 'block';
                 roundSubtitleEl.textContent = "En attente du lancement de la prochaine ronde...";
              });
+        } else if (tournamentState.status === 'round_over') {
+            // New state to handle resumption when round is over but break hasn't started
+            roundSubtitleEl.textContent = "Ronde terminée. En attente de la pause...";
+            skipToBreakBtn.style.display = 'block';
+            renderScoreboard();
+            startScoreFetching();
         } else if (tournamentState.status === 'awaiting_confirmation') {
             awaitFinalConfirmation(); // This will set up the final confirmation screen correctly
         }

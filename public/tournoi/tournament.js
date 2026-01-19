@@ -784,99 +784,53 @@ const finalizeBtn = document.getElementById('finalize-btn');
         if (!tournamentState.players || tournamentState.currentRoundIndex < 0) return;
 
         let scoreboardHTML = '';
+        const roundIndex = tournamentState.currentRoundIndex;
+        const nextCutoff = tournamentState.cutoffs ? (tournamentState.cutoffs[roundIndex + 1] || 0) : 0;
 
-        // During a break or at the very end, we show cumulative scores.
+        // All sorting is now based on the score for the current round.
+        const playersRankedByRound = Object.entries(tournamentState.players)
+            .map(([name, data]) => ({
+                name,
+                roundScore: data.scores[roundIndex] || 0,
+                eliminated: data.eliminated,
+                photoURL: data.photoURL
+            }))
+            .sort((a, b) => b.roundScore - a.roundScore);
+
+        const activePlayers = playersRankedByRound.filter(p => !p.eliminated);
+        const eliminatedPlayers = playersRankedByRound.filter(p => p.eliminated);
+
         if (tournamentState.status === 'break' || tournamentState.status === 'awaiting_confirmation' || tournamentState.status === 'round_over') {
-            const currentRoundIndex = tournamentState.currentRoundIndex;
-            // The cutoff that matters is the one for the round that just finished.
-            const nextCutoff = tournamentState.cutoffs ? tournamentState.cutoffs[currentRoundIndex + 1] : 0;
-
-            const cumulativeScores = Object.entries(tournamentState.players).map(([name, data]) => {
-                // Sum scores up to and including the current round.
-                const totalScore = data.scores.slice(0, currentRoundIndex + 1).reduce((sum, score) => sum + score, 0);
-                return { name, totalScore, eliminated: data.eliminated, photoURL: data.photoURL };
-            }).sort((a, b) => b.totalScore - a.totalScore);
-
-            const activePlayersCumulative = cumulativeScores.filter(p => !p.eliminated);
-            const eliminatedPlayersCumulative = cumulativeScores.filter(p => p.eliminated);
-
-            scoreboardHTML += '<div class="cumulative-score-clarification">Scores cumulés jusqu\'à la ronde actuelle.</div>';
-
-            if (activePlayersCumulative.length > 0) {
-                scoreboardHTML += '<div class="scoreboard-section-title">Joueurs Actifs</div>';
-                scoreboardHTML += activePlayersCumulative.map((p, i) => {
-                    let statusClass = '';
-                    // Show danger/safe only during a break, not at the final confirmation screen.
-                    // And only if it's an elimination round (not after the warmup round if cutoffs apply)
-                    if (tournamentState.status === 'break' && nextCutoff > 0 && currentRoundIndex > 0) {
-                        statusClass = i < nextCutoff ? 'safe' : 'danger';
-                    }
-                    const avatarSrc = p.photoURL ? p.photoURL : '../assets/default-avatar.png';
-                    return `<div class="scoreboard-entry ${statusClass}"><span class="rank">${i + 1}.</span><img src="${avatarSrc}" alt="${p.name}" class="player-avatar" style="width: 24px; height: 24px; border-radius: 50%; margin-right: 8px; vertical-align: middle;"><span class="player-name">${p.name}</span><span class="score">${p.totalScore.toLocaleString()}</span></div>`;
-                }).join('');
-            }
-
-            if (eliminatedPlayersCumulative.length > 0) {
-                scoreboardHTML += '<div class="scoreboard-section-title eliminated-section-title">Joueurs Éliminés</div>';
-                const rankOffset = activePlayersCumulative.length;
-                scoreboardHTML += eliminatedPlayersCumulative.map((p, i) => {
-                    const avatarSrc = p.photoURL ? p.photoURL : '../assets/default-avatar.png';
-                    return `<div class="scoreboard-entry eliminated"><span class="rank">${rankOffset + i + 1}.</span><img src="${avatarSrc}" alt="${p.name}" class="player-avatar" style="width: 24px; height: 24px; border-radius: 50%; margin-right: 8px; vertical-align: middle;"><span class="player-name">${p.name}</span><span class="score">${p.totalScore.toLocaleString()}</span></div>`;
-                }).join('');
-            }
-
-            scoreboardEntriesEl.innerHTML = scoreboardHTML;
-
-        } else { // Normal round display (status === 'round')
-            const roundIndex = tournamentState.currentRoundIndex;
-            const nextCutoff = tournamentState.cutoffs ? (tournamentState.cutoffs[roundIndex + 1] || 0) : 0;
-
-            // We need to calculate ranks based on CUMULATIVE score, but display ROUND score.
-            const playersRankedByCumulative = Object.entries(tournamentState.players)
-                .map(([name, data]) => {
-                    const totalScore = data.scores.slice(0, roundIndex + 1).reduce((sum, score) => sum + score, 0);
-                    return {
-                        name,
-                        totalScore,
-                        roundScore: data.scores[roundIndex] || 0,
-                        eliminated: data.eliminated,
-                        photoURL: data.photoURL
-                    };
-                })
-                .sort((a, b) => b.totalScore - a.totalScore);
-
-            const activePlayers = playersRankedByCumulative.filter(p => !p.eliminated);
-            const eliminatedPlayers = playersRankedByCumulative.filter(p => p.eliminated);
-
-            if (activePlayers.length > 0) {
-                scoreboardHTML += '<div class="scoreboard-section-title">Joueurs Actifs</div>';
-                scoreboardHTML += activePlayers.map((p, i) => {
-                    let statusClass = '';
-                    // First round is warmup, everyone is safe.
-                    if (roundIndex === 0) {
-                        statusClass = 'safe';
-                    } else if (nextCutoff > 0) {
-                        // In subsequent rounds, compare rank (i) to the cutoff.
-                        statusClass = i < nextCutoff ? 'safe' : 'danger';
-                    }
-                    
-                    const avatarSrc = p.photoURL ? p.photoURL : '../assets/default-avatar.png';
-                    // NOTE: The displayed score is p.roundScore, but the ranking (i) is based on totalScore.
-                    return `<div class="scoreboard-entry ${statusClass}"><span class="rank">${i + 1}.</span><img src="${avatarSrc}" alt="${p.name}" class="player-avatar" style="width: 24px; height: 24px; border-radius: 50%; margin-right: 8px; vertical-align: middle;"><span class="player-name">${p.name}</span><span class="score">${p.roundScore.toLocaleString()}</span></div>`;
-                }).join('');
-            }
-
-            if (eliminatedPlayers.length > 0) {
-                scoreboardHTML += '<div class="scoreboard-section-title eliminated-section-title">Joueurs Éliminés</div>';
-                const rankOffset = activePlayers.length;
-                scoreboardHTML += eliminatedPlayers.map((p, i) => {
-                    const avatarSrc = p.photoURL ? p.photoURL : '../assets/default-avatar.png';
-                    // NOTE: The displayed score is p.roundScore
-                    return `<div class="scoreboard-entry eliminated"><span class="rank">${rankOffset + i + 1}.</span><img src="${avatarSrc}" alt="${p.name}" class="player-avatar" style="width: 24px; height: 24px; border-radius: 50%; margin-right: 8px; vertical-align: middle;"><span class="player-name">${p.name}</span><span class="score">${p.roundScore.toLocaleString()}</span></div>`;
-                }).join('');
-            }
-            scoreboardEntriesEl.innerHTML = scoreboardHTML;
+            scoreboardHTML += '<div class="cumulative-score-clarification">Scores de la dernière ronde.</div>';
         }
+
+        if (activePlayers.length > 0) {
+            scoreboardHTML += '<div class="scoreboard-section-title">Joueurs Actifs</div>';
+            scoreboardHTML += activePlayers.map((p, i) => {
+                let statusClass = '';
+                // Determine status based on round rank. This applies during both round and break.
+                // First round is warmup, everyone is safe.
+                if (roundIndex === 0) {
+                    statusClass = 'safe';
+                } else if (nextCutoff > 0) {
+                    // In subsequent rounds, compare rank (i) to the cutoff.
+                    statusClass = i < nextCutoff ? 'safe' : 'danger';
+                }
+                
+                const avatarSrc = p.photoURL ? p.photoURL : '../assets/default-avatar.png';
+                return `<div class="scoreboard-entry ${statusClass}"><span class="rank">${i + 1}.</span><img src="${avatarSrc}" alt="${p.name}" class="player-avatar" style="width: 24px; height: 24px; border-radius: 50%; margin-right: 8px; vertical-align: middle;"><span class="player-name">${p.name}</span><span class="score">${p.roundScore.toLocaleString()}</span></div>`;
+            }).join('');
+        }
+
+        if (eliminatedPlayers.length > 0) {
+            scoreboardHTML += '<div class="scoreboard-section-title eliminated-section-title">Joueurs Éliminés</div>';
+            const rankOffset = activePlayers.length;
+            scoreboardHTML += eliminatedPlayers.map((p, i) => {
+                const avatarSrc = p.photoURL ? p.photoURL : '../assets/default-avatar.png';
+                return `<div class="scoreboard-entry eliminated"><span class="rank">${rankOffset + i + 1}.</span><img src="${avatarSrc}" alt="${p.name}" class="player-avatar" style="width: 24px; height: 24px; border-radius: 50%; margin-right: 8px; vertical-align: middle;"><span class="player-name">${p.name}</span><span class="score">${p.roundScore.toLocaleString()}</span></div>`;
+            }).join('');
+        }
+        scoreboardEntriesEl.innerHTML = scoreboardHTML;
     } // Correctly closes the renderScoreboard function.
 
     function startScoreFetching() { stopScoreFetching(); fetchScores(); const i = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 5000 : 30000; scoreFetchingInterval = setInterval(fetchScores, i); } 

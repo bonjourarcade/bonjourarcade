@@ -1016,7 +1016,7 @@ const finalizeBtn = document.getElementById('finalize-btn');
         const cutoff = tournamentState.cutoffs[roundIndex + 1];
 
         // Perform eliminations now, based on CUMULATIVE score.
-        if (roundIndex >= 0 && roundIndex < tournamentState.games.length - 1 && cutoff) { // No eliminations for final round
+        if (roundIndex > 0 && roundIndex < tournamentState.games.length - 1 && cutoff) { // No eliminations for final round
             // We need cumulative scores to decide who is eliminated
             const cumulativeScores = Object.entries(tournamentState.players).map(([name, data]) => {
                 const totalScore = data.scores.slice(0, roundIndex + 1).reduce((sum, score) => sum + score, 0);

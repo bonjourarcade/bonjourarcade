@@ -728,20 +728,6 @@ const finalizeBtn = document.getElementById('finalize-btn');
 
     function simulateScoreUpdates() {
         const roundIndex = tournamentState.currentRoundIndex;
-
-        // Initialize players if simulatedPlayerNames is empty (e.g., initial setup)
-        if (simulatedPlayerNames.length === 0) {
-            const numPlayers = parseInt(simulatedPlayersInput.value, 10) || 16;
-            for (let i = 1; i <= numPlayers; i++) {
-                simulatedPlayerNames.push(`Player${i}`);
-            }
-            // Ensure all newly created players have their objects in tournamentState.players
-            simulatedPlayerNames.forEach(playerName => {
-                if (!tournamentState.players[playerName]) {
-                    tournamentState.players[playerName] = { scores: Array(tournamentState.games.length).fill(0), totalScore: 0, eliminated: false, eliminatedRound: null };
-                }
-            });
-        }
         
         // Always generate a new score for active SIMULATED players at the beginning of a round
         if (!tournamentState.simulatedScoresGeneratedForRound && roundIndex !== -1) {
@@ -904,6 +890,18 @@ const finalizeBtn = document.getElementById('finalize-btn');
         // Stop fetching scores from the break period before starting a new round.
         stopScoreFetching();
         nextRoundBtn.style.display = 'none'; // Hide button when round starts
+        skipToBreakBtn.style.display = 'none';
+
+        if (tournamentState.currentRoundIndex === -1) {
+            tournamentState.initialPlayerCount = Object.keys(tournamentState.players).length;
+            tournamentState.cutoffs = [];
+            const Y = tournamentState.initialPlayerCount;
+            const X = tournamentState.games.length;
+            for (let i = 1; i < X; i++) {
+                const playersAfter = Math.max(1, Math.ceil(Y * (X - i) / X));
+                tournamentState.cutoffs[i] = playersAfter;
+            }
+        }
 
         tournamentState.currentRoundIndex++;
         tournamentState.simulatedScoresGeneratedForRound = false; // Reset for the new round
@@ -1028,6 +1026,10 @@ const finalizeBtn = document.getElementById('finalize-btn');
             renderScoreboard(); // Re-render to update safe/danger zones as scores change
             saveState(); 
         }, endRound);
+
+        if (simulationModeCheckbox.checked) {
+            skipToBreakBtn.style.display = 'block';
+        }
     }
     
     async function endRound() {
@@ -1036,18 +1038,6 @@ const finalizeBtn = document.getElementById('finalize-btn');
         endRoundSound.play().catch(e => console.log("Audio play failed, user interaction needed."));
     
         const roundIndex = tournamentState.currentRoundIndex;
-    
-        // Calculate cutoffs after the warmup round.
-        if (roundIndex === 0 && (!tournamentState.cutoffs || tournamentState.cutoffs.length === 0)) {
-            tournamentState.initialPlayerCount = Object.keys(tournamentState.players).length;
-            tournamentState.cutoffs = [];
-            const Y = tournamentState.initialPlayerCount;
-            const X = tournamentState.games.length;
-            for (let i = 1; i < X; i++) {
-                const playersAfter = Math.max(1, Math.ceil(Y * (X - i) / X));
-                tournamentState.cutoffs[i] = playersAfter;
-            }
-        }
     
         await fetchScores(); // Fetch one last time.
         renderScoreboard(); // Show final scores for the round.
@@ -1117,6 +1107,10 @@ const finalizeBtn = document.getElementById('finalize-btn');
             nextRoundBtn.style.display = 'block'; // Show the button
             roundSubtitleEl.textContent = "En attente du lancement de la prochaine ronde...";
         });
+
+        if (simulationModeCheckbox.checked) {
+            nextRoundBtn.style.display = 'block';
+        }
     }
 
     function awaitFinalConfirmation() {
@@ -1222,6 +1216,16 @@ const finalizeBtn = document.getElementById('finalize-btn');
             currentRoundIndex: -1, players: {}, roundHistory: [], status: 'setup', remainingTime: 0, currentCutoff: 0,
             simulatedScoresGeneratedForRound: false
         };
+
+        if (simulationModeCheckbox.checked) {
+            const numPlayers = parseInt(simulatedPlayersInput.value, 10) || 16;
+            for (let i = 1; i <= numPlayers; i++) {
+                const playerName = `Player${i}`;
+                simulatedPlayerNames.push(playerName);
+                tournamentState.players[playerName] = { scores: Array(gameIds.length).fill(0), totalScore: 0, eliminated: false, eliminatedRound: null };
+            }
+        }
+
         showTournamentView();
         startNextRound();
     });

@@ -1,0 +1,17 @@
+title: Virtua Fighter
+developer: Sega AM2
+year: 1993
+genre: Fighting
+#controls:
+#  - "←↓↑→: Mouvement"
+#  - "Z: "
+#  - "X: "
+#  - "C: "
+#  - "V: "
+
+#to_start: Espace, puis Enter
+
+enable_score: true
+hide: yes
+
+added: 2026-01-19

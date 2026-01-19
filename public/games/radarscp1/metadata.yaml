@@ -1,0 +1,17 @@
+title: Radar Scope
+developer: Nintendo
+year: 1980
+genre: Shooter
+#controls:
+#  - "←↓↑→: Mouvement"
+#  - "Z: "
+#  - "X: "
+#  - "C: "
+#  - "V: "
+
+#to_start: Espace, puis Enter
+
+enable_score: true
+hide: yes
+
+added: 2026-01-19

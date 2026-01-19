@@ -1,0 +1,17 @@
+title: Vs. Tetris
+developer: Tengen
+year: 1988
+genre: Puzzle
+#controls:
+#  - "←↓↑→: Mouvement"
+#  - "Z: "
+#  - "X: "
+#  - "C: "
+#  - "V: "
+
+#to_start: Espace, puis Enter
+
+enable_score: true
+hide: yes
+
+added: 2026-01-19

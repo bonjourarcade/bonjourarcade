@@ -95,7 +95,7 @@ elif [ -n "$ROMS_MANIFEST_PATH" ] && [ -f "$ROMS_MANIFEST_PATH" ]; then
 else
     # Fallback to scanning local filesystem
     echo -e "${BLUE}🗂️  Scanning roms directory: $ROMS_DIR${NC}"
-    ROM_FILES=$(find -L "$ROMS_DIR" -maxdepth 2 -type f -not -path "*/\.*") \
+    ROM_FILES=$(find -L "$ROMS_DIR" -maxdepth 2 -type f -not -path "*/\.*" \
         | grep -v "/bios/" \
         | grep -viE '(^|/)(README|upload-files|roms-manifest)(\.|$)' \
         | grep -viE '\\.(md|markdown|txt|sh|bash|zsh|ps1|bat)$' \

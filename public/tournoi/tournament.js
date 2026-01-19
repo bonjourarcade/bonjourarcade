@@ -1050,12 +1050,21 @@ const finalizeBtn = document.getElementById('finalize-btn');
         roundSubtitleEl.textContent = "Approbation des scores en cours...";
         gameTitleEl.textContent = "";
         gameMetadataEl.innerHTML = "";
-        gameCoverEl.src = '../assets/static.gif';
-        gameCoverEl.alt = 'Animation statique de pause';
-        gameCoverEl.style.display = 'block';
+
+        // Show the cover of the game that just ended
+        const gameId = tournamentState.games[tournamentState.currentRoundIndex];
+        if (gameId) {
+            gameCoverEl.src = `/games/${gameId}/cover.png`;
+            gameCoverEl.alt = `Couverture de ${gameId}`;
+            gameCoverEl.style.display = 'block';
+        } else {
+            // Fallback to static if gameId is not found for some reason
+            gameCoverEl.src = '../assets/static.gif';
+            gameCoverEl.alt = 'Animation statique de pause';
+            gameCoverEl.style.display = 'block';
+        }
 
         renderScoreboard();
-
         // The timer now just reveals the button at the end.
         startTimer(tournamentState.pauseDuration, updateTimerDisplay, () => {
             nextRoundBtn.style.display = 'block'; // Show the button
@@ -1263,8 +1272,14 @@ const finalizeBtn = document.getElementById('finalize-btn');
              roundSubtitleEl.textContent = "Approbation des scores en cours...";
              gameTitleEl.textContent = "";
              gameMetadataEl.innerHTML = "";
-             gameCoverEl.src = '../assets/static.gif';
-             gameCoverEl.alt = 'Animation statique de pause (reprise)';
+             const gameId = tournamentState.games[tournamentState.currentRoundIndex];
+             if (gameId) {
+                gameCoverEl.src = `/games/${gameId}/cover.png`;
+                gameCoverEl.alt = `Couverture de ${gameId}`;
+             } else {
+                gameCoverEl.src = '../assets/static.gif';
+                gameCoverEl.alt = 'Animation statique de pause (reprise)';
+             }
              gameCoverEl.style.display = 'block';
              renderScoreboard();
              startScoreFetching(); // Ensure fetching continues on resume

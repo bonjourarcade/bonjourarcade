@@ -55,6 +55,11 @@ jobs:
             echo "no-game" > public/api/current-game
             echo "⚠️  No current game found, created placeholder"
           fi
+
+          python3 scripts/generate_upcoming_games.py
+          python3 scripts/generate_history.py
+
+
 #      
 #      - name: Install dependencies
 #        run: |

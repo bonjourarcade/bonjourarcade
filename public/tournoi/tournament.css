@@ -463,3 +463,41 @@ textarea { resize: vertical; }
     font-size: 1.2em;
     margin-right: 15px;
 }
+
+/* Right-aligned footer action buttons */
+#next-round-btn,
+#skip-to-break-btn,
+#finalize-btn {
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 15px;
+    font-size: 0.9em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-left: auto; /* Pushes the button to the right */
+}
+
+#skip-to-break-btn {
+    background-color: #6c757d; /* Gray */
+}
+#skip-to-break-btn:hover {
+    background-color: #5a6268;
+}
+
+#next-round-btn {
+    background-color: #28a745; /* Green */
+}
+
+#next-round-btn:hover {
+    background-color: #218838; /* A darker green */
+}
+
+#finalize-btn {
+     background-color: #ffc107; /* Yellow */
+     color: #1a1a1a;
+}
+#finalize-btn:hover {
+    background-color: #ffca2c;
+}

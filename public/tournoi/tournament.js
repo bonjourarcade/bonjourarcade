@@ -32,7 +32,8 @@ const restartTournamentBtn = document.getElementById('restart-tournament-btn');
 const endRoundSound = document.getElementById('end-round-sound');
 const goSound = document.getElementById('go-sound');
 const cancelTournamentBtn = document.getElementById('cancel-tournament-btn');
-const localTestingOnlyDiv = document.getElementById('local-testing-only');
+const simulationModeCheckbox = document.getElementById('simulation-mode-checkbox');
+const simulatedPlayersContainer = document.getElementById('simulated-players-container');
 const simulatedPlayersInput = document.getElementById('simulated-players');
 const numGamesInput = document.getElementById('num-games');
 const generateGamesBtn = document.getElementById('generate-games-btn');
@@ -742,38 +743,41 @@ const finalizeBtn = document.getElementById('finalize-btn');
             });
         }
         
-        // Always generate a new score for active players at the beginning of a round
-        // This logic runs only once per round because of simulatedScoresGeneratedForRound flag,
-        // which is reset in startNextRound()
-        if (!tournamentState.simulatedScoresGeneratedForRound && roundIndex !== -1) { // roundIndex !== -1 to avoid generating scores before tournament starts
-            Object.keys(tournamentState.players).forEach(playerName => {
+        // Always generate a new score for active SIMULATED players at the beginning of a round
+        if (!tournamentState.simulatedScoresGeneratedForRound && roundIndex !== -1) {
+            simulatedPlayerNames.forEach(playerName => {
                 const p = tournamentState.players[playerName];
-                p.scores[roundIndex] = Math.floor(Math.random() * 5000) + 100;
+                if (p && !p.eliminated) {
+                    p.scores[roundIndex] = Math.floor(Math.random() * 5000) + 100;
+                }
             });
             tournamentState.simulatedScoresGeneratedForRound = true;
         }
-
-        renderScoreboard();
-        saveState();
     }
 
     // --- Scoreboard & API ---
     async function fetchScores() {
-        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') { simulateScoreUpdates(); return; }
+        if (simulationModeCheckbox.checked) {
+            simulateScoreUpdates();
+        }
+        
         const gameId = tournamentState.games[tournamentState.currentRoundIndex];
-        if (!gameId) return;
+        if (!gameId) {
+            // If there's no gameId, but we're simulating, we should still render.
+            if (simulationModeCheckbox.checked) {
+                renderScoreboard();
+                saveState();
+            }
+            return;
+        }
+        
         try {
             const r = await fetch('https://us-central1-alloarcade.cloudfunctions.net/listGameScores', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ data: { timeRange: "week", gameId: gameId } }) });
             if (!r.ok) throw new Error(`API response not OK: ${r.status}`);
             const apiResponse = await r.json();
             const scores = apiResponse.result.scores;
             const roundStartTime = new Date(tournamentState.roundStartTime);
-            // Timezone note: Date comparisons in JavaScript are based on milliseconds since epoch (UTC).
-            // `new Date(s.date._seconds * 1000)` creates a Date object from a UTC timestamp.
-            // `roundStartTime` is created from an ISO string, which is also UTC.
-            // Therefore, the comparison `new Date(s.date._seconds * 1000) > roundStartTime` is
-            // inherently UTC-based and timezone-agnostic, ensuring correct chronological order
-            // regardless of the user's local timezone setting.
+
             scores.forEach(s => {
                 if (new Date(s.date._seconds * 1000) > roundStartTime) {
                     if (!tournamentState.players[s.player]) { tournamentState.players[s.player] = { scores: Array(tournamentState.games.length).fill(0), totalScore: 0, eliminated: false, eliminatedRound: null, photoURL: s.photoURL }; } else if (!tournamentState.players[s.player].photoURL) { tournamentState.players[s.player].photoURL = s.photoURL; }
@@ -781,9 +785,13 @@ const finalizeBtn = document.getElementById('finalize-btn');
                     if (s.score > p.scores[tournamentState.currentRoundIndex]) { p.scores[tournamentState.currentRoundIndex] = s.score; }
                 }
             });
+        } catch (e) {
+            console.error('Error fetching scores:', e);
+        } finally {
+            // Render and save once at the end of everything.
             renderScoreboard();
             saveState();
-        } catch (e) { console.error('Error fetching scores:', e); } 
+        }
     }
 
     function renderScoreboard() {
@@ -835,28 +843,50 @@ const finalizeBtn = document.getElementById('finalize-btn');
 
         } else { // Normal round display (status === 'round')
             const roundIndex = tournamentState.currentRoundIndex;
-            const playersArray = Object.entries(tournamentState.players).map(([name, data]) => ({ name, score: data.scores[roundIndex] || 0, eliminated: data.eliminated, photoURL: data.photoURL }));
-            
-            playersArray.sort((a, b) => b.score - a.score);
+            const nextCutoff = tournamentState.cutoffs ? (tournamentState.cutoffs[roundIndex + 1] || 0) : 0;
 
-            const activePlayersRound = playersArray.filter(p => !p.eliminated);
-            const eliminatedPlayersRound = playersArray.filter(p => p.eliminated);
+            // We need to calculate ranks based on CUMULATIVE score, but display ROUND score.
+            const playersRankedByCumulative = Object.entries(tournamentState.players)
+                .map(([name, data]) => {
+                    const totalScore = data.scores.slice(0, roundIndex + 1).reduce((sum, score) => sum + score, 0);
+                    return {
+                        name,
+                        totalScore,
+                        roundScore: data.scores[roundIndex] || 0,
+                        eliminated: data.eliminated,
+                        photoURL: data.photoURL
+                    };
+                })
+                .sort((a, b) => b.totalScore - a.totalScore);
 
-            if (activePlayersRound.length > 0) {
-                // During a round, we don't show safe/danger, as it's based on cumulative score at the end.
+            const activePlayers = playersRankedByCumulative.filter(p => !p.eliminated);
+            const eliminatedPlayers = playersRankedByCumulative.filter(p => p.eliminated);
+
+            if (activePlayers.length > 0) {
                 scoreboardHTML += '<div class="scoreboard-section-title">Joueurs Actifs</div>';
-                scoreboardHTML += activePlayersRound.map((p, i) => {
+                scoreboardHTML += activePlayers.map((p, i) => {
+                    let statusClass = '';
+                    // First round is warmup, everyone is safe.
+                    if (roundIndex === 0) {
+                        statusClass = 'safe';
+                    } else if (nextCutoff > 0) {
+                        // In subsequent rounds, compare rank (i) to the cutoff.
+                        statusClass = i < nextCutoff ? 'safe' : 'danger';
+                    }
+                    
                     const avatarSrc = p.photoURL ? p.photoURL : '../assets/default-avatar.png';
-                    return `<div class="scoreboard-entry"><span class="rank">${i + 1}.</span><img src="${avatarSrc}" alt="${p.name}" class="player-avatar" style="width: 24px; height: 24px; border-radius: 50%; margin-right: 8px; vertical-align: middle;"><span class="player-name">${p.name}</span><span class="score">${p.score.toLocaleString()}</span></div>`;
+                    // NOTE: The displayed score is p.roundScore, but the ranking (i) is based on totalScore.
+                    return `<div class="scoreboard-entry ${statusClass}"><span class="rank">${i + 1}.</span><img src="${avatarSrc}" alt="${p.name}" class="player-avatar" style="width: 24px; height: 24px; border-radius: 50%; margin-right: 8px; vertical-align: middle;"><span class="player-name">${p.name}</span><span class="score">${p.roundScore.toLocaleString()}</span></div>`;
                 }).join('');
             }
 
-            if (eliminatedPlayersRound.length > 0) {
+            if (eliminatedPlayers.length > 0) {
                 scoreboardHTML += '<div class="scoreboard-section-title eliminated-section-title">Joueurs Éliminés</div>';
-                const rankOffset = activePlayersRound.length;
-                scoreboardHTML += eliminatedPlayersRound.map((p, i) => {
+                const rankOffset = activePlayers.length;
+                scoreboardHTML += eliminatedPlayers.map((p, i) => {
                     const avatarSrc = p.photoURL ? p.photoURL : '../assets/default-avatar.png';
-                    return `<div class="scoreboard-entry eliminated"><span class="rank">${rankOffset + i + 1}.</span><img src="${avatarSrc}" alt="${p.name}" class="player-avatar" style="width: 24px; height: 24px; border-radius: 50%; margin-right: 8px; vertical-align: middle;"><span class="player-name">${p.name}</span><span class="score">${p.score.toLocaleString()}</span></div>`;
+                    // NOTE: The displayed score is p.roundScore
+                    return `<div class="scoreboard-entry eliminated"><span class="rank">${rankOffset + i + 1}.</span><img src="${avatarSrc}" alt="${p.name}" class="player-avatar" style="width: 24px; height: 24px; border-radius: 50%; margin-right: 8px; vertical-align: middle;"><span class="player-name">${p.name}</span><span class="score">${p.roundScore.toLocaleString()}</span></div>`;
                 }).join('');
             }
             scoreboardEntriesEl.innerHTML = scoreboardHTML;
@@ -1309,10 +1339,19 @@ const finalizeBtn = document.getElementById('finalize-btn');
     }
 
     async function init() {
-        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-            localTestingOnlyDiv.style.display = 'block';
+        const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        simulationModeCheckbox.checked = isLocal;
+        if (isLocal) {
             simulatedPlayersInput.value = Math.floor(Math.random() * (20 - 4 + 1)) + 4;
         }
+
+        function toggleSimulatedPlayersInput() {
+            simulatedPlayersContainer.style.display = simulationModeCheckbox.checked ? 'block' : 'none';
+        }
+
+        toggleSimulatedPlayersInput(); // Set initial visibility
+        simulationModeCheckbox.addEventListener('change', toggleSimulatedPlayersInput);
+
         await fetchGamelist();
         if (loadState() && tournamentState.status && tournamentState.status !== 'setup' && tournamentState.status !== 'finished') {
             resumeTournament();

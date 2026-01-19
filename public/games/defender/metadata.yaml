@@ -2,12 +2,13 @@ title: Defender
 developer: Williams Electronics
 year: 1981
 genre: Shooter
-#controls:
-#  - 🕹️ Déplacer
-#  - 1️⃣  Tirer
-#  - 2️⃣  Bombe
+controls:
+  - ←↓↑→: Mouvement
+  - Z: Tirer
+  - X: Super bombe
+  - C: Téléportation
 
-#to_start: Select -> Start
+to_start: Espace, puis Enter
 
 hide: yes
 

@@ -2,12 +2,11 @@ title: Vs. Battle City
 developer: Namco
 year: 1985
 genre: Shooter
-#controls:
-#  - 🕹️ Déplacer
-#  - 1️⃣  Tirer
-#  - 2️⃣  Bombe
+controls:
+  - ←↓↑→: Mouvement
+  - Z: Pew!
 
-#to_start: Select -> Start
+to_start: Espace, puis Enter
 
 enable_score: true
 hide: yes

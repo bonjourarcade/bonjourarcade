@@ -3,8 +3,8 @@ developer: Namco
 year: 1985
 genre: Shooter
 controls:
-  - ←↓↑→: Mouvement
-  - Z: Pew!
+  - "←↓↑→: Mouvement"
+  - "Z: Pew!"
 
 to_start: Espace, puis Enter
 

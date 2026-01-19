@@ -3,11 +3,11 @@ developer:
 year: 
 genre: 
 #controls:
-#  - ←↓↑→: Mouvement
-#  - Z: 
-#  - X: 
-#  - C: 
-#  - V: 
+#  - "←↓↑→: Mouvement"
+#  - "Z: "
+#  - "X: "
+#  - "C: "
+#  - "V: "
 
 #to_start: Espace, puis Enter
 

@@ -3,10 +3,10 @@ developer: Williams Electronics
 year: 1981
 genre: Shooter
 controls:
-  - ←↓↑→: Mouvement
-  - Z: Tirer
-  - X: Super bombe
-  - C: Téléportation
+  - "←↓↑→: Mouvement"
+  - "Z: Tirer"
+  - "X: Super bombe"
+  - "C: Téléportation"
 
 to_start: Espace, puis Enter
 

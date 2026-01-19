@@ -3,9 +3,9 @@ developer: Taito
 year: 1986
 genre: Platform, Cute, co-op
 controls:
-  - ←↓↑→: Mouvement
-  - Z: Bulle
-  - X: Sauter
+  - "←↓↑→: Mouvement"
+  - "Z: Bulle"
+  - "X: Sauter"
 
 to_start: Espace, puis Enter
 

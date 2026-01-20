@@ -903,31 +903,17 @@
             
             // Handle week games filter
             if (searchType === 'week') {
-                const currentWeek = getCurrentWeek();
-                
-                // Filter games that are in predictions and not from future weeks
-                filteredGamesData = gamesData.filter(game => {
-                    const prediction = predictionsData.find(pred => pred.game_id === game.id);
-                    if (!prediction) return false;
-                    
-                    // Only include games from current week or earlier
-                    const weekNumber = parseInt(prediction.week);
-                    return weekNumber <= currentWeek;
-                });
-                
-                // Sort by seed number (week number) in descending order (latest first)
+                const weekGameIds = predictionsData.map(p => p.game_id);
+
+                filteredGamesData = gamesData.filter(game => weekGameIds.includes(game.id));
+
+                // Sort by the order in `predictionsData` (which is oldest first)
                 filteredGamesData.sort((a, b) => {
-                    const aPrediction = predictionsData.find(pred => pred.game_id === a.id);
-                    const bPrediction = predictionsData.find(pred => pred.game_id === b.id);
-                    
-                    if (!aPrediction || !bPrediction) return 0;
-                    
-                    const aWeek = parseInt(aPrediction.week);
-                    const bWeek = parseInt(bPrediction.week);
-                    
-                    return bWeek - aWeek; // Descending order (latest first)
+                    const aIndex = weekGameIds.indexOf(a.id);
+                    const bIndex = weekGameIds.indexOf(b.id);
+                    return aIndex - bIndex;
                 });
-                
+
                 updateSearchInfo();
                 renderGames(filteredGamesData);
                 hideHeaderElements(); // Hide header elements when filtering
@@ -1173,17 +1159,12 @@
                 
                 // Sort games based on search type and sort selection
                 if (searchType === 'week') {
+                    const weekGameIds = predictionsData.map(p => p.game_id);
                     // Sort week games by seed number (week number) in descending order (latest first)
                     games.sort((a, b) => {
-                        const aPrediction = predictionsData.find(pred => pred.game_id === a.id);
-                        const bPrediction = predictionsData.find(pred => pred.game_id === b.id);
-                        
-                        if (!aPrediction || !bPrediction) return 0;
-                        
-                        const aWeek = parseInt(aPrediction.week);
-                        const bWeek = parseInt(bPrediction.week);
-                        
-                        return bWeek - aWeek; // Descending order (latest first)
+                        const aIndex = weekGameIds.indexOf(a.id);
+                        const bIndex = weekGameIds.indexOf(b.id);
+                        return aIndex - bIndex;
                     });
                 } else if (sortSelect && (sortSelect.value === 'year-asc' || sortSelect.value === 'year-desc')) {
                     // Group games by year for search results
@@ -2695,44 +2676,15 @@
         });
 
         // Fetch predictions data
-        fetch('/upcoming/upcoming.yaml')
-            .then(res => res.text())
-            .then(yamlText => {
-                // Parse YAML data (simple parsing for this specific format)
-                const lines = yamlText.split('\n');
-                const predictions = [];
-                let currentPrediction = null;
-                
-                for (let i = 0; i < lines.length; i++) {
-                    const line = lines[i];
-
-                    // Check if line is a week key (format: YYYYWW: with optional space)
-                    if (/^\d{6}: ?$/.test(line)) {
-                        if (currentPrediction && currentPrediction.game_id) {
-                            predictions.push(currentPrediction);
-                        }
-                        currentPrediction = {
-                            week: line.replace(/^(\d{6}): ?$/, '$1'),
-                            title: null,
-                            game_id: null
-                        };
-                    } else if (currentPrediction && line.startsWith('  title: ')) {
-                        currentPrediction.title = line.replace('  title: ', '').replace(/"/g, '');
-                    } else if (currentPrediction && line.startsWith('  game_id: ')) {
-                        currentPrediction.game_id = line.replace('  game_id: ', '').replace(/"/g, '');
-                    }
-                }
-
-                // Add the last prediction if it has a game_id
-                if (currentPrediction && currentPrediction.game_id) {
-                    predictions.push(currentPrediction);
-                }
-                
-                // Store predictions data (already in chronological order from latest to oldest)
-                predictionsData = predictions;
+        fetch('/api/previous-games.json')
+            .then(res => res.json())
+            .then(previousGames => {
+                // Transform the array of strings into an array of objects
+                // with a 'game_id' property.
+                predictionsData = previousGames.map(gameId => ({ game_id: gameId }));
             })
             .catch(err => {
-                console.error('Error loading upcoming.yaml:', err);
+                console.error('Error loading previous-games.json:', err);
                 predictionsData = [];
             });
 

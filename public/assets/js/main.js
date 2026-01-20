@@ -349,6 +349,9 @@ async function fetchGameData() {
         // Store shuffled games globally for search/clear functionality
         window.allGamesData = filteredGames;
 
+        // Signal that game data is loaded
+        window.gameDataLoaded = true;
+
         // Update search placeholder with game count
         updateSearchPlaceholder();
 

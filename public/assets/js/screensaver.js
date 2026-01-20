@@ -48,7 +48,10 @@ function timerIncrement() {
     }
 
     if (idleTime >= SCREENSAVER_TIMEOUT_MINUTES * 60 && !screensaverActive) {
-        startScreensaver();
+        // Only start the screensaver if the game data has been loaded
+        if (window.gameDataLoaded) {
+            startScreensaver();
+        }
     }
 }
 

@@ -36,7 +36,7 @@ function summarizeControls(controls) {
         if (!line) continue;
         let first = line.split(' ')[0];
         if ([
-            '1️⃣','2️⃣','3️⃣','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣','9️⃣','0️⃣'
+            '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '0️⃣'
         ].includes(first)) {
             first = '🔴';
         }
@@ -55,10 +55,10 @@ function showTooltipForItem(item) {
     const tooltip = document.createElement('div');
     tooltip.id = 'game-meta-tooltip';
     tooltip.className = 'game-meta-tooltip';
-    
+
     // Get system name from core field
     const systemName = getSystemName(game.core);
-    
+
     const fields = [
         { label: 'Developpeur', key: 'developer' },
         { label: 'Année', key: 'year' },
@@ -131,15 +131,15 @@ function removeTooltip() {
 function removeAccents(text) {
     if (!text) return '';
     return text.normalize('NFD')
-               .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
-               .toLowerCase();
+        .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
+        .toLowerCase();
 }
 
 
 document.addEventListener('DOMContentLoaded', () => {
     // This function starts the process when the HTML page is fully loaded
     fetchGameData();
-    
+
     // Initialize newsletter functionality
     initializeNewsletter();
 
@@ -190,7 +190,7 @@ async function fetchGameData() {
     try {
         // Use local gamelist.json for development, Google Cloud Storage for production
         const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.startsWith('192.168.');
-        
+
         // Get the current game ID from the API endpoint (generated from upcoming.yaml)
         let currentGameId = null;
         try {
@@ -205,7 +205,7 @@ async function fetchGameData() {
         } catch (error) {
             console.warn('Could not fetch current game from API:', error);
         }
-        
+
         // Load previous games from the new API endpoint
         let previousWeekGames = [];
         try {
@@ -227,7 +227,7 @@ async function fetchGameData() {
 
         if (!response.ok) {
             // Handle common errors like file not found
-            if(response.status === 404) {
+            if (response.status === 404) {
                 throw new Error(`gamelist.json not found at ${response.url}. Did you run the generation script?`);
             } else {
                 throw new Error(`HTTP error fetching gamelist.json! Status: ${response.status}`);
@@ -238,7 +238,7 @@ async function fetchGameData() {
 
         // Check if the received data structure is as expected (now simplified)
         if (!data || !Array.isArray(data.games)) {
-             throw new Error("Invalid data structure received from gamelist.json.");
+            throw new Error("Invalid data structure received from gamelist.json.");
         }
 
         // Find the current game of the week from the games list
@@ -271,7 +271,7 @@ async function fetchGameData() {
             }
             return game;
         });
-        
+
         // Shuffle games array to randomize order
         function shuffleArray(array) {
             const shuffled = [...array];
@@ -288,13 +288,13 @@ async function fetchGameData() {
             if (!game.added) {
                 return false;
             }
-            
+
             // Don't show hidden games as new (unless they were previously games of the week,
             // which are already handled by the hide override above)
             if (game.hide === true || game.hide === 'yes') {
                 return false;
             }
-            
+
             // Check if added date is within last 7 days
             try {
                 const addedDate = new Date(game.added);
@@ -313,11 +313,11 @@ async function fetchGameData() {
             }
             return false;
         }
-        
+
         // Separate new games from the rest (using date-aware checking)
         const newGames = filteredGames.filter(game => isGameActuallyNew(game));
         const otherGames = filteredGames.filter(game => !isGameActuallyNew(game));
-        
+
         // Sort new games by release date (newest first), then alphabetically
         newGames.sort((a, b) => {
             // First, sort by added date (newest first)
@@ -339,13 +339,13 @@ async function fetchGameData() {
             const normalizedB = normalizeTitleForSorting(titleB).toLowerCase();
             return normalizedA.localeCompare(normalizedB);
         });
-        
+
         // Randomize the order of other games
         const shuffledOtherGames = shuffleArray(otherGames);
-        
+
         // Combine: new games first, then randomized other games
         filteredGames = [...newGames, ...shuffledOtherGames];
-        
+
         // Store shuffled games globally for search/clear functionality
         window.allGamesData = filteredGames;
 
@@ -413,28 +413,28 @@ async function fetchGameData() {
         const footerRandomBtn = document.getElementById('footer-random-game-btn');
         // Filter out hidden games for randomizer (using already filtered games)
         const visibleGames = filteredGames.filter(game => !(game.hide === true || game.hide === 'yes'));
-        
+
         // Function to handle random game button click (reusable for both buttons)
         const setupRandomButton = (button) => {
             if (!button || !Array.isArray(visibleGames) || visibleGames.length === 0) return;
-            
+
             button.onclick = (e) => {
                 // Prevent default link behavior
                 e.preventDefault();
-                
+
                 // Prevent multiple clicks during animation
                 if (button.classList.contains('rolling')) {
                     return;
                 }
-                
+
                 // Add rolling animation class
                 button.classList.add('rolling');
-                
+
                 // Get current search term to determine which games to randomize from
                 const searchInput = document.getElementById('game-id-input');
                 // Always exclude external games from random selection
                 let gamesToRandomizeFrom = visibleGames.filter(game => game.core !== 'external');
-                
+
                 if (searchInput && searchInput.value.trim()) {
                     const searchTerm = searchInput.value.toLowerCase();
 
@@ -457,14 +457,14 @@ async function fetchGameData() {
                         return titleMatch || idMatch;
                     });
                 }
-                
+
                 // If no games match the filter, show a message or fall back to all games
                 if (gamesToRandomizeFrom.length === 0) {
                     button.classList.remove('rolling');
                     alert('Aucun jeu ne correspond à votre recherche pour la sélection aléatoire.');
                     return;
                 }
-                
+
                 // Wait for animation to complete before navigating
                 setTimeout(() => {
                     const randomIdx = Math.floor(Math.random() * gamesToRandomizeFrom.length);
@@ -494,7 +494,7 @@ async function fetchGameData() {
                 }, 1200); // Match animation duration
             };
         };
-        
+
         // Setup both buttons
         if (randomBtn) {
             setupRandomButton(randomBtn);
@@ -502,15 +502,15 @@ async function fetchGameData() {
         if (footerRandomBtn) {
             setupRandomButton(footerRandomBtn);
         }
-        
+
         // Function to update random button info text
-        window.updateRandomButtonInfo = function() {
+        window.updateRandomButtonInfo = function () {
             const infoText = document.querySelector('.random-info-text');
             if (infoText) {
                 const searchInput = document.getElementById('game-id-input');
                 // Always exclude external games from random selection count
                 let gamesToRandomizeFrom = visibleGames.filter(game => game.core !== 'external');
-                
+
                 if (searchInput && searchInput.value.trim()) {
                     const searchTerm = searchInput.value.toLowerCase();
                     const normalizedSearch = removeAccents(searchTerm);
@@ -541,7 +541,7 @@ async function fetchGameData() {
                 }
             }
         };
-        
+
         // Initialize the random button info
         window.updateRandomButtonInfo();
 
@@ -566,8 +566,8 @@ function populateFeaturedGame(game) {
 
     // Check if essential elements exist
     if (!contentContainer) {
-         // console.error("Required HTML elements for featured game not found."); // Removed for cleaner console
-         return;
+        // console.error("Required HTML elements for featured game not found."); // Removed for cleaner console
+        return;
     }
 
     // Check if game data is valid (especially game.id)
@@ -594,10 +594,10 @@ function populateFeaturedGame(game) {
     if (!displayTitle || displayTitle === game.id) {
         displayTitle = capitalizeFirst(game.id);
     }
-    
+
     // Normalize title for display (move "The" to the end)
     displayTitle = normalizeTitleForSorting(displayTitle);
-    
+
     // Add problem indicator if the game has problems
     if (game.problem === "true") {
         displayTitle += ' (❌)';
@@ -615,7 +615,7 @@ function populateFeaturedGame(game) {
         // Game of the week is always new
         // (This function is only called for the featured game, so always return true)
         return true;
-        
+
         // Original logic kept for reference but not used for featured game:
         // Check explicit new_flag first
         // if (game.new_flag === 'true') {
@@ -640,7 +640,7 @@ function populateFeaturedGame(game) {
         // }
         // return false;
     }
-    
+
     // Game of the week is always considered new
     const isNew = isGameNew(game);
 
@@ -691,7 +691,7 @@ function populateFeaturedGame(game) {
         badge.style.left = '7px';
         gameLink.appendChild(badge);
     }
-    
+
     // Add external game styling if it's an external game
     if (game.game_type === 'external' || game.core === 'external') {
         gameLink.classList.add('game-external');
@@ -709,13 +709,13 @@ function populateFeaturedGame(game) {
     }
 
     coverWrapper.appendChild(gameLink);
-    
+
     // Add "JOUER" button underneath the game cover
     const playButton = document.createElement('a');
     playButton.href = game.pageUrl || ('/play?game=' + game.id);
     playButton.className = 'featured-play-button';
     playButton.textContent = 'JOUER';
-    
+
     // Add click handler to use the same animation and sound as the game cover
     playButton.addEventListener('click', (e) => {
         e.preventDefault();
@@ -725,9 +725,9 @@ function populateFeaturedGame(game) {
             handleGameClick(featuredGameSection);
         }
     });
-    
+
     coverWrapper.appendChild(playButton);
-    
+
     coverColumn.appendChild(coverWrapper);
     gameContainer.appendChild(coverColumn);
 
@@ -744,14 +744,14 @@ function populateFeaturedGame(game) {
     // Metadata and Description wrapper
     const metadataWrapper = document.createElement('div');
     metadataWrapper.className = 'featured-game-metadata-wrapper';
-    
+
     // Metadata fields (left side of right column)
     const metadataLeft = document.createElement('div');
     metadataLeft.className = 'featured-game-metadata-left';
-    
+
     // Get system name from core field
     const systemName = getSystemName(game.core);
-    
+
     const fields = [
         { label: 'Développeur', key: 'developer' },
         { label: 'Année', key: 'year' },
@@ -774,7 +774,7 @@ function populateFeaturedGame(game) {
             metadataLeft.appendChild(metaRow);
         }
     });
-    
+
     // Add controls if present
     if (game.controls && summarizeControls(game.controls)) {
         const metaRow = document.createElement('div');
@@ -789,7 +789,7 @@ function populateFeaturedGame(game) {
         metaRow.appendChild(valueSpan);
         metadataLeft.appendChild(metaRow);
     }
-    
+
     metadataWrapper.appendChild(metadataLeft);
 
     // Description (right side of right column)
@@ -799,14 +799,14 @@ function populateFeaturedGame(game) {
         descriptionDiv.textContent = game.announcement_message;
         metadataWrapper.appendChild(descriptionDiv);
     }
-    
+
     rightColumn.appendChild(metadataWrapper);
 
     // Leaderboard section
     const leaderboard = document.createElement('div');
     leaderboard.className = 'featured-game-leaderboard';
     leaderboard.id = 'featured-game-leaderboard';
-    
+
     // Add scores section if scores are enabled
     const scoresEnabled = game.enable_score !== false && game.enable_score !== "false";
     console.log(`Featured game: ${game.id}, scores enabled: ${scoresEnabled}`);
@@ -815,37 +815,37 @@ function populateFeaturedGame(game) {
         leaderboardTitle.className = 'featured-leaderboard-title';
         leaderboardTitle.textContent = 'Classement';
         leaderboard.appendChild(leaderboardTitle);
-        
+
         const leaderboardContent = document.createElement('div');
         leaderboardContent.className = 'featured-leaderboard-content';
         leaderboardContent.innerHTML = '<div class="featured-leaderboard-loading">Chargement...</div>';
         leaderboard.appendChild(leaderboardContent);
-        
+
         // Clear any existing refresh interval before creating a new one
         if (window.featuredGameLeaderboardRefreshInterval) {
             clearInterval(window.featuredGameLeaderboardRefreshInterval);
             window.featuredGameLeaderboardRefreshInterval = null;
         }
-        
+
         // Fetch leaderboard data - use setTimeout to ensure DOM is ready
         console.log(`Fetching leaderboard for featured game: ${game.id}`);
         setTimeout(() => {
             fetchFeaturedGameLeaderboard(game.id);
         }, 100);
-        
+
         // Set up periodic refresh of leaderboard every 2 minutes (silent background refresh)
         const scoreRefreshInterval = setInterval(() => {
             console.log('Refreshing featured game leaderboard scores (2-minute interval)');
             // Use silent refresh to avoid flashing "Chargement..." message
             fetchFeaturedGameLeaderboard(game.id, true);
         }, 120000); // 2 minutes = 120,000 milliseconds
-        
+
         // Store interval ID for cleanup if needed
         window.featuredGameLeaderboardRefreshInterval = scoreRefreshInterval;
-        
+
         // Cleanup interval when page is unloaded
         if (!window.featuredGameLeaderboardCleanupAdded) {
-            window.addEventListener('beforeunload', function() {
+            window.addEventListener('beforeunload', function () {
                 if (window.featuredGameLeaderboardRefreshInterval) {
                     clearInterval(window.featuredGameLeaderboardRefreshInterval);
                     window.featuredGameLeaderboardRefreshInterval = null;
@@ -858,13 +858,13 @@ function populateFeaturedGame(game) {
         leaderboardTitle.className = 'featured-leaderboard-title';
         leaderboardTitle.textContent = 'Classement';
         leaderboard.appendChild(leaderboardTitle);
-        
+
         const leaderboardContent = document.createElement('div');
         leaderboardContent.className = 'featured-leaderboard-content';
         leaderboardContent.innerHTML = '<p style="text-align: center; opacity: 0.6;">Scores désactivés</p>';
         leaderboard.appendChild(leaderboardContent);
     }
-    
+
     rightColumn.appendChild(leaderboard);
     gameContainer.appendChild(rightColumn);
     contentContainer.appendChild(gameContainer);
@@ -882,10 +882,10 @@ function populateFeaturedGame(game) {
                 gameLink.addEventListener('mouseenter', (e) => {
                     // Clear any existing highlights
                     clearHighlights();
-                    
+
                     // Add highlight to featured section (for visual feedback)
                     featuredGameSection.classList.add('game-item--selected');
-                    
+
                     // Tooltips disabled on home page
                 });
                 gameLink.addEventListener('mouseleave', () => {
@@ -893,7 +893,7 @@ function populateFeaturedGame(game) {
                     featuredGameSection.classList.remove('game-item--selected');
                     removeTooltipWithTimeout();
                 });
-                
+
                 // Add click handler to use the exploding animation and sound
                 gameLink.addEventListener('click', (e) => {
                     e.preventDefault();
@@ -903,7 +903,7 @@ function populateFeaturedGame(game) {
             }
         }
     }
-    
+
 }
 
 /**
@@ -921,7 +921,7 @@ async function fetchFeaturedGameLeaderboard(gameId, isRefresh = false) {
         console.warn('Leaderboard container not found: featured-game-leaderboard');
         return;
     }
-    
+
     const leaderboardContent = leaderboardContainer.querySelector('.featured-leaderboard-content');
     if (!leaderboardContent) {
         console.warn('Leaderboard content not found');
@@ -932,16 +932,16 @@ async function fetchFeaturedGameLeaderboard(gameId, isRefresh = false) {
     if (!isRefresh) {
         leaderboardContent.innerHTML = '<div class="featured-leaderboard-loading">Chargement...</div>';
     }
-    
+
     try {
         // Check if we're on localhost and use mock data
-        const isLocalhost = window.location.hostname === 'localhost' || 
-                          window.location.hostname === '127.0.0.1' || 
-                          window.location.hostname.includes('localhost') ||
-                          window.location.hostname.startsWith('192.168.');
-        
+        const isLocalhost = window.location.hostname === 'localhost' ||
+            window.location.hostname === '127.0.0.1' ||
+            window.location.hostname.includes('localhost') ||
+            window.location.hostname.startsWith('192.168.');
+
         let data;
-        
+
         if (isLocalhost) {
             // Use mock data for localhost
             console.log('Using mock leaderboard data for localhost');
@@ -989,7 +989,7 @@ async function fetchFeaturedGameLeaderboard(gameId, isRefresh = false) {
             data = await response.json();
             console.log('Leaderboard API response received:', data);
         }
-        
+
         if (!data.result || !data.result.success || !data.result.scores) {
             console.error('Invalid response format:', data);
             throw new Error('Invalid response format');
@@ -998,7 +998,7 @@ async function fetchFeaturedGameLeaderboard(gameId, isRefresh = false) {
         // Find the oldest score (first submitted) among all scores
         let oldestScore = null;
         let oldestTimestamp = Infinity;
-        
+
         data.result.scores.forEach(score => {
             if (score.date && score.date._seconds) {
                 const timestamp = score.date._seconds;
@@ -1008,14 +1008,14 @@ async function fetchFeaturedGameLeaderboard(gameId, isRefresh = false) {
                 }
             }
         });
-        
+
         // Get best score for each unique player
         const playerBestScores = new Map();
-        
+
         data.result.scores.forEach(score => {
             const userId = score.userId;
             const currentBest = playerBestScores.get(userId);
-            
+
             if (!currentBest || score.score > currentBest.score) {
                 playerBestScores.set(userId, {
                     player: score.player,
@@ -1052,7 +1052,7 @@ async function fetchFeaturedGameLeaderboard(gameId, isRefresh = false) {
             // Get first letter, uppercase
             return cleaned.charAt(0).toUpperCase();
         }
-        
+
         // Helper function to get avatar color based on player name
         function getAvatarColor(playerName) {
             if (!playerName) return '#999';
@@ -1065,7 +1065,7 @@ async function fetchFeaturedGameLeaderboard(gameId, isRefresh = false) {
             const hue = Math.abs(hash) % 360;
             return `hsl(${hue}, 70%, 50%)`;
         }
-        
+
         // On refresh, compare with current scores to avoid unnecessary DOM updates
         if (isRefresh) {
             const currentEntries = leaderboardContent.querySelectorAll('.featured-leaderboard-entry');
@@ -1104,15 +1104,15 @@ async function fetchFeaturedGameLeaderboard(gameId, isRefresh = false) {
         sortedScores.forEach((score, index) => {
             const rank = index + 1;
             const rankText = rank.toString();
-            
+
             // Escape HTML to prevent XSS
             const playerName = escapeHtml(score.player);
             const initial = getPlayerInitial(score.player);
             const avatarColor = getAvatarColor(score.player);
-            
+
             // Check if this is the player with the oldest score
             const isOldestPlayer = isOldestInTop10 && score.userId === oldestPlayerId;
-            
+
             leaderboardHTML += `
                 <div class="featured-leaderboard-entry" data-game-id="${escapeHtml(gameId)}" style="cursor: pointer;">
                     <div class="featured-leaderboard-rank">${rankText}</div>
@@ -1124,7 +1124,7 @@ async function fetchFeaturedGameLeaderboard(gameId, isRefresh = false) {
         });
 
         leaderboardContent.innerHTML = leaderboardHTML;
-        
+
         // Add click handlers to each leaderboard entry
         const leaderboardEntries = leaderboardContent.querySelectorAll('.featured-leaderboard-entry');
         leaderboardEntries.forEach(entry => {
@@ -1135,7 +1135,7 @@ async function fetchFeaturedGameLeaderboard(gameId, isRefresh = false) {
                 }
             });
         });
-        
+
         console.log(`Leaderboard successfully displayed for game: ${gameId}, showing ${sortedScores.length} scores`);
 
     } catch (error) {
@@ -1281,11 +1281,11 @@ function populatePreviousWeekGames(previousGames, allGames) {
 
         let displayTitle = game.title || capitalizeFirst(game.id);
         displayTitle = normalizeTitleForSorting(displayTitle);
-        
+
         title.textContent = displayTitle;
         title.style.fontWeight = 'bold';
         title.style.fontSize = '1.1em';
-        
+
         titleContainer.appendChild(title);
         link.appendChild(img);
         link.appendChild(titleContainer);
@@ -1302,7 +1302,7 @@ function populatePreviousWeekGames(previousGames, allGames) {
             e.stopPropagation();
             gameItem.classList.remove('game-item--selected');
         });
-        
+
         // Click behavior
         gameItem.addEventListener('click', (e) => {
             e.preventDefault();
@@ -1313,12 +1313,12 @@ function populatePreviousWeekGames(previousGames, allGames) {
 
     if (previousGames.length > 0) {
         const viewAllLink = document.createElement('a');
-        viewAllLink.href = '/all?filter=week';
+        viewAllLink.href = '/featured/';
         viewAllLink.textContent = "Voir l'historique complet des jeux en vedette";
         viewAllLink.className = 'previous-week-view-all-link';
         container.appendChild(viewAllLink);
     }
-    
+
     addRandomAndLeaderboardButtons(container);
 }
 
@@ -1328,9 +1328,9 @@ function populatePreviousWeekGames(previousGames, allGames) {
  */
 function addRandomAndLeaderboardButtons(container) {
     if (!container) return;
-    
+
     let leaderboardLink = document.getElementById('leaderboard-link');
-    
+
     // Create leaderboard link if it doesn't exist
     if (!leaderboardLink) {
         leaderboardLink = document.createElement('a');
@@ -1339,7 +1339,7 @@ function addRandomAndLeaderboardButtons(container) {
         leaderboardLink.target = '_blank';
         leaderboardLink.textContent = 'Classements';
     }
-    
+
     if (leaderboardLink) {
         // Remove from current location if it exists elsewhere
         if (leaderboardLink.parentNode && leaderboardLink.parentNode !== container) {
@@ -1366,7 +1366,7 @@ function updateSocialMediaMetaTags(game) {
     if (!displayTitle || displayTitle === game.id) {
         displayTitle = capitalizeFirst(game.id);
     }
-    
+
     // Normalize title for display (move "The" to the end)
     displayTitle = normalizeTitleForSorting(displayTitle);
 
@@ -1406,8 +1406,8 @@ function updateSocialMediaMetaTags(game) {
  * @param {string} content - The new content value
  */
 function updateMetaTag(property, content) {
-    const metaTag = document.querySelector(`meta[property="${property}"]`) || 
-                   document.querySelector(`meta[name="${property}"]`);
+    const metaTag = document.querySelector(`meta[property="${property}"]`) ||
+        document.querySelector(`meta[name="${property}"]`);
     if (metaTag) {
         metaTag.setAttribute('content', content);
     }
@@ -1420,8 +1420,8 @@ function updateMetaTag(property, content) {
 function populatePreviousGames(games) {
     const gridContainer = document.getElementById('previous-games-grid');
     if (!gridContainer) {
-         console.error("Element with ID 'previous-games-grid' not found.");
-         return;
+        console.error("Element with ID 'previous-games-grid' not found.");
+        return;
     }
 
     let visibleGames;
@@ -1432,7 +1432,7 @@ function populatePreviousGames(games) {
         // Check if we're in search mode by looking at the search input
         const searchInput = document.getElementById('game-id-input');
         const isSearching = searchInput && searchInput.value.trim().length > 0;
-        
+
         if (isSearching) {
             // In search mode, show all games including hidden ones
             visibleGames = games;
@@ -1454,8 +1454,8 @@ function populatePreviousGames(games) {
     // Create grid items for each game
     visibleGames.forEach((game, idx) => {
         // Skip if game data is invalid
-        if(!game || !game.id) {
-             return; // Skip this iteration
+        if (!game || !game.id) {
+            return; // Skip this iteration
         }
 
         const gameItem = document.createElement('div');
@@ -1488,11 +1488,11 @@ function populatePreviousGames(games) {
                 // Invalid date, don't consider it new
             }
         }
-        
+
         if (isNewInList) {
             gameItem.classList.add('game-new');
         }
-        
+
         // Add external game styling if it's an external game
         if (game.game_type === 'external' || game.core === 'external') {
             gameItem.classList.add('game-external');
@@ -1528,10 +1528,10 @@ function populatePreviousGames(games) {
         if (!displayTitle || displayTitle === game.id) {
             displayTitle = capitalizeFirst(game.id);
         }
-        
+
         // Normalize title for display (move "The" to the end)
         displayTitle = normalizeTitleForSorting(displayTitle);
-        
+
         title.textContent = displayTitle;
 
         link.appendChild(img);
@@ -1544,10 +1544,10 @@ function populatePreviousGames(games) {
             // Clear any existing highlights
             clearHighlights();
             removeTooltipWithTimeout();
-            
+
             // Add highlight to this item
             gameItem.classList.add('game-item--selected');
-            
+
             // Show tooltip with delay (same as keyboard)
             if (tooltipTimeout) clearTimeout(tooltipTimeout);
             tooltipTimeout = setTimeout(() => {
@@ -1559,7 +1559,7 @@ function populatePreviousGames(games) {
             gameItem.classList.remove('game-item--selected');
             removeTooltipWithTimeout();
         });
-        
+
         // --- Click behavior (same as Enter key) ---
         gameItem.addEventListener('click', (e) => {
             e.preventDefault(); // Prevent default link behavior
@@ -1638,7 +1638,7 @@ function unlockSelectSound() {
     if (selectSound) {
         selectSound.currentTime = 0;
         selectSound.volume = 0;
-        selectSound.play().catch(() => {});
+        selectSound.play().catch(() => { });
         setTimeout(() => { selectSound.pause(); selectSound.volume = 1; }, 10);
     }
     window.removeEventListener('pointerdown', unlockSelectSound);
@@ -1655,7 +1655,7 @@ function playNavSound() {
             const temp = new Audio('/assets/click.mp3');
             temp.play();
         }
-    } catch (e) {}
+    } catch (e) { }
 }
 
 function playSelectSound() {
@@ -1668,17 +1668,17 @@ function playSelectSound() {
             const temp = new Audio('/assets/select.mp3');
             temp.play();
         }
-    } catch (e) {}
+    } catch (e) { }
 }
 
 // Global function to handle clicks the same way as Enter key
 function handleGameClick(element) {
     playSelectSound();
-    
+
     // Find the target URL
     const link = element.querySelector('a');
     if (!link || !link.href) return;
-    
+
     const targetUrl = link.href;
 
     // Block input
@@ -1865,7 +1865,7 @@ function handleGameClick(element) {
             const games = window.games || [];
             gameData = games.find(g => g.id === element.dataset.gameId);
         }
-        
+
         // Handle external games differently
         if (gameData && gameData.core === 'external') {
             // For external games, open in new tab/window
@@ -1882,7 +1882,7 @@ function handleGameClick(element) {
 }
 
 // --- Keyboard Navigation for Game Selection ---
-(function() {
+(function () {
     // Navigation and selection sounds
     // navSound and selectSound are now preloaded globally
 
@@ -1918,9 +1918,9 @@ function handleGameClick(element) {
             const rect = element.getBoundingClientRect();
             const winHeight = window.innerHeight;
             if (rect.top < margin) {
-                window.scrollBy({top: rect.top - margin, behavior: 'smooth'});
+                window.scrollBy({ top: rect.top - margin, behavior: 'smooth' });
             } else if (rect.bottom > winHeight - margin) {
-                window.scrollBy({top: rect.bottom - winHeight + margin, behavior: 'smooth'});
+                window.scrollBy({ top: rect.bottom - winHeight + margin, behavior: 'smooth' });
             }
             return;
         }
@@ -1937,7 +1937,7 @@ function handleGameClick(element) {
     function highlightCurrent() {
         // Only highlight if user has started navigating with arrow keys
         if (!userHasNavigated) return;
-        
+
         clearHighlights();
         removeTooltipWithTimeout();
         if (currentIndex === 0 && featuredGameSection) {
@@ -2156,7 +2156,7 @@ function handleGameClick(element) {
                 const games = window.games || [];
                 gameData = games.find(g => g.id === selectedEl.dataset.gameId);
             }
-            
+
             // Handle external games differently
             if (gameData && gameData.core === 'external') {
                 // For external games, open in new tab/window
@@ -2180,7 +2180,7 @@ function handleGameClick(element) {
     }
 
     // Listen for keyboard events
-    document.addEventListener('keydown', function(e) {
+    document.addEventListener('keydown', function (e) {
         // If search is focused, ignore except Escape
         if (document.activeElement === searchInput) {
             if (e.key === 'Escape') {
@@ -2203,10 +2203,10 @@ function handleGameClick(element) {
             return;
         }
         // Navigation keys
-        if (["ArrowDown","ArrowUp","ArrowLeft","ArrowRight","Enter","Tab"].includes(e.key)) {
+        if (["ArrowDown", "ArrowUp", "ArrowLeft", "ArrowRight", "Enter", "Tab"].includes(e.key)) {
             // Set flag that user has started navigating
             userHasNavigated = true;
-            
+
             // Only throttle if key is held (event.repeat)
             if (e.repeat && navThrottle) return;
             if (e.repeat) {
@@ -2285,7 +2285,7 @@ function handleGameClick(element) {
     });
     const gridElement = document.getElementById('previous-games-grid');
     if (gridElement) {
-        observer.observe(gridElement, {childList: true, subtree: false});
+        observer.observe(gridElement, { childList: true, subtree: false });
     }
 
     window.addEventListener('DOMContentLoaded', () => {
@@ -2310,26 +2310,26 @@ function initializeNewsletter() {
 }
 
 // --- Ensure menu and main content are visible after browser back navigation ---
-window.addEventListener('pageshow', function(event) {
-  // Remove animation classes from body
-  document.body.classList.remove('radial-exit-block');
-  document.body.style.opacity = '';
-  document.body.style.transition = '';
+window.addEventListener('pageshow', function (event) {
+    // Remove animation classes from body
+    document.body.classList.remove('radial-exit-block');
+    document.body.style.opacity = '';
+    document.body.style.transition = '';
 
-  // Remove radial-exit and transform from all elements
-  document.querySelectorAll('.radial-exit').forEach(el => {
-    el.classList.remove('radial-exit');
-    el.style.transform = '';
-  });
-
-  // Reset header, main, footer transforms
-  ['header', 'main', 'footer'].forEach(sel => {
-    document.querySelectorAll(sel).forEach(el => {
-      el.style.transform = '';
+    // Remove radial-exit and transform from all elements
+    document.querySelectorAll('.radial-exit').forEach(el => {
+        el.classList.remove('radial-exit');
+        el.style.transform = '';
     });
-  });
 
-  // Optionally, reset .container display if it was hidden
-  // var container = document.querySelector('.container');
-  // if (container) container.style.display = '';
+    // Reset header, main, footer transforms
+    ['header', 'main', 'footer'].forEach(sel => {
+        document.querySelectorAll(sel).forEach(el => {
+            el.style.transform = '';
+        });
+    });
+
+    // Optionally, reset .container display if it was hidden
+    // var container = document.querySelector('.container');
+    // if (container) container.style.display = '';
 });

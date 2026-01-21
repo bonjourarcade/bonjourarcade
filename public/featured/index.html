@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BonjourArcade - Jeux en vedette</title>
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="">
+    <meta property="og:title" content="BonjourArcade - Jeux en vedette">
+    <meta property="og:description" content="Découvrez les jeux en vedette et l'historique sur BonjourArcade">
+    <meta property="og:image" content="">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="">
+    <meta property="twitter:title" content="BonjourArcade - Jeux en vedette">
+    <meta property="twitter:description" content="Découvrez les jeux en vedette et l'historique sur BonjourArcade">
+    <meta property="twitter:image" content="">
+
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <style>
+        .featured-games-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .featured-games-title {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            color: #333;
+        }
+
+        .featured-games-section {
+            margin-bottom: 50px;
+        }
+
+        .section-header {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+            color: #444;
+        }
+
+        /* Styles for current game are similar to upcoming game card but larger/highlighted */
+        .current-game-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border: 2px solid #ffd700;
+            /* Gold border for featured */
+            display: flex;
+            gap: 30px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .current-game-card:hover {
+            transform: scale(1.01);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .current-game-image img {
+            width: 300px;
+            height: 300px;
+            object-fit: cover;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .current-game-details {
+            flex: 1;
+        }
+
+        .current-game-title {
+            font-size: 2.2rem;
+            font-weight: bold;
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .current-game-leaderboard {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+
+        .leaderboard-title {
+            font-size: 1rem;
+            font-weight: bold;
+            color: #495057;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .leaderboard-entry {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+            font-size: 0.9rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .leaderboard-entry:last-child {
+            border-bottom: none;
+        }
+
+        .leaderboard-rank {
+            font-size: 1rem;
+            margin-right: 8px;
+            min-width: 25px;
+        }
+
+        .leaderboard-player {
+            flex: 1;
+            color: #495057;
+            font-weight: 500;
+        }
+
+        .leaderboard-score {
+            color: #28a745;
+            font-weight: bold;
+            font-family: monospace;
+        }
+
+        .leaderboard-loading,
+        .leaderboard-empty,
+        .leaderboard-error {
+            text-align: center;
+            color: #6c757d;
+            font-size: 0.9rem;
+            font-style: italic;
+            padding: 10px;
+        }
+
+        .theme-dark .current-game-leaderboard {
+            background: #3d3d3d;
+            border-color: #555;
+        }
+
+        .theme-dark .leaderboard-title,
+        .theme-dark .leaderboard-player {
+            color: #e0e0e0;
+        }
+
+        .theme-dark .leaderboard-score {
+            color: #4caf50;
+        }
+
+        .theme-dark .leaderboard-entry {
+            border-color: #555;
+        }
+
+
+        .meta-tags span {
+            display: inline-block;
+            margin-right: 10px;
+            padding: 4px 8px;
+            background: #f0f0f0;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .play-button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 30px;
+            background: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: background 0.2s;
+        }
+
+        .play-button:hover {
+            background: #45a049;
+        }
+
+        /* List for previous games */
+        .previous-games-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .previous-game-card {
+            background: #fff;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: flex-start;
+            /* Changed from center to allow multiline */
+            gap: 20px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            border: 1px solid #eee;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .previous-game-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .previous-game-card img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+
+        .previous-game-info {
+            flex: 1;
+        }
+
+        .previous-game-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .previous-game-meta {
+            font-size: 0.9rem;
+            color: #777;
+        }
+
+        .previous-game-leaderboard {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border: 1px solid #eee;
+            font-size: 0.85rem;
+        }
+
+        .previous-game-leaderboard .leaderboard-title {
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+            text-align: left;
+        }
+
+        .previous-game-leaderboard .leaderboard-entry {
+            padding: 2px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .theme-dark .previous-game-leaderboard {
+            background: #333;
+            border-color: #555;
+        }
+
+        .theme-dark .previous-game-leaderboard .leaderboard-entry {
+            border-bottom-color: #444;
+        }
+
+
+        @media (max-width: 768px) {
+            .current-game-card {
+                flex-direction: column;
+                padding: 20px;
+            }
+
+            .current-game-image img {
+                width: 100%;
+                height: auto;
+                max-height: 300px;
+            }
+
+            .current-game-title {
+                font-size: 1.8rem;
+            }
+        }
+
+        /* Dark Theme overrides */
+        .theme-dark .featured-games-title,
+        .theme-dark .section-header,
+        .theme-dark .current-game-title,
+        .theme-dark .previous-game-title {
+            color: #f0f0f0;
+        }
+
+        .theme-dark .current-game-card,
+        .theme-dark .previous-game-card {
+            background: #2d2d2d;
+            border-color: #444;
+        }
+
+        .theme-dark .current-game-card {
+            border-color: #c5a900;
+        }
+
+        .theme-dark .meta-tags span {
+            background: #444;
+            color: #ccc;
+        }
+
+        .theme-dark .previous-game-meta {
+            color: #aaa;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <div class="header-flex">
+                <a href="/" aria-label="Retour à l'accueil">
+                    <img src="../assets/images/bonjourarcade-logo.png" alt="BonjourArcade Logo" class="header-logo">
+                </a>
+                <div class="header-actions">
+                    <a target="_blank" id="leaderboard-link" href="https://alloarcade.web.app">Classements</a>
+                </div>
+                <div style="position: relative;">
+                    <button id="theme-toggle-btn" class="theme-btn" aria-label="Changer le thème" type="button">
+                        <span id="theme-toggle-icon"
+                            style="display:inline-flex;align-items:center;font-size:1.2em;">🌓</span>
+                        <span id="theme-toggle-label">Thème</span>
+                    </button>
+                    <!-- Theme dropdown (same as other pages) -->
+                    <div id="theme-dropdown"
+                        style="display:none;position:absolute;top:110%;left:50%;transform:translateX(-50%);background:#222;color:#fff;border:1px solid #444;border-radius:8px;box-shadow:0 4px 16px #0002;min-width:170px;z-index:10000;padding:8px 0;">
+                        <button class="theme-option" data-theme="system"
+                            style="display:flex;align-items:center;width:100%;background:none;border:none;color:inherit;font:inherit;padding:8px 18px;gap:10px;cursor:pointer;"><span
+                                style='font-size:1.2em;'>🌓</span>Système</button>
+                        <button class="theme-option" data-theme="light"
+                            style="display:flex;align-items:center;width:100%;background:none;border:none;color:inherit;font:inherit;padding:8px 18px;gap:10px;cursor:pointer;"><span
+                                style='font-size:1.2em;'>☀️</span>Clair</button>
+                        <button class="theme-option" data-theme="dark"
+                            style="display:flex;align-items:center;width:100%;background:none;border:none;color:inherit;font:inherit;padding:8px 18px;gap:10px;cursor:pointer;"><span
+                                style='font-size:1.2em;'>🌙</span>Sombre</button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="featured-games-container">
+                <h1 class="featured-games-title">✨ Jeux en vedette</h1>
+
+                <div id="loading" style="text-align: center; font-size: 1.2rem; margin: 40px;">Chargement...</div>
+
+                <div id="content" style="display: none;">
+
+                    <!-- Current Featured Game -->
+                    <section class="featured-games-section">
+                        <h2 class="section-header">Jeu en vedette actuel</h2>
+                        <div id="current-game-container"></div>
+                    </section>
+
+                    <!-- Previous Featured Games -->
+                    <section class="featured-games-section">
+                        <h2 class="section-header">Historique des jeux en vedette</h2>
+                        <div id="previous-games-list" class="previous-games-list"></div>
+                    </section>
+
+                </div>
+
+                <div style="text-align: center; margin-top: 40px;">
+                    <a href="/"
+                        style="display: inline-block; padding: 12px 24px; background: #007bff; color: white; text-decoration: none; border-radius: 8px;">←
+                        Retour à l'accueil</a>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../assets/js/utils.js"></script>
+    <script>
+        // Init logic
+        document.addEventListener('DOMContentLoaded', () => {
+            initTheme();
+            loadFeaturedData();
+        });
+
+        // Theme logic
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'system';
+            setTheme(savedTheme);
+
+            // Listen for system changes
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+                if (!localStorage.getItem('theme')) setTheme('system');
+            });
+
+            // UI Event Listeners
+            const themeBtn = document.getElementById('theme-toggle-btn');
+            const themeDropdown = document.getElementById('theme-dropdown');
+
+            if (themeBtn) {
+                themeBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    themeDropdown.style.display = (themeDropdown.style.display === 'block') ? 'none' : 'block';
+                });
+            }
+
+            document.addEventListener('click', () => {
+                if (themeDropdown) themeDropdown.style.display = 'none';
+            });
+
+            document.querySelectorAll('.theme-option').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const theme = btn.dataset.theme;
+                    if (theme === 'system') localStorage.removeItem('theme');
+                    else localStorage.setItem('theme', theme);
+                    setTheme(theme);
+                });
+            });
+        }
+
+        function setTheme(theme) {
+            document.body.classList.remove('theme-light', 'theme-dark');
+            const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            document.body.classList.add(isDark ? 'theme-dark' : 'theme-light');
+
+            // Update UI text (simplified)
+            const icon = document.getElementById('theme-toggle-icon');
+            const label = document.getElementById('theme-toggle-label');
+            if (icon) icon.textContent = isDark ? '🌙' : '☀️';
+            if (label) label.textContent = isDark ? 'Sombre' : 'Clair';
+        }
+
+        // Data Loading
+        async function loadFeaturedData() {
+            try {
+                const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+                const cacheBuster = '?v=' + Date.now();
+
+                // Fetch All Data needed
+                const [currentGameRes, previousGamesRes, gamelistRes] = await Promise.all([
+                    fetch('/api/current-game'),
+                    fetch('/api/previous-games.json'),
+                    fetch(isLocalhost ? '../gamelist.json' : 'https://storage.googleapis.com/bonjourarcade/gamelist.json' + cacheBuster)
+                ]);
+
+                let currentGameId = null;
+                if (currentGameRes.ok) currentGameId = (await currentGameRes.text()).trim();
+
+                let previousGameIds = [];
+                if (previousGamesRes.ok) previousGameIds = await previousGamesRes.json(); // Array of strings (Ids) or objects? 
+                // Based on previous analysis, previous-games.json returns array of strings (IDs).
+
+                const gamelistData = await gamelistRes.json();
+                const games = gamelistData.games || [];
+
+                renderPage(currentGameId, previousGameIds, games);
+
+                // Load leaderboard for current game
+                if (currentGameId) {
+                    loadGameLeaderboard(currentGameId, 'current-game-leaderboard-container');
+                }
+
+            } catch (error) {
+                console.error("Error loading data:", error);
+                document.getElementById('loading').textContent = "Erreur lors du chargement des données.";
+            }
+        }
+
+        function renderPage(currentId, previousIds, games) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('content').style.display = 'block';
+
+            // 1. Render Current Game
+            const currentGame = games.find(g => g.id === currentId);
+            const currentContainer = document.getElementById('current-game-container');
+
+            if (currentGame) {
+                currentContainer.innerHTML = `
+                    <div class="current-game-card" onclick="window.location.href='${currentGame.pageUrl || '/play?game=' + currentGame.id}'">
+                        <div class="current-game-image">
+                            <img src="${currentGame.coverArt || '../assets/images/placeholder_thumb.png'}" alt="${currentGame.title}">
+                        </div>
+                        <div class="current-game-details">
+                            <h3 class="current-game-title">${currentGame.title || currentGame.id}</h3>
+                            <div class="meta-tags">
+                                ${currentGame.genre ? `<span>${currentGame.genre}</span>` : ''}
+                                ${currentGame.year ? `<span>${currentGame.year}</span>` : ''}
+                                ${currentGame.developer ? `<span>${currentGame.developer}</span>` : ''}
+                            </div>
+                            <p style="margin-top: 15px; line-height: 1.5; color: #555;">${currentGame.description || currentGame.announcement_message || "Découvrez le jeu en vedette de cette semaine !"}</p>
+                            <a href="${currentGame.pageUrl || '/play?game=' + currentGame.id}" class="play-button">JOUER MAINTENANT</a>
+                            <div id="current-game-leaderboard-container" class="current-game-leaderboard">
+                                <div class="leaderboard-loading">Chargement des scores...</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                currentContainer.innerHTML = '<p>Aucun jeu en vedette actuellement.</p>';
+            }
+
+            // 2. Render Previous Games
+            const previousListContainer = document.getElementById('previous-games-list');
+
+            // previousIds is likely ["id1", "id2", ...]. Filter out current game if present to avoid duplication?
+            // User requested "history", usually that implies past games. Current game might be in the list if the API returns it.
+            // Let's filter out the current ID if it appears in the history list to keep "Previous" distinct.
+            const uniquePreviousIds = previousIds.filter(id => id !== currentId);
+
+            if (uniquePreviousIds.length === 0) {
+                previousListContainer.innerHTML = '<p>Aucun historique disponible.</p>';
+            } else {
+                uniquePreviousIds.forEach(id => {
+                    const game = games.find(g => g.id === id);
+                    if (game) {
+                        const card = document.createElement('a');
+                        card.href = game.pageUrl || `/play?game=${game.id}`;
+                        card.className = 'previous-game-card';
+                        card.innerHTML = `
+                            <img src="${game.coverArt || '../assets/images/placeholder_thumb.png'}" alt="${game.title}" loading="lazy">
+                            <div class="previous-game-info">
+                                <div class="previous-game-title">${game.title || game.id}</div>
+                                <div class="previous-game-meta">
+                                     ${game.year ? game.year + ' • ' : ''} ${game.genre || ''}
+                                </div>
+                                <div id="leaderboard-${game.id}" class="previous-game-leaderboard">
+                                    <div class="leaderboard-loading" style="padding: 5px;">Chargement des scores...</div>
+                                </div>
+                            </div>
+                            <div style="font-size: 1.5rem; align-self: center;">›</div>
+                        `;
+                        previousListContainer.appendChild(card);
+
+                        // Load leaderboard for this game
+                        loadGameLeaderboard(game.id, `leaderboard-${game.id}`);
+                    }
+                });
+            }
+        }
+
+        // Leaderboard Functions
+        async function fetchLeaderboardData(gameId) {
+            try {
+                // Check if we're on localhost and use mock data
+                const isLocalhost = window.location.hostname === 'localhost' ||
+                    window.location.hostname === '127.0.0.1' ||
+                    window.location.hostname.includes('localhost') ||
+                    window.location.hostname.startsWith('192.168.');
+
+                let data;
+
+                if (isLocalhost) {
+                    // Use mock data for localhost
+                    data = {
+                        result: {
+                            success: true,
+                            scores: generateMockScores(gameId)
+                        }
+                    };
+                } else {
+                    const response = await fetch('https://us-central1-alloarcade.cloudfunctions.net/listGameScores', {
+                        method: 'POST',
+                        headers: {
+                            'accept': '*/*',
+                            'content-type': 'application/json',
+                            'origin': 'https://alloarcade.web.app',
+                            'referer': 'https://alloarcade.web.app/',
+                        },
+                        body: JSON.stringify({
+                            data: {
+                                timeRange: "all",
+                                gameId: gameId
+                            }
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    try {
+                        data = await response.json();
+                    } catch (e) {
+                        throw e;
+                    }
+                }
+
+                if (!data.result || !data.result.success || !data.result.scores) {
+                    return null;
+                }
+
+                // Get best score for each unique player
+                const playerBestScores = new Map();
+
+                data.result.scores.forEach(score => {
+                    const userId = score.userId;
+                    const currentBest = playerBestScores.get(userId);
+
+                    if (!currentBest || score.score > currentBest.score) {
+                        playerBestScores.set(userId, {
+                            player: score.player,
+                            score: score.score,
+                            rank: score.rank
+                        });
+                    }
+                });
+
+                // Convert to array and sort by score (highest first)
+                const sortedScores = Array.from(playerBestScores.values())
+                    .sort((a, b) => b.score - a.score)
+                    .slice(0, 5); // Show top 5 players for featured page
+
+                return sortedScores;
+            } catch (error) {
+                console.error('Error fetching leaderboard for', gameId, ':', error);
+                return null;
+            }
+        }
+
+        function generateMockScores(gameId) {
+            const mockPlayers = [
+                { name: "Félix L", userId: "user1" },
+                { name: "Marie C", userId: "user2" },
+                { name: "Jean P", userId: "user3" },
+                { name: "Sophie M", userId: "user4" },
+                { name: "Pierre D", userId: "user5" }
+            ];
+
+            let baseScore = 1000;
+            if (gameId.includes('shmup') || gameId.includes('shoot')) {
+                baseScore = 50000;
+            } else if (gameId.includes('puzzle')) {
+                baseScore = 5000;
+            } else if (gameId.includes('platform')) {
+                baseScore = 15000;
+            }
+
+            return mockPlayers.map((player, index) => ({
+                rank: index + 1,
+                id: `mock_${player.userId}_${Date.now()}`,
+                userId: player.userId,
+                player: player.name,
+                photoURL: `https://via.placeholder.com/96/cccccc/666666?text=${player.name.charAt(0)}`,
+                score: Math.floor(baseScore * (1 + Math.random() * 5) * (1 - index * 0.1)),
+                game: gameId,
+                date: {
+                    _seconds: Math.floor(Date.now() / 1000) - Math.floor(Math.random() * 86400 * 30),
+                    _nanoseconds: Math.floor(Math.random() * 1000000000)
+                },
+                verified: true,
+                screenshotUrl: `https://via.placeholder.com/300x200/333333/ffffff?text=Screenshot`
+            }));
+        }
+
+        async function loadGameLeaderboard(gameId, containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            try {
+                const scores = await fetchLeaderboardData(gameId);
+
+                if (!scores || scores.length === 0) {
+                    container.innerHTML = '<div class="leaderboard-empty">Aucun score pour le moment</div>';
+                    return;
+                }
+
+                let leaderboardHTML = '<div class="leaderboard-title">🏆 Top scores</div>';
+                scores.forEach((score, index) => {
+                    const rankEmoji = index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉';
+                    leaderboardHTML += `
+                        <div class="leaderboard-entry">
+                            <span class="leaderboard-rank">${index < 3 ? rankEmoji : (index + 1) + '.'}</span>
+                            <span class="leaderboard-player">${score.player}</span>
+                            <span class="leaderboard-score">${score.score.toLocaleString()}</span>
+                        </div>
+                    `;
+                });
+
+                container.innerHTML = leaderboardHTML;
+            } catch (error) {
+                container.innerHTML = '<div class="leaderboard-error">Erreur de chargement</div>';
+            }
+        }
+    </script>
+</body>
+
+</html>

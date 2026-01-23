@@ -21,7 +21,6 @@ pages:
   script:
     - bash scripts/build_sequential.sh
     - python3 scripts/generate_dos_gamelist.py
-    - cp plinko-gamelist.txt public/plinko/gamelist.txt
     # Upload gamelist.json to Google Cloud Storage
     - /root/google-cloud-sdk/bin/gcloud auth activate-service-account --key-file=$GCLOUD_SERVICE_KEY
     - /root/google-cloud-sdk/bin/gcloud config set project bonjourarcade

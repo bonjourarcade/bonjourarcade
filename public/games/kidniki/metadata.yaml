@@ -1,0 +1,17 @@
+title: "Kid Niki: Radical Ninja"
+developer: Irem
+year: 1986
+genre: Action
+#controls:
+#  - "←↓↑→: Mouvement"
+#  - "Z: "
+#  - "X: "
+#  - "C: "
+#  - "V: "
+
+#to_start: Espace, puis Enter
+
+enable_score: true
+hide: yes
+
+added: 2026-01-24

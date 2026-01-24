@@ -1,0 +1,17 @@
+title: Root Beer Tapper
+developer: Bally Midway
+year: 1983
+genre: Action, Time management
+#controls:
+#  - "←↓↑→: Mouvement"
+#  - "Z: "
+#  - "X: "
+#  - "C: "
+#  - "V: "
+
+#to_start: Espace, puis Enter
+
+enable_score: true
+hide: yes
+
+added: 2026-01-24

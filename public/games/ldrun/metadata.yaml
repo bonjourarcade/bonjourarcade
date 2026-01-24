@@ -1,0 +1,17 @@
+title: Lode Runner
+developer: Irem
+year: 1984
+genre: Action, Puzzle
+#controls:
+#  - "←↓↑→: Mouvement"
+#  - "Z: "
+#  - "X: "
+#  - "C: "
+#  - "V: "
+
+#to_start: Espace, puis Enter
+
+enable_score: true
+hide: yes
+
+added: 2026-01-24

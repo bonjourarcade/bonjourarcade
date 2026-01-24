@@ -1,0 +1,17 @@
+title: Wild West C.O.W. Boys of Moo Mesa
+developer: Konami
+year: 1992
+genre: Beat 'em up
+#controls:
+#  - "←↓↑→: Mouvement"
+#  - "Z: "
+#  - "X: "
+#  - "C: "
+#  - "V: "
+
+#to_start: Espace, puis Enter
+
+enable_score: true
+hide: yes
+
+added: 2026-01-24

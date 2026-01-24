@@ -1,0 +1,17 @@
+title: Super Hang-on
+developer: Sega-AM2
+year: 1987
+genre: Racing
+#controls:
+#  - "←↓↑→: Mouvement"
+#  - "Z: "
+#  - "X: "
+#  - "C: "
+#  - "V: "
+
+#to_start: Espace, puis Enter
+
+enable_score: true
+hide: yes
+
+added: 2026-01-24

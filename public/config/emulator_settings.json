@@ -11,7 +11,7 @@
   "EJS_disableAutoLang": true,
   "EJS_alignStartButton": "bottom",
   "EJS_startOnLoaded": true,
-  "EJS_pathtodata": "https://cdn.emulatorjs.org/nightly/data/",
+  "EJS_pathtodata": "https://cdn.emulatorjs.org/stable/data/",
   "EJS_AdUrl": "/ads",
   "EJS_AdTimer": 4000,
   "EJS_AdSize": ["400px", "262px"],

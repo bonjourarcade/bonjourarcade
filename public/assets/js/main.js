@@ -775,20 +775,7 @@ function populateFeaturedGame(game) {
         }
     });
 
-    // Add controls if present
-    if (game.controls && summarizeControls(game.controls)) {
-        const metaRow = document.createElement('div');
-        metaRow.className = 'featured-meta-row';
-        const label = document.createElement('span');
-        label.className = 'featured-meta-label';
-        label.textContent = 'Contrôles:';
-        const valueSpan = document.createElement('span');
-        valueSpan.className = 'featured-meta-value';
-        valueSpan.textContent = summarizeControls(game.controls);
-        metaRow.appendChild(label);
-        metaRow.appendChild(valueSpan);
-        metadataLeft.appendChild(metaRow);
-    }
+
 
     metadataWrapper.appendChild(metadataLeft);
 

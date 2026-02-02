@@ -403,7 +403,7 @@ class NewsletterSender:
             
             last_week_html = f'''
         <div style="background:#f8f9fa;border-left:4px solid #007bff;padding:16px;margin:18px 0;border-radius:4px;">
-            <h3 style="margin:0 0 12px 0;color:#007bff;">🏆 Top scores de la semaine dernière sur {last_week_highlight['game_title']}</h3>
+            <h3 style="margin:0 0 12px 0;color:#007bff;">🏆 Les champions du dernier défi : {last_week_highlight['game_title']}</h3>
             <ul style="margin:0;padding-left:20px;font-size:1.1em;">
                 {scores_list}
             </ul>
@@ -596,7 +596,7 @@ class NewsletterSender:
                 scores_list += f"{medal} {score['player']}: {score['score']:,} points\n"
             
             last_week_text = f"""
-Top scores de la semaine dernière sur {{b}}{last_week_highlight['game_title']}{{b}} :
+Les champions du dernier défi : {{b}}{last_week_highlight['game_title']}{{b}}
 {scores_list}"""
         
         # Get announcement message from metadata, fallback to custom_message if provided
@@ -664,7 +664,7 @@ Bonne semaine ! ☀️
             # Add last week's highlight if available
             if last_week_highlight:
                 # Build the full text with header and all scores
-                highlight_text = f"Top scores de la semaine dernière sur {last_week_highlight['game_title']}\n"
+                highlight_text = f"Les champions du dernier défi : {last_week_highlight['game_title']}\n"
                 for score in last_week_highlight['top_scores']:
                     medal = "🥇" if score['rank'] == 1 else "🥈" if score['rank'] == 2 else "🥉"
                     highlight_text += f"{medal} {score['player']}: {score['score']:,} points\n"

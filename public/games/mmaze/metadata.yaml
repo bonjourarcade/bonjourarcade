@@ -2,10 +2,10 @@ title: Märchen Maze
 developer: N.H. System
 year: 1988
 genre: Shooter, Platform
-#controls:
-#  - 🕹️ Déplacer
-#  - 1️⃣  Tirer
-#  - 2️⃣  Bombe
+controls:
+  - "←↓↑→: Mouvement"
+  - "Z: Bulle"
+  - "X: Sauter"
 
 #to_start: Select -> Start
 

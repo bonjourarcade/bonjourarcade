@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BonjourArcade</title>
+    <script async src="/assets/js/analytics.js"></script>
     <script>
         // Set title early to prevent 404 flash
-        (function() {
+        (function () {
             const path = window.location.pathname;
             const isRedirect = path.match(/^\/b\/([^\/]+)$/);
             if (isRedirect) {
@@ -30,29 +32,29 @@
             position: relative;
             color: #fff;
         }
-        
+
         /* Hide 404 content initially - will be shown only if not redirecting */
         #errorOverlay {
             display: none !important;
         }
-        
+
         #actionButtons {
             display: none !important;
         }
-        
+
         #coversContainer {
             display: none !important;
         }
-        
+
         /* Show 404 content when it's a real 404 */
         #errorOverlay.show-404 {
             display: flex !important;
         }
-        
+
         #actionButtons.show-404 {
             display: flex !important;
         }
-        
+
         #coversContainer.show-404 {
             display: block !important;
         }
@@ -75,12 +77,12 @@
             display: flex;
             background-color: #000 !important;
         }
-        
+
         /* Hide redirect overlay when showing 404 */
         .redirect-overlay.hide {
             display: none !important;
         }
-        
+
         /* Prevent loading.js overlay from showing on 404 page */
         #loading-overlay:not(#redirectOverlay) {
             display: none !important;
@@ -88,12 +90,12 @@
             opacity: 0 !important;
             pointer-events: none !important;
         }
-        
+
         /* Ensure redirect overlay uses black background when active */
         #redirectOverlay.active {
             background-color: #000 !important;
         }
-        
+
         /* Ensure loading-content has proper styling */
         #redirectOverlay .loading-content {
             display: flex;
@@ -211,7 +213,7 @@
             color: transparent;
             -webkit-text-stroke: 3px rgba(255, 0, 87, 0.9);
             text-stroke: 3px rgba(255, 0, 87, 0.9);
-            text-shadow: 
+            text-shadow:
                 0 0 15px rgba(255, 0, 87, 0.5),
                 0 0 30px rgba(255, 0, 87, 0.3);
             letter-spacing: 0.1em;
@@ -222,17 +224,20 @@
         }
 
         @keyframes subtleGlow {
-            0%, 100% {
+
+            0%,
+            100% {
                 -webkit-text-stroke-color: rgba(255, 0, 87, 0.85);
                 text-stroke-color: rgba(255, 0, 87, 0.85);
-                text-shadow: 
+                text-shadow:
                     0 0 15px rgba(255, 0, 87, 0.4),
                     0 0 30px rgba(255, 0, 87, 0.2);
             }
+
             50% {
                 -webkit-text-stroke-color: rgba(255, 0, 87, 0.95);
                 text-stroke-color: rgba(255, 0, 87, 0.95);
-                text-shadow: 
+                text-shadow:
                     0 0 20px rgba(255, 0, 87, 0.6),
                     0 0 40px rgba(255, 0, 87, 0.3);
             }
@@ -262,7 +267,7 @@
             border-radius: 8px;
             text-transform: uppercase;
             transition: all 0.3s;
-            box-shadow: 
+            box-shadow:
                 0 0 20px rgba(255, 0, 87, 0.5),
                 0 4px 10px rgba(0, 0, 0, 0.3);
             text-decoration: none;
@@ -272,7 +277,7 @@
 
         .arcade-btn:hover {
             transform: translateY(-3px) scale(1.05);
-            box-shadow: 
+            box-shadow:
                 0 0 30px rgba(255, 0, 87, 0.8),
                 0 6px 15px rgba(0, 0, 0, 0.4);
             border-color: #00ff90;
@@ -311,10 +316,12 @@
                 -webkit-text-stroke-width: 2px;
                 text-stroke-width: 2px;
             }
+
             .arcade-btn {
                 font-size: 1rem;
                 padding: 12px 24px;
             }
+
             .action-buttons {
                 flex-direction: column;
                 gap: 10px;
@@ -322,12 +329,15 @@
         }
     </style>
 </head>
+
 <body>
     <!-- Redirect overlay - reuses loading-overlay from loading.js -->
     <div class="redirect-overlay" id="redirectOverlay"></div>
-    
+
     <!-- Prevent loading.js from auto-initializing: create hidden overlay so it doesn't create its own -->
-    <div id="loading-overlay" class="loading-overlay" style="display: none !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important;"></div>
+    <div id="loading-overlay" class="loading-overlay"
+        style="display: none !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important;">
+    </div>
 
     <!-- Loading screen (hidden by default) -->
     <div class="loading-screen hidden" id="loadingScreen">
@@ -349,27 +359,27 @@
 
     <!-- Load CSS -->
     <link rel="stylesheet" href="/assets/css/style.css">
-    
+
     <script>
         // Redirect logic (runs first)
-        (function() {
+        (function () {
             const path = window.location.pathname;
-            
+
             // Check if the path matches /b/game_id pattern
             const match = path.match(/^\/b\/([^\/]+)$/);
-            
+
             if (match) {
                 // Extract the game_id from the path
                 const gameId = match[1];
-                
+
                 // Show redirect overlay immediately (it's already visible by default)
                 const redirectOverlay = document.getElementById('redirectOverlay');
                 redirectOverlay.classList.add('active');
-                
+
                 // Only load loading.js when we need to redirect
                 const script = document.createElement('script');
                 script.src = '/assets/js/loading.js';
-                script.onload = function() {
+                script.onload = function () {
                     // Hide the main loading overlay that loading.js might have created/auto-initialized
                     const mainOverlay = document.getElementById('loading-overlay');
                     if (mainOverlay) {
@@ -378,7 +388,7 @@
                         mainOverlay.style.opacity = '0';
                         mainOverlay.classList.add('hidden');
                     }
-                    
+
                     // Use loading.js function to create loading content
                     if (window.createLoadingOverlay) {
                         // Temporarily create overlay to get content, then hide it
@@ -387,13 +397,13 @@
                             tempOverlay.style.display = 'none';
                             tempOverlay.classList.add('hidden');
                         }
-                        
+
                         const loadingContent = tempOverlay?.querySelector('.loading-content');
-                        
+
                         if (loadingContent) {
                             // Copy the content to our redirect overlay
                             redirectOverlay.innerHTML = loadingContent.outerHTML;
-                            
+
                             // Update the text
                             const textElement = redirectOverlay.querySelector('.loading-text');
                             if (textElement) {
@@ -401,7 +411,7 @@
                             }
                         }
                     }
-                    
+
                     // Redirect to /play/?game=game_id
                     setTimeout(() => {
                         window.location.href = `/play/?game=${encodeURIComponent(gameId)}`;
@@ -413,12 +423,12 @@
                 // Not a redirect - hide redirect overlay and show 404 content
                 const redirectOverlay = document.getElementById('redirectOverlay');
                 redirectOverlay.classList.add('hide');
-                
+
                 // Show 404 content
                 const errorOverlay = document.getElementById('errorOverlay');
                 const actionButtons = document.getElementById('actionButtons');
                 const coversContainer = document.getElementById('coversContainer');
-                
+
                 if (errorOverlay) errorOverlay.classList.add('show-404');
                 if (actionButtons) actionButtons.classList.add('show-404');
                 if (coversContainer) coversContainer.classList.add('show-404');
@@ -434,11 +444,11 @@
 
         // Initialize
         async function init() {
-            const isLocalhost = window.location.hostname === 'localhost' || 
-                               window.location.hostname === '127.0.0.1' || 
-                               window.location.hostname.startsWith('192.168.');
+            const isLocalhost = window.location.hostname === 'localhost' ||
+                window.location.hostname === '127.0.0.1' ||
+                window.location.hostname.startsWith('192.168.');
             const cacheBuster = '?v=' + Date.now();
-            
+
             // Try multiple paths for gamelist.json
             const possiblePaths = isLocalhost ? [
                 'gamelist.json',
@@ -475,12 +485,12 @@
                 document.body.appendChild(errorMsg);
                 return;
             }
-                
+
             // Filter games: must have coverArt and pageUrl (for clickability), and exclude games with problems
-            games = (data.games || []).filter(game => 
-                game.coverArt && 
+            games = (data.games || []).filter(game =>
+                game.coverArt &&
                 game.coverArt.trim() !== '' &&
-                game.pageUrl && 
+                game.pageUrl &&
                 game.pageUrl.trim() !== '' &&
                 !game.problem // Exclude games with problems
             );
@@ -496,7 +506,7 @@
 
             // Create columns
             createColumns();
-            
+
             // Start animation
             animate();
         }
@@ -514,46 +524,46 @@
             const container = document.getElementById('coversContainer');
             const viewportWidth = window.innerWidth || document.documentElement.clientWidth;
             const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
-            
+
             // Calculate number of columns needed to fully cover width
             // Use Math.ceil to ensure we have enough, then add 3 more for safety
             const numColumns = Math.ceil(viewportWidth / columnWidth) + 3;
-            
+
             // Clear existing columns
             container.innerHTML = '';
             columns = [];
-            
+
             // Create columns
             for (let i = 0; i < numColumns; i++) {
                 const column = document.createElement('div');
                 column.className = 'cover-column';
                 column.style.width = columnWidth + 'px';
                 column.style.left = (i * columnWidth) + 'px';
-                
+
                 // Populate column with covers (do this before appending to measure height)
                 populateColumn(column);
-                
+
                 container.appendChild(column);
-                
+
                 // Calculate initial Y position - start way above viewport to ensure coverage
                 // All columns start from the same high position to prevent gaps
                 // Use a very negative value to ensure full coverage from the start
                 const coverHeight = columnWidth + 10;
                 const columnHeight = column.offsetHeight || (viewportHeight * 3);
                 const initialY = -columnHeight + (viewportHeight * 0.5); // Start high enough to cover top
-                
+
                 columns.push({
                     element: column,
                     y: initialY
                 });
-                
+
                 // Set initial position immediately
                 column.style.transform = `translateY(${initialY}px)`;
             }
-            
+
             // Force a layout recalculation to ensure columns are positioned
             container.offsetHeight;
-            
+
             // Verify coverage
             const lastColumnRight = (numColumns - 1) * columnWidth + columnWidth;
             if (lastColumnRight < viewportWidth) {
@@ -569,7 +579,7 @@
             const coverHeight = columnWidth + 10; // width + gap
             // Ensure we have enough covers to fill 4x viewport height to cover from way above to way below
             const coversPerColumn = Math.ceil((viewportHeight * 4) / coverHeight) + 20;
-            
+
             for (let i = 0; i < coversPerColumn; i++) {
                 const cover = createCoverItem();
                 column.appendChild(cover);
@@ -579,39 +589,39 @@
         // Create a cover item
         function createCoverItem() {
             const game = games[Math.floor(Math.random() * games.length)];
-            
+
             // Create wrapper for tooltip
             const wrapper = document.createElement('div');
             wrapper.className = 'cover-item-wrapper';
-            
+
             // Store game data for click navigation
             if (game.pageUrl) {
                 wrapper.dataset.gameUrl = game.pageUrl;
                 wrapper.dataset.gameId = game.id;
             }
-            
+
             const img = document.createElement('img');
             img.className = 'cover-item';
             img.src = game.coverArt;
             img.alt = game.title || game.id;
             img.dataset.gameTitle = game.title || game.id;
-            
+
             // Create tooltip
             const tooltip = document.createElement('div');
             tooltip.className = 'cover-tooltip';
             tooltip.textContent = game.title || game.id;
-            
+
             // Add click handler to launch game
             if (game.pageUrl) {
-                wrapper.addEventListener('click', function(e) {
+                wrapper.addEventListener('click', function (e) {
                     e.preventDefault();
                     e.stopPropagation();
                     // Navigate to game page
                     window.location.href = game.pageUrl;
                 });
             }
-            
-            img.onerror = function() {
+
+            img.onerror = function () {
                 // If image fails to load, try placeholder
                 if (this.src !== '/assets/images/placeholder_thumb.png') {
                     this.src = '/assets/images/placeholder_thumb.png';
@@ -625,10 +635,10 @@
                     this.style.fontSize = '0.8rem';
                 }
             };
-            
+
             wrapper.appendChild(img);
             wrapper.appendChild(tooltip);
-            
+
             return wrapper;
         }
 
@@ -636,12 +646,12 @@
         function animate() {
             const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
             const viewportWidth = window.innerWidth || document.documentElement.clientWidth;
-            
+
             columns.forEach((column, index) => {
                 // Move column down
                 column.y += scrollSpeed;
                 column.element.style.transform = `translateY(${column.y}px)`;
-                
+
                 // Get column height (use a fallback if not yet measured)
                 let columnHeight = column.element.offsetHeight;
                 if (columnHeight === 0) {
@@ -649,7 +659,7 @@
                     const coverCount = column.element.querySelectorAll('.cover-item-wrapper').length;
                     columnHeight = coverCount * (columnWidth + 10);
                 }
-                
+
                 // If column has scrolled past bottom, reset to top
                 // Reset when the top of the column passes the bottom of viewport
                 if (column.y > viewportHeight) {
@@ -657,48 +667,48 @@
                     // Use a large negative value to ensure smooth transition and full coverage
                     const resetY = -Math.max(columnHeight, viewportHeight * 3.5);
                     column.y = resetY;
-                    
+
                     // Refresh covers in column with new random games
                     const wrappers = column.element.querySelectorAll('.cover-item-wrapper');
                     wrappers.forEach((wrapper, index) => {
                         const img = wrapper.querySelector('.cover-item');
                         const tooltip = wrapper.querySelector('.cover-tooltip');
                         const newGame = games[Math.floor(Math.random() * games.length)];
-                        
+
                         if (img && newGame && newGame.coverArt) {
                             img.src = newGame.coverArt;
                             img.alt = newGame.title || newGame.id;
                             img.dataset.gameTitle = newGame.title || newGame.id;
-                            
+
                             // Update game URL for click navigation
                             if (newGame.pageUrl) {
                                 wrapper.dataset.gameUrl = newGame.pageUrl;
                                 wrapper.dataset.gameId = newGame.id;
-                                
+
                                 // Remove existing click handlers by cloning without listeners
                                 const newWrapper = wrapper.cloneNode(true);
                                 wrapper.parentNode.replaceChild(newWrapper, wrapper);
-                                
+
                                 // Add click handler to launch game
-                                newWrapper.addEventListener('click', function(e) {
+                                newWrapper.addEventListener('click', function (e) {
                                     e.preventDefault();
                                     e.stopPropagation();
                                     window.location.href = newGame.pageUrl;
                                 });
                             }
-                            
+
                             if (tooltip) {
                                 tooltip.textContent = newGame.title || newGame.id;
                             }
                         }
                     });
                 }
-                
+
                 // Safety check: ensure column always covers viewport vertically
                 // Check both top and bottom coverage
                 const columnTop = column.y;
                 const columnBottom = column.y + columnHeight;
-                
+
                 // If top of column is below viewport top, we have a gap
                 if (columnTop > 0) {
                     // Add covers to the top
@@ -711,7 +721,7 @@
                     // Recalculate position
                     column.y = columnTop - (neededCovers * coverHeight);
                 }
-                
+
                 // If bottom is getting close to viewport bottom, add more covers
                 if (columnBottom < viewportHeight + 200) {
                     const coverHeight = columnWidth + 10;
@@ -721,7 +731,7 @@
                         column.element.appendChild(cover);
                     }
                 }
-                
+
                 // Ensure column is still positioned correctly horizontally
                 const expectedLeft = index * columnWidth;
                 if (Math.abs(parseFloat(column.element.style.left) - expectedLeft) > 1) {
@@ -753,7 +763,7 @@
             const viewportWidth = window.innerWidth;
             const currentColumns = document.querySelectorAll('.cover-column').length;
             const expectedColumns = Math.ceil(viewportWidth / columnWidth) + 2;
-            
+
             // If columns are missing, recreate them
             if (currentColumns < expectedColumns - 1) {
                 console.log('Recreating columns to fix coverage');
@@ -772,12 +782,12 @@
             // Only initialize if we're not redirecting
             const path = window.location.pathname;
             const match = path.match(/^\/b\/([^\/]+)$/);
-            
+
             if (match) {
                 // We're redirecting, don't initialize 404 content
                 return;
             }
-            
+
             try {
                 init();
             } catch (error) {
@@ -786,7 +796,7 @@
                 const errorOverlay = document.getElementById('errorOverlay');
                 const actionButtons = document.getElementById('actionButtons');
                 const coversContainer = document.getElementById('coversContainer');
-                
+
                 if (errorOverlay) errorOverlay.classList.add('show-404');
                 if (actionButtons) actionButtons.classList.add('show-404');
                 if (coversContainer) coversContainer.classList.add('show-404');
@@ -801,4 +811,5 @@
         }
     </script>
 </body>
+
 </html>

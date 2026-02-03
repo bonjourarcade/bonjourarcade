@@ -1,236 +1,243 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BonjourArcade - Jeu en vedette</title>
-    
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="">
-    <meta property="og:title" content="BonjourArcade - Jeu en vedette">
-    <meta property="og:description" content="Chargement...">
-    <meta property="og:image" content="">
-    
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="">
-    <meta property="twitter:title" content="BonjourArcade - Jeu en vedette">
-    <meta property="twitter:description" content="Chargement...">
-    <meta property="twitter:image" content="">
-    
-    <link rel="stylesheet" href="assets/css/style.css">
-    <style>
-        .footer-emoji-link {
-            margin: 0 15px;
-            font-size: 0.85rem;
-            text-decoration: none;
-            color: inherit;
-            transition: opacity 0.2s ease;
-        }
-        
-        .footer-emoji-link:hover {
-            opacity: 0.7;
-        }
-        
-        footer {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 20px;
-            padding: 20px 0;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BonjourArcade - Jeu en vedette</title>
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="">
+  <meta property="og:title" content="BonjourArcade - Jeu en vedette">
+  <meta property="og:description" content="Chargement...">
+  <meta property="og:image" content="">
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="">
+  <meta property="twitter:title" content="BonjourArcade - Jeu en vedette">
+  <meta property="twitter:description" content="Chargement...">
+  <meta property="twitter:image" content="">
+
+  <link rel="stylesheet" href="assets/css/style.css">
+  <style>
+    .footer-emoji-link {
+      margin: 0 15px;
+      font-size: 0.85rem;
+      text-decoration: none;
+      color: inherit;
+      transition: opacity 0.2s ease;
+    }
+
+    .footer-emoji-link:hover {
+      opacity: 0.7;
+    }
+
+    footer {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+      padding: 20px 0;
+    }
+  </style>
 </head>
+
 <body>
-    <!-- Loading overlay (will be populated by loading.js) -->
-    <div id="loading-overlay" class="loading-overlay"></div>
-    
-    <div class="container" id="main-container" style="display: none;">
-        <header>
-            <div class="header-flex">
-                <img src="assets/images/bonjourarcade-logo.png" alt="BonjourArcade Logo" class="header-logo">
-                <div class="game-launcher">
-                    <input type="text" id="game-id-input"
-                    placeholder="Recherche">
-                    <!-- <button id="launch-game-btn">Lancer</button> -->
-                </div>
-                <a id="newsletter-subscribe"
-                  class="newsletter-btn"
-                  href="https://ko-fi.com/bonjourarcade"
-               target="_blank" rel="noopener">❤️ <span class="support-label-full">Supporter BonjourArcade</span><span class="support-label-short">Supporter</span></a>
-                <div class="header-actions">
-                </div>
-                <div class="theme-toggle-wrapper" style="position: relative;">
-                  <button id="theme-toggle-btn" class="theme-btn" aria-label="Changer le thème" type="button">
-                    <span id="theme-toggle-icon" style="display:inline-flex;align-items:center;font-size:1.2em;">🌓</span>
-                    <span id="theme-toggle-label">Thème</span>
-                  </button>
-                  <div id="theme-dropdown" style="display:none;position:absolute;top:110%;left:50%;transform:translateX(-50%);background:#222;color:#fff;border:1px solid #444;border-radius:8px;box-shadow:0 4px 16px #0002;min-width:170px;z-index:10000;padding:8px 0;">
-                    <button class="theme-option" data-theme="system" style="display:flex;align-items:center;width:100%;background:none;border:none;color:inherit;font:inherit;padding:8px 18px;gap:10px;cursor:pointer;"><span style='font-size:1.2em;'>🌓</span>Système</button>
-                    <button class="theme-option" data-theme="light" style="display:flex;align-items:center;width:100%;background:none;border:none;color:inherit;font:inherit;padding:8px 18px;gap:10px;cursor:pointer;"><span style='font-size:1.2em;'>☀️</span>Clair</button>
-                    <button class="theme-option" data-theme="dark" style="display:flex;align-items:center;width:100%;background:none;border:none;color:inherit;font:inherit;padding:8px 18px;gap:10px;cursor:pointer;"><span style='font-size:1.2em;'>🌙</span>Sombre</button>
-                  </div>
-                </div>
-            </div>
-        </header>
+  <!-- Loading overlay (will be populated by loading.js) -->
+  <div id="loading-overlay" class="loading-overlay"></div>
 
-        <main class="main-content">
-            <div class="left-column">
-                <h2 class="game-of-the-week-title">Jeu en vedette</h2>
-                <section id="game-of-the-week" class="featured-section">
-                    <div id="featured-game-content" class="featured-content-vertical">
-                        <img id="featured-game-img"
-                             src="" alt="Couverture du jeu sélectionné">
-                    </div>
-                </section>
-            </div>
+  <div class="container" id="main-container" style="display: none;">
+    <header>
+      <div class="header-flex">
+        <img src="assets/images/bonjourarcade-logo.png" alt="BonjourArcade Logo" class="header-logo">
+        <div class="game-launcher">
+          <input type="text" id="game-id-input" placeholder="Recherche">
+          <!-- <button id="launch-game-btn">Lancer</button> -->
+        </div>
+        <a id="header-games-list-btn" class="newsletter-btn" href="/all">🕹️ <span class="support-label-full">Liste des
+            jeux</span><span class="support-label-short">Jeux</span></a>
+        <div class="header-actions">
+        </div>
+        <div class="theme-toggle-wrapper" style="position: relative;">
+          <button id="theme-toggle-btn" class="theme-btn" aria-label="Changer le thème" type="button">
+            <span id="theme-toggle-icon" style="display:inline-flex;align-items:center;font-size:1.2em;">🌓</span>
+            <span id="theme-toggle-label">Thème</span>
+          </button>
+          <div id="theme-dropdown"
+            style="display:none;position:absolute;top:110%;left:50%;transform:translateX(-50%);background:#222;color:#fff;border:1px solid #444;border-radius:8px;box-shadow:0 4px 16px #0002;min-width:170px;z-index:10000;padding:8px 0;">
+            <button class="theme-option" data-theme="system"
+              style="display:flex;align-items:center;width:100%;background:none;border:none;color:inherit;font:inherit;padding:8px 18px;gap:10px;cursor:pointer;"><span
+                style='font-size:1.2em;'>🌓</span>Système</button>
+            <button class="theme-option" data-theme="light"
+              style="display:flex;align-items:center;width:100%;background:none;border:none;color:inherit;font:inherit;padding:8px 18px;gap:10px;cursor:pointer;"><span
+                style='font-size:1.2em;'>☀️</span>Clair</button>
+            <button class="theme-option" data-theme="dark"
+              style="display:flex;align-items:center;width:100%;background:none;border:none;color:inherit;font:inherit;padding:8px 18px;gap:10px;cursor:pointer;"><span
+                style='font-size:1.2em;'>🌙</span>Sombre</button>
+          </div>
+        </div>
+      </div>
+    </header>
 
-            <div class="right-column">
-                <section id="previous-week-games" class="previous-week-section">
-                    <center><h2>Les jeux précédents</h2></center>
-                    <div id="previous-week-games-list" class="previous-week-games-list">
-                        <p>Chargement des jeux...</p>
-                    </div>
-                </section>
-                <section class="grid-section">
-                    <div id="previous-games-grid" class="game-grid">
-                        <!-- Search results will be displayed here -->
-                    </div>
-                </section>
-            </div>
-        </main>
-    </div>
-    <!-- <div class="all-games-link-container bottom-link">
+    <main class="main-content">
+      <div class="left-column">
+        <h2 class="game-of-the-week-title">Jeu en vedette</h2>
+        <section id="game-of-the-week" class="featured-section">
+          <div id="featured-game-content" class="featured-content-vertical">
+            <img id="featured-game-img" src="" alt="Couverture du jeu sélectionné">
+          </div>
+        </section>
+      </div>
+
+      <div class="right-column">
+        <section id="previous-week-games" class="previous-week-section">
+          <center>
+            <h2>Les jeux précédents</h2>
+          </center>
+          <div id="previous-week-games-list" class="previous-week-games-list">
+            <p>Chargement des jeux...</p>
+          </div>
+        </section>
+        <section class="grid-section">
+          <div id="previous-games-grid" class="game-grid">
+            <!-- Search results will be displayed here -->
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+  <!-- <div class="all-games-link-container bottom-link">
         <a href="/all" class="all-games-link">
             <span class="joystick-emoji">🕹️</span>
         </a>
     </div> -->
 
-    <script>
-        window.gameDataLoaded = false;
-    </script>
-    <script src="assets/js/loading.js"></script>
-    <script src="assets/js/game-history.js"></script>
-    <script src="assets/js/screensaver.js"></script>
-    <script src="/assets/js/banner.js"></script>
-    <script src="assets/js/utils.js"></script>
-    <script src="assets/js/main.js"></script>
+  <script>
+    window.gameDataLoaded = false;
+  </script>
+  <script src="assets/js/loading.js"></script>
+  <script src="assets/js/game-history.js"></script>
+  <script src="assets/js/screensaver.js"></script>
+  <script src="/assets/js/banner.js"></script>
+  <script src="assets/js/utils.js"></script>
+  <script src="assets/js/main.js"></script>
 
-    <!--This is for loading custom cursors-->
-    <!--script
+  <!--This is for loading custom cursors-->
+  <!--script
       src="https://unpkg.com/cursor-effects@latest/dist/browser.js"></script-->
-    <script>
-      /*
-      window.addEventListener("load", (event) => {
-        // Only enable cursor effects on non-mobile devices
-        if (!/Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-          const springyEmojiCursor = new cursoreffects.springyEmojiCursor({ emoji: "💛" });
-          setTimeout(() => {
-            const cursorElements = document.querySelectorAll('.cursor-effects');
-            cursorElements.forEach(element => {
-              element.style.zIndex = '99999';
-              element.style.pointerEvents = 'none';
-            });
-          }, 100);
-        }
-      });
-      */
+  <script>
+    /*
+    window.addEventListener("load", (event) => {
+      // Only enable cursor effects on non-mobile devices
+      if (!/Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+        const springyEmojiCursor = new cursoreffects.springyEmojiCursor({ emoji: "💛" });
+        setTimeout(() => {
+          const cursorElements = document.querySelectorAll('.cursor-effects');
+          cursorElements.forEach(element => {
+            element.style.zIndex = '99999';
+            element.style.pointerEvents = 'none';
+          });
+        }, 100);
+      }
+    });
+    */
 
 
     // Key 'z' for directly going to /all (but not when typing in search)
     document.addEventListener('keydown', (event) => {
-        if (event.key === 'z') {
-          // Don't navigate if user is typing in the search input
-          const activeElement = document.activeElement;
-          if (activeElement && activeElement.id === 'game-id-input') {
-            return;
-          }
-          window.location.replace("/all");
+      if (event.key === 'z') {
+        // Don't navigate if user is typing in the search input
+        const activeElement = document.activeElement;
+        if (activeElement && activeElement.id === 'game-id-input') {
+          return;
         }
+        window.location.replace("/all");
+      }
     });
 
     // Key 'x' for directly going to /upcoming (but not when typing in textbox)
     document.addEventListener('keydown', (event) => {
-        if (event.key === 'x') {
-          // Don't navigate if user is typing in an input or textarea
-          const activeElement = document.activeElement;
-          if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
-            return;
-          }
-          window.location.replace("/upcoming");
+      if (event.key === 'x') {
+        // Don't navigate if user is typing in an input or textarea
+        const activeElement = document.activeElement;
+        if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
+          return;
         }
+        window.location.replace("/upcoming");
+      }
     });
 
     // Theme toggling logic
     function setTheme(theme) {
-        document.body.classList.remove('theme-light', 'theme-dark');
-        let classToAdd;
-        if (theme === 'system') {
-          classToAdd = getSystemTheme();
-        } else if (theme === 'dark') {
-          classToAdd = 'theme-dark';
+      document.body.classList.remove('theme-light', 'theme-dark');
+      let classToAdd;
+      if (theme === 'system') {
+        classToAdd = getSystemTheme();
+      } else if (theme === 'dark') {
+        classToAdd = 'theme-dark';
+      } else {
+        classToAdd = 'theme-light';
+      }
+      document.body.classList.add(classToAdd);
+      // Update button icon and label
+      const icon = document.getElementById('theme-toggle-icon');
+      const label = document.getElementById('theme-toggle-label');
+      if (icon && label) {
+        if (theme === 'dark') {
+          icon.textContent = '🌙';
+          label.textContent = 'Sombre';
+        } else if (theme === 'light') {
+          icon.textContent = '☀️';
+          label.textContent = 'Clair';
         } else {
-          classToAdd = 'theme-light';
+          icon.textContent = '🌓';
+          label.textContent = 'Thème';
         }
-        document.body.classList.add(classToAdd);
-        // Update button icon and label
-        const icon = document.getElementById('theme-toggle-icon');
-        const label = document.getElementById('theme-toggle-label');
-        if (icon && label) {
-          if (theme === 'dark') {
-            icon.textContent = '🌙';
-            label.textContent = 'Sombre';
-          } else if (theme === 'light') {
-            icon.textContent = '☀️';
-            label.textContent = 'Clair';
-          } else {
-            icon.textContent = '🌓';
-            label.textContent = 'Thème';
-          }
+      }
+      // Highlight current in dropdown
+      document.querySelectorAll('.theme-option').forEach(btn => {
+        btn.style.background = (btn.dataset.theme === theme) ? '#444' : 'none';
+      });
+      // Update button style for dark/light
+      const themeBtn = document.getElementById('theme-toggle-btn');
+      if (themeBtn) {
+        if (classToAdd === 'theme-dark') {
+          themeBtn.style.background = '#222';
+          themeBtn.style.color = '#fff';
+          themeBtn.style.border = '2px solid rgba(255,255,255,0.2)';
+        } else {
+          themeBtn.style.background = '#fff';
+          themeBtn.style.color = '#111';
+          themeBtn.style.border = '2px solid #ccc';
         }
-        // Highlight current in dropdown
-        document.querySelectorAll('.theme-option').forEach(btn => {
-          btn.style.background = (btn.dataset.theme === theme) ? '#444' : 'none';
-        });
-        // Update button style for dark/light
-        const themeBtn = document.getElementById('theme-toggle-btn');
-        if (themeBtn) {
-          if (classToAdd === 'theme-dark') {
-            themeBtn.style.background = '#222';
-            themeBtn.style.color = '#fff';
-            themeBtn.style.border = '2px solid rgba(255,255,255,0.2)';
-          } else {
-            themeBtn.style.background = '#fff';
-            themeBtn.style.color = '#111';
-            themeBtn.style.border = '2px solid #ccc';
-          }
-        }
+      }
     }
 
     function getSystemTheme() {
-        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'theme-dark' : 'theme-light';
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'theme-dark' : 'theme-light';
     }
 
     // Dropdown logic
     const themeBtn = document.getElementById('theme-toggle-btn');
     const themeDropdown = document.getElementById('theme-dropdown');
-    
+
     // Ensure dropdown is closed on page load
     if (themeDropdown) {
       themeDropdown.style.display = 'none';
     }
-    
+
     if (themeBtn && themeDropdown) {
-      themeBtn.addEventListener('click', function(e) {
+      themeBtn.addEventListener('click', function (e) {
         e.stopPropagation();
         const isOpen = themeDropdown.style.display === 'block';
         themeDropdown.style.display = isOpen ? 'none' : 'block';
       });
-      
+
       // Close dropdown when clicking outside
-      document.addEventListener('click', function(e) {
+      document.addEventListener('click', function (e) {
         if (themeDropdown && themeDropdown.style.display === 'block') {
           // Don't close if clicking on the button or dropdown itself
           if (!themeBtn.contains(e.target) && !themeDropdown.contains(e.target)) {
@@ -238,14 +245,14 @@
           }
         }
       });
-      
+
       // Prevent dropdown from closing when clicking inside it
-      themeDropdown.addEventListener('click', function(e) { 
-        e.stopPropagation(); 
+      themeDropdown.addEventListener('click', function (e) {
+        e.stopPropagation();
       });
     }
     document.querySelectorAll('.theme-option').forEach(btn => {
-      btn.addEventListener('click', function() {
+      btn.addEventListener('click', function () {
         const selected = btn.dataset.theme;
         if (selected === 'system') {
           localStorage.removeItem('theme');
@@ -263,14 +270,14 @@
     setTheme(initialTheme);
     // Listen for system theme changes if user hasn't chosen
     if (!savedTheme) {
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
-            setTheme('system');
-        });
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+        setTheme('system');
+      });
     }
-    </script>
-    <script>
+  </script>
+  <script>
     // --- Auto-refresh every 3 hours, and auto-restart screensaver if it was active before refresh ---
-    (function() {
+    (function () {
       // Refresh every 3 hours (10,800,000 ms)
       const THREE_HOURS_MS = 3 * 60 * 60 * 1000;
       setTimeout(() => {
@@ -282,11 +289,11 @@
       }, THREE_HOURS_MS);
 
       // On load, if the flag is set, start the screensaver after DOM is ready
-      document.addEventListener('DOMContentLoaded', function() {
+      document.addEventListener('DOMContentLoaded', function () {
         if (sessionStorage.getItem('bonjourarcade_screensaver_was_active') === '1') {
           sessionStorage.removeItem('bonjourarcade_screensaver_was_active');
           // Wait a tick to ensure screensaver.js is initialized
-          setTimeout(function() {
+          setTimeout(function () {
             if (typeof startScreensaver === 'function') {
               startScreensaver();
             }
@@ -294,73 +301,88 @@
         }
       });
     })();
-    </script>
-    
-    <script>
+  </script>
+
+  <script>
     // Initialize meta tags with current domain
-    document.addEventListener('DOMContentLoaded', function() {
-        const currentDomain = window.location.origin;
-        const currentUrl = window.location.href;
-        
-        // Update Open Graph meta tags
-        updateMetaTag('og:url', currentUrl);
-        updateMetaTag('og:image', `${currentDomain}/assets/images/bonjourarcade-logo.png`);
-        
-        // Update Twitter meta tags
-        updateMetaTag('twitter:url', currentUrl);
-        updateMetaTag('twitter:image', `${currentDomain}/assets/images/bonjourarcade-logo.png`);
+    document.addEventListener('DOMContentLoaded', function () {
+      const currentDomain = window.location.origin;
+      const currentUrl = window.location.href;
+
+      // Update Open Graph meta tags
+      updateMetaTag('og:url', currentUrl);
+      updateMetaTag('og:image', `${currentDomain}/assets/images/bonjourarcade-logo.png`);
+
+      // Update Twitter meta tags
+      updateMetaTag('twitter:url', currentUrl);
+      updateMetaTag('twitter:image', `${currentDomain}/assets/images/bonjourarcade-logo.png`);
     });
-    
+
     /**
      * Helper function to update meta tags
      * @param {string} property - The meta tag property to update
      * @param {string} content - The new content value
      */
     function updateMetaTag(property, content) {
-        const metaTag = document.querySelector(`meta[property="${property}"]`) || 
-                       document.querySelector(`meta[name="${property}"]`);
-        if (metaTag) {
-            metaTag.setAttribute('content', content);
-        }
+      const metaTag = document.querySelector(`meta[property="${property}"]`) ||
+        document.querySelector(`meta[name="${property}"]`);
+      if (metaTag) {
+        metaTag.setAttribute('content', content);
+      }
     }
-    </script>
-    
-    <div id="screensaver-overlay" class="screensaver-overlay">
-        <img id="screensaver-image" class="screensaver-image" src="" alt="Screensaver Image">
-        <img id="screensaver-logo" class="screensaver-logo" src="" alt="BonjourArcade Logo">
+  </script>
+
+  <div id="screensaver-overlay" class="screensaver-overlay">
+    <img id="screensaver-image" class="screensaver-image" src="" alt="Screensaver Image">
+    <img id="screensaver-logo" class="screensaver-logo" src="" alt="BonjourArcade Logo">
+  </div>
+
+  <!-- Newsletter Subscription Modal -->
+  <!-- The newsletter modal and form HTML have been removed. -->
+
+  <footer id="main-footer" style="display: none;">
+    <!-- Sorted from most exciting to most boring -->
+    <div class="footer-row">
+      <a href="/swipe" class="footer-emoji-link" title="Swipez pour découvrir des jeux" aria-label="Mode swipe">🔄 Mode
+        swipe</a>
+      <a href="/upcoming" class="footer-emoji-link" title="Découvrez les prochains jeux de la semaine"
+        aria-label="Jeux à venir">🔮 Jeux à venir</a>
+      <a href="/all" class="footer-emoji-link" title="Liste complète des jeux" aria-label="Liste complète des jeux">🗝️
+        Liste complète</a>
+      <a href="/screensaver" class="footer-emoji-link"
+        title="Mode écran de veille - Jeux aléatoires toutes les 2.5 minutes" aria-label="Mode écran de veille">🌠 Mode
+        écran de veille</a>
+      <a href="https://amazon.ca/dp/B08GJC5WSS" class="footer-emoji-link"
+        title="Manette officielle BonjourArcade sur Amazon" aria-label="Manette officielle BonjourArcade"
+        target="_blank" rel="noopener">🕹️ Manette officielle</a>
+      <a href="https://ko-fi.com/bonjourarcade" class="footer-emoji-link" title="Supportez BonjourArcade sur Ko-fi"
+        aria-label="Supportez BonjourArcade sur Ko-fi" target="_blank" rel="noopener">❤️ Supporter</a>
+      <a href="https://discord.gg/2E48gr5BNJ" class="footer-emoji-link" title="Rejoindre le Discord BonjourArcade"
+        aria-label="Discord BonjourArcade" target="_blank" rel="noopener">
+        <svg width="1.4em" height="1.4em" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;">
+          <path
+            d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276c-.598.3428-1.2205.6447-1.8733.8923a.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1835 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1835 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z" />
+        </svg>
+        Communauté
+      </a>
+      <a href="https://bonjourarcade.kit.com/abonne" class="footer-emoji-link"
+        title="S'abonner à la liste de diffusion pour recevoir le jeu de la semaine"
+        aria-label="S'abonner à la liste de diffusion" target="_blank" rel="noopener">📬 S'abonner</a>
+      <a href="https://productific.com/@BonjourArcade/preview" class="footer-emoji-link" title="Suggestions?"
+        target="_blank" rel="noopener">💡 Suggestions?</a>
+      <a href="https://gitlab.com/bonjourarcade/bonjourarcade" class="footer-emoji-link" title="Code source sur GitLab"
+        aria-label="Code source GitLab" target="_blank" rel="noopener">💻 Code source</a>
+      <a href="/privacy-policy.html" class="footer-emoji-link"
+        title="Politique de confidentialité et avis de non-garantie" aria-label="Politique de confidentialité">🔒
+        Confidentialité</a>
     </div>
 
-    <!-- Newsletter Subscription Modal -->
-    <!-- The newsletter modal and form HTML have been removed. -->
-    
-    <footer id="main-footer" style="display: none;">
-      <!-- Sorted from most exciting to most boring -->
-      <div class="footer-row">
-        <a href="/swipe" class="footer-emoji-link" title="Swipez pour découvrir des jeux" aria-label="Mode swipe">🔄 Mode swipe</a>
-        <a href="/upcoming" class="footer-emoji-link" title="Découvrez les prochains jeux de la semaine" aria-label="Jeux à venir">🔮 Jeux à venir</a>
-        <a href="/all" class="footer-emoji-link" title="Liste complète des jeux" aria-label="Liste complète des jeux">🗝️ Liste complète</a>
-        <a href="/screensaver" class="footer-emoji-link" title="Mode écran de veille - Jeux aléatoires toutes les 2.5 minutes" aria-label="Mode écran de veille">🌠 Mode écran de veille</a>
-        <a href="https://amazon.ca/dp/B08GJC5WSS" class="footer-emoji-link" title="Manette officielle BonjourArcade sur Amazon" aria-label="Manette officielle BonjourArcade" target="_blank" rel="noopener">🕹️ Manette officielle</a>
-        <a href="https://ko-fi.com/bonjourarcade" class="footer-emoji-link" title="Supportez BonjourArcade sur Ko-fi" aria-label="Supportez BonjourArcade sur Ko-fi" target="_blank" rel="noopener">❤️  Supporter</a>
-        <a href="https://discord.gg/2E48gr5BNJ" class="footer-emoji-link" title="Rejoindre le Discord BonjourArcade" aria-label="Discord BonjourArcade" target="_blank" rel="noopener">
-          <svg width="1.4em" height="1.4em" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;">
-            <path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276c-.598.3428-1.2205.6447-1.8733.8923a.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1835 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1835 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z"/>
-          </svg>
-          Communauté
-        </a>
-        <a href="https://bonjourarcade.kit.com/abonne" class="footer-emoji-link" title="S'abonner à la liste de diffusion pour recevoir le jeu de la semaine" aria-label="S'abonner à la liste de diffusion" target="_blank" rel="noopener">📬 S'abonner</a>
-        <a
-           href="https://productific.com/@BonjourArcade/preview"
-           class="footer-emoji-link" title="Suggestions?" target="_blank"
-        rel="noopener">💡 Suggestions?</a>
-        <a href="https://gitlab.com/bonjourarcade/bonjourarcade" class="footer-emoji-link" title="Code source sur GitLab" aria-label="Code source GitLab" target="_blank" rel="noopener">💻 Code source</a>
-        <a href="/privacy-policy.html" class="footer-emoji-link" title="Politique de confidentialité et avis de non-garantie" aria-label="Politique de confidentialité">🔒 Confidentialité</a>
-      </div>
-      
-      <!-- Avis de non-garantie -->
-      <div class="footer-row disclaimer-row">
-        <span class="footer-disclaimer-text">Aucune garantie • Le service peut cesser sans préavis • <a href="/privacy-policy.html">Politique de confidentialité</a></span>
-      </div>
-    </footer>
+    <!-- Avis de non-garantie -->
+    <div class="footer-row disclaimer-row">
+      <span class="footer-disclaimer-text">Aucune garantie • Le service peut cesser sans préavis • <a
+          href="/privacy-policy.html">Politique de confidentialité</a></span>
+    </div>
+  </footer>
 </body>
+
 </html>

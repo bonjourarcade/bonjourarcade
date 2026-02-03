@@ -57,26 +57,35 @@
           <input type="text" id="game-id-input" placeholder="Recherche">
           <!-- <button id="launch-game-btn">Lancer</button> -->
         </div>
-        <a id="header-games-list-btn" class="newsletter-btn" href="/all">🕹️ <span class="support-label-full">Liste des
-            jeux</span><span class="support-label-short">Jeux</span></a>
-        <div class="header-actions">
-        </div>
         <div class="theme-toggle-wrapper" style="position: relative;">
-          <button id="theme-toggle-btn" class="theme-btn" aria-label="Changer le thème" type="button">
-            <span id="theme-toggle-icon" style="display:inline-flex;align-items:center;font-size:1.2em;">🌓</span>
-            <span id="theme-toggle-label">Thème</span>
+          <button id="options-toggle-btn" class="theme-btn" aria-label="Options" type="button">
+            <span>⚙️</span>
+            <span>Options</span>
           </button>
-          <div id="theme-dropdown"
-            style="display:none;position:absolute;top:110%;left:50%;transform:translateX(-50%);background:#222;color:#fff;border:1px solid #444;border-radius:8px;box-shadow:0 4px 16px #0002;min-width:170px;z-index:10000;padding:8px 0;">
-            <button class="theme-option" data-theme="system"
-              style="display:flex;align-items:center;width:100%;background:none;border:none;color:inherit;font:inherit;padding:8px 18px;gap:10px;cursor:pointer;"><span
-                style='font-size:1.2em;'>🌓</span>Système</button>
-            <button class="theme-option" data-theme="light"
-              style="display:flex;align-items:center;width:100%;background:none;border:none;color:inherit;font:inherit;padding:8px 18px;gap:10px;cursor:pointer;"><span
-                style='font-size:1.2em;'>☀️</span>Clair</button>
-            <button class="theme-option" data-theme="dark"
-              style="display:flex;align-items:center;width:100%;background:none;border:none;color:inherit;font:inherit;padding:8px 18px;gap:10px;cursor:pointer;"><span
-                style='font-size:1.2em;'>🌙</span>Sombre</button>
+          <div id="options-dropdown" class="dropdown-menu">
+            <a href="/all" class="dropdown-option">
+              <span>🕹️</span>Tous les jeux
+            </a>
+            <a href="/swipe" class="dropdown-option">
+              <span>🔄</span>Mode Swipe
+            </a>
+            <a href="/screensaver" class="dropdown-option">
+              <span>🌠</span>Mode écran de veille
+            </a>
+            <a href="/upcoming" class="dropdown-option">
+              <span>🔮</span>Jeux à venir
+            </a>
+            <!-- Sub-menu or direct options for Theme -->
+            <div class="dropdown-divider"></div>
+            <button class="theme-option dropdown-option" data-theme="system">
+              <span class="theme-icon">🌓</span>Thème : Système
+            </button>
+            <button class="theme-option dropdown-option" data-theme="light">
+              <span class="theme-icon">☀️</span>Thème : Clair
+            </button>
+            <button class="theme-option dropdown-option" data-theme="dark">
+              <span class="theme-icon">🌙</span>Thème : Sombre
+            </button>
           </div>
         </div>
       </div>
@@ -182,36 +191,23 @@
         classToAdd = 'theme-light';
       }
       document.body.classList.add(classToAdd);
-      // Update button icon and label
-      const icon = document.getElementById('theme-toggle-icon');
-      const label = document.getElementById('theme-toggle-label');
-      if (icon && label) {
-        if (theme === 'dark') {
-          icon.textContent = '🌙';
-          label.textContent = 'Sombre';
-        } else if (theme === 'light') {
-          icon.textContent = '☀️';
-          label.textContent = 'Clair';
-        } else {
-          icon.textContent = '🌓';
-          label.textContent = 'Thème';
-        }
-      }
+
       // Highlight current in dropdown
       document.querySelectorAll('.theme-option').forEach(btn => {
         btn.style.background = (btn.dataset.theme === theme) ? '#444' : 'none';
       });
-      // Update button style for dark/light
-      const themeBtn = document.getElementById('theme-toggle-btn');
-      if (themeBtn) {
+
+      // Update Options button style for dark/light
+      const optionsBtn = document.getElementById('options-toggle-btn');
+      if (optionsBtn) {
         if (classToAdd === 'theme-dark') {
-          themeBtn.style.background = '#222';
-          themeBtn.style.color = '#fff';
-          themeBtn.style.border = '2px solid rgba(255,255,255,0.2)';
+          optionsBtn.style.background = '#222';
+          optionsBtn.style.color = '#fff';
+          optionsBtn.style.border = '2px solid rgba(255,255,255,0.2)';
         } else {
-          themeBtn.style.background = '#fff';
-          themeBtn.style.color = '#111';
-          themeBtn.style.border = '2px solid #ccc';
+          optionsBtn.style.background = '#fff';
+          optionsBtn.style.color = '#111';
+          optionsBtn.style.border = '2px solid #ccc';
         }
       }
     }
@@ -220,37 +216,29 @@
       return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'theme-dark' : 'theme-light';
     }
 
-    // Dropdown logic
-    const themeBtn = document.getElementById('theme-toggle-btn');
-    const themeDropdown = document.getElementById('theme-dropdown');
+    // Dropdown logic for Options
+    const optionsBtn = document.getElementById('options-toggle-btn');
+    const optionsDropdown = document.getElementById('options-dropdown');
 
-    // Ensure dropdown is closed on page load
-    if (themeDropdown) {
-      themeDropdown.style.display = 'none';
-    }
-
-    if (themeBtn && themeDropdown) {
-      themeBtn.addEventListener('click', function (e) {
+    if (optionsBtn && optionsDropdown) {
+      optionsBtn.addEventListener('click', function (e) {
         e.stopPropagation();
-        const isOpen = themeDropdown.style.display === 'block';
-        themeDropdown.style.display = isOpen ? 'none' : 'block';
+        optionsDropdown.classList.toggle('active');
       });
 
       // Close dropdown when clicking outside
       document.addEventListener('click', function (e) {
-        if (themeDropdown && themeDropdown.style.display === 'block') {
-          // Don't close if clicking on the button or dropdown itself
-          if (!themeBtn.contains(e.target) && !themeDropdown.contains(e.target)) {
-            themeDropdown.style.display = 'none';
+        if (optionsDropdown.classList.contains('active')) {
+          if (!optionsBtn.contains(e.target) && !optionsDropdown.contains(e.target)) {
+            optionsDropdown.classList.remove('active');
           }
         }
       });
 
-      // Prevent dropdown from closing when clicking inside it
-      themeDropdown.addEventListener('click', function (e) {
-        e.stopPropagation();
-      });
+      // Prevent closing when clicking inside
+      optionsDropdown.addEventListener('click', (e) => e.stopPropagation());
     }
+
     document.querySelectorAll('.theme-option').forEach(btn => {
       btn.addEventListener('click', function () {
         const selected = btn.dataset.theme;
@@ -260,7 +248,7 @@
           localStorage.setItem('theme', selected);
         }
         setTheme(selected);
-        themeDropdown.style.display = 'none';
+        // Don't auto-close menu on theme change to allow user to see the result
       });
     });
 
@@ -268,12 +256,13 @@
     const savedTheme = localStorage.getItem('theme');
     const initialTheme = savedTheme || 'system';
     setTheme(initialTheme);
-    // Listen for system theme changes if user hasn't chosen
-    if (!savedTheme) {
-      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+
+    // Listen for system theme changes
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+      if (!localStorage.getItem('theme')) {
         setTheme('system');
-      });
-    }
+      }
+    });
   </script>
   <script>
     // --- Auto-refresh every 3 hours, and auto-restart screensaver if it was active before refresh ---

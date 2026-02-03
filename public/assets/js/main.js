@@ -256,6 +256,9 @@ async function fetchGameData() {
         // Populate previous week games section
         populatePreviousWeekGames(previousWeekGames, data.games);
 
+        // Populate recently played games section
+        populateRecentlyPlayedGames(data.games);
+
         // Use all games for grid and randomizer (no need to combine separate arrays)
         let allGames = data.games;
 
@@ -1308,6 +1311,122 @@ function populatePreviousWeekGames(previousGames, allGames) {
 
     addRandomAndLeaderboardButtons(container);
 }
+
+/**
+ * Populates the "Recently Played Games" section with games from session history.
+ * @param {Array} allGames - An array of all game objects from gamelist.json.
+ */
+function populateRecentlyPlayedGames(allGames) {
+    const section = document.getElementById('recently-played-section');
+    const listContainer = document.getElementById('recently-played-list');
+
+    if (!section || !listContainer) return;
+
+    // Load history from sessionStorage
+    const historyGameIds = getHistoryGameIds();
+
+    // If no history, hide the section
+    if (!historyGameIds || historyGameIds.length === 0) {
+        section.style.display = 'none';
+        return;
+    }
+
+    // Limit to 5 most recent games
+    const recentIds = historyGameIds.slice(0, 5);
+
+    // Find the games corresponding to the IDs
+    const recentGames = recentIds
+        .map(id => allGames.find(game => game.id === id))
+        .filter(game => game !== undefined);
+
+    // If no games found, hide the section
+    if (recentGames.length === 0) {
+        section.style.display = 'none';
+        return;
+    }
+
+    // Show the section
+    section.style.display = 'block';
+
+    // Clear placeholder content
+    listContainer.innerHTML = '';
+
+    // Create game items for each recent game (same format as previous week games)
+    recentGames.forEach((game, idx) => {
+        const gameItem = document.createElement('div');
+        gameItem.className = 'previous-week-game-item';
+        gameItem.dataset.gameId = game.id;
+        gameItem._gameData = game; // Attach game data directly
+
+        if (game.romMissing === true) {
+            gameItem.classList.add('rom-missing');
+        }
+
+        if (game.game_type === 'external' || game.core === 'external') {
+            gameItem.classList.add('game-external');
+        }
+
+        const link = document.createElement('a');
+        link.href = game.pageUrl || '#';
+        link.style.position = 'relative';
+        link.style.display = 'flex';
+        link.style.alignItems = 'center';
+        link.style.gap = '15px';
+        link.style.textDecoration = 'none';
+        link.style.color = 'inherit';
+
+        const img = document.createElement('img');
+        const coverSrc = game.coverArt || '/assets/images/placeholder_thumb.png';
+        img.src = coverSrc;
+        img.alt = game.title || 'Game Cover';
+        img.loading = 'lazy';
+        img.style.width = '80px';
+        img.style.height = '80px';
+        img.style.objectFit = 'cover';
+        img.style.flexShrink = '0';
+
+        const titleContainer = document.createElement('div');
+        titleContainer.style.display = 'flex';
+        titleContainer.style.flexDirection = 'column';
+        titleContainer.style.gap = '4px';
+        titleContainer.style.flex = '1';
+
+        const title = document.createElement('div');
+        title.className = 'previous-week-game-title';
+
+        let displayTitle = game.title || capitalizeFirst(game.id);
+        displayTitle = normalizeTitleForSorting(displayTitle);
+
+        title.textContent = displayTitle;
+        title.style.fontWeight = 'bold';
+        title.style.fontSize = '1.1em';
+
+        titleContainer.appendChild(title);
+        link.appendChild(img);
+        link.appendChild(titleContainer);
+        gameItem.appendChild(link);
+        listContainer.appendChild(gameItem);
+
+        // Add mouse hover behavior
+        gameItem.addEventListener('mouseenter', (e) => {
+            e.stopPropagation();
+            clearHighlights();
+            gameItem.classList.add('game-item--selected');
+        });
+        gameItem.addEventListener('mouseleave', (e) => {
+            e.stopPropagation();
+            gameItem.classList.remove('game-item--selected');
+        });
+
+        // Click behavior
+        gameItem.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            handleGameClick(gameItem);
+        });
+    });
+}
+
 
 /**
  * Adds Random Game and Leaderboard buttons to the specified container

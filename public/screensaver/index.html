@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Bonjour Arcade - Screensaver</title>
     <style>
         * {
@@ -15,14 +17,14 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             text-align: center;
-            padding: 20px;
-            overflow: hidden;
+            padding: 40px 20px;
+            overflow-y: auto;
         }
 
         .container {
@@ -34,7 +36,7 @@
             font-size: 2.5rem;
             font-weight: bold;
             margin-bottom: 1rem;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
         }
 
         .subtitle {
@@ -54,14 +56,14 @@
             border-radius: 50px;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
             margin-bottom: 2rem;
             min-width: 200px;
         }
 
         .launch-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 12px 35px rgba(0,0,0,0.3);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.3);
         }
 
         .launch-btn:active {
@@ -69,11 +71,11 @@
         }
 
         .info {
-            background: rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.1);
             padding: 20px;
             border-radius: 15px;
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             margin-bottom: 2rem;
         }
 
@@ -117,22 +119,22 @@
         }
 
         .time-config {
-            background: rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.1);
             padding: 20px;
             border-radius: 15px;
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             margin-bottom: 2rem;
             text-align: left;
             width: 100%;
         }
 
         .chronological-option {
-            background: rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.1);
             padding: 20px;
             border-radius: 15px;
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             margin-bottom: 2rem;
             text-align: left;
             width: 100%;
@@ -198,9 +200,9 @@
         .time-input {
             width: 70px;
             padding: 10px;
-            border: 1px solid rgba(255,255,255,0.3);
+            border: 1px solid rgba(255, 255, 255, 0.3);
             border-radius: 8px;
-            background: rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.1);
             color: white;
             font-size: 1.1rem;
             text-align: center;
@@ -209,14 +211,14 @@
 
         .time-input:focus {
             outline: none;
-            border-color: rgba(255,255,255,0.6);
-            background: rgba(255,255,255,0.15);
+            border-color: rgba(255, 255, 255, 0.6);
+            background: rgba(255, 255, 255, 0.15);
         }
 
         .time-input::-webkit-inner-spin-button,
         .time-input::-webkit-outer-spin-button {
             opacity: 1;
-            background: rgba(255,255,255,0.2);
+            background: rgba(255, 255, 255, 0.2);
         }
 
         .time-note {
@@ -230,50 +232,51 @@
             .logo {
                 font-size: 2rem;
             }
-            
+
             .subtitle {
                 font-size: 1rem;
             }
-            
+
             .launch-btn {
                 padding: 18px 35px;
                 font-size: 1.2rem;
                 min-width: 180px;
             }
-            
+
             .loading-text {
                 font-size: 0.9rem;
             }
-            
+
             .loading-bar {
                 height: 6px;
             }
-            
+
             .time-config {
                 padding: 15px;
             }
-            
+
             .time-inputs {
                 gap: 15px;
             }
-            
+
             .time-input {
                 width: 60px;
                 padding: 8px;
                 font-size: 1rem;
             }
-            
+
             .time-note {
                 font-size: 0.8rem;
             }
         }
     </style>
 </head>
+
 <body>
     <div class="container">
-    <div class="logo">🎮 Bonjour Arcade</div>
-    <div class="subtitle">Mode Écran de veille</div>
-        
+        <div class="logo">🎮 Bonjour Arcade</div>
+        <div class="subtitle">Mode Écran de veille</div>
+
         <div class="time-config">
             <h3>⏱️ Durée du jeu</h3>
             <div class="time-inputs">
@@ -288,24 +291,28 @@
             </div>
             <p class="time-note">Par défaut : 2 minutes 30 secondes (150 secondes au total)</p>
         </div>
-        
+
         <div class="chronological-option">
             <h3>📅 Ordre des jeux</h3>
             <div class="checkbox-container">
                 <input type="checkbox" id="chronologicalOrder" class="chronological-checkbox">
-                <label for="chronologicalOrder">Jouer les jeux dans l'ordre chronologique (les plus récents en premier)</label>
+                <label for="chronologicalOrder">Jouer les jeux dans l'ordre chronologique (les plus récents en
+                    premier)</label>
             </div>
-            <p class="chronological-note">Si activé, les jeux seront lancés dans l'ordre où ils ont été ajoutés au site, en commençant par les plus récents.</p>
+            <p class="chronological-note">Si activé, les jeux seront lancés dans l'ordre où ils ont été ajoutés au site,
+                en commençant par les plus récents.</p>
         </div>
-        
+
         <button class="launch-btn" onclick="launchScreensaver()">
             🚀 Lancer l'écran de veille
         </button>
-        
+
         <div class="info">
             <h3>Comment ça marche</h3>
-            <p>L'écran de veille chargera automatiquement des jeux aléatoires à l'intervalle configuré, créant une expérience d'arcade continue. Idéal pour les fêtes, salles d'attente, ou tout simplement pour découvrir de nouveaux jeux !</p>
-            
+            <p>L'écran de veille chargera automatiquement des jeux aléatoires à l'intervalle configuré, créant une
+                expérience d'arcade continue. Idéal pour les fêtes, salles d'attente, ou tout simplement pour découvrir
+                de nouveaux jeux !</p>
+
             <div class="loading-container">
                 <div class="loading-text">Lancement automatique...</div>
                 <div class="loading-bar">
@@ -370,23 +377,23 @@
             }
 
             const totalMilliseconds = totalSeconds * 1000;
-            
+
             // Get chronological order preference
             const chronologicalOrder = document.getElementById('chronologicalOrder').checked;
-            
+
             // Set screensaver mode flag in session storage
             sessionStorage.setItem('screensaverMode', 'true');
             sessionStorage.setItem('screensaverStartTime', Date.now().toString());
             sessionStorage.setItem('screensaverInterval', totalMilliseconds.toString());
             sessionStorage.setItem('chronologicalOrder', chronologicalOrder.toString());
-            
+
             // Redirect to randomgame which will then redirect to play
             window.location.href = '/randomgame/';
         }
 
-    // Auto-launch after configured input if no interaction
+        // Auto-launch after configured input if no interaction
         let autoLaunchTimer;
-        
+
         function startAutoLaunchTimer() {
             // Auto-launch is fixed to 2 minutes (120 seconds). The per-game duration
             // chosen by the user is still saved to sessionStorage when they launch.
@@ -449,4 +456,5 @@
         startAutoLaunchTimer();
     </script>
 </body>
+
 </html>

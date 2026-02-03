@@ -2415,6 +2415,15 @@ body.theme-dark .loading-text {
     opacity: 0.5;
 }
 
+.dropdown-highlight {
+    color: #ffe600 !important;
+    font-weight: bold;
+}
+
+.dropdown-highlight:hover {
+    background: #333 !important;
+}
+
 .dropdown-option {
     display: flex;
     align-items: center;

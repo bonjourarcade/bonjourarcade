@@ -135,6 +135,66 @@ function removeAccents(text) {
         .toLowerCase();
 }
 
+/**
+ * Calculates the next featured game change date (1st or 15th of the month)
+ * @returns {Date} - The next change date
+ */
+function getNextGameChangeDate() {
+    const now = new Date();
+    const currentDay = now.getDate();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+
+    let nextChangeDate;
+
+    if (currentDay < 1) {
+        // Before the 1st (shouldn't happen, but handle it)
+        nextChangeDate = new Date(currentYear, currentMonth, 1);
+    } else if (currentDay < 15) {
+        // Between 1st and 14th, next change is on the 15th
+        nextChangeDate = new Date(currentYear, currentMonth, 15);
+    } else {
+        // On or after the 15th, next change is on the 1st of next month
+        nextChangeDate = new Date(currentYear, currentMonth + 1, 1);
+    }
+
+    return nextChangeDate;
+}
+
+/**
+ * Formats the time remaining until the next game change
+ * @param {Date} targetDate - The target date
+ * @returns {string} - Formatted time remaining
+ */
+function formatTimeRemaining(targetDate) {
+    const now = new Date();
+    const diff = targetDate - now;
+
+    if (diff <= 0) {
+        return 'Bientôt';
+    }
+
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+    const parts = [];
+
+    if (days > 0) {
+        parts.push(`${String(days).padStart(2, '0')}j`);
+    }
+    if (hours > 0 || days > 0) {
+        parts.push(`${String(hours).padStart(2, '0')}h`);
+    }
+    if (minutes > 0 || hours > 0 || days > 0) {
+        parts.push(`${String(minutes).padStart(2, '0')}m`);
+    }
+    parts.push(`${String(seconds).padStart(2, '0')}s`);
+
+    return parts.join(' ');
+}
+
 
 document.addEventListener('DOMContentLoaded', () => {
     // This function starts the process when the HTML page is fully loaded
@@ -664,6 +724,43 @@ function populateFeaturedGame(game) {
     weekLabel.className = 'featured-game-week-label';
     weekLabel.textContent = 'Jeu en vedette';
     coverWrapper.appendChild(weekLabel);
+
+    // Add timer showing when the next game change will occur
+    const timerLabel = document.createElement('div');
+    timerLabel.className = 'featured-game-timer';
+    timerLabel.id = 'featured-game-timer';
+
+    // Function to update the timer
+    function updateTimer() {
+        const nextChangeDate = getNextGameChangeDate();
+        const timeRemaining = formatTimeRemaining(nextChangeDate);
+        timerLabel.textContent = timeRemaining;
+    }
+
+    // Initial update
+    updateTimer();
+
+    // Update timer every second for real-time countdown
+    const timerInterval = setInterval(updateTimer, 1000);
+
+    // Store interval ID for cleanup
+    if (!window.featuredGameTimerIntervals) {
+        window.featuredGameTimerIntervals = [];
+    }
+    window.featuredGameTimerIntervals.push(timerInterval);
+
+    // Cleanup on page unload
+    if (!window.featuredGameTimerCleanupAdded) {
+        window.addEventListener('beforeunload', function () {
+            if (window.featuredGameTimerIntervals) {
+                window.featuredGameTimerIntervals.forEach(interval => clearInterval(interval));
+                window.featuredGameTimerIntervals = [];
+            }
+        });
+        window.featuredGameTimerCleanupAdded = true;
+    }
+
+    coverWrapper.appendChild(timerLabel);
 
     // Create link container for the image
     const gameLink = document.createElement('a');
@@ -1304,7 +1401,7 @@ function populatePreviousWeekGames(previousGames, allGames) {
     if (previousGames.length > 0) {
         const viewAllLink = document.createElement('a');
         viewAllLink.href = '/featured/';
-        viewAllLink.textContent = "Voir l'historique complet des jeux en vedette";
+        viewAllLink.textContent = "Voir l'historique complet des jeux vedettes";
         viewAllLink.className = 'previous-week-view-all-link';
         container.appendChild(viewAllLink);
     }

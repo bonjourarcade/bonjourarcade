@@ -230,7 +230,7 @@ for i in $(seq 1 $BATCH_WORKERS); do
                         fi
                         
                         core=$(get_core_from_dir "$rom_subdir")
-                        page_url="${launcher_page}?game=${game_id}"
+                        page_url="${launcher_page}/b/{game_id}"
 
                         # --- Determine Title and other metadata ---
                         title="$game_id"

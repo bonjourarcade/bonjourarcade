@@ -13,7 +13,7 @@ GAMES_DIR="public/games"
 ROMS_DIR="roms"
 OUTPUT_FILE="public/gamelist.json"
 DEFAULT_COVER="assets/images/placeholder_thumb.png"
-LAUNCHER_PAGE="/play"
+LAUNCHER_PAGE="/b"
 
 # Check if we're in local testing mode
 if [ "$LOCAL_TESTING" = "true" ]; then
@@ -230,7 +230,7 @@ for i in $(seq 1 $BATCH_WORKERS); do
                         fi
                         
                         core=$(get_core_from_dir "$rom_subdir")
-                        page_url="${launcher_page}/b/{game_id}"
+                        page_url="${launcher_page}/{game_id}"
 
                         # --- Determine Title and other metadata ---
                         title="$game_id"

@@ -13,7 +13,7 @@ GAMES_DIR="public/games"
 ROMS_DIR="roms"
 OUTPUT_FILE="public/gamelist.json"
 DEFAULT_COVER="assets/images/placeholder_thumb.png"
-LAUNCHER_PAGE="/play"
+LAUNCHER_PAGE="/b"
 
 # Check if we're in local testing mode
 if [ "$LOCAL_TESTING" = "true" ]; then
@@ -159,7 +159,7 @@ while IFS= read -r rom_entry; do
     fi
 
     core=$(get_core_from_dir "$rom_subdir")
-    page_url="${LAUNCHER_PAGE}/b/${game_id}"
+    page_url="${LAUNCHER_PAGE}/${game_id}"
 
     # --- Metadata ---
     title="$game_id"

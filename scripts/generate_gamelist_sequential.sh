@@ -159,7 +159,7 @@ while IFS= read -r rom_entry; do
     fi
 
     core=$(get_core_from_dir "$rom_subdir")
-    page_url="${LAUNCHER_PAGE}?game=${game_id}"
+    page_url="${LAUNCHER_PAGE}/b/${game_id}"
 
     # --- Metadata ---
     title="$game_id"

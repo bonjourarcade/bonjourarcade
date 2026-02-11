@@ -10,6 +10,7 @@ genre:
 #  - "V: "
 
 #to_start: Espace, puis Enter
+#announcement_message: ""
 
 enable_score: true
 hide: yes

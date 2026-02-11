@@ -3,4 +3,14 @@ developer: Nintendo
 year: 1985
 genre: Platform
 added: 2025-07-26
-added: 2025-07-27
+controls:
+  - "←↓↑→: Mouvement"
+  - "Z: Courir/Feu"
+  - "X: Sauter"
+
+to_start: Enter
+announcement_message: "L'original! Aidez Mario à sauver la princesse Peach gardée prisonnière dans le château de Bowser, le roi des Koopas."
+
+enable_score: true
+hide: yes
+

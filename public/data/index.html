@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Index of /stable/data/</title>
+<meta name="viewport" content="initial-scale=1"><link rel="stylesheet" type="text/css" href="/.theme/lighttpd-dir.css">
+</head>
+<body>
+<h2>Index of /stable/data/</h2>
+<div class="list">
+<table summary="Directory Listing" cellpadding="0" cellspacing="0">
+<thead><tr><th class="n">Name</th><th class="m">Last Modified</th><th class="s">Size</th><th class="t">Type</th></tr></thead>
+<tbody>
+<tr class="d"><td class="n"><a href="../">..</a>/</td><td class="m" data-value="-1">&nbsp;</td><td class="s" data-value="-1">- &nbsp;</td><td class="t">Directory</td></tr>
+<tr class="d"><td class="n"><a href="compression/">compression</a>/</td><td class="m">2025-Jul-05 19:24:26</td><td class="s" data-value="-1">- &nbsp;</td><td class="t">Directory</td></tr>
+<tr class="d"><td class="n"><a href="cores/">cores</a>/</td><td class="m">2025-Jul-05 19:36:25</td><td class="s" data-value="-1">- &nbsp;</td><td class="t">Directory</td></tr>
+<tr class="d"><td class="n"><a href="localization/">localization</a>/</td><td class="m">2025-Jul-05 19:24:26</td><td class="s" data-value="-1">- &nbsp;</td><td class="t">Directory</td></tr>
+<tr class="d"><td class="n"><a href="src/">src</a>/</td><td class="m">2025-Jul-05 19:28:51</td><td class="s" data-value="-1">- &nbsp;</td><td class="t">Directory</td></tr>
+<tr><td class="n"><a href="emulator.css">emulator.css</a></td><td class="m">2025-Jul-05 19:24:26</td><td class="s" data-value="33532">32.7K</td><td class="t">text/css</td></tr>
+<tr><td class="n"><a href="emulator.min.css">emulator.min.css</a></td><td class="m">2025-Jul-05 19:34:29</td><td class="s" data-value="25630">25.0K</td><td class="t">text/css</td></tr>
+<tr><td class="n"><a href="emulator.min.js">emulator.min.js</a></td><td class="m">2025-Jul-05 19:34:29</td><td class="s" data-value="426343">416.3K</td><td class="t">text/javascript</td></tr>
+<tr><td class="n"><a href="emulator.min.zip">emulator.min.zip</a></td><td class="m">2025-Jul-06 01:50:30</td><td class="s" data-value="121942">119.0K</td><td class="t">application/zip</td></tr>
+<tr><td class="n"><a href="loader.js">loader.js</a></td><td class="m">2025-Jul-05 19:24:26</td><td class="s" data-value="7594">7.4K</td><td class="t">text/javascript</td></tr>
+<tr><td class="n"><a href="version.json">version.json</a></td><td class="m">2025-Jul-05 19:28:13</td><td class="s" data-value="126">0.1K</td><td class="t">application/json</td></tr>
+</tbody>
+</table>
+</div>
+<div class="foot"><b>EmulatorJS CDN</b> lighttpd</div>
+
+<script type="text/javascript">
+// <!--
+
+var click_column;
+var name_column = 0;
+var date_column = 1;
+var size_column = 2;
+var type_column = 3;
+var prev_span = null;
+
+if (typeof(String.prototype.localeCompare) === 'undefined') {
+ String.prototype.localeCompare = function(str, locale, options) {
+   return ((this == str) ? 0 : ((this > str) ? 1 : -1));
+ };
+}
+
+if (typeof(String.prototype.toLocaleUpperCase) === 'undefined') {
+ String.prototype.toLocaleUpperCase = function() {
+  return this.toUpperCase();
+ };
+}
+
+function get_inner_text(el) {
+ if((typeof el == 'string')||(typeof el == 'undefined'))
+  return el;
+ if(el.dataset
+    && (typeof el.dataset.value === 'string'
+        || typeof el.dataset.value === 'number'))
+  return el.dataset.value;
+ if(el.innerText)
+  return el.innerText;
+ else {
+  var str = "";
+  var cs = el.childNodes;
+  var l = cs.length;
+  for (var i=0;i<l;i++) {
+   if (cs[i].nodeType==1) str += get_inner_text(cs[i]);
+   else if (cs[i].nodeType==3) str += cs[i].nodeValue;
+  }
+ }
+ return str;
+}
+
+var li_date_regex=/(\d{4})-(\w{3})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/;
+
+var li_mon = ['Jan','Feb','Mar','Apr','May','Jun',
+              'Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function li_mon_num(mon) {
+ var i; for (i = 0; i < 12 && mon != li_mon[i]; ++i); return i;
+}
+
+function li_dates_to_dv(table) {
+ for (var j=1;j<table.rows.length;j++) {
+  var el = table.rows[j].cells[date_column];
+  if(el.dataset && typeof el.dataset.value != 'undefined') {
+   if (typeof el.dataset.value == 'number')
+    break;
+   if (el.dataset.value === "-1")
+    el.dataset.value = -1;
+  } else {
+   var d = li_date_regex.exec(get_inner_text(el));
+   el.dataset.value = (parseInt(d[1])*(1<<26))
+     + ( (li_mon_num(d[2])<<22)
+        |(parseInt(d[3])  <<17)
+        |(parseInt(d[4])  <<12)
+        |(parseInt(d[5])  << 6)
+        |(parseInt(d[6])) );
+  }
+ }
+}
+
+function sortfn_then_by_name(a,b,sort_column) {
+ if (sort_column == name_column || sort_column == type_column) {
+  var ad = (a.cells[type_column].innerHTML === 'Directory');
+  var bd = (b.cells[type_column].innerHTML === 'Directory');
+  if (ad != bd) return (ad ? -1 : 1);
+ }
+ var at = get_inner_text(a.cells[sort_column]);
+ var bt = get_inner_text(b.cells[sort_column]);
+ var cmp;
+ if (sort_column == size_column) {
+  cmp = parseInt(at)-parseInt(bt);
+ } else if (sort_column == date_column) {
+  cmp = at-bt;
+ } else {
+  if (sort_column == name_column) {
+   if (at == '../') return -1;
+   if (bt == '../') return  1;
+  }
+  cmp = at.toLocaleUpperCase().localeCompare(bt.toLocaleUpperCase());
+  if (0 != cmp) return cmp;
+  cmp = at.localeCompare(bt);
+ }
+ if (0 != cmp || sort_column == name_column) return cmp;
+ return sortfn_then_by_name(a,b,name_column);
+}
+
+function sortfn(a,b) {
+ return sortfn_then_by_name(a,b,click_column);
+}
+
+function resort(lnk) {
+ var span = lnk.childNodes[1];
+ var table = lnk.parentNode.parentNode.parentNode.parentNode;
+ click_column = lnk.parentNode.cellIndex;
+ if (click_column == date_column) li_dates_to_dv(table);
+ var rows = new Array();
+ for (var j=1;j<table.rows.length;j++)
+  rows[j-1] = table.rows[j];
+ rows.sort(sortfn);
+
+ if (prev_span != null) prev_span.innerHTML = '';
+ if (span.getAttribute('sortdir')=='down') {
+  span.innerHTML = '&uarr;';
+  span.setAttribute('sortdir','up');
+  rows.reverse();
+ } else {
+  span.innerHTML = '&darr;';
+  span.setAttribute('sortdir','down');
+ }
+ for (var i=0;i<rows.length;i++)
+  table.tBodies[0].appendChild(rows[i]);
+ prev_span = span;
+}
+
+function init_sort(init_sort_column, descending) {
+ var tables = document.getElementsByTagName("table");
+ for (var i = 0; i < tables.length; i++) {
+  var table = tables[i];
+  //var c = table.getAttribute("class")
+  //if (-1 != c.split(" ").indexOf("sort")) {
+   var row = table.rows[0].cells;
+   for (var j = 0; j < row.length; j++) {
+    var n = row[j];
+    if (n.childNodes.length == 1 && n.childNodes[0].nodeType == 3) {
+     var link = document.createElement("a");
+     var title = n.childNodes[0].nodeValue.replace(/:$/, "");
+     link.appendChild(document.createTextNode(title));
+     link.setAttribute("href", "#");
+     link.setAttribute("class", "sortheader");
+     link.setAttribute("onclick", "resort(this);return false;");
+     var arrow = document.createElement("span");
+     arrow.setAttribute("class", "sortarrow");
+     arrow.appendChild(document.createTextNode(":"));
+     link.appendChild(arrow)
+     n.replaceChild(link, n.firstChild);
+    }
+   }
+   var lnk = row[init_sort_column].firstChild;
+   if (descending) {
+    var span = lnk.childNodes[1];
+    span.setAttribute('sortdir','down');
+   }
+   resort(lnk);
+  //}
+ }
+}
+
+function init_sort_from_query() {
+  var urlParams = new URLSearchParams(location.search);
+  var c = 0;
+  var o = 0;
+  switch (urlParams.get('C')) {
+    case "N": c=0; break;
+    case "M": c=1; break;
+    case "S": c=2; break;
+    case "T":
+    case "D": c=3; break;
+  }
+  switch (urlParams.get('O')) {
+    case "A": o=0; break;
+    case "D": o=1; break;
+  }
+  init_sort(c,o);
+}
+init_sort_from_query();
+
+// -->
+</script>
+
+</body>
+</html>

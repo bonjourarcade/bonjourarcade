@@ -418,6 +418,15 @@ async function fetchGameData() {
         // Update search placeholder with game count
         updateSearchPlaceholder();
 
+        // Hide loading overlay now that data is ready
+        if (typeof hideLoading === 'function') {
+            hideLoading({
+                containerSelector: '#main-container',
+                footerSelector: '#main-footer',
+                delay: 300
+            });
+        }
+
         // populatePreviousGames removed - no longer displaying game grid on home page
 
         // Add search input listener

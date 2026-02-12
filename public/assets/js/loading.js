@@ -3,7 +3,7 @@
  * Provides a reusable loading animation with Pacman SVG
  */
 
-(function() {
+(function () {
     'use strict';
 
     // Pacman SVG markup
@@ -124,13 +124,13 @@
         if (!loadingOverlay) return;
 
         // Get container element
-        const container = typeof containerSelector === 'string' 
+        const container = typeof containerSelector === 'string'
             ? document.querySelector(containerSelector)
             : containerSelector;
 
         // Get footer element if specified
-        const footer = footerSelector 
-            ? (typeof footerSelector === 'string' 
+        const footer = footerSelector
+            ? (typeof footerSelector === 'string'
                 ? document.querySelector(footerSelector)
                 : footerSelector)
             : null;
@@ -184,6 +184,14 @@
                     hideLoading({ containerSelector, footerSelector, delay });
                 }, delay);
             };
+
+            // For home page, don't auto-hide - let main.js control it
+            const isHomePage = window.location.pathname === '/' || window.location.pathname === '/index.html';
+
+            if (isHomePage) {
+                // Don't auto-hide on home page - main.js will call hideLoading when data is ready
+                return;
+            }
 
             if (document.readyState === 'complete') {
                 // Already loaded

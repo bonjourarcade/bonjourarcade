@@ -1428,8 +1428,8 @@ function populateRecentlyPlayedGames(allGames) {
         return;
     }
 
-    // Limit to 5 most recent games
-    const recentIds = historyGameIds.slice(0, 5);
+    // Show all recently played games
+    const recentIds = historyGameIds;
 
     // Find the games corresponding to the IDs
     const recentGames = recentIds

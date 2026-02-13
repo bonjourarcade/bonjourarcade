@@ -2,13 +2,16 @@ title: Earthion
 developer: Ancient
 year: 2025
 genre: Shooter
-#controls:
-#  - 🕹️ Déplacer
-#  - 1️⃣  Tirer
-#  - 2️⃣  Bombe
+controls:
+  - "←↓↑→: Mouvement"
+  - "Z: Arme principale"
+  - "X: Arme secondaire"
+  - "C: Changer d'arme"
 
-#to_start: Select -> Start
+to_start: Enter
+announcement_message: "Replongez dans l'âge d'or du jeu 16 bits avec Earthion, le tout nouveau shoot'em up d'Ancient! Earthion, le jeu de tir spatial à défilement horizontal de Yuzo Koshiro, a été développé nativement pour les systèmes 16-bits par le légendaire studio japonais Ancient Corporation."
 
+enable_score: true
 hide: yes
 
 added: 2025-08-02

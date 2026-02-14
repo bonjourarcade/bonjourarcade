@@ -2,12 +2,12 @@ title: "Teenage Mutant Ninja Turtles IV: Turtles in Time"
 developer: Konami
 year: 1992
 genre: Beat 'em up, Co-op 
-#controls:
-#  - 🕹️ Déplacer
-#  - 1️⃣  Tirer
-#  - 2️⃣  Bombe
+controls:
+  - 🕹️ Déplacer
+  - "Z: Attaquer"
+  - "X: Sauter"
 
-#to_start: Select -> Start
+to_start: Enter
 
-
+announcement: "Leonardo, Raphael, Donatello et Michelangelo doivent se frayer un chemin à travers le temps et des hordes de soldats du Clan des Foot, de mutants cinglés et autres pour ramener la liberté et envoyer Shredder valser dans la Dimension X! Allez, les Tortues!"
 added: 2025-07-29

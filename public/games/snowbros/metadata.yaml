@@ -2,14 +2,14 @@ title: Snow Bros.
 developer: Toaplan
 year: 1990
 genre: Platform, Action, co-op
-#controls:
-#  - 🕹️ Déplacer
-#  - 1️⃣  Tirer
-#  - 2️⃣  Bombe
+controls:
+  - 🕹️ Déplacer
+  - "Z: Attaquer"
+  - "X: Sauter"
 
-#to_start: Select -> Start
+to_start: Espace -> Enter
 
-announcement_message: 
+announcement_message: "Rejoignez Nick et Tom dans un voyage à travers 50 niveaux glacés de Snowland, remplis d'ennemis prêts à être transformés en boules de neige!"
 
 hide: yes
 

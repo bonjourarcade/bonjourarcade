@@ -1,0 +1,18 @@
+title: 4 Nin Uchi Mahjong
+developer: Hudson Soft
+year: 1984
+genre: Board game
+#controls:
+#  - "←↓↑→: Mouvement"
+#  - "Z: "
+#  - "X: "
+#  - "C: "
+#  - "V: "
+
+#to_start: Espace, puis Enter
+#announcement_message: ""
+
+enable_score: true
+hide: yes
+
+added: 2026-02-13

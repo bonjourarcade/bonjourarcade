@@ -692,6 +692,15 @@
     <script src="../assets/js/utils.js"></script>
     <script src="../assets/js/qrcode.min.js"></script>
     <script>
+        // Helper to navigate even if in iframe
+        function navigate(url) {
+            if (window.parent !== window) {
+                window.parent.location.href = url;
+            } else {
+                window.location.href = url;
+            }
+        }
+
         function downloadFile(url, filename) {
             const link = document.createElement('a');
             link.href = url;
@@ -832,7 +841,12 @@
             const gameId = urlParams.get('game');
 
             if (!gameId) {
-                window.location.href = "../";
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.get('source') === 'screensaver') {
+                    navigate("../screensaver/");
+                } else {
+                    navigate("../");
+                }
             }
             console.log(`Attempting to load game with ID: ${gameId}`);
 
@@ -1482,7 +1496,7 @@
                 const refreshInterval = setInterval(() => {
                     console.log('Screensaver mode: Refreshing to new random game');
                     // Redirect to randomgame to get a new random game
-                    window.location.href = '/randomgame/';
+                    navigate('/randomgame/');
                 }, configuredInterval);
 
                 // Store the interval ID so it can be cleared if needed
@@ -1639,7 +1653,7 @@
             nextGameBtn.addEventListener('click', () => {
                 if (!nextGameBtn.disabled) {
                     console.log('Manual next game requested');
-                    window.location.href = '/randomgame/';
+                    navigate('/randomgame/');
                 }
             });
 
@@ -1827,7 +1841,7 @@
             nextGameBtn.innerHTML = '⏭️ Prochain jeu';
             nextGameBtn.addEventListener('click', () => {
                 console.log('Manual next game requested');
-                window.location.href = '/randomgame/';
+                navigate('/randomgame/');
             });
 
             // Add buttons to submenu
@@ -1991,7 +2005,7 @@
 
             // If redirecting to screensaver, do it immediately
             if (redirectToScreensaver) {
-                window.location.href = '/screensaver/';
+                navigate('/screensaver/');
                 return;
             }
 
@@ -2031,9 +2045,9 @@
         document.getElementById('menu-button').addEventListener('click', function () {
             if (sessionStorage.getItem('referrerAllGames') === '1') {
                 sessionStorage.removeItem('referrerAllGames');
-                window.location.href = '/all/';
+                navigate('/all/');
             } else {
-                window.location.href = '/';
+                navigate('/');
             }
         });
 

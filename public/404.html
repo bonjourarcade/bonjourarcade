@@ -372,52 +372,35 @@
                 // Extract the game_id from the path
                 const gameId = match[1];
 
-                // Show redirect overlay immediately (it's already visible by default)
-                const redirectOverlay = document.getElementById('redirectOverlay');
-                redirectOverlay.classList.add('active');
+                // Stop 404 content from showing
+                const errorOverlay = document.getElementById('errorOverlay');
+                if (errorOverlay) errorOverlay.style.display = 'none';
 
-                // Only load loading.js when we need to redirect
-                const script = document.createElement('script');
-                script.src = '/assets/js/loading.js';
-                script.onload = function () {
-                    // Hide the main loading overlay that loading.js might have created/auto-initialized
-                    const mainOverlay = document.getElementById('loading-overlay');
-                    if (mainOverlay) {
-                        mainOverlay.style.display = 'none';
-                        mainOverlay.style.visibility = 'hidden';
-                        mainOverlay.style.opacity = '0';
-                        mainOverlay.classList.add('hidden');
-                    }
-
-                    // Use loading.js function to create loading content
-                    if (window.createLoadingOverlay) {
-                        // Temporarily create overlay to get content, then hide it
-                        const tempOverlay = window.createLoadingOverlay();
-                        if (tempOverlay) {
-                            tempOverlay.style.display = 'none';
-                            tempOverlay.classList.add('hidden');
+                // Fetch game details to set title
+                fetch('/gamelist.json')
+                    .then(response => response.json())
+                    .then(data => {
+                        const game = data.games.find(g => g.id === gameId);
+                        if (game) {
+                            document.title = game.title + " - BonjourArcade";
                         }
+                    })
+                    .catch(e => console.error(e));
 
-                        const loadingContent = tempOverlay?.querySelector('.loading-content');
+                // Create full-screen iframe
+                const iframe = document.createElement('iframe');
+                iframe.style.position = 'fixed';
+                iframe.style.top = '0';
+                iframe.style.left = '0';
+                iframe.style.width = '100vw';
+                iframe.style.height = '100vh';
+                iframe.style.border = 'none';
+                iframe.style.zIndex = '9999';
 
-                        if (loadingContent) {
-                            // Copy the content to our redirect overlay
-                            redirectOverlay.innerHTML = loadingContent.outerHTML;
+                // Add analytics=false to prevent double counting
+                iframe.src = `/play/?game=${encodeURIComponent(gameId)}&analytics=false`;
 
-                            // Update the text
-                            const textElement = redirectOverlay.querySelector('.loading-text');
-                            if (textElement) {
-                                textElement.textContent = 'Redirection en cours...';
-                            }
-                        }
-                    }
-
-                    // Redirect to /play/?game=game_id
-                    setTimeout(() => {
-                        window.location.href = `/play/?game=${encodeURIComponent(gameId)}`;
-                    }, 500);
-                };
-                document.head.appendChild(script);
+                document.body.appendChild(iframe);
                 return;
             } else {
                 // Not a redirect - hide redirect overlay and show 404 content

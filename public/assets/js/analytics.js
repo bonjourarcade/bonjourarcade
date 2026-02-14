@@ -5,6 +5,13 @@
         return;
     }
 
+    // Disable if analytics=false query param is present (e.g. inside iframe)
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('analytics') === 'false') {
+        console.log('BonjourArcade: Analytics disabled via query param');
+        return;
+    }
+
     // BonjourArcade Analytics (Umami)
     const script = document.createElement('script');
     script.defer = true;

@@ -611,6 +611,7 @@ Les champions du dernier défi : {{b}}{last_week_highlight['game_title']}{{b}}
         # Note: For Google Chat, we use cards instead of this template
         message_template = f"""
 Annonce du jeu en vedette !
+
 {custom_text}{{b}}Jeu en vedette :{{b}} {title}
 {{b}}Développeur :{{b}} {developer}
 {{b}}Année :{{b}} {year}

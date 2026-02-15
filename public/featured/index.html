@@ -237,6 +237,18 @@
         .previous-game-meta {
             font-size: 0.9rem;
             color: #777;
+            margin-bottom: 8px;
+        }
+
+        .previous-game-announcement {
+            font-size: 0.95rem;
+            line-height: 1.4;
+            color: #555;
+            margin: 8px 0;
+        }
+
+        .theme-dark .previous-game-announcement {
+            color: #bbb;
         }
 
         .previous-game-leaderboard {
@@ -528,6 +540,7 @@
                                 <div class="previous-game-meta">
                                      ${game.year ? game.year + ' • ' : ''} ${game.genre || ''}
                                 </div>
+                                <p class="previous-game-announcement">${game.description || game.announcement_message || ""}</p>
                                 <div id="leaderboard-${game.id}" class="previous-game-leaderboard">
                                     <div class="leaderboard-loading" style="padding: 5px;">Chargement des scores...</div>
                                 </div>

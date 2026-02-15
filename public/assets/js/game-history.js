@@ -1,12 +1,41 @@
 // Game History Management Utility
 // This file provides functions to track and manage game history across all pages
 
+// Helper to determine the start date of the current featured game period
+// Matches the schedule: 1st and 15th of each month
+function getCurrentPeriodStart() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth(); // 0-indexed
+    const day = now.getDate();
+
+    // If today is 1st-14th, start is the 1st of this month
+    // If today is 15th-end, start is the 15th of this month
+    const startDay = day >= 15 ? 15 : 1;
+
+    return new Date(year, month, startDay).getTime();
+}
+
 // Game history management functions
 function loadGameHistory() {
     try {
         const historyData = localStorage.getItem('gameHistory');
         if (historyData) {
-            return JSON.parse(historyData);
+            let history = JSON.parse(historyData);
+
+            // Filter out games played before the current featured game period
+            const periodStart = getCurrentPeriodStart();
+            const filteredHistory = history.filter(entry => {
+                // Ensure entry has a timestamp and it's within current period
+                return entry.timestamp && entry.timestamp >= periodStart;
+            });
+
+            // If we filtered out items, update localStorage
+            if (filteredHistory.length < history.length) {
+                saveGameHistory(filteredHistory);
+            }
+
+            return filteredHistory;
         } else {
             return [];
         }

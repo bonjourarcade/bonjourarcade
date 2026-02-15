@@ -1,2 +1,1 @@
-cd public
-python3 -m http.server
+python3 scripts/local_server.py

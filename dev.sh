@@ -225,9 +225,7 @@ fi
 echo -e "${BLUE}🌐 Starting HTTP server...${NC}"
 
 # Start the server and capture its exit code
-cd public
-python3 -m http.server 8000 >/dev/null 2>&1
-echo "   Python server command completed"
+python3 scripts/local_server.py 8000
 SERVER_EXIT_CODE=$?
 echo "   Server exit code: $SERVER_EXIT_CODE"
 

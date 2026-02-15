@@ -532,6 +532,8 @@
             const wrapper = document.createElement('div');
             wrapper.className = 'cover-item-wrapper';
 
+            if (!game) return wrapper;
+
             // Store game data for click navigation
             if (game.pageUrl) {
                 wrapper.dataset.gameUrl = game.pageUrl;

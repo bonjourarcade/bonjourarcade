@@ -183,6 +183,16 @@
             line-height: 1;
             /* Subtle, slow pulse instead of aggressive flashing */
             animation: subtleGlow 4s ease-in-out infinite;
+            transition: transform 1.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 1.5s ease;
+            will-change: transform;
+        }
+
+        .error-overlay.minimized .error-text {
+            transform:
+                translate(calc(50vw - 160px), calc(-50vh + 80px)) scale(0.25);
+            opacity: 0.95;
+            -webkit-text-stroke-width: 1px;
+            text-shadow: 0 0 10px rgba(255, 0, 87, 0.5);
         }
 
         @keyframes subtleGlow {
@@ -308,7 +318,7 @@
 
     <!-- 404 Overlay - Always visible -->
     <div class="error-overlay" id="errorOverlay">
-        <div class="error-text">404</div>
+        <div class="error-text">Erreur 404</div>
     </div>
 
     <!-- Action buttons - Always visible -->
@@ -370,6 +380,11 @@
                 if (errorOverlay) errorOverlay.classList.add('show-404');
                 if (actionButtons) actionButtons.classList.add('show-404');
                 if (coversContainer) coversContainer.classList.add('show-404');
+
+                // Animate 404 text after a delay
+                setTimeout(() => {
+                    if (errorOverlay) errorOverlay.classList.add('minimized');
+                }, 3000);
             }
         })();
 

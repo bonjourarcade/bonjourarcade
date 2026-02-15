@@ -14,18 +14,26 @@ class RedirectHandler(http.server.SimpleHTTPRequestHandler):
             
         # If the file doesn't exist, decide whether to serve 404.html
         if not os.path.exists(path):
-            # We only want to serve 404.html for:
+            # Strip query parameters for extension/route checking
+            clean_path = self.path.split('?')[0]
+            
+            # We ONLY want to serve 404.html for routes, not for missing assets
             # 1. Paths starting with /b/ (our custom game routes)
-            # 2. Paths without an extension (likely clean URL routes)
+            # 2. Paths without an extension (clean URL routes)
             
-            is_b_route = self.path.startswith('/b/')
-            has_extension = '.' in os.path.basename(self.path)
+            is_b_route = clean_path.startswith('/b/')
+            has_extension = '.' in os.path.basename(clean_path)
             
-            if is_b_route or not has_extension:
+            # Directories that definitely shouldn't trigger a 404.html redirect
+            asset_dirs = ['/assets/', '/games/', '/config/', '/data/', '/roms/', '/api/']
+            is_asset_path = any(clean_path.startswith(d) for d in asset_dirs)
+            
+            if (is_b_route or not has_extension) and not is_asset_path:
                 print(f"Route not found: {self.path}. Serving 404.html for client-side routing.")
                 self.path = "/404.html"
             else:
                 # For images, JSON, etc. that are missing, return a real 404
+                # super().do_GET will call self.send_error(404)
                 return super().do_GET()
             
         return super().do_GET()

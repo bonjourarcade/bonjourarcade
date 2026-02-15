@@ -603,41 +603,33 @@
             }
 
             .card-stack {
-                width: 85%;
-                /* provide side margins */
-                height: auto;
-                aspect-ratio: 400 / 600;
-                /* Desktop proportions */
-                max-height: 70vh;
-                /* Ensure it fits on screen vertically */
-                max-width: 400px;
-                /* Don't let it get bigger than desktop */
-                margin: 0 auto;
+                max-width: 100%;
+                height: 65vh;
+                /* Dynamic height based on viewport */
+                max-height: 550px;
+                min-height: 400px;
             }
 
             .game-title {
-                /* Inherit desktop size or slightly reduce if needed, but closer to desktop */
-                font-size: 1.4rem;
-                margin-bottom: 0.8rem;
+                font-size: 1.1rem;
+                margin-bottom: 0.5rem;
             }
 
             .game-info {
-                padding: 1.25rem;
+                padding: 1rem;
                 padding-top: 1.5rem;
             }
 
             .game-meta {
-                font-size: 0.9rem;
-                gap: 0.4rem 0.8rem;
+                font-size: 0.8rem;
+                gap: 0.3rem 0.8rem;
             }
 
             .swipe-container {
-                padding: 1rem;
-                padding-top: 4vh;
+                padding: 0.5rem;
+                padding-top: 2vh;
                 align-items: flex-start;
-                /* Centering the card stack horizontally */
-                display: flex;
-                justify-content: center;
+                /* Reduce padding */
             }
 
             .game-announcement {

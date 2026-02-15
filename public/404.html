@@ -321,7 +321,7 @@
 
     <script>
         // Redirect logic (runs first)
-        (async function () {
+        (function () {
             const path = window.location.pathname;
 
             // Check if the path matches /b/game_id pattern
@@ -331,48 +331,46 @@
                 // Extract the game_id from the path
                 const gameId = match[1];
 
-                try {
-                    // Fetch game details to validate and set title
-                    const response = await fetch('/gamelist.json');
-                    const data = await response.json();
-                    const game = data.games.find(g => g.id === gameId);
+                // Stop 404 content from showing
+                const errorOverlay = document.getElementById('errorOverlay');
+                if (errorOverlay) errorOverlay.style.display = 'none';
 
-                    if (game) {
-                        // Valid game - stop 404 content from showing
-                        const errorOverlay = document.getElementById('errorOverlay');
-                        if (errorOverlay) errorOverlay.style.display = 'none';
+                // Fetch game details to set title
+                fetch('/gamelist.json')
+                    .then(response => response.json())
+                    .then(data => {
+                        const game = data.games.find(g => g.id === gameId);
+                        if (game) {
+                            document.title = game.title + " - BonjourArcade";
+                        }
+                    })
+                    .catch(e => console.error(e));
 
-                        document.title = game.title + " - BonjourArcade";
+                // Create full-screen iframe
+                const iframe = document.createElement('iframe');
+                iframe.style.position = 'fixed';
+                iframe.style.top = '0';
+                iframe.style.left = '0';
+                iframe.style.width = '100%';
+                iframe.style.height = '100%';
+                iframe.style.border = 'none';
+                iframe.style.zIndex = '9999';
 
-                        // Create full-screen iframe
-                        const iframe = document.createElement('iframe');
-                        iframe.style.position = 'fixed';
-                        iframe.style.top = '0';
-                        iframe.style.left = '0';
-                        iframe.style.width = '100%';
-                        iframe.style.height = '100%';
-                        iframe.style.border = 'none';
-                        iframe.style.zIndex = '9999';
+                // Add analytics=false to prevent double counting
+                iframe.src = `/play/?game=${encodeURIComponent(gameId)}&analytics=false`;
 
-                        // Add analytics=false to prevent double counting
-                        iframe.src = `/play/?game=${encodeURIComponent(gameId)}&analytics=false`;
+                document.body.appendChild(iframe);
+                return;
+            } else {
+                // Not a redirect - show 404 content
+                const errorOverlay = document.getElementById('errorOverlay');
+                const actionButtons = document.getElementById('actionButtons');
+                const coversContainer = document.getElementById('coversContainer');
 
-                        document.body.appendChild(iframe);
-                        return;
-                    }
-                } catch (e) {
-                    console.error('Error validating game:', e);
-                }
+                if (errorOverlay) errorOverlay.classList.add('show-404');
+                if (actionButtons) actionButtons.classList.add('show-404');
+                if (coversContainer) coversContainer.classList.add('show-404');
             }
-
-            // Not a valid redirect - show 404 content
-            const errorOverlay = document.getElementById('errorOverlay');
-            const actionButtons = document.getElementById('actionButtons');
-            const coversContainer = document.getElementById('coversContainer');
-
-            if (errorOverlay) errorOverlay.classList.add('show-404');
-            if (actionButtons) actionButtons.classList.add('show-404');
-            if (coversContainer) coversContainer.classList.add('show-404');
         })();
 
         // Game state

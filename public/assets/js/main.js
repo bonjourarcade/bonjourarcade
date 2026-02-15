@@ -1209,10 +1209,15 @@ async function fetchFeaturedGameLeaderboard(gameId, isRefresh = false) {
             // Check if this is the player with the oldest score
             const isOldestPlayer = isOldestInTop10 && score.userId === oldestPlayerId;
 
+            // Avatar content: use photoURL if available, otherwise fallback to initial
+            const avatarContent = score.photoURL
+                ? `<img src="${score.photoURL}" alt="${playerName}">`
+                : initial;
+
             leaderboardHTML += `
                 <div class="featured-leaderboard-entry" data-game-id="${escapeHtml(gameId)}" style="cursor: pointer;">
                     <div class="featured-leaderboard-rank">${rankText}</div>
-                    <div class="featured-leaderboard-avatar" style="background-color: ${avatarColor}">${initial}</div>
+                    <div class="featured-leaderboard-avatar" style="background-color: ${score.photoURL ? 'transparent' : avatarColor}">${avatarContent}</div>
                     <div class="featured-leaderboard-player">${playerName}</div>
                     <div class="featured-leaderboard-score">${isOldestPlayer ? '🍪 ' : ''}${score.score.toLocaleString()}</div>
                 </div>

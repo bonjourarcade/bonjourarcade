@@ -607,6 +607,20 @@
                     return null;
                 }
 
+                // Find the oldest score (first submitted) among all scores
+                let oldestScore = null;
+                let oldestTimestamp = Infinity;
+
+                data.result.scores.forEach(score => {
+                    if (score.date && score.date._seconds) {
+                        const timestamp = score.date._seconds;
+                        if (timestamp < oldestTimestamp) {
+                            oldestTimestamp = timestamp;
+                            oldestScore = score;
+                        }
+                    }
+                });
+
                 // Get best score for each unique player
                 const playerBestScores = new Map();
 
@@ -618,7 +632,8 @@
                         playerBestScores.set(userId, {
                             player: score.player,
                             score: score.score,
-                            rank: score.rank
+                            rank: score.rank,
+                            userId: userId
                         });
                     }
                 });
@@ -628,7 +643,10 @@
                     .sort((a, b) => b.score - a.score)
                     .slice(0, 5); // Show top 5 players for featured page
 
-                return sortedScores;
+                return {
+                    scores: sortedScores,
+                    oldestPlayerId: oldestScore ? oldestScore.userId : null
+                };
             } catch (error) {
                 console.error('Error fetching leaderboard for', gameId, ':', error);
                 return null;
@@ -662,7 +680,7 @@
                 score: Math.floor(baseScore * (1 + Math.random() * 5) * (1 - index * 0.1)),
                 game: gameId,
                 date: {
-                    _seconds: Math.floor(Date.now() / 1000) - Math.floor(Math.random() * 86400 * 30),
+                    _seconds: Math.floor(Date.now() / 1000) - (index === mockPlayers.length - 1 ? 1000000 : Math.floor(Math.random() * 86400 * 30)),
                     _nanoseconds: Math.floor(Math.random() * 1000000000)
                 },
                 verified: true,
@@ -675,21 +693,25 @@
             if (!container) return;
 
             try {
-                const scores = await fetchLeaderboardData(gameId);
+                const result = await fetchLeaderboardData(gameId);
 
-                if (!scores || scores.length === 0) {
+                if (!result || !result.scores || result.scores.length === 0) {
                     container.innerHTML = '<div class="leaderboard-empty">Aucun score pour le moment</div>';
                     return;
                 }
 
+                const { scores, oldestPlayerId } = result;
+
                 let leaderboardHTML = '<div class="leaderboard-title">🏆 Top scores</div>';
                 scores.forEach((score, index) => {
                     const rankEmoji = index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉';
+                    const isOldestPlayer = oldestPlayerId && score.userId === oldestPlayerId;
+
                     leaderboardHTML += `
                         <div class="leaderboard-entry">
                             <span class="leaderboard-rank">${index < 3 ? rankEmoji : (index + 1) + '.'}</span>
                             <span class="leaderboard-player">${score.player}</span>
-                            <span class="leaderboard-score">${score.score.toLocaleString()}</span>
+                            <span class="leaderboard-score">${isOldestPlayer ? '🍪 ' : ''}${score.score.toLocaleString()}</span>
                         </div>
                     `;
                 });

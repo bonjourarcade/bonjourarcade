@@ -357,6 +357,13 @@ body.theme-dark .featured-leaderboard-entry:hover {
     font-weight: bold;
     font-size: 0.9rem;
     flex-shrink: 0;
+    overflow: hidden; /* Ensure avatar image doesn't bleed out */
+}
+
+.featured-leaderboard-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .featured-leaderboard-player {

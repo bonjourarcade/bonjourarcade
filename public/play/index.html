@@ -1389,6 +1389,28 @@
                     hideOnLoad: false // We'll hide it manually when the game is ready
                 });
 
+                // --- Disable save/load for featured game ---
+                try {
+                    const currentGameResponse = await fetch('/api/current-game');
+                    if (currentGameResponse.ok) {
+                        let featuredGameId = await currentGameResponse.text();
+                        featuredGameId = featuredGameId.trim();
+                        if (featuredGameId === gameId) {
+                            console.log("Featured game detected. Disabling save/load buttons.");
+                            if (window.EJS_Buttons) {
+                                window.EJS_Buttons.saveState = false;
+                                window.EJS_Buttons.loadState = false;
+                                window.EJS_Buttons.quickSave = false;
+                                window.EJS_Buttons.quickLoad = false;
+                                window.EJS_Buttons.saveSavFiles = false;
+                                window.EJS_Buttons.loadSavFiles = false;
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.warn('Could not fetch current game from API to check featured status:', error);
+                }
+
                 // Step 10: Load the main EmulatorJS engine (loader.js)
                 // This now happens sequentially after successfully fetching/setting up everything else
                 if (window.EJS_pathtodata) {

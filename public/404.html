@@ -10,9 +10,12 @@
         // Set title early to prevent 404 flash
         (function () {
             const path = window.location.pathname;
-            const isRedirect = path.match(/^\/b\/([^\/]+)$/);
-            if (isRedirect) {
-                document.title = 'Redirection...';
+            const match = path.match(/^\/b\/([^\/]+)$/);
+            if (match) {
+                // Use a capitalized version of the gameId as a much better fallback than "Redirection..."
+                const gameId = match[1];
+                const fallbackTitle = gameId.charAt(0).toUpperCase() + gameId.slice(1).replace(/[-_]/g, ' ');
+                document.title = fallbackTitle + ' - BonjourArcade';
             } else {
                 document.title = '404 - Page non trouvée';
             }
@@ -346,12 +349,18 @@
                 if (errorOverlay) errorOverlay.style.display = 'none';
 
                 // Fetch game details to set title
-                fetch('/gamelist.json')
+                const isLocalhost = window.location.hostname === 'localhost' ||
+                    window.location.hostname === '127.0.0.1' ||
+                    window.location.hostname.startsWith('192.168.');
+                const cacheBuster = '?v=' + Date.now();
+                const gamelistUrl = isLocalhost ? '/gamelist.json' + cacheBuster : 'https://storage.googleapis.com/bonjourarcade/gamelist.json' + cacheBuster;
+
+                fetch(gamelistUrl)
                     .then(response => response.json())
                     .then(data => {
                         const game = data.games.find(g => g.id === gameId);
                         if (game) {
-                            document.title = game.title + " - BonjourArcade";
+                            document.title = (game.title || gameId) + " - BonjourArcade";
                         }
                     })
                     .catch(e => console.error(e));

@@ -1,7 +1,7 @@
 {
     "EJS_defaultControls": {
         "0": {
-            "0": { "value": "c", "value2": "BUTTON_3" },
+            "0": { "value": "v", "value2": "BUTTON_3" },
             "1": { "value": "", "value2": "RIGHT_TOP_SHOULDER" },
             "2": { "value": "space", "value2": "SELECT" },
             "3": { "value": "enter", "value2": "START" },
@@ -9,10 +9,10 @@
             "5": { "value": "down arrow", "value2": "DPAD_DOWN" },
             "6": { "value": "left arrow", "value2": "DPAD_LEFT" },
             "7": { "value": "right arrow", "value2": "DPAD_RIGHT" },
-            "8": { "value": "v", "value2": "BUTTON_4" },
+            "8": { "value": "c", "value2": "BUTTON_4" },
             "9": { "value": "", "value2": "BUTTON_1" },
-            "10": { "value": "x", "value2": "" },
-            "11": { "value": "z", "value2": "" },
+            "10": { "value": "", "value2": "" },
+            "11": { "value": "", "value2": "" },
             "12": { "value": "x", "value2": "LEFT_BOTTOM_SHOULDER" },
             "13": { "value": "z", "value2": "RIGHT_BOTTOM_SHOULDER" },
             "14": { "value": "", "value2": "LEFT_STICK" },

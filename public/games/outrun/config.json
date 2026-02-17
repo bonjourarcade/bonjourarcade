@@ -3,11 +3,11 @@
         "0": {
             "0": {
                 "value": "c",
-                "value2": "BUTTON_3"
+                "value2": "RIGHT_TOP_SHOULDER"
             },
             "1": {
                 "value": "",
-                "value2": "RIGHT_TOP_SHOULDER"
+                "value2": ""
             },
             "2": {
                 "value": "space",
@@ -51,11 +51,11 @@
             },
             "12": {
                 "value": "x",
-                "value2": "LEFT_BOTTOM_SHOULDER"
+                "value2": "BUTTON_4"
             },
             "13": {
                 "value": "z",
-                "value2": "RIGHT_BOTTOM_SHOULDER"
+                "value2": "BUTTON_3"
             },
             "14": {
                 "value": "",

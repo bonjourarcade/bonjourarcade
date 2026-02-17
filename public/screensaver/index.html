@@ -294,14 +294,24 @@
         </div>
 
         <div class="chronological-option">
-            <h3>📅 Ordre des jeux</h3>
             <div class="checkbox-container">
-                <input type="checkbox" id="chronologicalOrder" class="chronological-checkbox">
-                <label for="chronologicalOrder">Jouer les jeux dans l'ordre chronologique (les plus récents en
-                    premier)</label>
+                <input type="radio" id="behaviorRandom" name="screensaverBehavior" value="random" checked>
+                <label for="behaviorRandom">Aléatoire (random)</label>
             </div>
-            <p class="chronological-note">Si activé, les jeux seront lancés dans l'ordre où ils ont été ajoutés au site,
-                en commençant par les plus récents.</p>
+            <div class="checkbox-container">
+                <input type="radio" id="behaviorLatest" name="screensaverBehavior" value="latest">
+                <label for="behaviorLatest">Derniers ajouts (nouveaux d'abord)</label>
+            </div>
+            <div class="checkbox-container">
+                <input type="radio" id="behaviorUpcoming" name="screensaverBehavior" value="upcoming">
+                <label for="behaviorUpcoming">Boucler les jeux de /upcoming</label>
+            </div>
+            <div class="checkbox-container">
+                <input type="radio" id="behaviorFeatured" name="screensaverBehavior" value="featured">
+                <label for="behaviorFeatured">Boucler les jeux de /featured</label>
+            </div>
+            <p class="chronological-note">Choisissez le comportement de l'écran de veille : aléatoire, parcourir
+                les derniers ajouts, ou boucler une liste spécialisée.</p>
         </div>
 
         <button class="launch-btn" onclick="launchScreensaver()">
@@ -379,14 +389,23 @@
 
             const totalMilliseconds = totalSeconds * 1000;
 
-            // Get chronological order preference
-            const chronologicalOrder = document.getElementById('chronologicalOrder').checked;
+                // Get selected behavior (random / latest / upcoming / featured)
+                const behaviorRadio = document.querySelector('input[name="screensaverBehavior"]:checked');
+                const screensaverBehavior = behaviorRadio ? behaviorRadio.value : 'random';
+
+                // Map behavior to chronologicalOrder flag for backward compatibility
+                const chronologicalOrder = (screensaverBehavior === 'latest');
+
+                // Clear any previously set explicit filtered games
+                sessionStorage.removeItem('screensaverHasFilter');
+                sessionStorage.removeItem('screensaverFilteredGames');
 
             // Set screensaver mode flag in session storage
             sessionStorage.setItem('screensaverMode', 'true');
             sessionStorage.setItem('screensaverStartTime', Date.now().toString());
             sessionStorage.setItem('screensaverInterval', totalMilliseconds.toString());
-            sessionStorage.setItem('chronologicalOrder', chronologicalOrder.toString());
+                sessionStorage.setItem('chronologicalOrder', chronologicalOrder.toString());
+                sessionStorage.setItem('screensaverBehavior', screensaverBehavior);
 
             // Redirect to randomgame which will then redirect to play
             window.location.href = '/randomgame/';
@@ -426,7 +445,7 @@
             const urlParams = new URLSearchParams(window.location.search);
             const urlMinutes = urlParams.get('minutes');
             const urlSeconds = urlParams.get('seconds');
-            const urlChrono = urlParams.get('chronological');
+            const urlBehavior = urlParams.get('behavior') || urlParams.get('screensaverBehavior');
 
             // If sessionStorage has values (user returned), prefer them
             const storedInterval = sessionStorage.getItem('screensaverInterval');
@@ -436,6 +455,18 @@
                 const s = storedSeconds % 60;
                 document.getElementById('minutes').value = m;
                 document.getElementById('seconds').value = s;
+            }
+
+            // Restore saved behavior if present
+            const storedBehavior = sessionStorage.getItem('screensaverBehavior');
+            if (storedBehavior) {
+                const el = document.querySelector(`input[name="screensaverBehavior"][value="${storedBehavior}"]`);
+                if (el) el.checked = true;
+            }
+
+            if (urlBehavior !== null) {
+                const el = document.querySelector(`input[name="screensaverBehavior"][value="${urlBehavior}"]`);
+                if (el) el.checked = true;
             }
 
             if (urlMinutes !== null) {
@@ -448,9 +479,6 @@
             if (urlSeconds !== null) {
                 const s = parseInt(urlSeconds, 10);
                 if (!Number.isNaN(s)) document.getElementById('seconds').value = Math.max(0, Math.min(59, s));
-            }
-            if (urlChrono !== null) {
-                document.getElementById('chronologicalOrder').checked = urlChrono === '1' || urlChrono === 'true';
             }
         })();
 

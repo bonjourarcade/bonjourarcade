@@ -102,8 +102,8 @@
       <div class="left-column">
         <!-- Recently Played Games Section -->
         <section id="recently-played-section" class="recently-played-section" style="display: none;">
-          <h2>Jeux récemment joués</h2>
-          <div id="recently-played-list" class="recently-played-list">
+          <h2 id="recently-played-toggle" class="collapsible-toggle">Jeux récemment joués ▼</h2>
+          <div id="recently-played-list" class="recently-played-list collapsible-content">
             <p>Aucun jeu joué récemment</p>
           </div>
         </section>
@@ -149,7 +149,27 @@
   <script src="assets/js/utils.js"></script>
   <script src="assets/js/main.js"></script>
 
-  <!--This is for loading custom cursors-->
+  <script>
+    // Collapsible functionality for recently played games section
+    document.addEventListener('DOMContentLoaded', function() {
+      const toggle = document.getElementById('recently-played-toggle');
+      const content = document.getElementById('recently-played-list');
+      
+      if (toggle && content) {
+        // Start expanded by default
+        toggle.textContent = 'Jeux récemment joués ▼';
+        
+        toggle.addEventListener('click', function() {
+          content.classList.toggle('collapsed');
+          if (content.classList.contains('collapsed')) {
+            toggle.textContent = 'Jeux récemment joués ▶';
+          } else {
+            toggle.textContent = 'Jeux récemment joués ▼';
+          }
+        });
+      }
+    });
+  </script>
   <!--script
       src="https://unpkg.com/cursor-effects@latest/dist/browser.js"></script-->
   <script>

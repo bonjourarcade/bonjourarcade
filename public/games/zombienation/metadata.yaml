@@ -3,9 +3,9 @@ developer: KaZe, Live Planning
 year: 1990
 genre: Shooter, Horror
 #controls:
-#  - 🕹️ Déplacer
-#  - 1️⃣  Tirer
-#  - 2️⃣  Bombe
+#  - "←↓↑→: Déplacer"
+#  - "Z: Tirer"
+#  - "X: Bombe"
 
 #to_start: Select -> Start
 

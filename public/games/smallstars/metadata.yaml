@@ -3,9 +3,8 @@ developer: Nintendo
 year: 1993
 genre: Platform
 #controls:
-#  - 🕹️ Déplacer
-#  - 1️⃣  Tirer
-#  - 2️⃣  Bombe
+#  - "←↓↑→: Déplacer"
+#  - "Z: Tirer"
+#  - "X: Bombe"
 #to_start: Select -> Start
 added: 2015-07-26
-added: 2025-07-27

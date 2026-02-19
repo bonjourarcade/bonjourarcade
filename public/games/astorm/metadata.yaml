@@ -3,9 +3,9 @@ developer: Team Shinobi
 year: 1990
 genre: Beat 'em up, Shooter
 #controls:
-#  - 🕹️ Déplacer
-#  - 1️⃣  Tirer
-#  - 2️⃣  Bombe
+#  - "←↓↑→: Déplacer"
+#  - "Z: Tirer"
+#  - "X: Bombe"
 
 #to_start: Select -> Start
 

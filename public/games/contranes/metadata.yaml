@@ -3,8 +3,8 @@ year: 1987
 developer: Konami
 genre: Run 'n gun, Co-op
 controls:
-  - 🕹️ Déplacer
-  - 1️⃣  Tirer
-  - 2️⃣  Sauter
+- '←↓↑→: Déplacer'
+- 'Z: Tirer'
+- 'X: Sauter'
 to_start: Start
 enable_score: true

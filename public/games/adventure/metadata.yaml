@@ -3,7 +3,7 @@ developer: Warren Robinett
 year: 1980
 genre: Adventure
 controls:
-  - 🕹️ Déplacer
-  - 1️⃣  Déposer
+- '←↓↑→: Déplacer'
+- 'Z: Déposer'
 to_start: Reset (Start)
 added: 2025-06-18

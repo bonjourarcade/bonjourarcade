@@ -6,8 +6,8 @@ enable_score: true
 added: 2025-03-10
 to_start: Select -> Start
 controls:
-  - 🕹️ Déplacer
-  - 1️⃣ Tir gauche
-  - 2️⃣ Tir droit
-  - 3️⃣ Tir bas
-  - 4️⃣ Tir haut
+- '←↓↑→: Déplacer'
+- 'Z: Tir gauche'
+- 'X: Tir droit'
+- 'C: Tir bas'
+- 'V: Tir haut'

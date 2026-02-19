@@ -4,9 +4,9 @@ year: 1992
 genre: Platform, Cute
 #to_start: Select -> Start
 controls:
-  - 🕹️ Déplacer
-  - 1️⃣  Étoile
-  - 2️⃣  Sauter
+- '←↓↑→: Déplacer'
+- 'Z: Étoile'
+- 'X: Sauter'
 hide: yes
 
 added: 2025-07-27

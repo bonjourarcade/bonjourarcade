@@ -3,12 +3,8 @@ developer: Capcom
 year: 1996
 genre: Fighting
 controls:
-  - 🕹️ Déplacer
-  - 1️⃣  Tirer
-  - 2️⃣  Sauter
-
-#to_start: Select -> Start
-
-
+- '←↓↑→: Déplacer'
+- 'Z: Tirer'
+- 'X: Sauter'
 added: 2025-08-19
 hide: yes

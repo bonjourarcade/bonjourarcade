@@ -3,9 +3,9 @@ developer: Bally Midway
 year: 1987
 genre: Shooter, Racing
 #controls:
-#  - 🕹️ Déplacer
-#  - 1️⃣  Tirer
-#  - 2️⃣  Bombe
+#  - "←↓↑→: Déplacer"
+#  - "Z: Tirer"
+#  - "X: Bombe"
 
 #to_start: Select -> Start
 

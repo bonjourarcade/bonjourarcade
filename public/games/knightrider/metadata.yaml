@@ -3,9 +3,9 @@ developer: Pack-In-Video
 year: 1988
 genre: Racing, Shooter
 #controls:
-#  - 🕹️ Déplacer
-#  - 1️⃣  Tirer
-#  - 2️⃣  Bombe
+#  - "←↓↑→: Déplacer"
+#  - "Z: Tirer"
+#  - "X: Bombe"
 
 #to_start: Select -> Start
 

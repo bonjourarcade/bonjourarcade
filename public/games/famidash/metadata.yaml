@@ -3,8 +3,7 @@ developer: TFDSoft
 year: 2025
 genre: Rhythm
 controls:
-  - 1️⃣  Sauter
-
+- 'Z: Sauter'
 to_start: Start
 
 enable_score: true

@@ -3,13 +3,13 @@ developer: Chris Gray Enterprises
 year: 1991
 genre: Platform, Shooter
 controls:
-#  - 🕹️ Déplacer
-#  - 1️⃣  Tirer
-#  - 2️⃣  Bombe
-#  - 3️⃣ ...
-#  - 4️⃣ ...
+#  - "←↓↑→: Déplacer"
+#  - "Z: Tirer"
+#  - "X: Bombe"
+#  - "C: ..."
+#  - "V: ..."
 
-to_start:  Start
+to_start: Start
 
 enable_score: true
 hide: yes

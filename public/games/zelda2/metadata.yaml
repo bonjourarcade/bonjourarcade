@@ -3,9 +3,9 @@ developer: Nintendo R&D4
 year: 1988
 genre: Role-Playing, Action, Platform
 #controls:
-#  - 🕹️ Déplacer
-#  - 1️⃣  Tirer
-#  - 2️⃣  Bombe
+#  - "←↓↑→: Déplacer"
+#  - "Z: Tirer"
+#  - "X: Bombe"
 
 #to_start: Select -> Start
 

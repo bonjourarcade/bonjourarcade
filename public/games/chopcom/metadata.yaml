@@ -3,8 +3,8 @@ developer: Activision
 year: 1982
 genre: Shooter
 controls:
-  - 🕹️ Move
-  - 1️⃣  Shoot
+- '←↓↑→: Move'
+- 'Z: Shoot'
 to_start: Reset (Start)
 added: 2025-07-08
 enable_score: true

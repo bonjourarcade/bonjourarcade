@@ -3,8 +3,8 @@ developer: Nintendo
 year: 1988
 genre: Puzzle
 controls:
-  - 🕹️ Sortir les bras
-  - 1️⃣  Onde supersonique
+- '←↓↑→: Sortir les bras'
+- 'Z: Onde supersonique'
 to_start: Start
 added: 2025-06-04
 enable_score: true

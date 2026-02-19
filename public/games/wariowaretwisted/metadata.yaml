@@ -3,9 +3,9 @@ developer: Intelligent Systems, Nintendo R&D1
 year: 2005
 genre: Action, Puzzle
 #controls:
-#  - 🕹️ Déplacer
-#  - 1️⃣  Tirer
-#  - 2️⃣  Bombe
+#  - "←↓↑→: Déplacer"
+#  - "Z: Tirer"
+#  - "X: Bombe"
 
 #to_start: Select -> Start
 

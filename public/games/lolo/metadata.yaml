@@ -4,7 +4,7 @@ year: 1989
 genre: Puzzle
 added: 2025-06-05
 controls:
-  - 🕹️ Déplacer
-  - 2️⃣  Tirer
+- '←↓↑→: Déplacer'
+- 'X: Tirer'
 to_start: Start
 hide: yes

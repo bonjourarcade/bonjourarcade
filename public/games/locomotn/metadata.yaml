@@ -3,12 +3,15 @@ developer: Konami
 year: 1982
 genre: Puzzle, Strategy
 controls:
-  - 🕹️ Déplacer les tuiles
-  - 1️⃣  Accélérer le train
-
+- '←↓↑→: Déplacer les tuiles'
+- 'Z: Accélérer le train'
 to_start: Select -> Start
 
 # Message d'annonce personnalisé pour la newsletter
 # Ce message apparaîtra en haut de l'email et des webhooks
-announcement_message: "Vous souvenez-vous de ces 'jeux de pousse-pousse' où l'on devait démêler une image en poussant des carrés? Eh bien Loco-Motion, créé par Konami en 1982, c'est un jeu de pousse-pousse sur lequel se promène un train qui doit ramasser des passagers. Ce concept surprenant a très bien vieilli. Essayez-le, vous ne serez pas déçu!"
+announcement_message: "Vous souvenez-vous de ces 'jeux de pousse-pousse' où l'on devait
+  démêler une image en poussant des carrés? Eh bien Loco-Motion, créé par Konami en
+  1982, c'est un jeu de pousse-pousse sur lequel se promène un train qui doit ramasser
+  des passagers. Ce concept surprenant a très bien vieilli. Essayez-le, vous ne serez
+  pas déçu!"
 added: 2025-09-06

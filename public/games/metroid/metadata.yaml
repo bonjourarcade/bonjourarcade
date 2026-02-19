@@ -3,12 +3,9 @@ developer: Nintendo R&D1, Intelligent Systems
 year: 1987
 genre: Shooter, Platform, Adventure
 controls:
-  - 🕹️ Déplacer
-  - 1️⃣  Tirer
-  - 2️⃣  Sauter
-
-#to_start: Select -> Start
-
+- '←↓↑→: Déplacer'
+- 'Z: Tirer'
+- 'X: Sauter'
 hide: yes
 
 added: 2025-07-27

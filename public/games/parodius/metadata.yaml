@@ -3,15 +3,19 @@ developer: Konami
 year: 1990
 genre: Shooter, Cute, co-op
 controls:
-  - 🕹️ Déplacer
-  - 1️⃣  Upgrade
-  - 2️⃣  Tirer
-  - 3️⃣  Arme secondaire
-
+- '←↓↑→: Déplacer'
+- 'Z: Upgrade'
+- 'X: Tirer'
+- 'C: Arme secondaire'
 to_start: Select -> Start
 
 enable_score: true
 hide: yes
 
 added: 2025-08-24
-announcement_message: "Plongez dans l'univers loufoque de Parodius Da!, le shooter hilarant de Konami sorti en 1990 qui parodie les classiques du genre avec style ! Affrontez des ennemis farfelus et des boss extravagants tout en pilotant un vaisseau aux capacités uniques inspiré des mignons personnages de l'univers de Konami. Avec ses visuels colorés et son humour décalé, ce jeu vous promet des heures de fun et de surprises !"
+announcement_message: "Plongez dans l'univers loufoque de Parodius Da!, le shooter
+  hilarant de Konami sorti en 1990 qui parodie les classiques du genre avec style
+  ! Affrontez des ennemis farfelus et des boss extravagants tout en pilotant un vaisseau
+  aux capacités uniques inspiré des mignons personnages de l'univers de Konami. Avec
+  ses visuels colorés et son humour décalé, ce jeu vous promet des heures de fun et
+  de surprises !"

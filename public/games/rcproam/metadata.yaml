@@ -3,9 +3,9 @@ developer: Rare
 year: 1987
 genre: Racing
 controls:
-  - 🕹️ Direction
-  - 1️⃣  Accélérer
-  - 2️⃣  Item
+- '←↓↑→: Direction'
+- 'Z: Accélérer'
+- 'X: Item'
 to_start: Start
 added: 2025-07-21
 enable_score: true

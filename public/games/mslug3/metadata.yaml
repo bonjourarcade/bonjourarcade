@@ -2,13 +2,17 @@ title: Metal Slug 3
 developer: SNK
 year: 2000
 genre: Run 'n gun
-announcement_message: "Préparez-vous à plonger dans l'action explosive de Metal Slug 3, un incontournable de SNK sorti en 2000 ! Ce run 'n gun iconique vous entraîne dans des combats effrénés où vous ferez face à des hordes d'ennemis avec un arsenal dévastateur, tout en découvrant des niveaux riches en surprises et en transformations inattendues. Ne manquez pas l'occasion de vivre cette aventure palpitante qui allie humour décalé et gameplay frénétique, faisant de chaque session un vrai régal !"
+announcement_message: "Préparez-vous à plonger dans l'action explosive de Metal Slug
+  3, un incontournable de SNK sorti en 2000 ! Ce run 'n gun iconique vous entraîne
+  dans des combats effrénés où vous ferez face à des hordes d'ennemis avec un arsenal
+  dévastateur, tout en découvrant des niveaux riches en surprises et en transformations
+  inattendues. Ne manquez pas l'occasion de vivre cette aventure palpitante qui allie
+  humour décalé et gameplay frénétique, faisant de chaque session un vrai régal !"
 controls:
-  - 🕹️ Déplacer
-  - 1️⃣  Tirer
-  - 2️⃣  Sauter
-  - 3️⃣  Grenade
-
+- '←↓↑→: Déplacer'
+- 'Z: Tirer'
+- 'X: Sauter'
+- 'C: Grenade'
 to_start: Select -> Start
 
 added: 2025-08-01

@@ -3,11 +3,10 @@ developer: Hitoshi Sakimoto
 year: 1991
 genre: Music Player
 controls:
-  - 🕹️ Changer de chanson
-  - 1️⃣  Rien
-  - 2️⃣  Pause
-  - 3️⃣ Recommencer la chanson
-
+- '←↓↑→: Changer de chanson'
+- 'Z: Rien'
+- 'X: Pause'
+- 'C: Recommencer la chanson'
 to_start: Automatique!
 
 enable_score: true

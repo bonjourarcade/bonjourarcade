@@ -3,9 +3,9 @@ developer: Homebrew
 year: 2022
 genre: Puzzle
 #controls:
-#  - 🕹️ 
-#  - 1️⃣  
-#  - 2️⃣  
+#  - "←↓↑→: "
+#  - "Z: "
+#  - "X: "
 #to_start: Select -> Start
 #added: 
 hide: yes

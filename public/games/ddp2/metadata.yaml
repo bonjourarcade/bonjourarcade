@@ -3,13 +3,13 @@ developer: IGS
 year: 2001
 genre: Shooter, co-op
 #controls:
-#  - 🕹️ Déplacer
-#  - 1️⃣  Tirer
-#  - 2️⃣  Bombe
+#  - "←↓↑→: Déplacer"
+#  - "Z: Tirer"
+#  - "X: Bombe"
 
 #to_start: Select -> Start
 
-announcement_message: 
+announcement_message:
 
 hide: yes
 

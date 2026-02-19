@@ -3,8 +3,8 @@ developer: Sega
 year: 1985
 genre: Platform
 controls:
-  - 🕹️ Déplacer
-  - 1️⃣  Sauter
+- '←↓↑→: Déplacer'
+- 'Z: Sauter'
 to_start: Select -> Start
 added: 2025-07-29
 enable_score: true

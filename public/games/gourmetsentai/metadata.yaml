@@ -3,11 +3,11 @@ developer: Winds, Fupac
 year: 1995
 genre: Beat 'em up
 controls:
-#  - 🕹️ Déplacer
-#  - 1️⃣  Tirer
-#  - 2️⃣  Bombe
-#  - 3️⃣ ...
-#  - 4️⃣ ...
+#  - "←↓↑→: Déplacer"
+#  - "Z: Tirer"
+#  - "X: Bombe"
+#  - "C: ..."
+#  - "V: ..."
 
 to_start: Select -> Start
 

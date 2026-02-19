@@ -4,9 +4,9 @@ year: 1996
 genre: Run 'n Gun, co-op
 added: 2025-07-08
 controls:
-  - 🕹️ Déplacer
-  - 1️⃣  Tirer
-  - 2️⃣  Sauter
-  - 3️⃣ Grenade
+- '←↓↑→: Déplacer'
+- 'Z: Tirer'
+- 'X: Sauter'
+- 'C: Grenade'
 to_start: Select -> Start
 enable_score: true

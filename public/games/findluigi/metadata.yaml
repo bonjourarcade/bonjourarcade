@@ -2,7 +2,7 @@ title: Find Luigi
 year: 2024
 developer: MaxwelOlinda
 controls:
-  - 🕹️ Déplacer
-  - 1️⃣  Plus vite
+- '←↓↑→: Déplacer'
+- 'Z: Plus vite'
 to_start: Start
 enable_score: true

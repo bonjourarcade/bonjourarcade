@@ -3,14 +3,17 @@ developer: Namco
 year: 1990
 genre: Puzzle
 controls:
-  - 🕹️ Déplacer
-  - 1️⃣  Choisir/Recommencer
-  - 2️⃣  Undo
-
+- '←↓↑→: Déplacer'
+- 'Z: Choisir/Recommencer'
+- 'X: Undo'
 to_start: Select -> Start
 
 enable_score: true
 hide: yes
 
 added: 2025-08-03
-announcement_message: "Entrez dans le monde captivant de Boxy Boy, un jeu de puzzle emblématique de Namco sorti en 1990, où chaque mouvement compte ! Vous devrez manipuler des caisses pour résoudre des énigmes de plus en plus complexes, tout en faisant preuve de logique et d'anticipation. Avec son gameplay addictif et son style graphique charmant, Boxy Boy vous promet des heures de réflexion amusante et stimulante !"
+announcement_message: "Entrez dans le monde captivant de Boxy Boy, un jeu de puzzle
+  emblématique de Namco sorti en 1990, où chaque mouvement compte ! Vous devrez manipuler
+  des caisses pour résoudre des énigmes de plus en plus complexes, tout en faisant
+  preuve de logique et d'anticipation. Avec son gameplay addictif et son style graphique
+  charmant, Boxy Boy vous promet des heures de réflexion amusante et stimulante !"

@@ -3,7 +3,7 @@ developer: Williams Electronics
 year: 1982
 genre: Action
 controls:
-  - 🕹️ Déplacer
-  - 1️⃣  Flap
+- '←↓↑→: Déplacer'
+- 'Z: Flap'
 to_start: Select -> Start
 enable_score: true

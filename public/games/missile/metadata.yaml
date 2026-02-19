@@ -3,14 +3,17 @@ developer: Atari
 year: 1980
 genre: Shooter
 controls:
-  - "Souris ou ←↓↑→: Mouvement"
-  - "Z: Tir gauche"
-  - "X: Tir centre"
-  - "C: Tir droit"
-
+- 'Souris ou ←↓↑→: Mouvement'
+- 'Z: Tir gauche'
+- 'X: Tir centre'
+- 'C: Tir droit'
 to_start: Espace -> Enter
 
-announcement_message: "Des extraterrestres de la planète Krytol attaquent vos villes ! En tant que commandant d'une base de missiles, il est de votre responsabilité de les défendre. Diverses armes et avions ennemis tenteront de détruire les six villes situées en bas de l'écran. Vous devez tirer des missiles pour anéantir ces attaques."
+announcement_message: "Des extraterrestres de la planète Krytol attaquent vos villes
+  ! En tant que commandant d'une base de missiles, il est de votre responsabilité
+  de les défendre. Diverses armes et avions ennemis tenteront de détruire les six
+  villes situées en bas de l'écran. Vous devez tirer des missiles pour anéantir ces
+  attaques."
 
 hide: yes
 

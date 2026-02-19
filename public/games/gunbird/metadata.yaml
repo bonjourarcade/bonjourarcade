@@ -3,10 +3,9 @@ developer: Psikyo
 year: 1994
 genre: Shooter, co-op
 controls:
-  - 🕹️ Déplacer
-  - 1️⃣  Tirer/Charger
-  - 2️⃣  Bombe
-
+- '←↓↑→: Déplacer'
+- 'Z: Tirer/Charger'
+- 'X: Bombe'
 to_start: Select -> Start
 
 # Message d'annonce personnalisé pour la newsletter
@@ -16,4 +15,9 @@ enable_score: true
 hide: yes
 
 added: 2025-08-24
-announcement_message: "Venez découvrir Gunbird, le shooter emblématique de Psikyo sorti en 1994, qui vous propulsera dans un monde de magie et d'aventure fantastique ! Pilotez des avions stylisés tout en collectant des power-ups détonants et en affrontant des boss mémorables dans des niveaux riches en couleurs et en défis. Avec son gameplay énergique, son ambiance unique et ses personnages attachants, Gunbird est une véritable ode aux shoot 'em up qui saura captiver les amateurs de sensations fortes !"
+announcement_message: "Venez découvrir Gunbird, le shooter emblématique de Psikyo
+  sorti en 1994, qui vous propulsera dans un monde de magie et d'aventure fantastique
+  ! Pilotez des avions stylisés tout en collectant des power-ups détonants et en affrontant
+  des boss mémorables dans des niveaux riches en couleurs et en défis. Avec son gameplay
+  énergique, son ambiance unique et ses personnages attachants, Gunbird est une véritable
+  ode aux shoot 'em up qui saura captiver les amateurs de sensations fortes !"

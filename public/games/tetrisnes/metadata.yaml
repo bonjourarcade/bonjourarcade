@@ -4,7 +4,7 @@ year: 1989
 genre: Puzzle
 hide: no
 controls:
-  - 🕹️ Déplacer
-  - 1️⃣  Tourner ↪️
-  - 2️⃣  Tourner ↩️
+- '←↓↑→: Déplacer'
+- 'Z: Tourner ↪️'
+- 'X: Tourner ↩️'
 to_start: Start

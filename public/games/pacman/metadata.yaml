@@ -3,6 +3,6 @@ developer: Namco
 year: 1980
 genre: Maze
 controls:
-  - 🕹️ Déplacer
+- '←↓↑→: Déplacer'
 to_start: Select -> Start
 enable_score: true

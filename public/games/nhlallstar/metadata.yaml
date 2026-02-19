@@ -3,9 +3,9 @@ developer: Sega Midwest Studio, New Wave Graphics
 year: 1995
 genre: Sports, Hockey
 #controls:
-#  - 🕹️ Déplacer
-#  - 1️⃣  Tirer
-#  - 2️⃣  Bombe
+#  - "←↓↑→: Déplacer"
+#  - "Z: Tirer"
+#  - "X: Bombe"
 
 #to_start: Select -> Start
 

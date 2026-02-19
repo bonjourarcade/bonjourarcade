@@ -3,12 +3,9 @@ developer: Tamtex
 year: 1991
 genre: Shooter
 controls:
-  - 🕹️ Déplacer
-  - 1️⃣  Tirer
-  - 2️⃣  Sauter
-
-#to_start: Select -> Start
-
+- '←↓↑→: Déplacer'
+- 'Z: Tirer'
+- 'X: Sauter'
 hide: yes
 
 added: 2025-07-27

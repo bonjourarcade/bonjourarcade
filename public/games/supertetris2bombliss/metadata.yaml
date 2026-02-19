@@ -3,11 +3,11 @@ developer: Tose, Bullet-Proof Software
 year: 1992
 genre: Puzzle
 #controls:
-#  - 🕹️ Déplacer
-#  - 1️⃣  Tirer
-#  - 2️⃣  Bombe
-#  - 3️⃣ ...
-#  - 4️⃣ ...
+#  - "←↓↑→: Déplacer"
+#  - "Z: Tirer"
+#  - "X: Bombe"
+#  - "C: ..."
+#  - "V: ..."
 
 #to_start: Select -> Start
 

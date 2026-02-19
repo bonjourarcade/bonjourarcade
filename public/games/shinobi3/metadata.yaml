@@ -3,11 +3,10 @@ developer: Megasoft
 year: 1993
 genre: Platform, Beat 'em up
 controls:
-  - 🕹️ Déplacer
-  - 1️⃣  Ninjitsu
-  - 2️⃣  Shuriken
-  - 3️⃣  Sauter
-#to_start: Select -> Start
+- '←↓↑→: Déplacer'
+- 'Z: Ninjitsu'
+- 'X: Shuriken'
+- 'C: Sauter'
 added: 2025-08-10
 announcement_message:
 enable_score: true

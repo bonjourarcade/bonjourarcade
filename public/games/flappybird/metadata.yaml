@@ -3,11 +3,17 @@ developer: Nioreh
 year: 2014
 genre: Action
 controls:
-  - 1️⃣  Voler
-  - 2️⃣  Voler
-  - "Start: Voler"
+- 'Z: Voler'
+- 'X: Voler'
+- 'Start: Voler'
 to_start: Start
 hide: yes
 
 added: 2025-07-26
-announcement_message: "Venez tester Flappy Bird, le phénomène addictif de Nioreh sorti en 2014 qui a captivé des millions de joueurs à travers le monde ! Dans ce jeu d'action simple mais ô combien frustrant, votre mission est d'aider un petit oiseau à naviguer entre des tuyaux en appuyant sur l'écran pour le faire voler. Ce qui rend Flappy Bird si spécial, c'est son défi intense qui met vos réflexes à l'épreuve, tout en offrant une esthétique minimaliste charmante qui vous fera sourire à chaque échec !"
+announcement_message: "Venez tester Flappy Bird, le phénomène addictif de Nioreh sorti
+  en 2014 qui a captivé des millions de joueurs à travers le monde ! Dans ce jeu d'action
+  simple mais ô combien frustrant, votre mission est d'aider un petit oiseau à naviguer
+  entre des tuyaux en appuyant sur l'écran pour le faire voler. Ce qui rend Flappy
+  Bird si spécial, c'est son défi intense qui met vos réflexes à l'épreuve, tout en
+  offrant une esthétique minimaliste charmante qui vous fera sourire à chaque échec
+  !"

@@ -3,8 +3,8 @@ developer: HAL Laboratory
 year: 1993
 genre: Platform, Cute
 controls:
-  - 🕹️ Déplacer
-  - 1️⃣  Aspirer
-  - 2️⃣  Sauter
+- '←↓↑→: Déplacer'
+- 'Z: Aspirer'
+- 'X: Sauter'
 to_start: Start
 added: 2025-07-20

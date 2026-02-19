@@ -3,6 +3,6 @@ developer: Coke774, M2
 genre: Maze
 year: 2020
 controls:
-  - 🕹️ Déplacer
+- '←↓↑→: Déplacer'
 to_start: Start
 enable_score: true

@@ -3,8 +3,8 @@ developer: Konami
 year: 1981
 genre: Shooter
 controls:
-  - 🕹️ Déplacer
-  - 1️⃣  Tirer
-  - 2️⃣  Bombe
+- '←↓↑→: Déplacer'
+- 'Z: Tirer'
+- 'X: Bombe'
 to_start: Select -> Start
 enable_score: true

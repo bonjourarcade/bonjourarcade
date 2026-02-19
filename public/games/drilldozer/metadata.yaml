@@ -1,11 +1,11 @@
 title: Drill Dozer
 developer: Game Freak
 year: 2005
-genre: 
+genre:
 #controls:
-#  - 🕹️ Déplacer
-#  - 1️⃣  Tirer
-#  - 2️⃣  Bombe
+#  - "←↓↑→: Déplacer"
+#  - "Z: Tirer"
+#  - "X: Bombe"
 
 #to_start: Select -> Start
 

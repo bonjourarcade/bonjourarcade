@@ -7,8 +7,14 @@ hide: yes
 enable_score: true
 to_start: Start
 controls:
-  - 🕹️ Déplacer
-  - 1️⃣  Épée/Jet Pack
-  - 2️⃣  Sauter
-  - 3️⃣  Épée/Jet Pack
-announcement_message: "Préparez-vous à vivre une aventure palpitante avec Rocket Knight Adventures, un chef-d'œuvre de Konami sorti en 1993 qui allie action et plateforme de manière inédite ! Incarnez un opossum en armure, équipé d'un jetpack, pour explorer des niveaux fascinants remplis d'énigmes ingénieuses et d'ennemis farceurs, tout en profitant d'une direction artistique charmante et colorée. Ce jeu emblématique se distingue par son mélange unique de mécanique de vol et de combat, vous garantissant des heures de plaisir ininterrompu !"
+- '←↓↑→: Déplacer'
+- 'Z: Épée/Jet Pack'
+- 'X: Sauter'
+- 'C: Épée/Jet Pack'
+announcement_message: "Préparez-vous à vivre une aventure palpitante avec Rocket Knight
+  Adventures, un chef-d'œuvre de Konami sorti en 1993 qui allie action et plateforme
+  de manière inédite ! Incarnez un opossum en armure, équipé d'un jetpack, pour explorer
+  des niveaux fascinants remplis d'énigmes ingénieuses et d'ennemis farceurs, tout
+  en profitant d'une direction artistique charmante et colorée. Ce jeu emblématique
+  se distingue par son mélange unique de mécanique de vol et de combat, vous garantissant
+  des heures de plaisir ininterrompu !"

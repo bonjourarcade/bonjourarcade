@@ -4,8 +4,8 @@ year: 1993
 genre: Beat 'em up
 added: 2025-07-01
 controls:
-  - 🕹️ Déplacer
-  - 1️⃣  Frapper
-  - 2️⃣  Sauter
+- '←↓↑→: Déplacer'
+- 'Z: Frapper'
+- 'X: Sauter'
 to_start: Select -> Start
 enable_score: true

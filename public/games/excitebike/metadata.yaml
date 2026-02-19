@@ -3,7 +3,7 @@ developer: Nintendo
 year: 1984
 genre: Racing
 controls:
-  - 🕹️ Conduire
-  - 1️⃣  Turbo
-  - 2️⃣  Gaz
+- '←↓↑→: Conduire'
+- 'Z: Turbo'
+- 'X: Gaz'
 to_start: Start

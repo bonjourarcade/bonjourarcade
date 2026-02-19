@@ -3,9 +3,8 @@ developer: SNK
 year: 1990
 genre: Sports
 controls:
-  - 🕹️ Déplacer
-  - 1️⃣  Lancer
-
+- '←↓↑→: Déplacer'
+- 'Z: Lancer'
 to_start: Select -> Start
 
 hide: yes

@@ -3,11 +3,11 @@ developer: 5pb, Wamsoft, M2
 year: 2011
 genre: Visual Novel, Sci-fi
 controls:
-#  - 🕹️ Déplacer
-#  - 1️⃣  Tirer
-#  - 2️⃣  Bombe
-#  - 3️⃣ ...
-#  - 4️⃣ ...
+#  - "←↓↑→: Déplacer"
+#  - "Z: Tirer"
+#  - "X: Bombe"
+#  - "C: ..."
+#  - "V: ..."
 
 #to_start: Select -> Start
 

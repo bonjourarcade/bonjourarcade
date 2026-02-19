@@ -3,9 +3,9 @@ developer: Capcom Production Studio 2
 year: 2003
 genre: Role-playing, Real-time strategy
 #controls:
-#  - 🕹️ Déplacer
-#  - 1️⃣  Tirer
-#  - 2️⃣  Bombe
+#  - "←↓↑→: Déplacer"
+#  - "Z: Tirer"
+#  - "X: Bombe"
 
 #to_start: Select -> Start
 

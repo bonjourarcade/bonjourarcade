@@ -4,7 +4,7 @@ year: 1982
 genre: Shooter
 added: 2025-06-25
 controls:
-  - 🕹️ Déplacer
-  - 1️⃣  Tirer
+- '←↓↑→: Déplacer'
+- 'Z: Tirer'
 to_start: Tirer
 enable_score: true

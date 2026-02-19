@@ -3,15 +3,16 @@ developer: Nintendo R&D1
 year: 1981
 genre: Platform
 #controls:
-#  - 🕹️ Déplacer
-#  - 1️⃣  Tirer
-#  - 2️⃣  Bombe
+#  - "←↓↑→: Déplacer"
+#  - "Z: Tirer"
+#  - "X: Bombe"
 
 #to_start: Select -> Start
 
 # Message d'annonce personnalisé pour la newsletter
 # Ce message apparaîtra en haut de l'email et des webhooks
-announcement_message: 🦍 Préparez-vous à affronter le roi des gorilles dans ce classique absolu du jeu d'arcade !
+announcement_message: 🦍 Préparez-vous à affronter le roi des gorilles dans ce 
+  classique absolu du jeu d'arcade !
 
 enable_score: true
 

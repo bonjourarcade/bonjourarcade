@@ -3,9 +3,9 @@ developer: Sensible Software, Codemasters
 year: 2000
 genre: Shoot 'em up
 #controls:
-#  - 🕹️ Déplacer
-#  - 1️⃣  Tirer
-#  - 2️⃣  Bombe
+#  - "←↓↑→: Déplacer"
+#  - "Z: Tirer"
+#  - "X: Bombe"
 
 #to_start: Select -> Start
 

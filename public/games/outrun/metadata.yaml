@@ -3,11 +3,13 @@ developer: Sega
 year: 1986
 genre: Racing
 controls:
-  - "←↓↑→: Diriger"
-  - "Z: Accélérer"
-  - "X: Freiner"
-  - "C: Changer vitesse"
+- '←↓↑→: Diriger'
+- 'Z: Accélérer'
+- 'X: Freiner'
+- 'C: Changer vitesse'
 to_start: Espace -> Enter
-announcement_message: "Au volant d'une Ferrari Testarossa, mettez votre talent de pilote à l'épreuve sur les routes les plus dures du monde! Et sans aucune limitation de vitesse..."
+announcement_message: "Au volant d'une Ferrari Testarossa, mettez votre talent de
+  pilote à l'épreuve sur les routes les plus dures du monde! Et sans aucune limitation
+  de vitesse..."
 added: 2026-02-16
 hide: yes

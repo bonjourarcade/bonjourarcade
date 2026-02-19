@@ -3,6 +3,6 @@ developer: Intelligent Systems
 year: 1996
 genre: Puzzle
 controls:
-  - 🕹️ Déplacer
-  - 1️⃣  Swap
+- '←↓↑→: Déplacer'
+- 'Z: Swap'
 to_start: Start

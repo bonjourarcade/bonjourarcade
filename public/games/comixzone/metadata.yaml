@@ -3,9 +3,9 @@ developer: Sega Technical Institute
 year: 1995
 genre: Beat 'em up, Action
 #controls:
-#  - 🕹️ Déplacer
-#  - 1️⃣  Tirer
-#  - 2️⃣  Bombe
+#  - "←↓↑→: Déplacer"
+#  - "Z: Tirer"
+#  - "X: Bombe"
 
 #to_start: Select -> Start
 

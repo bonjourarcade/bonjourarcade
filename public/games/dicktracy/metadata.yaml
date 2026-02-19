@@ -3,11 +3,9 @@ developer: Realtime Associates
 year: 1990
 genre: Platform, Action
 controls:
-  - 🕹️ Déplacer
-  - 1️⃣  Tirer
-  - 2️⃣  Sauter
-  - 3️⃣  Select
-#to_start: Select -> Start
-#added: 
+- '←↓↑→: Déplacer'
+- 'Z: Tirer'
+- 'X: Sauter'
+- 'C: Select'
 hide: yes
 added: 2025-07-27

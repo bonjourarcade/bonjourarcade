@@ -3,14 +3,19 @@ developer: CAVE
 year: 2006
 genre: Shooter, co-op
 controls:
-  - 🕹️ Déplacer
-  - 1️⃣  Tirer (Focus)
-  - 2️⃣  Bombe
-  - 3️⃣  Tirer (Auto)
-
+- '←↓↑→: Déplacer'
+- 'Z: Tirer (Focus)'
+- 'X: Bombe'
+- 'C: Tirer (Auto)'
 to_start: Select -> Start
 
 enable_score: true
 
 added: 2025-07-31
-announcement_message: "Plongez dans l'univers envoûtant de Mushihimesama Futari, un chef-d'œuvre de CAVE sorti en 2006 qui redéfinit le genre des shooters ! Armés de votre vaisseau insecto-entreprenant, vous devrez surmonter des hordes d'ennemis tout en découvrant un monde visuellement époustouflant rempli de créatures fascinantes et de paysages féeriques. Grâce à son système de scoring unique et ses mécaniques de jeu audacieuses, chaque partie vous promet un défi exaltant qui ne manquera pas de vous captiver !"
+announcement_message: "Plongez dans l'univers envoûtant de Mushihimesama Futari, un
+  chef-d'œuvre de CAVE sorti en 2006 qui redéfinit le genre des shooters ! Armés de
+  votre vaisseau insecto-entreprenant, vous devrez surmonter des hordes d'ennemis
+  tout en découvrant un monde visuellement époustouflant rempli de créatures fascinantes
+  et de paysages féeriques. Grâce à son système de scoring unique et ses mécaniques
+  de jeu audacieuses, chaque partie vous promet un défi exaltant qui ne manquera pas
+  de vous captiver !"

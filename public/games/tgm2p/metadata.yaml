@@ -3,9 +3,9 @@ developer: Arika
 year: 2000
 genre: Puzzle, Co-op
 controls:
-  - 🕹️ Déplacer
-  - 1️⃣  Tourner ↪️
-  - 2️⃣  Tourner ↩️
-  - 3️⃣  Tourner ↪️
+- '←↓↑→: Déplacer'
+- 'Z: Tourner ↪️'
+- 'X: Tourner ↩️'
+- 'C: Tourner ↪️'
 to_start: Select -> Start
 enable_score: true

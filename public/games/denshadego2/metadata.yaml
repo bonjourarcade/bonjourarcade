@@ -3,11 +3,11 @@ developer: Taito GM R&D Sect 2, ITL Co
 year: 2000
 genre: Simulation
 controls:
-#  - 🕹️ Déplacer
-#  - 1️⃣  Tirer
-#  - 2️⃣  Bombe
-#  - 3️⃣ ...
-#  - 4️⃣ ...
+#  - "←↓↑→: Déplacer"
+#  - "Z: Tirer"
+#  - "X: Bombe"
+#  - "C: ..."
+#  - "V: ..."
 
 #to_start: Select -> Start
 

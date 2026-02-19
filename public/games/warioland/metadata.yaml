@@ -3,10 +3,7 @@ developer: Nintendo, korxo
 year: 1994, 2023
 genre: Platform
 controls:
-  - 🕹️ Déplacer
-  - 1️⃣  Charger
-  - 2️⃣  Sauter
-
-#to_start: Select -> Start
-
+- '←↓↑→: Déplacer'
+- 'Z: Charger'
+- 'X: Sauter'
 added: 2025-07-27

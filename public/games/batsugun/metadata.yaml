@@ -3,9 +3,9 @@ developer: Toaplan
 year: 1993
 genre: Shooter, co-op
 controls:
-  - 🕹️ Bouger
-  - 1️⃣  Tirer
-  - 2️⃣  Bombe
+- '←↓↑→: Bouger'
+- 'Z: Tirer'
+- 'X: Bombe'
 to_start: Select -> Start
 added: 2025-07-14
 enable_score: true

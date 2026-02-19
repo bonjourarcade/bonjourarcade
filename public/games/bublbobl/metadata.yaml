@@ -3,15 +3,14 @@ developer: Taito
 year: 1986
 genre: Platform, Cute, co-op
 controls:
-  - "←↓↑→: Mouvement"
-  - "Z: Bulle"
-  - "X: Sauter"
-
+- '←↓↑→: Mouvement'
+- 'Z: Bulle'
+- 'X: Sauter'
 to_start: Espace, puis Enter
 
 # Message d'annonce personnalisé pour la newsletter
 # Ce message apparaîtra en haut de l'email et des webhooks
-announcement_message: 
+announcement_message:
 
 hide: yes
 

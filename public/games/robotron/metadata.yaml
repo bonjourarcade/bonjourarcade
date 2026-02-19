@@ -3,12 +3,11 @@ developer: Vid Kidz
 year: 1982
 genre: Shooter
 controls:
-  - "Flèches / TFGH: Déplacer"
-  - "IJKL:  Tirer"
-
+- 'Flèches / TFGH: Déplacer'
+- 'IJKL:  Tirer'
 to_start: Select -> Start
 
-announcement_message: 
+announcement_message:
 
 hide: yes
 

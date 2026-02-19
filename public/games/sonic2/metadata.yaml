@@ -4,8 +4,7 @@ year: 1992
 genre: Platform, Co-op
 added: 2025-07-20
 controls:
-  - 🕹️ Déplacer
-  - 1️⃣  Sauter/Dash
+- '←↓↑→: Déplacer'
+- 'Z: Sauter/Dash'
 to_start: Start
-added: 2025-07-27
 enable_score: true

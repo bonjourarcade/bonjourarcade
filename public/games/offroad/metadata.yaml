@@ -3,9 +3,9 @@ developer: Leland Corp
 year: 1989
 genre: Racing
 controls:
-  - 🕹️ Diriger
-  - 1️⃣  Accélérer
-  - 2️⃣  Nitro
+- '←↓↑→: Diriger'
+- 'Z: Accélérer'
+- 'X: Nitro'
 to_start: Select -> Start
 added: 2025-07-21
 enable_score: true

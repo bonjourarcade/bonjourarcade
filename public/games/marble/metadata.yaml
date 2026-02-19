@@ -3,11 +3,11 @@ developer: Atari
 year: 1984
 genre: Action, Puzzle, Racing, Isometric
 controls:
-#  - 🕹️ Déplacer
-#  - 1️⃣  Tirer
-#  - 2️⃣  Bombe
-#  - 3️⃣ ...
-#  - 4️⃣ ...
+#  - "←↓↑→: Déplacer"
+#  - "Z: Tirer"
+#  - "X: Bombe"
+#  - "C: ..."
+#  - "V: ..."
 
 to_start: Select -> Start
 

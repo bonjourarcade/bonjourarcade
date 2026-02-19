@@ -3,10 +3,10 @@ developer: Tokai Engineering, Sunsoft
 year: 1988
 genre: Shooter, Platform
 controls:
-  - 🕹️ Déplacer
-  - 1️⃣  Tirer
-  - 2️⃣  Sauter
-  - Select: Sortir du véhicule
+- '←↓↑→: Déplacer'
+- 'Z: Tirer'
+- 'X: Sauter'
+- Select: Sortir du véhicule
 to_start: Select -> Start
 hide: yes
 

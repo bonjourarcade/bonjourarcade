@@ -3,12 +3,9 @@ developer: Gazelle
 year: 1996
 genre: Shooter
 controls:
-  - 🕹️ Déplacer
-  - 1️⃣  Tirer
-  - 2️⃣  Bombe
-
-#to_start: Select -> Start
-
+- '←↓↑→: Déplacer'
+- 'Z: Tirer'
+- 'X: Bombe'
 hide: yes
 
 added: 2025-08-08

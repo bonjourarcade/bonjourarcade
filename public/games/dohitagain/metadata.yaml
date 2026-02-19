@@ -3,13 +3,13 @@ developer: Taito
 year: 1997
 genre: Action
 #controls:
-#  - 🕹️ Déplacer
-#  - 1️⃣  Tirer
-#  - 2️⃣  Bombe
+#  - "←↓↑→: Déplacer"
+#  - "Z: Tirer"
+#  - "X: Bombe"
 
-to_start:  Start
+to_start: Start
 
-announcement_message: 
+announcement_message:
 
 hide: yes
 

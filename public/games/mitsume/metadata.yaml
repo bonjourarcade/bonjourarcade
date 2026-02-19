@@ -3,9 +3,8 @@ developer: Natsume
 year: 1991
 genre: Platform
 controls:
-  - 🕹️ Déplacer
-  - 1️⃣  Tirer
-  - 2️⃣  Sauter
-#to_start: Select -> Start
+- '←↓↑→: Déplacer'
+- 'Z: Tirer'
+- 'X: Sauter'
 added: 2025-07-26
 hide: yes

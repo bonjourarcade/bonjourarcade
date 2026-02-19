@@ -3,9 +3,8 @@ developer: Rare
 year: 1994
 genre: Platform, Co-op
 #controls:
-#  - 🕹️ Déplacer
-#  - 1️⃣  Tirer
-#  - 2️⃣  Bombe
+#  - "←↓↑→: Déplacer"
+#  - "Z: Tirer"
+#  - "X: Bombe"
 #to_start: Select -> Start
 added: 2025-07-26
-added: 2025-07-27

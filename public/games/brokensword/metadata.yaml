@@ -1,11 +1,11 @@
 title: "Broken Sword: The Shadow of the Templars"
 developer: BAM! Entertainment
 year: 2002
-genre: 
+genre:
 #controls:
-#  - 🕹️ Déplacer
-#  - 1️⃣  Tirer
-#  - 2️⃣  Bombe
+#  - "←↓↑→: Déplacer"
+#  - "Z: Tirer"
+#  - "X: Bombe"
 
 #to_start: Select -> Start
 

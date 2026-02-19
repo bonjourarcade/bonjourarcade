@@ -3,9 +3,9 @@ developer: Taito
 year: 1992
 genre: Platform
 #controls:
-#  - 🕹️ Déplacer
-#  - 1️⃣  Spécial
-#  - 2️⃣  Sauter
+#  - "←↓↑→: Déplacer"
+#  - "Z: Spécial"
+#  - "X: Sauter"
 #to_start: Select -> Start
 added: 2025-07-26
 hide: yes

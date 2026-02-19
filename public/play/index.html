@@ -1479,6 +1479,11 @@
         // --- Start the loading process once the DOM is ready ---
         // Using DOMContentLoaded ensures the #game-container element exists
         document.addEventListener('DOMContentLoaded', () => {
+            // Play silent audio to bypass browser autoplay restrictions
+            const silentAudio = new Audio('../assets/silent.mp3');
+            silentAudio.volume = 0.01; // Very low volume, almost silent
+            silentAudio.play().catch(e => console.log('Silent audio play failed:', e));
+
             checkBrowserAndShowWarning();
             loadSelectedGame();
 

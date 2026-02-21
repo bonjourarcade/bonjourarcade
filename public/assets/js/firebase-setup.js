@@ -1,0 +1,90 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut, connectAuthEmulator } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { getFunctions, httpsCallable, connectFunctionsEmulator } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-functions.js";
+
+// Your web app's Firebase configuration
+const firebaseConfig = {
+    apiKey: "AIzaSyAh5PlPLpy8sfB5QxmjWiXaA_Qrtszc2Vg",
+    authDomain: "alloarcade.firebaseapp.com",
+    projectId: "alloarcade",
+    storageBucket: "alloarcade.firebasestorage.app",
+    messagingSenderId: "743236959029",
+    appId: "1:743236959029:web:9996605303444776ae6a7c",
+    measurementId: "G-G55K9S82G7"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const functions = getFunctions(app);
+
+// Check if we are running locally to use emulators
+const isLocalhost = window.location.hostname === 'localhost' ||
+    window.location.hostname === '127.0.0.1' ||
+    window.location.hostname.includes('localhost') ||
+    window.location.hostname.startsWith('192.168.');
+
+if (isLocalhost) {
+    console.log('Using Firebase Emulators for Auth and Functions');
+    connectAuthEmulator(auth, "http://127.0.0.1:9099");
+    connectFunctionsEmulator(functions, "127.0.0.1", 5001);
+}
+
+// Global instances
+window.firebaseAuth = auth;
+window.firebaseFunctions = functions;
+
+window.signInWithGoogle = async () => {
+    const provider = new GoogleAuthProvider();
+    try {
+        const result = await signInWithPopup(auth, provider);
+        return result.user;
+    } catch (error) {
+        console.error("Google SSO Error:", error);
+        throw error;
+    }
+};
+
+window.signOutFirebase = async () => {
+    try {
+        await signOut(auth);
+    } catch (error) {
+        console.error("Sign Out Error:", error);
+    }
+};
+
+// Expose onAuthStateChanged handler
+window.onFirebaseAuthStateChanged = (callback) => {
+    return onAuthStateChanged(auth, callback);
+};
+
+// Global score submission function
+window.submitGameScore = async (gameId, score, comment, screenshotBase64) => {
+    const submitScoreFn = httpsCallable(functions, 'submitScore');
+    try {
+        const result = await submitScoreFn({
+            gameId: gameId,
+            score: score,
+            comment: comment || undefined, // Send undefined if empty
+            screenshotBase64: screenshotBase64 || undefined
+        });
+        return result.data;
+    } catch (error) {
+        console.error("Score submission error:", error);
+        throw error;
+    }
+};
+
+// Global function to fetch latest verified scores (for public gallery)
+window.getLatestScores = async () => {
+    const fn = httpsCallable(functions, 'getLatestScores');
+    const result = await fn({});
+    return result.data;
+};
+
+// Global function to fetch leaderboard scores (optionally filtered by game)
+window.listGameScores = async (gameId) => {
+    const fn = httpsCallable(functions, 'listGameScores');
+    const result = await fn({ gameId: gameId || 'all' });
+    return result.data;
+};

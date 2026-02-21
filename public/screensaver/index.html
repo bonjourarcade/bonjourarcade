@@ -389,23 +389,27 @@
 
             const totalMilliseconds = totalSeconds * 1000;
 
-                // Get selected behavior (random / latest / upcoming / featured)
-                const behaviorRadio = document.querySelector('input[name="screensaverBehavior"]:checked');
-                const screensaverBehavior = behaviorRadio ? behaviorRadio.value : 'random';
+            // Get selected behavior (random / latest / upcoming / featured)
+            const behaviorRadio = document.querySelector('input[name="screensaverBehavior"]:checked');
+            const screensaverBehavior = behaviorRadio ? behaviorRadio.value : 'random';
 
-                // Map behavior to chronologicalOrder flag for backward compatibility
-                const chronologicalOrder = (screensaverBehavior === 'latest');
+            // Map behavior to chronologicalOrder flag for backward compatibility
+            const chronologicalOrder = (screensaverBehavior === 'latest');
 
-                // Clear any previously set explicit filtered games
+            // Clear explicit filters only if we are using upcoming or featured lists
+            // Random and Latest can respect the existing filters from /all
+            if (screensaverBehavior === 'upcoming' || screensaverBehavior === 'featured') {
                 sessionStorage.removeItem('screensaverHasFilter');
                 sessionStorage.removeItem('screensaverFilteredGames');
+            }
 
             // Set screensaver mode flag in session storage
+            sessionStorage.removeItem('unplayedRandomGames');
             sessionStorage.setItem('screensaverMode', 'true');
             sessionStorage.setItem('screensaverStartTime', Date.now().toString());
             sessionStorage.setItem('screensaverInterval', totalMilliseconds.toString());
-                sessionStorage.setItem('chronologicalOrder', chronologicalOrder.toString());
-                sessionStorage.setItem('screensaverBehavior', screensaverBehavior);
+            sessionStorage.setItem('chronologicalOrder', chronologicalOrder.toString());
+            sessionStorage.setItem('screensaverBehavior', screensaverBehavior);
 
             // Redirect to randomgame which will then redirect to play
             window.location.href = '/randomgame/';
@@ -479,6 +483,18 @@
             if (urlSeconds !== null) {
                 const s = parseInt(urlSeconds, 10);
                 if (!Number.isNaN(s)) document.getElementById('seconds').value = Math.max(0, Math.min(59, s));
+            }
+
+            // Check if there are active filters from /all and update labels
+            if (sessionStorage.getItem('screensaverHasFilter') === 'true') {
+                const randomLabel = document.querySelector('label[for="behaviorRandom"]');
+                if (randomLabel) {
+                    randomLabel.textContent = 'Sélection filtrée (aléatoire)';
+                }
+                const latestLabel = document.querySelector('label[for="behaviorLatest"]');
+                if (latestLabel) {
+                    latestLabel.textContent = "Sélection filtrée (nouveaux d'abord)";
+                }
             }
         })();
 

@@ -133,7 +133,7 @@
         },
         {
             "type": "button",
-            "text": "⚙️",
+            "text": "L/H",
             "id": "b",
             "location": "right",
             "left": 81,

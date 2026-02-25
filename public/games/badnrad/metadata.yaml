@@ -1,0 +1,18 @@
+title: "Skate or Die: Bad 'N Rad"
+developer: Konami
+year: 1991
+genre: Sports, Action
+#controls:
+#  - "←↓↑→: Mouvement"
+#  - "Z: "
+#  - "X: "
+#  - "C: "
+#  - "V: "
+
+#to_start: Espace, puis Enter
+#announcement_message: ""
+
+enable_score: true
+hide: yes
+
+added: 2026-02-25

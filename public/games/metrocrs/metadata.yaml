@@ -1,0 +1,18 @@
+title: Metro-Cross
+developer: Namco
+year: 1985
+genre: Platform
+#controls:
+#  - "←↓↑→: Mouvement"
+#  - "Z: "
+#  - "X: "
+#  - "C: "
+#  - "V: "
+
+#to_start: Espace, puis Enter
+#announcement_message: ""
+
+enable_score: true
+hide: yes
+
+added: 2026-02-25

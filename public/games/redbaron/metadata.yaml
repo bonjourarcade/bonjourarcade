@@ -1,0 +1,18 @@
+title: Red Baron
+developer: Atari
+year: 1981
+genre: Flight, First-person, Action
+#controls:
+#  - "←↓↑→: Mouvement"
+#  - "Z: "
+#  - "X: "
+#  - "C: "
+#  - "V: "
+
+#to_start: Espace, puis Enter
+#announcement_message: ""
+
+enable_score: true
+hide: yes
+
+added: 2026-02-25

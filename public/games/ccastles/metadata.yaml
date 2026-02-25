@@ -1,0 +1,18 @@
+title: Crystal Castles
+developer: Atari
+year: 1983
+genre: Action, Isometric
+#controls:
+#  - "←↓↑→: Mouvement"
+#  - "Z: "
+#  - "X: "
+#  - "C: "
+#  - "V: "
+
+#to_start: Espace, puis Enter
+#announcement_message: ""
+
+enable_score: true
+hide: yes
+
+added: 2026-02-25

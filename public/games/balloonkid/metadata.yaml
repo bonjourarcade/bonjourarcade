@@ -1,0 +1,18 @@
+title: Balloon Kid
+developer: Nintendo, Pax Softnica, Nintendo R&D1
+year: 1990
+genre: Action
+#controls:
+#  - "←↓↑→: Mouvement"
+#  - "Z: "
+#  - "X: "
+#  - "C: "
+#  - "V: "
+
+#to_start: Espace, puis Enter
+#announcement_message: ""
+
+enable_score: true
+hide: yes
+
+added: 2026-02-25

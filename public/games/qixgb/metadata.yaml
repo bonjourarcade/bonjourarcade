@@ -1,0 +1,18 @@
+title: Qix (GB)
+developer: Threshold Research
+year: 1990
+genre: 1990
+#controls:
+#  - "←↓↑→: Mouvement"
+#  - "Z: "
+#  - "X: "
+#  - "C: "
+#  - "V: "
+
+#to_start: Espace, puis Enter
+#announcement_message: ""
+
+enable_score: true
+hide: yes
+
+added: 2026-02-25

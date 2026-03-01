@@ -798,10 +798,10 @@
     <div id="score-submission-modal"
         style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.85); z-index:4000; justify-content:center; align-items:center; padding:16px; box-sizing:border-box;">
         <div class="modal-content"
-            style="background:#1a1a1a; padding:20px; border-radius:12px; border:2px solid #444; max-width:480px; width:100%; text-align:center; position:relative; max-height:90vh; overflow-y:auto; box-sizing:border-box;">
+            style="background:#1a1a1a; padding:20px; border-radius:12px; border:2px solid #444; max-width:480px; width:100%; text-align:center; position:relative; max-height:90vh; overflow-y:auto; box-sizing:border-box; display:flex; flex-direction:column; align-items:center;">
             <button id="score-modal-close"
                 style="position:absolute; top:10px; right:12px; background:#ff4444; color:white; border:none; border-radius:50%; width:30px; height:30px; font-size:18px; cursor:pointer; line-height:1; z-index:1;">x</button>
-            <h3 style="color:#ffd700; margin-top:0; margin-right:40px; text-align:left;">Partager ton score</h3>
+            <h3 style="color:#ffd700; margin-top:0; text-align:center; width:100%;">Partager ton score</h3>
 
             <!-- Screenshot always visible at top, regardless of login state -->
             <div id="score-screenshot-container" style="margin-bottom:14px;">
@@ -825,7 +825,7 @@
                 <input type="number" id="score-input" placeholder="Ton score" required inputmode="numeric"
                     style="width:100%; padding:12px; margin-bottom:10px; border-radius:6px; border:1px solid #555; background:#222; color:white; box-sizing:border-box; font-size:16px;">
                 <textarea id="score-comment-input" placeholder="Commentaire (optionnel)"
-                    style="width:100%; padding:10px; margin-bottom:14px; border-radius:6px; border:1px solid #555; background:#222; color:white; box-sizing:border-box; resize:vertical; min-height:60px; font-size:14px;"></textarea>
+                    style="display:none; width:100%; padding:10px; margin-bottom:14px; border-radius:6px; border:1px solid #555; background:#222; color:white; box-sizing:border-box; resize:vertical; min-height:60px; font-size:14px;"></textarea>
                 <button id="score-submit-btn"
                     style="background:#00C851; color:white; border:none; padding:12px 20px; border-radius:8px; cursor:pointer; font-size:16px; width:100%; font-weight:bold;">Soumettre</button>
                 <div id="score-submission-status" style="margin-top:10px; font-size:14px;"></div>
@@ -1232,23 +1232,15 @@
                         }
                     }
 
-                    // Build leaderboard HTML
+                    // Build leaderboard HTML and mobile leaderboard HTML
                     let leaderboardHTML = '';
-
-                    sortedScores.forEach((score, index) => {
-                        const rank = index + 1;
-
-                        const rankEmoji = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `${rank}.`;
-
-                        leaderboardHTML += `<div class="leaderboard-entry"><div class="leaderboard-rank">${rankEmoji}</div><div class="leaderboard-player">${score.player}</div><div class="leaderboard-score">${score.score.toLocaleString()}</div></div>`;
-                    });
-
-                    // Build mobile leaderboard HTML
                     let mobileLeaderboardHTML = '';
 
                     sortedScores.forEach((score, index) => {
                         const rank = index + 1;
+                        const rankEmoji = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `${rank}.`;
 
+                        leaderboardHTML += `<div class="leaderboard-entry"><div class="leaderboard-rank">${rankEmoji}</div><div class="leaderboard-player">${score.player}</div><div class="leaderboard-score">${score.score.toLocaleString()}</div></div>`;
                         mobileLeaderboardHTML += `<div class="mobile-leaderboard-entry"><div class="mobile-leaderboard-rank">${rankEmoji}</div><div class="mobile-leaderboard-player">${score.player}</div><div class="mobile-leaderboard-score">${score.score.toLocaleString()}</div></div>`;
                     });
 
@@ -1861,6 +1853,7 @@
 
             checkBrowserAndShowWarning();
             loadSelectedGame();
+
 
             // Update positions initially and on resize
             updateHeaderAndGameContainerPositions();
@@ -2929,7 +2922,7 @@
             // Start the initial timeout
             resetMouseTimeout();
 
-            console.log('Mouse auto-hide initialized with 5-second timeout');
+            console.log('Mouse auto-hide initialized');
         }
 
     </script>

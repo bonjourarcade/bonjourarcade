@@ -93,6 +93,10 @@
             <button class="theme-option dropdown-option" data-theme="dark">
               <span class="theme-icon">🌙</span>Thème : Sombre
             </button>
+            <div class="dropdown-divider" id="auth-divider" style="display: none;"></div>
+            <button id="logout-btn" class="dropdown-option" style="display: none; color: #ff4444;">
+              <span>🚪</span>Se déconnecter
+            </button>
           </div>
         </div>
       </div>
@@ -148,18 +152,19 @@
   <script src="/assets/js/banner.js"></script>
   <script src="assets/js/utils.js"></script>
   <script src="assets/js/main.js"></script>
+  <script type="module" src="assets/js/firebase-setup.js"></script>
 
   <script>
     // Collapsible functionality for recently played games section
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
       const toggle = document.getElementById('recently-played-toggle');
       const content = document.getElementById('recently-played-list');
-      
+
       if (toggle && content) {
         // Start expanded by default
         toggle.textContent = 'Jeux récemment joués ▼';
-        
-        toggle.addEventListener('click', function() {
+
+        toggle.addEventListener('click', function () {
           content.classList.toggle('collapsed');
           if (content.classList.contains('collapsed')) {
             toggle.textContent = 'Jeux récemment joués ▶';
@@ -325,6 +330,42 @@
         }
       });
     })();
+  </script>
+
+  <script>
+    // Firebase Auth State Listener for Logout Button
+    document.addEventListener('DOMContentLoaded', () => {
+      const logoutBtn = document.getElementById('logout-btn');
+      const authDivider = document.getElementById('auth-divider');
+
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', async () => {
+          if (typeof window.signOutFirebase === 'function') {
+            await window.signOutFirebase();
+            location.reload(); // Reload to refresh UI state
+          }
+        });
+
+        // Use the global listener exposed by firebase-setup.js
+        const checkAuth = () => {
+          if (typeof window.onFirebaseAuthStateChanged === 'function') {
+            window.onFirebaseAuthStateChanged((user) => {
+              if (user) {
+                logoutBtn.style.display = 'flex';
+                if (authDivider) authDivider.style.display = 'block';
+              } else {
+                logoutBtn.style.display = 'none';
+                if (authDivider) authDivider.style.display = 'none';
+              }
+            });
+          } else {
+            // If not loaded yet, retry shortly
+            setTimeout(checkAuth, 100);
+          }
+        };
+        checkAuth();
+      }
+    });
   </script>
 
   <script>

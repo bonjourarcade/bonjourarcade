@@ -6,6 +6,7 @@ controls:
 - '←↓↑→: Déplacer'
 - 'Z: Lancer'
 to_start: Select -> Start
+announcement_message: "Avant Wii Sports, on pouvait compter sur SNK pour livrer des jeux de sports fantastiques sur la borne Neo Geo. Voici League Bowling, un titre culte qui testera votre précision et votre sens du timing. Ce classique de l'arcade se distingue par ses graphismes colorés et ses animations humoristiques typiques des années 1990. Il propose une prise en main immédiate à travers différents modes de jeu, offrant une expérience rétro simple et redoutablement addictive."
 
 hide: yes
 

@@ -1019,7 +1019,7 @@
 
             // QR Code generation logic
             const qrCodeContainer = document.getElementById('qr-code-container');
-            const leaderboardUrl = `https: //alloarcade.web.app/leaderboards/verify/${gameId}`;
+            const leaderboardUrl = `https://alloarcade.web.app/leaderboards/verify/${gameId}`;
 
             if (qrCodeContainer) {
                 if (!isMobileDevice()) {
@@ -1258,7 +1258,7 @@
                     leaderboardContent.innerHTML = leaderboardHTML;
 
                     // Define leaderboard URL for click handlers
-                    const leaderboardUrl = `https: //alloarcade.web.app/leaderboards/${gameId}`;
+                    const leaderboardUrl = `https://alloarcade.web.app/leaderboards/${gameId}`;
 
                     // Add click handler to desktop leaderboard container (only once)
                     if (!leaderboardContainer.dataset.clickHandlerAdded) {
@@ -1410,7 +1410,7 @@
                     id: `mock_${player.userId}_${Date.now()}`,
                     userId: player.userId,
                     player: player.name,
-                    photoURL: `https: //via.placeholder.com/96/cccccc/666666?text=${player.name.charAt(0)}`,
+                    photoURL: `https://via.placeholder.com/96/cccccc/666666?text=${player.name.charAt(0)}`,
 
                     score: Math.floor(baseScore * (1 + Math.random() * 5) * (1 - index * 0.1)),
                     game: gameId,
@@ -1421,7 +1421,7 @@
 
                     ,
                     verified: true,
-                    screenshotUrl: `https: //via.placeholder.com/300x200/333333/ffffff?text=Screenshot`
+                    screenshotUrl: `https://via.placeholder.com/300x200/333333/ffffff?text=Screenshot`
                 }));
             }
 
@@ -1586,7 +1586,7 @@
                 if (!settings) throw new Error("Emulator settings file loaded but contained invalid data.");
 
                 for (const [key, value] of Object.entries(settings)) {
-                    window[`${key}`] = value;
+                    window[key] = value;
                 }
 
                 try {
@@ -1606,52 +1606,26 @@
                         }
 
                         // Log the game-specific config values
-                        console.log(`Game-specific config values for $ {
-                            gameId
-                        }
-
-                        :`);
+                        console.log(`Game-specific config values for ${gameId}:`);
 
                         for (const [key, value] of Object.entries(gameConfig)) {
-                            console.log(` $ {
-                                key
-                            }
-
-                            =$ {
-                                value
-                            }
-
-                            `);
+                            console.log(`${key}=${value}`);
                         }
 
                         // Merge/override global settings with game-specific settings
                         for (const [key, value] of Object.entries(gameConfig)) {
-                            window[`$ {
-                            key
+                            window[key] = value;
                         }
 
-                        `] = value;
-                        }
-
-                        console.log(`Game-specific config loaded and merged for: $ {
-                            gameId
-                        }
-
-                        `);
+                        console.log(`Game-specific config loaded and merged for: ${gameId}`);
                     }
 
                     else if (gameConfigResponse.status !== 404) {
-                        throw new Error(`Failed to load game config '${gameConfigPath}'(Status: $ {
-                                gameConfigResponse.status
-                            })`);
+                        throw new Error(`Failed to load game config \'${gameConfigPath}\' (Status: ${gameConfigResponse.status})`);
                     }
 
                     else {
-                        console.log(`No game-specific config found for: $ {
-                            gameId
-                        }
-
-                        `);
+                        console.log(`No game-specific config found for: ${gameId}`);
                     }
                 }
 

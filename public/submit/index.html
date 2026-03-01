@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BonjourArcade - Soumettre un score</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: #111;
+            color: #fff;
+            font-family: sans-serif;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .header-logo {
+            max-width: 200px;
+            margin-bottom: 20px;
+            margin-top: 20px;
+        }
+
+        .submit-container {
+            background: #1a1a1a;
+            padding: 24px;
+            border-radius: 12px;
+            border: 2px solid #333;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        h3 {
+            color: #ffd700;
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+
+        #score-screenshot-preview {
+            display: none;
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 8px;
+            border: 1px solid #555;
+            object-fit: contain;
+            margin-top: 10px;
+            margin-bottom: 14px;
+        }
+
+        .file-input-wrapper {
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            font-weight: bold;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+            transition: opacity 0.2s;
+        }
+
+        .btn:active {
+            opacity: 0.8;
+        }
+
+        #score-login-btn {
+            background: #4285F4;
+        }
+
+        #score-submit-btn {
+            background: #00C851;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 14px;
+            margin-bottom: 14px;
+            border-radius: 8px;
+            border: 1px solid #555;
+            background: #222;
+            color: white;
+            box-sizing: border-box;
+            font-size: 18px;
+            text-align: center;
+        }
+
+        #photo-hint {
+            color: #aaa;
+            font-size: 15px;
+            margin-bottom: 12px;
+        }
+
+        #score-submission-status {
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        /* File input styling */
+        input[type="file"]::file-selector-button {
+            border: none;
+            background: #444;
+            padding: 10px 16px;
+            border-radius: 6px;
+            color: #fff;
+            cursor: pointer;
+            transition: background .2s ease-in-out;
+            margin-right: 15px;
+        }
+
+        input[type="file"]::file-selector-button:hover {
+            background: #555;
+        }
+    </style>
+</head>
+
+<body>
+    <a href="/">
+        <img src="../assets/images/bonjourarcade-logo.png" alt="BonjourArcade Logo" class="header-logo">
+    </a>
+
+    <div class="submit-container">
+        <h3>Soumettre ton score</h3>
+
+        <div id="score-auth-section" style="display:none;">
+            <p style="color:#aaa; margin-bottom:20px;">Connecte-toi pour soumettre ton score.</p>
+            <button id="score-login-btn" class="btn">Connexion avec Google</button>
+        </div>
+
+        <div id="score-form-section" style="display:none;">
+            <div class="file-input-wrapper">
+                <p id="photo-hint">Prends une photo de ton écran :</p>
+                <input type="file" id="score-photo-input" accept="image/*" capture="environment" class="input-field"
+                    style="padding: 10px; text-align: left; font-size: 14px;">
+                <img id="score-screenshot-preview" alt="Aperçu du score">
+            </div>
+
+            <input type="number" id="score-input" placeholder="Ton score" required inputmode="numeric"
+                class="input-field">
+
+            <button id="score-submit-btn" class="btn">Soumettre</button>
+            <div id="score-submission-status"></div>
+        </div>
+    </div>
+
+    <script type="module" src="../assets/js/firebase-setup.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const gameId = urlParams.get('game');
+
+            // Elements
+            const authSection = document.getElementById('score-auth-section');
+            const formSection = document.getElementById('score-form-section');
+            const loginBtn = document.getElementById('score-login-btn');
+            const submitBtn = document.getElementById('score-submit-btn');
+            const photoInput = document.getElementById('score-photo-input');
+            const screenshotPreview = document.getElementById('score-screenshot-preview');
+            const statusDiv = document.getElementById('score-submission-status');
+
+            let photoBase64 = null;
+
+            // Handle Auth State
+            const checkAuth = () => {
+                if (typeof window.onFirebaseAuthStateChanged === 'function') {
+                    window.onFirebaseAuthStateChanged((user) => {
+                        if (user) {
+                            authSection.style.display = 'none';
+                            formSection.style.display = 'block';
+                        } else {
+                            authSection.style.display = 'block';
+                            formSection.style.display = 'none';
+                        }
+                    });
+                } else {
+                    setTimeout(checkAuth, 100);
+                }
+            };
+
+            // Initial Auth Check
+            checkAuth();
+
+            // Handle Login
+            loginBtn.addEventListener('click', async () => {
+                loginBtn.textContent = 'Connexion...';
+                loginBtn.disabled = true;
+                try {
+                    if (typeof window.signInWithGoogle === 'function') {
+                        await window.signInWithGoogle();
+                    } else {
+                        throw new Error("Fonction de connexion introuvable");
+                    }
+                } catch (e) {
+                    alert("Erreur de connexion");
+                    console.error(e);
+                } finally {
+                    loginBtn.textContent = 'Connexion avec Google';
+                    loginBtn.disabled = false;
+                }
+            });
+
+            // Handle Photo Input with Resizing
+            photoInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) {
+                    photoBase64 = null;
+                    screenshotPreview.style.display = 'none';
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const MAX_WIDTH = 800; // Limit photo width to 800px to avoid huge uploads
+                        const MAX_HEIGHT = 800;
+                        let width = img.width;
+                        let height = img.height;
+
+                        if (width > height) {
+                            if (width > MAX_WIDTH) {
+                                height *= MAX_WIDTH / width;
+                                width = MAX_WIDTH;
+                            }
+                        } else {
+                            if (height > MAX_HEIGHT) {
+                                width *= MAX_HEIGHT / height;
+                                height = MAX_HEIGHT;
+                            }
+                        }
+                        canvas.width = width;
+                        canvas.height = height;
+
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        // Get base64 string
+                        const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+
+                        // Extract just the base64 part, discarding "data:image/jpeg;base64,"
+                        photoBase64 = dataUrl.split(',')[1];
+
+                        screenshotPreview.src = dataUrl;
+                        screenshotPreview.style.display = 'block';
+                    };
+                    img.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+
+            // Handle Submit
+            submitBtn.addEventListener('click', async () => {
+                if (!gameId) {
+                    statusDiv.textContent = "Erreur: Aucun jeu sélectionné dans l'URL (?game=...).";
+                    statusDiv.style.color = "#ff4444";
+                    return;
+                }
+
+                const scoreValue = parseInt(document.getElementById('score-input').value, 10);
+
+                if (isNaN(scoreValue) || scoreValue < 0) {
+                    statusDiv.textContent = "Veuillez entrer un score valide.";
+                    statusDiv.style.color = "#ff4444";
+                    return;
+                }
+
+                if (!photoBase64) {
+                    statusDiv.textContent = "Veuillez prendre une photo de votre score.";
+                    statusDiv.style.color = "#ff4444";
+                    return;
+                }
+
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Envoi...';
+                statusDiv.textContent = "Soumission en cours...";
+                statusDiv.style.color = "white";
+
+                try {
+                    if (typeof window.submitGameScore === 'function') {
+                        await window.submitGameScore(gameId, scoreValue, "", photoBase64);
+                        statusDiv.textContent = "Score soumis avec succès pour la vérification ! Redirection...";
+                        statusDiv.style.color = "#00C851";
+
+                        setTimeout(() => {
+                            window.location.href = `/play/?game=${gameId}`;
+                        }, 2500);
+                    } else {
+                        throw new Error("Fonction de soumission introuvable. Est-ce que firebase-setup.js est chargé ?");
+                    }
+                } catch (e) {
+                    statusDiv.textContent = "Erreur: " + (e.message || "Impossible de soumettre le score.");
+                    statusDiv.style.color = "#ff4444";
+                    console.error("Submit Error:", e);
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Soumettre';
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

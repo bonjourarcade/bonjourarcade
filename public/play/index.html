@@ -763,7 +763,7 @@
     <!-- QR Code Container -->
     <div id="qr-code-container">
         <div id="qr-code"></div>
-        <p>Partage ton score !</p>
+        <p>Scan pour soumettre !</p>
     </div>
 
     <!-- Help Modal -->
@@ -824,6 +824,7 @@
             <div id="score-form-section" style="display:none;">
                 <input type="number" id="score-input" placeholder="Ton score" required inputmode="numeric"
                     style="width:100%; padding:12px; margin-bottom:10px; border-radius:6px; border:1px solid #555; background:#222; color:white; box-sizing:border-box; font-size:16px;">
+                <!-- Comment section hidden as requested -->
                 <textarea id="score-comment-input" placeholder="Commentaire (optionnel)"
                     style="display:none; width:100%; padding:10px; margin-bottom:14px; border-radius:6px; border:1px solid #555; background:#222; color:white; box-sizing:border-box; resize:vertical; min-height:60px; font-size:14px;"></textarea>
                 <button id="score-submit-btn"
@@ -1019,7 +1020,7 @@
 
             // QR Code generation logic
             const qrCodeContainer = document.getElementById('qr-code-container');
-            const leaderboardUrl = `https://alloarcade.web.app/leaderboards/verify/${gameId}`;
+            const leaderboardUrl = `${window.location.origin}/submit/?game=${gameId}`;
 
             if (qrCodeContainer) {
                 if (!isMobileDevice()) {
@@ -1503,7 +1504,7 @@
                 if (controlsOverlay && controlsContent) {
                     if (!isMobileDevice() && selectedGame.controls && Array.isArray(selectedGame.controls) && selectedGame.controls.length > 0) {
                         // Build overlay HTML: 'Controls' on first line, then each control line
-                        let html = '<div style="font-weight:bold;font-size:15px;margin-bottom:6px;color:#ffd700;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:4px;">Contrôles</div>';
+                        let html = '<div style="font-weight:bold;font-size:15px;margin-bottom:6px;color:#ffd700;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:4px;">Contrôles (défaut)</div>';
 
                         html += selectedGame.controls.map(line => {
                             // Support simple markdown links [text](url)
@@ -2712,25 +2713,65 @@
             if (modal) {
                 modal.style.display = 'flex';
 
+                // Helper to fallback to HTML canvas if WebGL screenshot fails or gives a black image
+                const fallbackToCanvas = () => {
+                    // Try to use a slight delay and requestAnimationFrame to let any pending draw operations finish
+                    setTimeout(() => {
+                        requestAnimationFrame(() => {
+                            const canvas = document.querySelector('#game canvas');
+                            if (canvas) {
+                                try {
+                                    // Sometimes WebGL buffers are cleared if we don't draw immediately, 
+                                    // but preserving it usually helps.
+                                    const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+
+                                    // If it's too small, it's probably still black, but we try anyway.
+                                    const base64Data = dataUrl.split(',')[1];
+                                    sessionStorage.setItem('tempScoreScreenshot', base64Data);
+                                    screenshotPreview.src = dataUrl;
+                                    screenshotPreview.style.display = 'block';
+                                    if (noScreenshot) noScreenshot.style.display = 'none';
+                                } catch (e) {
+                                    console.error("Canvas screenshot failed:", e);
+                                    sessionStorage.removeItem('tempScoreScreenshot');
+                                    screenshotPreview.style.display = 'none';
+                                    if (noScreenshot) noScreenshot.style.display = 'block';
+                                }
+                            } else {
+                                sessionStorage.removeItem('tempScoreScreenshot');
+                                screenshotPreview.style.display = 'none';
+                                if (noScreenshot) noScreenshot.style.display = 'block';
+                            }
+                        });
+                    }, 50);
+                };
+
                 // Use EmulatorJS built-in screenshot which handles WebGL correctly via requestAnimationFrame
                 if (window.EJS_emulator && typeof window.EJS_emulator.screenshot === 'function') {
                     window.EJS_emulator.screenshot(function (blob, format) {
                         const reader = new FileReader();
                         reader.onloadend = function () {
                             const dataUrl = reader.result;
-                            const base64Data = dataUrl.split(',')[1];
-                            sessionStorage.setItem('tempScoreScreenshot', base64Data);
-                            screenshotPreview.src = dataUrl;
-                            screenshotPreview.style.display = 'block';
-                            if (noScreenshot) noScreenshot.style.display = 'none';
+
+                            // Check if the image might be the "half black" bug by checking raw size or just displaying
+                            // Some mobile WebGL buffers get cleared before the blob is generated.
+                            // We will display the EJS screenshot but if it's too small, fallback based on size (a black image is very small)
+                            if (blob.size < 5000) { // arbitrary small size for a mostly black jpeg/png
+                                console.warn("Screenshot seems abnormally small, falling back to canvas");
+                                fallbackToCanvas();
+                            } else {
+                                const base64Data = dataUrl.split(',')[1];
+                                sessionStorage.setItem('tempScoreScreenshot', base64Data);
+                                screenshotPreview.src = dataUrl;
+                                screenshotPreview.style.display = 'block';
+                                if (noScreenshot) noScreenshot.style.display = 'none';
+                            }
                         };
                         reader.readAsDataURL(blob);
                     });
                 } else {
-                    console.warn("EJS_emulator.screenshot not available");
-                    sessionStorage.removeItem('tempScoreScreenshot');
-                    screenshotPreview.style.display = 'none';
-                    if (noScreenshot) noScreenshot.style.display = 'block';
+                    console.warn("EJS_emulator.screenshot not available, falling back to canvas");
+                    fallbackToCanvas();
                 }
 
                 // Check auth status
@@ -2788,14 +2829,14 @@
                 scoreSubmitBtn.textContent = 'Envoi...';
 
                 try {
-                    await window.submitGameScore(gameId, scoreValue, commentValue, screenshotBase64);
+                    // Pass an empty string for the comment since we hid the field
+                    await window.submitGameScore(gameId, scoreValue, "", screenshotBase64);
                     statusDiv.textContent = "Score soumis avec succès pour revue !";
                     statusDiv.style.color = "#00C851";
 
                     setTimeout(() => {
                         document.getElementById('score-submission-modal').style.display = 'none';
                         document.getElementById('score-input').value = '';
-                        document.getElementById('score-comment-input').value = '';
                         sessionStorage.removeItem('tempScoreScreenshot');
                     }, 2000);
                 } catch (e) {

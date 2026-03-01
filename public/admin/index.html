@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BonjourArcade Admin - Scores</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <style>
+        body {
+            background-color: #111;
+            color: #eee;
+            font-family: sans-serif;
+            padding: 20px;
+        }
+
+        h1,
+        h2 {
+            color: #ffd700;
+        }
+
+        #auth-section,
+        #admin-section {
+            background: #222;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .score-card {
+            background: #1a1a1a;
+            border: 1px solid #444;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+        }
+
+        .score-card img {
+            max-width: 300px;
+            border-radius: 4px;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        .btn-approve {
+            background: #00C851;
+            color: white;
+        }
+
+        .btn-reject {
+            background: #ff4444;
+            color: white;
+        }
+
+        .btn-login {
+            background: #4285F4;
+            color: white;
+            font-size: 16px;
+            padding: 12px 24px;
+        }
+
+        input,
+        textarea {
+            background: #333;
+            color: white;
+            border: 1px solid #555;
+            padding: 8px;
+            border-radius: 4px;
+            width: 100%;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+
+        .score-meta {
+            color: #aaa;
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="auth-section">
+        <h1>Adminstration des Scores</h1>
+        <p>Veuillez vous connecter avec un compte administrateur.</p>
+        <button id="admin-login-btn" class="btn-login">Connexion avec Google</button>
+    </div>
+
+    <div id="admin-section" style="display:none;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h1>Scores en Attente</h1>
+            <button id="admin-logout-btn" style="background:#555; color:white;">Déconnexion</button>
+        </div>
+        <div id="scores-container">
+            <p>Chargement des scores...</p>
+        </div>
+    </div>
+
+    <!-- The type="module" is handled inside firebase-setup.js to allow async await -->
+    <script type="module" src="../assets/js/firebase-setup.js"></script>
+    <script type="module" src="admin.js"></script>
+</body>
+
+</html>

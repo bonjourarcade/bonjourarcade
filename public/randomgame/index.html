@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Loading Random Game...</title>
     <style>
         * {
@@ -32,7 +34,7 @@
         .spinner {
             width: 60px;
             height: 60px;
-            border: 4px solid rgba(255,255,255,0.3);
+            border: 4px solid rgba(255, 255, 255, 0.3);
             border-top: 4px solid white;
             border-radius: 50%;
             animation: spin 1s linear infinite;
@@ -40,8 +42,13 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         .loading-text {
@@ -50,25 +57,25 @@
         }
 
         .game-info {
-            background: rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.1);
             padding: 20px;
             border-radius: 15px;
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             margin-top: 20px;
             max-width: 400px;
         }
 
         .error {
-            background: rgba(255,100,100,0.2);
-            border: 1px solid rgba(255,100,100,0.4);
+            background: rgba(255, 100, 100, 0.2);
+            border: 1px solid rgba(255, 100, 100, 0.4);
             color: #ffcccc;
         }
 
         .retry-btn {
-            background: rgba(255,255,255,0.2);
+            background: rgba(255, 255, 255, 0.2);
             color: white;
-            border: 1px solid rgba(255,255,255,0.3);
+            border: 1px solid rgba(255, 255, 255, 0.3);
             padding: 10px 20px;
             border-radius: 25px;
             cursor: pointer;
@@ -77,9 +84,9 @@
         }
 
         .retry-btn:hover {
-            background: rgba(255,255,255,0.3);
+            background: rgba(255, 255, 255, 0.3);
         }
-        
+
         .retry-countdown {
             font-size: 0.9rem;
             margin-top: 10px;
@@ -87,6 +94,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="loading-container">
         <div class="spinner"></div>
@@ -116,11 +124,11 @@
                 // Show loading state
                 document.getElementById('game-info').style.display = 'none';
                 document.getElementById('error-container').style.display = 'none';
-                
+
                 // Check if we're in screensaver mode and read behavior (random/latest/upcoming/featured)
                 const screensaverBehavior = sessionStorage.getItem('screensaverBehavior') || 'random';
                 isChronologicalOrder = (screensaverBehavior === 'latest');
-                
+
                 // Fetch the game list
                 const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.startsWith('192.168.');
                 const cacheBuster = '?v=' + Date.now();
@@ -129,9 +137,9 @@
                 if (!response.ok) {
                     throw new Error(`Failed to fetch game list (Status: ${response.status})`);
                 }
-                
+
                 const data = await response.json();
-                
+
                 // Use all games from the simplified structure
                 let allGames = Array.isArray(data.games) ? data.games : [];
 
@@ -198,14 +206,14 @@
                     // No filter active, use all games
                     gameData = allGames;
                 }
-                
+
                 // Filter out games with problems
                 gameData = gameData.filter(game => game.problem !== "true");
-                
+
                 if (gameData.length === 0) {
                     throw new Error('No games available');
                 }
-                
+
                 // Decide whether to use sequential looping: latest, upcoming or featured use sequential; random does not
                 const screensaverSourceFinal = screensaverSource || 'all';
                 const useSequential = (screensaverSourceFinal === 'upcoming' || screensaverSourceFinal === 'featured' || isChronologicalOrder);
@@ -220,24 +228,48 @@
                         });
                     }
 
-                        // Use a per-behavior session key so each mode keeps its own index
-                        const indexKey = `currentGameIndex_${screensaverBehavior || 'sequential'}`;
-                        currentGameIndex = parseInt(sessionStorage.getItem(indexKey) || '0', 10) || 0;
-                        if (currentGameIndex >= gameData.length) currentGameIndex = 0;
-                        currentGame = gameData[currentGameIndex];
+                    // Use a per-behavior session key so each mode keeps its own index
+                    const indexKey = `currentGameIndex_${screensaverBehavior || 'sequential'}`;
+                    currentGameIndex = parseInt(sessionStorage.getItem(indexKey) || '0', 10) || 0;
+                    if (currentGameIndex >= gameData.length) currentGameIndex = 0;
+                    currentGame = gameData[currentGameIndex];
 
-                        // Increment and wrap, then persist for this behavior
-                        currentGameIndex = (currentGameIndex + 1) % Math.max(1, gameData.length);
-                        sessionStorage.setItem(indexKey, currentGameIndex.toString());
+                    // Increment and wrap, then persist for this behavior
+                    currentGameIndex = (currentGameIndex + 1) % Math.max(1, gameData.length);
+                    sessionStorage.setItem(indexKey, currentGameIndex.toString());
                 } else {
-                    // Select a random game (original behavior)
-                    const randomIndex = Math.floor(Math.random() * gameData.length);
-                    currentGame = gameData[randomIndex];
+                    const inScreensaver = sessionStorage.getItem('screensaverMode') === 'true';
+
+                    if (inScreensaver) {
+                        let unplayedGames = [];
+                        try {
+                            const stored = sessionStorage.getItem('unplayedRandomGames');
+                            if (stored) unplayedGames = JSON.parse(stored);
+                        } catch (e) { }
+
+                        const validGameIds = new Set(gameData.map(g => g.id));
+                        unplayedGames = unplayedGames.filter(id => validGameIds.has(id));
+
+                        if (unplayedGames.length === 0) {
+                            unplayedGames = gameData.map(g => g.id);
+                        }
+
+                        const randIdx = Math.floor(Math.random() * unplayedGames.length);
+                        const selectedId = unplayedGames[randIdx];
+                        currentGame = gameData.find(g => g.id === selectedId) || gameData[Math.floor(Math.random() * gameData.length)];
+
+                        unplayedGames.splice(randIdx, 1);
+                        sessionStorage.setItem('unplayedRandomGames', JSON.stringify(unplayedGames));
+                    } else {
+                        // Select a random game (original behavior)
+                        const randomIndex = Math.floor(Math.random() * gameData.length);
+                        currentGame = gameData[randomIndex];
+                    }
                 }
-                
+
                 // Show game info briefly
                 document.getElementById('game-title').textContent = currentGame.title || 'Unknown Game';
-                
+
                 // Map core to system name
                 const systemMap = {
                     'arcade': 'Arcade',
@@ -261,17 +293,17 @@
                 const systemName = currentGame.core ? (systemMap[currentGame.core] || currentGame.core) : 'Unknown System';
                 document.getElementById('game-system').textContent = systemName;
                 document.getElementById('game-info').style.display = 'block';
-                
+
                 // Wait a moment to show the game info, then redirect
                 setTimeout(() => {
                     redirectToGame();
                 }, 1500);
-                
+
             } catch (error) {
                 console.error('Error loading random game:', error);
                 document.getElementById('error-message').textContent = `Error: ${error.message}`;
                 document.getElementById('error-container').style.display = 'block';
-                
+
                 // Start automatic retry mechanism
                 startRetryMechanism();
             }
@@ -281,14 +313,14 @@
             if (currentGame && currentGame.id) {
                 // Stop retry mechanism before successful redirect
                 stopRetryMechanism();
-                
+
                 // Set screensaver mode flag if coming from screensaver
                 if (sessionStorage.getItem('screensaverMode') === 'true') {
                     sessionStorage.setItem('screensaverMode', 'true');
                     sessionStorage.setItem('lastRandomGame', currentGame.id);
                     sessionStorage.setItem('screensaverStartTime', Date.now().toString());
                 }
-                
+
                 // Redirect to the play page with the random game
                 window.location.href = `/play/?game=${currentGame.id}`;
             } else {
@@ -304,41 +336,41 @@
             if (countdownInterval) {
                 clearInterval(countdownInterval);
             }
-            
+
             // Reset retry count
             retryCount = 0;
-            
+
             // Show countdown element
             const countdownElement = document.getElementById('retry-countdown');
             countdownElement.style.display = 'block';
-            
+
             // Start countdown timer
             let countdownSeconds = 60;
             countdownInterval = setInterval(() => {
                 countdownElement.textContent = `Next retry in ${countdownSeconds} seconds...`;
                 countdownSeconds--;
-                
+
                 if (countdownSeconds < 0) {
                     clearInterval(countdownInterval);
                     countdownElement.style.display = 'none';
                 }
             }, 1000);
-            
+
             // Start retrying every minute (60,000 milliseconds) - infinite retries
             retryInterval = setInterval(() => {
                 retryCount++;
                 console.log(`Retrying random game launch (attempt ${retryCount})`);
-                
+
                 // Update error message to show retry status
                 const errorMessage = document.getElementById('error-message');
                 const originalError = errorMessage.textContent.replace(/ \(Retry \d+\)/, '');
                 errorMessage.textContent = `${originalError} (Retry ${retryCount})`;
-                
+
                 // Try to load a random game again
                 loadRandomGame();
             }, 60000); // 60 seconds = 60,000 milliseconds
         }
-        
+
         function stopRetryMechanism() {
             if (retryInterval) {
                 clearInterval(retryInterval);
@@ -349,18 +381,18 @@
                 countdownInterval = null;
             }
             retryCount = 0;
-            
+
             // Hide countdown element
             const countdownElement = document.getElementById('retry-countdown');
             countdownElement.style.display = 'none';
-            
+
             console.log('Retry mechanism stopped');
         }
-        
+
         function retryRandomGame() {
             // Stop automatic retries when user manually retries
             stopRetryMechanism();
-            
+
             // Reset game index for chronological order if needed
             if (isChronologicalOrder) {
                 sessionStorage.removeItem('currentGameIndex');
@@ -370,11 +402,12 @@
 
         // Start loading when page loads
         document.addEventListener('DOMContentLoaded', loadRandomGame);
-        
+
         // Cleanup retry mechanism when page is unloaded
-        window.addEventListener('beforeunload', function() {
+        window.addEventListener('beforeunload', function () {
             stopRetryMechanism();
         });
     </script>
 </body>
+
 </html>

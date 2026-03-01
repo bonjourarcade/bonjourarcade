@@ -600,6 +600,98 @@
         #browser-warning-close:hover {
             background: rgba(0, 0, 0, 0.3) !important;
         }
+
+        /* Controls Overlay Sidebar */
+        #controls-overlay {
+            position: fixed !important;
+            top: 62px !important;
+            left: 0 !important;
+            z-index: 1000 !important;
+            display: none;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none;
+            /* Allow clicking through the outer container */
+        }
+
+        #controls-overlay.collapsed {
+            transform: translateX(-100%);
+        }
+
+        #controls-content {
+            background: rgba(45, 45, 45, 0.95);
+            color: #fff;
+            padding: 10px;
+            border-radius: 0 6px 6px 0;
+            font-size: 14px;
+            font-family: sans-serif;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
+            min-width: 140px;
+            max-width: 200px;
+            line-height: 1.4;
+            pointer-events: auto;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-left: none;
+        }
+
+        #controls-toggle-handle {
+            position: absolute;
+            left: 100%;
+            top: 0;
+            width: 32px;
+            height: auto;
+            min-height: 120px;
+            background: rgba(45, 45, 45, 0.95);
+            color: #ffd700;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 0 6px 6px 0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-left: none;
+            box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+            pointer-events: auto;
+            padding: 15px 0;
+            transition: background-color 0.2s;
+        }
+
+        #controls-toggle-handle .handle-label {
+            writing-mode: vertical-rl;
+            white-space: nowrap;
+            font-size: 13px;
+            font-weight: bold;
+            font-family: sans-serif;
+            user-select: none;
+            margin-top: 10px;
+        }
+
+        #controls-toggle-handle .icon-arrow {
+            font-size: 18px;
+        }
+
+        #controls-toggle-handle:hover {
+            background: rgba(30, 30, 30, 0.95);
+        }
+
+        #controls-overlay.collapsed #controls-toggle-handle {
+            box-shadow: 4px 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        #controls-toggle-handle .icon-arrow {
+            transition: transform 0.3s ease;
+        }
+
+        #controls-overlay.collapsed #controls-toggle-handle .icon-arrow {
+            transform: rotate(180deg);
+        }
+
+        @media (max-width: 768px) {
+            #controls-overlay {
+                display: none !important;
+            }
+        }
     </style>
     <script src="../assets/js/analytics.js"></script>
 </head>
@@ -641,9 +733,13 @@
         </div>
     </header>
 
-    <!-- Controls Overlay (desktop only) -->
-    <div id="controls-overlay"
-        style="display:none;position:fixed;top:62px;left:10px;z-index:1999;background:rgba(0,0,0,0.85);color:#fff;padding:8px 14px 8px 12px;border-radius:6px;font-size:18px;font-family:sans-serif;box-shadow:0 2px 8px #0005;min-width:40px;max-width:220px;line-height:1.5;pointer-events:none;">
+    <!-- Controls Overlay (desktop as sidebar) -->
+    <div id="controls-overlay">
+        <div id="controls-content"></div>
+        <div id="controls-toggle-handle" title="Afficher/Masquer les contrôles">
+            <span class="icon-arrow">◂</span>
+            <span class="handle-label">Info contrôles</span>
+        </div>
     </div>
 
     <div id="game-container">
@@ -709,12 +805,14 @@
             link.click();
             document.body.removeChild(link);
         }
+
         function basename(path) {
             return path.split('/').pop().split('\\').pop();
         }
 
         // Custom buttons
         window.EJS_Buttons = {
+
             playPause: true,
             restart: true,
             mute: true,
@@ -733,6 +831,7 @@
             screenshot: true,
             cacheManager: true,
             customDownload: {
+
                 visible: true,
                 displayName: "Télécharger ce jeu",
                 icon: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/><path d="M12,19L16,15H13V11H11V15H8L12,19Z"/></svg>',
@@ -741,6 +840,7 @@
                         basename(window.EJS_gameUrl));
                 }
             },
+
             exitEmulation: false
         };
 
@@ -763,11 +863,13 @@
         function checkBrowserAndShowWarning() {
             if (!isChromeBrowser()) {
                 const warningElement = document.getElementById('browser-warning');
+
                 if (warningElement) {
                     warningElement.classList.add('show');
 
                     // Add close button functionality
                     const closeButton = document.getElementById('browser-warning-close');
+
                     if (closeButton) {
                         closeButton.addEventListener('click', () => {
                             warningElement.classList.remove('show');
@@ -783,29 +885,33 @@
          * @param {string} content - The new content value
          */
         function updateMetaTag(property, content) {
-            const metaTag = document.querySelector(`meta[property="${property}"]`) ||
-                document.querySelector(`meta[name="${property}"]`);
+            const metaTag = document.querySelector(`meta[property="${property}"]`) || document.querySelector(`meta[name="${property}"]`);
+
             if (metaTag) {
                 metaTag.setAttribute('content', content);
             }
         }
+
         // Summarize controls (same logic as main menu/newsletter)
         function summarizeControls(controls) {
             if (!controls || !Array.isArray(controls)) return '';
             const joystickLines = controls.filter(line => String(line).trim().startsWith('🕹️'));
             if (joystickLines.length >= 2) return '🕹️🕹️';
             let summary = '';
+
             for (let line of controls) {
                 line = String(line).trim();
                 if (!line) continue;
                 let first = line.split(' ')[0];
-                if ([
-                    '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '0️⃣'
+                if (['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '0️⃣'
+
                 ].includes(first)) {
                     first = '🔴';
                 }
+
                 summary += first + ' ';
             }
+
             return summary.trim();
         }
 
@@ -817,10 +923,13 @@
          */
         function showLauncherError(message) {
             const gameContainer = document.getElementById('game-container');
+
             if (gameContainer) {
+
                 // Display the error message inside the main container
                 gameContainer.innerHTML = `<p class="error-message">Error: ${message}</p>`;
             }
+
             // Also set a generic error title for the page tab
             document.title = "Error Loading Game";
         }
@@ -842,21 +951,26 @@
 
             if (!gameId) {
                 const urlParams = new URLSearchParams(window.location.search);
+
                 if (urlParams.get('source') === 'screensaver') {
                     navigate("../screensaver/");
-                } else {
+                }
+
+                else {
                     navigate("../");
                 }
             }
+
             console.log(`Attempting to load game with ID: ${gameId}`);
 
             // QR Code generation logic
             const qrCodeContainer = document.getElementById('qr-code-container');
-            const leaderboardUrl = `https://alloarcade.web.app/leaderboards/verify/${gameId}`;
+            const leaderboardUrl = `https: //alloarcade.web.app/leaderboards/verify/${gameId}`;
 
             if (qrCodeContainer) {
                 if (!isMobileDevice()) {
                     qrCodeContainer.style.display = 'flex'; // Show container for desktop
+
                     new QRCode(document.getElementById("qr-code"), {
                         text: leaderboardUrl,
                         width: 90,
@@ -865,11 +979,14 @@
                         colorLight: "#ffffff",
                         correctLevel: QRCode.CorrectLevel.H
                     });
+
                     // Make the container clickable for desktop
                     qrCodeContainer.addEventListener('click', () => {
                         window.open(leaderboardUrl, '_blank');
                     });
-                } else {
+                }
+
+                else {
                     // On mobile, hide the entire container
                     qrCodeContainer.style.display = 'none';
                 }
@@ -889,14 +1006,18 @@
                 function loadFromCache() {
                     try {
                         const cached = localStorage.getItem(cacheKey);
+
                         if (cached) {
                             const cacheData = JSON.parse(cached);
                             console.log('Loading leaderboard from cache');
                             return cacheData;
                         }
-                    } catch (e) {
+                    }
+
+                    catch (e) {
                         console.warn('Error loading cache:', e);
                     }
+
                     return null;
                 }
 
@@ -908,10 +1029,14 @@
                             desktopHTML: leaderboardHTML,
                             mobileHTML: mobileLeaderboardHTML,
                             timestamp: Date.now()
-                        };
+                        }
+
+                            ;
                         localStorage.setItem(cacheKey, JSON.stringify(cacheData));
                         console.log('Leaderboard saved to cache');
-                    } catch (e) {
+                    }
+
+                    catch (e) {
                         console.warn('Error saving to cache:', e);
                     }
                 }
@@ -919,36 +1044,43 @@
                 // Load from cache immediately on initial load
                 if (!isRefresh) {
                     const cachedData = loadFromCache();
+
                     if (cachedData) {
                         leaderboardContent.innerHTML = cachedData.desktopHTML;
                         // Show cached data while fetching fresh data
                         console.log('Displaying cached leaderboard while fetching fresh data');
-                    } else {
+                    }
+
+                    else {
                         leaderboardContent.innerHTML = '<div class="leaderboard-loading">Chargement...</div>';
                     }
                 }
 
                 try {
                     // Check if we're on localhost and use mock data
-                    const isLocalhost = window.location.hostname === 'localhost' ||
-                        window.location.hostname === '127.0.0.1' ||
-                        window.location.hostname.includes('localhost') ||
-                        window.location.hostname.startsWith('192.168.');
+                    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.includes('localhost') || window.location.hostname.startsWith('192.168.');
 
                     let data;
 
                     if (isLocalhost) {
                         // Use mock data for localhost
                         console.log('Using mock leaderboard data for localhost');
+
                         data = {
                             result: {
                                 success: true,
                                 scores: generateMockScores(gameId)
                             }
-                        };
-                    } else {
+                        }
+
+                            ;
+                    }
+
+                    else {
+
                         // Use real API for production
                         const response = await fetch('https://us-central1-alloarcade.cloudfunctions.net/listGameScores', {
+
                             method: 'POST',
                             headers: {
                                 'accept': '*/*',
@@ -967,7 +1099,9 @@
                                 'sec-fetch-mode': 'cors',
                                 'sec-fetch-site': 'cross-site',
                                 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36'
-                            },
+                            }
+
+                            ,
                             body: JSON.stringify({
                                 data: {
                                     timeRange: "all",
@@ -977,7 +1111,7 @@
                         });
 
                         if (!response.ok) {
-                            throw new Error(`HTTP error! status: ${response.status}`);
+                            throw new Error(`HTTP error ! status: ${response.status}`);
                         }
 
                         data = await response.json();
@@ -1004,14 +1138,13 @@
                     });
 
                     // Convert to array and sort by score (highest first)
-                    const sortedScores = Array.from(playerBestScores.values())
-                        .sort((a, b) => b.score - a.score)
-                        .slice(0, 10); // Show top 10 players
+                    const sortedScores = Array.from(playerBestScores.values()).sort((a, b) => b.score - a.score).slice(0, 10); // Show top 10 players
 
                     if (sortedScores.length === 0) {
                         if (!isRefresh) {
                             leaderboardContent.innerHTML = '<div class="leaderboard-loading">Aucun score trouvé</div>';
                         }
+
                         return;
                     }
 
@@ -1023,7 +1156,9 @@
                         // Check if scores have changed
                         if (currentEntries.length !== sortedScores.length) {
                             scoresChanged = true;
-                        } else {
+                        }
+
+                        else {
                             for (let i = 0; i < sortedScores.length; i++) {
                                 const currentPlayer = currentEntries[i]?.querySelector('.leaderboard-player')?.textContent;
                                 const currentScore = currentEntries[i]?.querySelector('.leaderboard-score')?.textContent?.replace(/\s/g, '');
@@ -1045,32 +1180,22 @@
 
                     // Build leaderboard HTML
                     let leaderboardHTML = '';
+
                     sortedScores.forEach((score, index) => {
                         const rank = index + 1;
+
                         const rankEmoji = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `${rank}.`;
 
-                        leaderboardHTML += `
-                            <div class="leaderboard-entry">
-                                <div class="leaderboard-rank">${rankEmoji}</div>
-                                <div class="leaderboard-player">${score.player}</div>
-                                <div class="leaderboard-score">${score.score.toLocaleString()}</div>
-                            </div>
-                        `;
+                        leaderboardHTML += `<div class="leaderboard-entry"><div class="leaderboard-rank">${rankEmoji}</div><div class="leaderboard-player">${score.player}</div><div class="leaderboard-score">${score.score.toLocaleString()}</div></div>`;
                     });
 
                     // Build mobile leaderboard HTML
                     let mobileLeaderboardHTML = '';
+
                     sortedScores.forEach((score, index) => {
                         const rank = index + 1;
-                        const rankEmoji = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `${rank}.`;
 
-                        mobileLeaderboardHTML += `
-                            <div class="mobile-leaderboard-entry">
-                                <div class="mobile-leaderboard-rank">${rankEmoji}</div>
-                                <div class="mobile-leaderboard-player">${score.player}</div>
-                                <div class="mobile-leaderboard-score">${score.score.toLocaleString()}</div>
-                            </div>
-                        `;
+                        mobileLeaderboardHTML += `<div class="mobile-leaderboard-entry"><div class="mobile-leaderboard-rank">${rankEmoji}</div><div class="mobile-leaderboard-player">${score.player}</div><div class="mobile-leaderboard-score">${score.score.toLocaleString()}</div></div>`;
                     });
 
                     // Save to cache after successful fetch
@@ -1079,7 +1204,7 @@
                     leaderboardContent.innerHTML = leaderboardHTML;
 
                     // Define leaderboard URL for click handlers
-                    const leaderboardUrl = `https://alloarcade.web.app/leaderboards/${gameId}`;
+                    const leaderboardUrl = `https: //alloarcade.web.app/leaderboards/${gameId}`;
 
                     // Add click handler to desktop leaderboard container (only once)
                     if (!leaderboardContainer.dataset.clickHandlerAdded) {
@@ -1092,13 +1217,17 @@
                     // Show leaderboard container on desktop, popup on mobile (but not in screensaver mode)
                     if (!isMobileDevice()) {
                         leaderboardContainer.style.display = 'flex';
-                    } else {
+                    }
+
+                    else {
                         // Check if we're in screensaver mode - don't show popup if we are
                         const isScreensaverMode = sessionStorage.getItem('screensaverMode') === 'true';
+
                         if (!isScreensaverMode) {
                             // Show mobile popup
                             const mobilePopup = document.getElementById('mobile-leaderboard-popup');
                             const mobileContent = document.getElementById('mobile-leaderboard-content-data');
+
                             if (mobilePopup && mobileContent) {
                                 mobileContent.innerHTML = mobileLeaderboardHTML;
 
@@ -1109,6 +1238,7 @@
 
                                 // Add click handler to mobile leaderboard title (only once)
                                 const mobileLeaderboardTitle = document.querySelector('#mobile-leaderboard-content h3');
+
                                 if (mobileLeaderboardTitle && !mobileLeaderboardTitle.dataset.clickHandlerAdded) {
                                     mobileLeaderboardTitle.addEventListener('click', () => {
                                         window.open(leaderboardUrl, '_blank');
@@ -1119,11 +1249,14 @@
                         }
                     }
 
-                } catch (error) {
+                }
+
+                catch (error) {
                     console.error('Error fetching leaderboard:', error);
 
                     // Try to load from cache on error
                     const cachedData = loadFromCache();
+
                     if (cachedData) {
                         console.warn('Network error - using cached leaderboard data');
                         leaderboardContent.innerHTML = cachedData.desktopHTML;
@@ -1131,11 +1264,14 @@
                         // Also update mobile popup if needed
                         if (isMobileDevice()) {
                             const isScreensaverMode = sessionStorage.getItem('screensaverMode') === 'true';
+
                             if (!isScreensaverMode) {
                                 const mobilePopup = document.getElementById('mobile-leaderboard-popup');
                                 const mobileContent = document.getElementById('mobile-leaderboard-content-data');
+
                                 if (mobilePopup && mobileContent && cachedData.mobileHTML) {
                                     mobileContent.innerHTML = cachedData.mobileHTML;
+
                                     if (!isRefresh) {
                                         mobilePopup.style.display = 'flex';
                                     }
@@ -1147,7 +1283,9 @@
                         if (!isMobileDevice()) {
                             leaderboardContainer.style.display = 'flex';
                         }
-                    } else {
+                    }
+
+                    else {
                         // Only show error if no cache is available
                         leaderboardContent.innerHTML = '<div class="leaderboard-error">Erreur de chargement</div>';
                     }
@@ -1156,41 +1294,80 @@
 
             // Mock data generator function
             function generateMockScores(gameId) {
-                const mockPlayers = [
-                    { name: "Félix L", userId: "user1" },
-                    { name: "Marie C", userId: "user2" },
-                    { name: "Jean P", userId: "user3" },
-                    { name: "Sophie M", userId: "user4" },
-                    { name: "Pierre D", userId: "user5" },
-                    { name: "Alice R", userId: "user6" },
-                    { name: "Thomas B", userId: "user7" },
-                    { name: "Emma L", userId: "user8" }
+                const mockPlayers = [{
+                    name: "Félix L", userId: "user1"
+                }
+
+                    ,
+                {
+                    name: "Marie C", userId: "user2"
+                }
+
+                    ,
+                {
+                    name: "Jean P", userId: "user3"
+                }
+
+                    ,
+                {
+                    name: "Sophie M", userId: "user4"
+                }
+
+                    ,
+                {
+                    name: "Pierre D", userId: "user5"
+                }
+
+                    ,
+                {
+                    name: "Alice R", userId: "user6"
+                }
+
+                    ,
+                {
+                    name: "Thomas B", userId: "user7"
+                }
+
+                    ,
+                {
+                    name: "Emma L", userId: "user8"
+                }
+
                 ];
 
                 // Generate different score ranges based on game type
                 let baseScore = 1000;
+
                 if (gameId.includes('shmup') || gameId.includes('shoot')) {
                     baseScore = 50000;
-                } else if (gameId.includes('puzzle')) {
+                }
+
+                else if (gameId.includes('puzzle')) {
                     baseScore = 5000;
-                } else if (gameId.includes('platform')) {
+                }
+
+                else if (gameId.includes('platform')) {
                     baseScore = 15000;
                 }
 
                 return mockPlayers.map((player, index) => ({
+
                     rank: index + 1,
                     id: `mock_${player.userId}_${Date.now()}`,
                     userId: player.userId,
                     player: player.name,
-                    photoURL: `https://via.placeholder.com/96/cccccc/666666?text=${player.name.charAt(0)}`,
+                    photoURL: `https: //via.placeholder.com/96/cccccc/666666?text=${player.name.charAt(0)}`,
+
                     score: Math.floor(baseScore * (1 + Math.random() * 5) * (1 - index * 0.1)),
                     game: gameId,
                     date: {
                         _seconds: Math.floor(Date.now() / 1000) - Math.floor(Math.random() * 86400 * 30), // Random date within last 30 days
                         _nanoseconds: Math.floor(Math.random() * 1000000000)
-                    },
+                    }
+
+                    ,
                     verified: true,
-                    screenshotUrl: `https://via.placeholder.com/300x200/333333/ffffff?text=Screenshot`
+                    screenshotUrl: `https: //via.placeholder.com/300x200/333333/ffffff?text=Screenshot`
                 }));
             }
 
@@ -1201,7 +1378,9 @@
             const scoreRefreshInterval = setInterval(() => {
                 console.log('Refreshing leaderboard scores (2-minute interval)');
                 fetchLeaderboard(gameId, true); // Pass isRefresh=true for silent refresh
-            }, 120000); // 2 minutes = 120,000 milliseconds
+            }
+
+                , 120000); // 2 minutes = 120,000 milliseconds
 
             // Store interval ID for cleanup if needed
             window.leaderboardRefreshInterval = scoreRefreshInterval;
@@ -1212,14 +1391,17 @@
                 const cacheBuster = '?v=' + Date.now();
                 const gamelistUrl = isLocalhost ? '../gamelist.json' + cacheBuster : 'https://storage.googleapis.com/bonjourarcade/gamelist.json' + cacheBuster;
                 const listResponse = await fetch(gamelistUrl);
+
                 if (!listResponse.ok) {
-                    throw new Error(`Failed to fetch game list '/gamelist.json' (Status: ${listResponse.status})`);
+                    throw new Error(`Failed to fetch game list '/gamelist.json'(Status: ${listResponse.status})`);
                 }
+
                 const gameData = await listResponse.json();
 
                 // Step 3: Find the specific game data using the gameId
                 console.log(`Searching for game ID '${gameId}' in game list...`);
                 let selectedGame = null;
+
                 if (Array.isArray(gameData.games)) {
                     selectedGame = gameData.games.find(game => game.id === gameId);
                 }
@@ -1228,6 +1410,7 @@
                 if (!selectedGame) {
                     throw new Error(`Game with ID '${gameId}' not found in game list.`);
                 }
+
                 console.log("Found game data:", selectedGame);
 
                 // --- Hide leaderboard button if enable_score is explicitly false ---
@@ -1238,7 +1421,9 @@
                     if (qrCodeContainer) qrCodeContainer.style.display = 'none';
                     if (leaderboardContainer) leaderboardContainer.style.display = 'none';
                     if (helpButton) helpButton.classList.remove('is-visible');
-                } else {
+                }
+
+                else {
                     const helpButton = document.getElementById('help-button');
                     if (helpButton) helpButton.classList.add('is-visible');
                 }
@@ -1254,37 +1439,85 @@
                 document.title = gameTitle;
 
                 // Update page title and meta tags
-                updateMetaTag('og:title', `Play now! ${gameTitle}`);
-                updateMetaTag('twitter:title', `Play now! ${gameTitle}`);
+                updateMetaTag('og:title', `Play now ! ${gameTitle}`);
+
+                updateMetaTag('twitter:title', `Play now ! ${gameTitle}`);
 
                 // Update image to use relative path
                 if (selectedGame.coverArt) {
                     updateMetaTag('og:image', selectedGame.coverArt);
                     updateMetaTag('twitter:image', selectedGame.coverArt);
                 }
+
                 // Show controls overlay (desktop only)
                 const controlsOverlay = document.getElementById('controls-overlay');
-                if (controlsOverlay) {
+                const controlsContent = document.getElementById('controls-content');
+                const toggleHandle = document.getElementById('controls-toggle-handle');
+
+                if (controlsOverlay && controlsContent) {
                     if (!isMobileDevice() && selectedGame.controls && Array.isArray(selectedGame.controls) && selectedGame.controls.length > 0) {
                         // Build overlay HTML: 'Controls' on first line, then each control line
-                        let html = '<div style="font-weight:bold;font-size:15px;margin-bottom:2px;">Contrôles</div>';
-                        html += selectedGame.controls.map(line => `<div>${line}</div>`).join('');
+                        let html = '<div style="font-weight:bold;font-size:15px;margin-bottom:6px;color:#ffd700;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:4px;">Contrôles</div>';
+
+                        html += selectedGame.controls.map(line => {
+                            // Support simple markdown links [text](url)
+                            let processedLine = line.replace(/\[([^\]]+)\]\(([^\)]+)\)/g, '<a href="$2" target="_blank" style="color:#ffd700;text-decoration:underline;">$1</a>');
+
+                            return `<div style="margin-bottom:2px;">${processedLine}</div>`;
+                        }).join('');
+
                         if (selectedGame.to_start) {
                             // Replace '->' with a better looking right arrow
                             let toStartDisplay = selectedGame.to_start.replace(/->/g, '→');
-                            html += '<div style="margin-top:10px;font-size:15px;"><span style="font-weight:bold;">Pour commencer:</span><br>' + toStartDisplay + '</div>';
+                            html += '<div style="margin-top:12px;font-size:15px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.1);"><span style="font-weight:bold;color:#ffd700;">Pour commencer:</span><br>' + toStartDisplay + '</div>';
                         }
-                        controlsOverlay.innerHTML = html;
+
+                        // Add Control Settings shortcut
+                        html += '<div style="margin-top:15px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.1);">';
+                        html += '<a href="#" id="open-ejs-controls" style="color:#ffd700;text-decoration:none;font-size:13px;display:flex;align-items:center;gap:6px;transition:opacity 0.2s;" onmouseover="this.style.opacity=0.8" onmouseout="this.style.opacity=1">';
+                        html += '<span style="font-size:16px;">⚙️</span> Modifier les touches</a>';
+                        html += '</div>';
+
+                        controlsContent.innerHTML = html;
+
+                        // Add event listener for the new shortcut
+                        const openEjsBtn = document.getElementById('open-ejs-controls');
+                        if (openEjsBtn) {
+                            openEjsBtn.addEventListener('click', (e) => {
+                                e.preventDefault();
+                                openEJSControls();
+                            });
+                        }
                         controlsOverlay.style.display = 'block';
-                    } else {
+
+                        // PERSISTENCE LOGIC
+                        const isCollapsed = localStorage.getItem('controls_collapsed') === 'true';
+
+                        if (isCollapsed) {
+                            controlsOverlay.classList.add('collapsed');
+                        }
+
+                        // Add toggle event listener if not already added
+                        if (!toggleHandle.dataset.listenerAdded) {
+                            toggleHandle.addEventListener('click', () => {
+                                controlsOverlay.classList.toggle('collapsed');
+                                const currentlyCollapsed = controlsOverlay.classList.contains('collapsed');
+                                localStorage.setItem('controls_collapsed', currentlyCollapsed);
+                            });
+                            toggleHandle.dataset.listenerAdded = 'true';
+                        }
+
+                    }
+
+                    else {
                         controlsOverlay.style.display = 'none';
                     }
                 }
 
                 // Step 6: Set the Core EJS Variables Globally (used by EmulatorJS loader)
                 console.log(`Setting EJS Vars - Core: ${selectedGame.core}, ROM: ${selectedGame.romPath}`);
-                window.EJS_player = "#game";        // Emulator renders in the #game div
-                window.EJS_core = selectedGame.core;    // Core name from gamelist.json
+                window.EJS_player = "#game"; // Emulator renders in the #game div
+                window.EJS_core = selectedGame.core; // Core name from gamelist.json
                 window.EJS_gameName = selectedGame.title;
                 window.EJS_gameID = gameId;
                 window.EJS_gameUrl = selectedGame.romPath; // ROM path from gamelist.json
@@ -1293,90 +1526,173 @@
                 // Step 7: Fetch General Emulator Settings
                 console.log("Fetching emulator settings: /config/emulator_settings.json");
                 const settingsResponse = await fetch('/config/emulator_settings.json'); // Absolute path
-                if (!settingsResponse.ok) throw new Error(`Failed to load '/config/emulator_settings.json' (Status: ${settingsResponse.status})`);
+
+                if (!settingsResponse.ok) throw new Error(`Failed to load '/config/emulator_settings.json'(Status: ${settingsResponse.status})`);
                 const settings = await settingsResponse.json();
                 if (!settings) throw new Error("Emulator settings file loaded but contained invalid data.");
 
-                // Step 8: Assign Fetched Settings Globally
                 for (const [key, value] of Object.entries(settings)) {
                     window[`${key}`] = value;
                 }
 
-                // --- NEW: Attempt to load game-specific config.json ---
                 try {
                     const gameConfigPath = `/games/${gameId}/config.json`;
-                    console.log(`Attempting to fetch game-specific config: ${gameConfigPath}`);
+                    console.log(`Attempting to fetch game-specific config: $ {
+                        gameConfigPath
+                    }
+
+                    `);
                     const gameConfigResponse = await fetch(gameConfigPath);
+
                     if (gameConfigResponse.ok) {
                         const gameConfig = await gameConfigResponse.json();
+
                         if (!gameConfig || typeof gameConfig !== 'object') {
                             throw new Error(`Game config file '${gameConfigPath}' loaded but contained invalid JSON.`);
                         }
 
                         // Log the game-specific config values
-                        console.log(`Game-specific config values for ${gameId}:`);
+                        console.log(`Game-specific config values for $ {
+                            gameId
+                        }
+
+                        :`);
+
                         for (const [key, value] of Object.entries(gameConfig)) {
-                            console.log(`  ${key} = ${value}`);
+                            console.log(` $ {
+                                key
+                            }
+
+                            =$ {
+                                value
+                            }
+
+                            `);
                         }
 
                         // Merge/override global settings with game-specific settings
                         for (const [key, value] of Object.entries(gameConfig)) {
-                            window[`${key}`] = value;
+                            window[`$ {
+                            key
                         }
-                        console.log(`Game-specific config loaded and merged for: ${gameId}`);
-                    } else if (gameConfigResponse.status !== 404) {
-                        throw new Error(`Failed to load game config '${gameConfigPath}' (Status: ${gameConfigResponse.status})`);
-                    } else {
-                        console.log(`No game-specific config found for: ${gameId}`);
+
+                        `] = value;
+                        }
+
+                        console.log(`Game-specific config loaded and merged for: $ {
+                            gameId
+                        }
+
+                        `);
                     }
-                } catch (gameConfigError) {
+
+                    else if (gameConfigResponse.status !== 404) {
+                        throw new Error(`Failed to load game config '${gameConfigPath}'(Status: $ {
+                                gameConfigResponse.status
+                            })`);
+                    }
+
+                    else {
+                        console.log(`No game-specific config found for: $ {
+                            gameId
+                        }
+
+                        `);
+                    }
+                }
+
+                catch (gameConfigError) {
                     console.error(`Error loading or parsing game-specific config:`, gameConfigError);
                     showLauncherError(gameConfigError.message || `An error occurred loading game-specific config.`);
                     return;
                 }
 
                 console.log("Final merged emulator settings (global + game-specific):");
+
                 // Log all EJS_* variables that are set
                 for (const key of Object.keys(window)) {
                     if (key.startsWith('EJS_')) {
-                        console.log(`  ${key} = ${window[key]}`);
+                        console.log(`${key}=${window[key]}`);
                     }
                 }
 
-                window.EJS_backgroundImage =
-                    `${window.location.protocol}//${window.location.hostname}:${window.location.port}/games/${gameId}/cover.png`; // Set background to game's cover
+                window.EJS_backgroundImage = `${window.location.protocol}//${window.location.hostname}:${window.location.port}/games/${gameId}/cover.png`; // Set background to game's cover
 
                 // Step 9: Fetch Controls JSON based on Core
                 const coreName = window.EJS_core;
+
                 const controlsJsonPath = `/config/controls_${coreName}.json`; // Path to control JSON file
+
                 // Only fetch global controls if not set by per-game config
                 if (typeof window.EJS_defaultControls === 'undefined') {
                     console.log(`Attempting to fetch controls: ${controlsJsonPath}`);
+
                     try {
                         const controlsResponse = await fetch(controlsJsonPath);
+
                         if (!controlsResponse.ok) {
+
                             // Handle file not found gracefully - use defaults
                             if (controlsResponse.status === 404) {
                                 console.warn(`Controls file not found: ${controlsJsonPath}. Using EmulatorJS default controls.`);
-                                window.EJS_defaultControls = { "0": {}, "1": {}, "2": {}, "3": {} }; // Use default empty controls (valid JSON)
-                            } else {
+
+                                window.EJS_defaultControls = {
+                                    "0": {}
+
+                                    ,
+                                    "1": {}
+
+                                    ,
+                                    "2": {}
+
+                                    ,
+                                    "3": {}
+                                }
+
+                                    ; // Use default empty controls (valid JSON)
+                            }
+
+                            else {
+
                                 // Throw error for other HTTP issues
                                 throw new Error(`Failed to fetch controls file (Status: ${controlsResponse.status})`);
                             }
-                        } else {
+                        }
+
+                        else {
                             // Parse JSON and assign directly
                             const controlsData = await controlsResponse.json();
                             if (!controlsData) throw new Error(`Controls file '${controlsJsonPath}' loaded but contained invalid JSON.`);
                             window.EJS_defaultControls = controlsData; // Assign fetched object
+
                             console.log(`Controls assigned successfully for core: ${coreName}`);
                         }
-                    } catch (controlsError) {
+                    }
+
+                    catch (controlsError) {
+
                         // Handle fetch/parse errors specifically for controls JSON
                         console.error(`Error loading or parsing controls from ${controlsJsonPath}:`, controlsError);
                         console.warn("Using EmulatorJS default controls due to controls loading error.");
-                        window.EJS_defaultControls = { "0": {}, "1": {}, "2": {}, "3": {} }; // Fallback to default empty controls
+
+                        window.EJS_defaultControls = {
+                            "0": {}
+
+                            ,
+                            "1": {}
+
+                            ,
+                            "2": {}
+
+                            ,
+                            "3": {}
+                        }
+
+                            ; // Fallback to default empty controls
                     }
-                } else {
+                }
+
+                else {
                     console.log('Using EJS_defaultControls from per-game config.json');
                 }
 
@@ -1392,11 +1708,14 @@
                 // --- Disable save/load for featured game ---
                 try {
                     const currentGameResponse = await fetch('/api/current-game');
+
                     if (currentGameResponse.ok) {
                         let featuredGameId = await currentGameResponse.text();
                         featuredGameId = featuredGameId.trim();
+
                         if (featuredGameId === gameId) {
                             console.log("Featured game detected. Disabling save/load buttons.");
+
                             if (window.EJS_Buttons) {
                                 window.EJS_Buttons.saveState = false;
                                 window.EJS_Buttons.loadState = false;
@@ -1407,7 +1726,9 @@
                             }
                         }
                     }
-                } catch (error) {
+                }
+
+                catch (error) {
                     console.warn('Could not fetch current game from API to check featured status:', error);
                 }
 
@@ -1416,38 +1737,63 @@
                 if (window.EJS_pathtodata) {
                     console.log("Loading EmulatorJS engine (loader.js)...");
                     const loaderScript = document.createElement('script');
+
                     // Use the path defined in emulator_settings.json
                     loaderScript.src = `${window.EJS_pathtodata}loader.js`;
+
                     loaderScript.onerror = () => {
                         console.error("CRITICAL: Error loading EmulatorJS 'loader.js' from:", loaderScript.src);
                         showLauncherError("Could not load the core emulator engine. Check network connection and EJS_pathtodata setting.");
+
                         // Hide loading on error
-                        hideLoading({ containerSelector: '#game' });
-                    };
+                        hideLoading({
+                            containerSelector: '#game'
+                        });
+                    }
+
+                        ;
 
                     // Hide loading when the script loads successfully
                     loaderScript.onload = () => {
                         console.log("EmulatorJS 'loader.js' loaded successfully.");
+
                         // Wait a bit for EmulatorJS to initialize, then hide loading
                         setTimeout(() => {
-                            hideLoading({ containerSelector: '#game' });
-                        }, 500);
-                    };
+                            hideLoading({
+                                containerSelector: '#game'
+                            });
+                        }
+
+                            , 500);
+                    }
+
+                        ;
 
                     document.body.appendChild(loaderScript);
                     console.log("EmulatorJS 'loader.js' script added to page.");
-                } else {
-                    console.error("EJS_pathtodata is not defined after loading settings. Cannot load emulator engine.");
-                    showLauncherError("Emulator configuration error: Path to required emulator data is missing.");
-                    // Hide loading on error
-                    hideLoading({ containerSelector: '#game' });
                 }
 
-            } catch (error) { // Catch errors from initial fetches (gamelist, settings) or setup logic
+                else {
+                    console.error("EJS_pathtodata is not defined after loading settings. Cannot load emulator engine.");
+                    showLauncherError("Emulator configuration error: Path to required emulator data is missing.");
+
+                    // Hide loading on error
+                    hideLoading({
+                        containerSelector: '#game'
+                    });
+                }
+
+            }
+
+            catch (error) {
+                // Catch errors from initial fetches (gamelist, settings) or setup logic
                 console.error("Error during game loading process:", error);
                 showLauncherError(error.message || "An unexpected error occurred while preparing the game.");
+
                 // Hide loading on error
-                hideLoading({ containerSelector: '#game' });
+                hideLoading({
+                    containerSelector: '#game'
+                });
             }
         }
 
@@ -1467,6 +1813,7 @@
             if (gameContainer) {
                 const totalOffset = totalBannerHeight + headerHeight;
                 gameContainer.style.top = totalOffset + 'px';
+
                 gameContainer.style.height = `calc(100% - ${totalOffset}px)`;
             }
 
@@ -1493,7 +1840,10 @@
 
             // Also update when banners are added/removed (observe banner changes)
             const observer = new MutationObserver(updateHeaderAndGameContainerPositions);
-            observer.observe(document.body, { childList: true, subtree: true });
+
+            observer.observe(document.body, {
+                childList: true, subtree: true
+            });
         });
 
         // Cleanup leaderboard refresh interval when page is unloaded
@@ -1520,11 +1870,14 @@
                 // Set up automatic refresh based on configured interval
                 const configuredInterval = parseInt(sessionStorage.getItem('screensaverInterval')) || 150000; // Default to 150 seconds (2.5 minutes)
                 console.log('Screensaver mode: Using configured interval of', configuredInterval, 'ms (', Math.round(configuredInterval / 1000), 'seconds)');
+
                 const refreshInterval = setInterval(() => {
                     console.log('Screensaver mode: Refreshing to new random game');
                     // Redirect to randomgame to get a new random game
                     navigate('/randomgame/');
-                }, configuredInterval);
+                }
+
+                    , configuredInterval);
 
                 // Store the interval ID so it can be cleared if needed
                 sessionStorage.setItem('screensaverRefreshInterval', refreshInterval);
@@ -1536,7 +1889,9 @@
                 if (isMobile) {
                     // Mobile: Create a single timer button in top center with submenu
                     createMobileScreensaverInterface();
-                } else {
+                }
+
+                else {
                     // Desktop: Keep the existing interface
                     createDesktopScreensaverInterface();
                 }
@@ -1555,26 +1910,25 @@
             // Create the main timer button - positioned below the game display
             const timerBtn = document.createElement('button');
             timerBtn.id = 'mobile-timer-btn';
-            timerBtn.style.cssText = `
-                position: fixed;
-                bottom: 200px;
-                left: 50%;
-                transform: translateX(-50%);
-                background: rgba(0, 0, 0, 0.7);
-                color: white;
-                border: none;
-                padding: 15px 25px;
-                border-radius: 30px;
-                font-size: 16px;
-                font-weight: bold;
-                z-index: 10000;
-                box-shadow: 0 6px 20px rgba(0,0,0,0.4);
-                cursor: pointer;
-                transition: all 0.3s ease;
-                font-family: sans-serif;
-                backdrop-filter: blur(10px);
-                border: 1px solid rgba(255, 255, 255, 0.2);
-                min-width: 180px;
+            timerBtn.style.cssText = ` position: fixed;
+            bottom: 200px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: bold;
+            z-index: 10000;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: sans-serif;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            min-width: 180px;
             `;
 
             // Add hover animation for mobile timer button
@@ -1595,88 +1949,87 @@
             // Create the submenu container - positioned below the timer button
             const submenu = document.createElement('div');
             submenu.id = 'mobile-screensaver-submenu';
-            submenu.style.cssText = `
-                position: fixed;
-                bottom: 120px;
-                left: 50%;
-                transform: translateX(-50%);
-                background: rgba(0, 0, 0, 0.9);
-                border-radius: 15px;
-                padding: 15px;
-                z-index: 10001;
-                display: none;
-                flex-direction: column;
-                gap: 10px;
-                min-width: 200px;
-                backdrop-filter: blur(15px);
-                border: 1px solid rgba(255, 255, 255, 0.2);
-                box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            submenu.style.cssText = ` position: fixed;
+            bottom: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            border-radius: 15px;
+            padding: 15px;
+            z-index: 10001;
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            min-width: 200px;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
             `;
 
             // Create submenu buttons
             const backToScreensaverBtn = document.createElement('button');
-            backToScreensaverBtn.style.cssText = `
-                background: rgba(70, 130, 180, 0.9);
-                color: white;
-                border: none;
-                padding: 12px 16px;
-                border-radius: 10px;
-                font-size: 14px;
-                font-weight: bold;
-                cursor: pointer;
-                transition: all 0.2s ease;
-                font-family: sans-serif;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                gap: 8px;
+            backToScreensaverBtn.style.cssText = ` background: rgba(70, 130, 180, 0.9);
+            color: white;
+            border: none;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
             `;
             backToScreensaverBtn.innerHTML = '🏠 Back to Screensaver';
+
             backToScreensaverBtn.addEventListener('click', () => {
                 exitScreensaverMode(true); // true = redirect to screensaver
             });
 
             const disableScreensaverBtn = document.createElement('button');
-            disableScreensaverBtn.style.cssText = `
-                background: rgba(220, 53, 69, 0.9);
-                color: white;
-                border: none;
-                padding: 12px 16px;
-                border-radius: 10px;
-                font-size: 14px;
-                font-weight: bold;
-                cursor: pointer;
-                transition: all 0.2s ease;
-                font-family: sans-serif;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                gap: 8px;
+            disableScreensaverBtn.style.cssText = ` background: rgba(220, 53, 69, 0.9);
+            color: white;
+            border: none;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
             `;
             disableScreensaverBtn.innerHTML = '⏹️ Disable Screensaver';
+
             disableScreensaverBtn.addEventListener('click', () => {
                 disableScreensaverMode();
             });
 
             const nextGameBtn = document.createElement('button');
             nextGameBtn.id = 'mobile-next-game-btn';
-            nextGameBtn.style.cssText = `
-                background: rgba(40, 167, 69, 0.9);
-                color: white;
-                border: none;
-                padding: 12px 16px;
-                border-radius: 10px;
-                font-size: 14px;
-                font-weight: bold;
-                cursor: pointer;
-                transition: all 0.2s ease;
-                font-family: sans-serif;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                gap: 8px;
+            nextGameBtn.style.cssText = ` background: rgba(40, 167, 69, 0.9);
+            color: white;
+            border: none;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
             `;
             nextGameBtn.innerHTML = '⏭️ Next Game (60s)';
+
             nextGameBtn.addEventListener('click', () => {
                 if (!nextGameBtn.disabled) {
                     console.log('Manual next game requested');
@@ -1703,7 +2056,9 @@
                     setTimeout(() => {
                         document.addEventListener('click', closeSubmenu);
                         document.addEventListener('touchstart', closeSubmenu);
-                    }, 100);
+                    }
+
+                        , 100);
                 }
             });
 
@@ -1730,12 +2085,17 @@
 
                 if (remaining <= 0) {
                     timerBtn.textContent = '⏰ Refreshing...';
-                } else {
+                }
+
+                else {
                     const minutes = Math.floor(remaining / 60000);
                     const seconds = Math.floor((remaining % 60000) / 1000);
+
                     timerBtn.textContent = `⏰ ${minutes}:${seconds.toString().padStart(2, '0')}`;
                 }
-            }, 1000);
+            }
+
+                , 1000);
 
             // Store countdown interval ID
             sessionStorage.setItem('screensaverCountdownInterval', countdownInterval);
@@ -1746,25 +2106,24 @@
             // Create the main timer button - positioned above the Menu button
             const timerBtn = document.createElement('button');
             timerBtn.id = 'desktop-timer-btn';
-            timerBtn.style.cssText = `
-                position: fixed;
-                top: 10px;
-                left: 10px;
-                background: rgba(0, 0, 0, 0.8);
-                color: white;
-                border: none;
-                padding: 10px 18px;
-                border-radius: 20px;
-                font-size: 12px;
-                font-weight: bold;
-                z-index: 10000;
-                box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-                cursor: pointer;
-                transition: all 0.3s ease;
-                font-family: sans-serif;
-                backdrop-filter: blur(10px);
-                border: 1px solid rgba(255, 255, 255, 0.2);
-                min-width: 140px;
+            timerBtn.style.cssText = ` position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            z-index: 10000;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: sans-serif;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            min-width: 140px;
             `;
 
             // Add hover animation for desktop timer button
@@ -1785,87 +2144,86 @@
             // Create the submenu container - positioned below the timer button
             const submenu = document.createElement('div');
             submenu.id = 'desktop-screensaver-submenu';
-            submenu.style.cssText = `
-                position: fixed;
-                top: 60px;
-                left: 10px;
-                background: rgba(0, 0, 0, 0.9);
-                border-radius: 15px;
-                padding: 12px;
-                z-index: 10001;
-                display: none;
-                flex-direction: column;
-                gap: 8px;
-                min-width: 180px;
-                backdrop-filter: blur(15px);
-                border: 1px solid rgba(255, 255, 255, 0.2);
-                box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            submenu.style.cssText = ` position: fixed;
+            top: 60px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.9);
+            border-radius: 15px;
+            padding: 12px;
+            z-index: 10001;
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            min-width: 180px;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
             `;
 
             // Create submenu buttons
             const backToScreensaverBtn = document.createElement('button');
-            backToScreensaverBtn.style.cssText = `
-                background: rgba(70, 130, 180, 0.9);
-                color: white;
-                border: none;
-                padding: 8px 14px;
-                border-radius: 8px;
-                font-size: 11px;
-                font-weight: bold;
-                cursor: pointer;
-                transition: all 0.2s ease;
-                font-family: sans-serif;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                gap: 6px;
+            backToScreensaverBtn.style.cssText = ` background: rgba(70, 130, 180, 0.9);
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
             `;
             backToScreensaverBtn.innerHTML = '🏠 Retour aux paramètres';
+
             backToScreensaverBtn.addEventListener('click', () => {
                 exitScreensaverMode(true); // true = redirect to screensaver
             });
 
             const disableScreensaverBtn = document.createElement('button');
-            disableScreensaverBtn.style.cssText = `
-                background: rgba(220, 53, 69, 0.9);
-                color: white;
-                border: none;
-                padding: 8px 14px;
-                border-radius: 8px;
-                font-size: 11px;
-                font-weight: bold;
-                cursor: pointer;
-                transition: all 0.2s ease;
-                font-family: sans-serif;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                gap: 6px;
+            disableScreensaverBtn.style.cssText = ` background: rgba(220, 53, 69, 0.9);
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
             `;
             disableScreensaverBtn.innerHTML = '⏹️ Rester sur ce jeu';
+
             disableScreensaverBtn.addEventListener('click', () => {
                 disableScreensaverMode();
             });
 
             const nextGameBtn = document.createElement('button');
             nextGameBtn.id = 'desktop-next-game-btn';
-            nextGameBtn.style.cssText = `
-                background: rgba(40, 167, 69, 0.9);
-                color: white;
-                border: none;
-                padding: 8px 14px;
-                border-radius: 8px;
-                font-size: 11px;
-                font-weight: bold;
-                cursor: pointer;
-                transition: all 0.2s ease;
-                font-family: sans-serif;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                gap: 6px;
+            nextGameBtn.style.cssText = ` background: rgba(40, 167, 69, 0.9);
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
             `;
             nextGameBtn.innerHTML = '⏭️ Prochain jeu';
+
             nextGameBtn.addEventListener('click', () => {
                 console.log('Manual next game requested');
                 navigate('/randomgame/');
@@ -1887,7 +2245,9 @@
                     setTimeout(() => {
                         document.addEventListener('click', closeSubmenu);
                         document.addEventListener('touchstart', closeSubmenu);
-                    }, 100);
+                    }
+
+                        , 100);
                 }
             });
 
@@ -1914,12 +2274,17 @@
 
                 if (remaining <= 0) {
                     timerBtn.textContent = '⏰ Refreshing...';
-                } else {
+                }
+
+                else {
                     const minutes = Math.floor(remaining / 60000);
                     const seconds = Math.floor((remaining % 60000) / 1000);
+
                     timerBtn.textContent = `⏰ ${minutes}:${seconds.toString().padStart(2, '0')}`;
                 }
-            }, 1000);
+            }
+
+                , 1000);
 
             // Store countdown interval ID
             sessionStorage.setItem('screensaverCountdownInterval', countdownInterval);
@@ -1947,8 +2312,7 @@
             sessionStorage.removeItem('screensaverStartTime');
 
             // Remove all visual indicators
-            const elementsToRemove = [
-                'screensaver-indicator',
+            const elementsToRemove = ['screensaver-indicator',
                 'screensaver-countdown',
                 'disable-screensaver-btn',
                 'desktop-next-game-btn',
@@ -1967,20 +2331,19 @@
 
             // Show confirmation
             const confirmation = document.createElement('div');
-            confirmation.style.cssText = `
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                background: rgba(0, 0, 0, 0.9);
-                color: white;
-                padding: 20px;
-                border-radius: 10px;
-                font-size: 16px;
-                z-index: 10001;
-                text-align: center;
-                backdrop-filter: blur(15px);
-                border: 1px solid rgba(255, 255, 255, 0.2);
+            confirmation.style.cssText = ` position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 16px;
+            z-index: 10001;
+            text-align: center;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             `;
             confirmation.innerHTML = 'Screensaver mode disabled<br><small>You can continue playing this game</small>';
             document.body.appendChild(confirmation);
@@ -1988,7 +2351,9 @@
             // Remove confirmation after 3 seconds
             setTimeout(() => {
                 confirmation.remove();
-            }, 3000);
+            }
+
+                , 3000);
         }
 
         function exitScreensaverMode(redirectToScreensaver = false) {
@@ -2006,8 +2371,7 @@
             }
 
             // Remove all visual indicators (both mobile and desktop)
-            const elementsToRemove = [
-                'screensaver-indicator',
+            const elementsToRemove = ['screensaver-indicator',
                 'screensaver-countdown',
                 'disable-screensaver-btn',
                 'desktop-next-game-btn',
@@ -2038,20 +2402,19 @@
 
             // Show confirmation
             const confirmation = document.createElement('div');
-            confirmation.style.cssText = `
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                background: rgba(0, 0, 0, 0.9);
-                color: white;
-                padding: 20px;
-                border-radius: 10px;
-                font-size: 16px;
-                z-index: 10001;
-                text-align: center;
-                backdrop-filter: blur(15px);
-                border: 1px solid rgba(255, 255, 255, 0.2);
+            confirmation.style.cssText = ` position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 16px;
+            z-index: 10001;
+            text-align: center;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             `;
             confirmation.innerHTML = 'Screensaver mode deactivated<br><small>Press any key or tap to continue</small>';
             document.body.appendChild(confirmation);
@@ -2061,11 +2424,27 @@
                 confirmation.remove();
                 document.removeEventListener('keydown', removeConfirmation);
                 document.removeEventListener('touchend', removeConfirmation);
-            };
+            }
+
+                ;
 
             setTimeout(removeConfirmation, 3000);
             document.addEventListener('keydown', removeConfirmation);
             document.addEventListener('touchend', removeConfirmation);
+        }
+
+        // Function to open EmulatorJS Control Settings
+        function openEJSControls() {
+            const btn = Array.from(document.querySelectorAll('.ejs_menu_button'))
+                .find(el => el.innerText.includes('Control Settings'));
+            if (btn) {
+                btn.click();
+            } else {
+                console.warn("EmulatorJS Control Settings button not found.");
+                // Fallback: try to find the gear icon if text is different
+                const gearBtn = document.querySelector('.ejs_menu_button[title*="Control"]');
+                if (gearBtn) gearBtn.click();
+            }
         }
 
         // Menu button referrer logic
@@ -2073,7 +2452,9 @@
             if (sessionStorage.getItem('referrerAllGames') === '1') {
                 sessionStorage.removeItem('referrerAllGames');
                 navigate('/all/');
-            } else {
+            }
+
+            else {
                 navigate('/');
             }
         });
@@ -2090,6 +2471,7 @@
             function getKeyboardTarget() {
                 // Try to find the game canvas or input element
                 const gameElement = document.getElementById('game');
+
                 if (gameElement) {
                     // Look for canvas or input elements inside the game container
                     const canvas = gameElement.querySelector('canvas');
@@ -2098,6 +2480,7 @@
                     if (input) return input;
                     return gameElement;
                 }
+
                 // Fallback to window
                 return window;
             }
@@ -2108,10 +2491,13 @@
 
                 // Try to focus the game element if it's focusable
                 const gameElement = document.getElementById('game');
+
                 if (gameElement && gameElement.focus) {
                     try {
                         gameElement.focus();
-                    } catch (e) {
+                    }
+
+                    catch (e) {
                         // Element might not be focusable, that's okay
                     }
                 }
@@ -2188,10 +2574,13 @@
                 e.preventDefault();
                 e.stopPropagation();
                 simulateKeyPress('0');
+
                 // Release after a short delay to simulate a click
                 setTimeout(() => {
                     simulateKeyRelease('0');
-                }, 100);
+                }
+
+                    , 100);
             });
 
             // Mouse down: start holding
@@ -2206,7 +2595,9 @@
                     if (isHolding) {
                         simulateKeyPress('0');
                     }
-                }, 100); // Simulate keydown every 100ms while holding
+                }
+
+                    , 100); // Simulate keydown every 100ms while holding
             });
 
             // Mouse up: stop holding
@@ -2214,10 +2605,12 @@
                 e.preventDefault();
                 e.stopPropagation();
                 isHolding = false;
+
                 if (holdInterval) {
                     clearInterval(holdInterval);
                     holdInterval = null;
                 }
+
                 simulateKeyRelease('0');
             });
 
@@ -2225,10 +2618,12 @@
             fastForwardButton.addEventListener('mouseleave', function (e) {
                 if (isHolding) {
                     isHolding = false;
+
                     if (holdInterval) {
                         clearInterval(holdInterval);
                         holdInterval = null;
                     }
+
                     simulateKeyRelease('0');
                 }
             });
@@ -2245,28 +2640,35 @@
                     if (isHolding) {
                         simulateKeyPress('0');
                     }
-                }, 100);
+                }
+
+                    , 100);
             });
 
             fastForwardButton.addEventListener('touchend', function (e) {
                 e.preventDefault();
                 e.stopPropagation();
                 isHolding = false;
+
                 if (holdInterval) {
                     clearInterval(holdInterval);
                     holdInterval = null;
                 }
+
                 simulateKeyRelease('0');
             });
 
             fastForwardButton.addEventListener('touchcancel', function (e) {
                 e.preventDefault();
+
                 if (isHolding) {
                     isHolding = false;
+
                     if (holdInterval) {
                         clearInterval(holdInterval);
                         holdInterval = null;
                     }
+
                     simulateKeyRelease('0');
                 }
             });
@@ -2276,7 +2678,7 @@
         document.getElementById('leaderboard-button').addEventListener('click', function () {
             const urlParams = new URLSearchParams(window.location.search);
             const gameId = urlParams.get('game');
-            const leaderboardUrl = `https://alloarcade.web.app/leaderboards/verify/${gameId}`;
+            const leaderboardUrl = `https: //alloarcade.web.app/leaderboards/verify/${gameId}`;
             window.open(leaderboardUrl, '_blank');
         });
 
@@ -2284,6 +2686,7 @@
         document.getElementById('help-button').addEventListener('click', function () {
             const helpModal = document.getElementById('help-modal');
             const helpModalContent = document.getElementById('help-modal-content');
+
             if (helpModal && helpModalContent) {
                 helpModal.style.display = 'flex';
                 helpModalContent.scrollTop = 0; // Scroll to top when opening
@@ -2293,6 +2696,7 @@
         // Close help modal functionality
         document.getElementById('help-modal-close').addEventListener('click', function () {
             const helpModal = document.getElementById('help-modal');
+
             if (helpModal) {
                 helpModal.style.display = 'none';
             }
@@ -2311,6 +2715,7 @@
             const mobileCloseBtn = document.getElementById('mobile-leaderboard-close');
 
             if (mobilePopup && mobileCloseBtn) {
+
                 // Close button click
                 mobileCloseBtn.addEventListener('click', function () {
                     mobilePopup.style.display = 'none';
@@ -2323,6 +2728,7 @@
 
                 // Prevent closing when clicking on the content box itself
                 const mobileContent = document.getElementById('mobile-leaderboard-content');
+
                 if (mobileContent) {
                     mobileContent.addEventListener('click', function (e) {
                         e.stopPropagation();
@@ -2371,6 +2777,7 @@
 
             console.log('Mouse auto-hide initialized with 5-second timeout');
         }
+
     </script>
 </body>
 

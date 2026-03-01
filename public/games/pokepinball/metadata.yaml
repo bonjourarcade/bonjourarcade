@@ -2,12 +2,16 @@ title: Pokémon Pinball
 developer: Jupiter, HAL Laboratory
 year: 1999
 genre: Pinball
-#controls:
-#  - "←↓↑→: Déplacer"
-#  - "Z: Tirer"
-#  - "X: Bombe"
+controls:
+  - "W,A,S,D: Directions (Flèches)"
+  - "J, K: Bouton A, B"
+  - "Espace: Select"
+  - "Enter: Start"
+  - "[Guide visuel (image)](/games/pokepinball/controls.jpg)"
 
-#to_start: Select -> Start
+announcement_message: "Découvrez une toute nouvelle façon d'attraper des Pokémon : en jouant au flipper ! Touchez les cibles avec votre Poké Ball pour capturer et faire évoluer des Pokémon. Plus vous êtes performant, plus les Pokémon que vous trouverez seront rares. Chaque Pokémon capturé est automatiquement enregistré dans votre Pokédex. Parviendrez-vous à tous les attraper ?"
+
+to_start: Enter
 
 
 added: 2025-07-27

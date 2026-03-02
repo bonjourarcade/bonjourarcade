@@ -726,6 +726,40 @@
                 display: none !important;
             }
         }
+
+        /* Enlarged screenshot overlay */
+        #enlarged-screenshot-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.95);
+            z-index: 5000;
+            justify-content: center;
+            align-items: center;
+            cursor: zoom-out;
+        }
+
+        #enlarged-screenshot-overlay img {
+            max-width: 95%;
+            max-height: 95%;
+            object-fit: contain;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+            border: 2px solid #444;
+            border-radius: 4px;
+        }
+
+        #score-screenshot-preview {
+            cursor: zoom-in;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        #score-screenshot-preview:hover {
+            transform: scale(1.02);
+            border-color: #ffd700 !important;
+        }
     </style>
     <script src="../assets/js/analytics.js"></script>
 </head>
@@ -830,6 +864,10 @@
             <div id="score-screenshot-container" style="margin-bottom:14px;">
                 <img id="score-screenshot-preview" src="" alt="Screenshot"
                     style="display:none; max-width:100%; max-height:200px; border-radius:8px; border:1px solid #555; object-fit:contain;">
+                <p id="screenshot-enlarge-hint"
+                    style="display:none; margin:4px 0 0 0; font-size:11px; color:#888; text-align:center;">
+                    🔍 Clique sur l'image pour l'agrandir
+                </p>
                 <div id="score-no-screenshot"
                     style="display:none; padding:12px; background:#222; border-radius:8px; color:#888; font-size:13px; border:1px dashed #444;">
                     Aucun screenshot disponible
@@ -855,6 +893,11 @@
                 <div id="score-submission-status" style="margin-top:10px; font-size:14px;"></div>
             </div>
         </div>
+    </div>
+
+    <!-- Enlarged Screenshot Overlay -->
+    <div id="enlarged-screenshot-overlay">
+        <img id="enlarged-screenshot-img" src="" alt="Screenshot agrandi">
     </div>
 
     <!-- Firebase SDK Modules as ES modules -->
@@ -2838,6 +2881,8 @@
                                     // Update preview UI
                                     screenshotPreview.src = dataUrl;
                                     screenshotPreview.style.display = 'block';
+                                    const enlargeHint = document.getElementById('screenshot-enlarge-hint');
+                                    if (enlargeHint) enlargeHint.style.display = 'block';
                                     if (noScreenshot) noScreenshot.style.display = 'none';
                                 } catch (e) {
                                     console.error("Canvas screenshot failed:", e);
@@ -2874,6 +2919,26 @@
                 }
             }
         });
+
+        // Click-to-enlarge: open overlay when clicking the screenshot preview
+        (function () {
+            const screenshotPreviewEl = document.getElementById('score-screenshot-preview');
+            const enlargedOverlayEl = document.getElementById('enlarged-screenshot-overlay');
+            const enlargedImgEl = document.getElementById('enlarged-screenshot-img');
+
+            if (screenshotPreviewEl && enlargedOverlayEl && enlargedImgEl) {
+                screenshotPreviewEl.addEventListener('click', () => {
+                    if (screenshotPreviewEl.src && screenshotPreviewEl.style.display !== 'none') {
+                        enlargedImgEl.src = screenshotPreviewEl.src;
+                        enlargedOverlayEl.style.display = 'flex';
+                    }
+                });
+
+                enlargedOverlayEl.addEventListener('click', () => {
+                    enlargedOverlayEl.style.display = 'none';
+                });
+            }
+        })();
 
         // Score Login button
         const loginBtn = document.getElementById('score-login-btn');

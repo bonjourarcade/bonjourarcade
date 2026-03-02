@@ -558,6 +558,28 @@
             background-color: rgba(0, 0, 0, 0.9);
         }
 
+        /* Clock styling */
+        #play-header-clock {
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            color: #ffd700;
+            margin-left: 15px;
+            padding: 4px 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            letter-spacing: 0.5px;
+            min-width: 45px;
+            text-align: center;
+        }
+
+        /* Hide clock on mobile to prevent layout conflicts */
+        @media (max-width: 768px) {
+            #play-header-clock {
+                display: none;
+            }
+        }
+
         #menu-button .arrow {
             font-size: 18px;
         }
@@ -723,6 +745,7 @@
                 <span class="arrow">←</span>
                 <span>MENU</span>
             </div>
+            <div id="play-header-clock">--:--</div>
         </div>
         <div id="play-header-center">
             <a href="/" aria-label="Retour à l'accueil">
@@ -1880,7 +1903,6 @@
         document.addEventListener('DOMContentLoaded', initScreensaverMode);
 
         // Initialize mouse auto-hide functionality
-        document.addEventListener('DOMContentLoaded', initMouseAutoHide);
 
         // Screensaver mode functionality - Completely overhauled for mobile
         function initScreensaverMode() {
@@ -3027,6 +3049,27 @@
 
             console.log('Mouse auto-hide initialized');
         }
+
+        // Clock functionality
+        function initClock() {
+            const clockElement = document.getElementById('play-header-clock');
+            if (!clockElement) return;
+
+            function updateClock() {
+                const now = new Date();
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                clockElement.textContent = `${hours}:${minutes}`;
+            }
+
+            updateClock();
+            setInterval(updateClock, 1000 * 30); // Update every 30 seconds
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initClock();
+            initMouseAutoHide();
+        });
 
     </script>
 </body>

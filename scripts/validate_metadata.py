@@ -32,27 +32,44 @@ def get_archetypal_fields(archetypal_path):
 def get_game_ids_from_predictions(predictions_path):
     """
     Extract all game_id values from upcoming.yaml.
+    Supports two formats:
+    - Plain list: [game_id1, game_id2, ...]
+    - Dict: {seed: {game_id: ...}, ...}
     Returns list of (seed, game_id) tuples.
     """
     try:
         with open(predictions_path, 'r') as f:
             predictions = yaml.safe_load(f)
-        
+
         if predictions is None:
             return []
-        
+
         game_ids = []
-        for seed, game_data in predictions.items():
-            if isinstance(game_data, dict):
-                game_id = game_data.get('game_id')
+
+        # New format: plain list of game ID strings
+        if isinstance(predictions, list):
+            for i, game_id in enumerate(predictions):
                 if game_id:
-                    game_ids.append((seed, game_id))
-            # Old format entries (just strings) are skipped as they don't have game_id
-        
-        return game_ids
+                    game_ids.append((f"entry_{i}", str(game_id)))
+            return game_ids
+
+        # Legacy format: dict with seed keys
+        if isinstance(predictions, dict):
+            for seed, game_data in predictions.items():
+                if isinstance(game_data, dict):
+                    game_id = game_data.get('game_id')
+                    if game_id:
+                        game_ids.append((seed, game_id))
+                # Old format entries (just strings) are skipped
+            return game_ids
+
+        print(f"Error: upcoming.yaml has unexpected format ({type(predictions).__name__})", file=sys.stderr)
+        sys.exit(1)
+
     except Exception as e:
         print(f"Error reading upcoming.yaml: {e}", file=sys.stderr)
         sys.exit(1)
+
 
 def get_game_title_from_gamelist(game_id, gamelist_path):
     """

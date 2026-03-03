@@ -1093,6 +1093,7 @@ const finalizeBtn = document.getElementById('finalize-btn');
     async function endTournament() {
         stopScoreFetching(); // Now we can stop fetching.
         tournamentState.status = 'finished';
+        if (skipTimerBtn) skipTimerBtn.style.display = 'none';
 
         // --- Data preparation for results.html ---
         const finalRoundIndex = tournamentState.games.length - 1;
@@ -1224,8 +1225,10 @@ const finalizeBtn = document.getElementById('finalize-btn');
         }
     });
 
+    // skip-timer button removed: using existing rectangular skip-to-break button `skipToBreakBtn`
+
     function showSetupView() { setupView.style.display = 'block'; tournamentView.style.display = 'none'; winnerView.style.display = 'none'; } 
-    function showTournamentView() { setupView.style.display = 'none'; tournamentView.style.display = 'block'; winnerView.style.display = 'none'; }
+    function showTournamentView() { setupView.style.display = 'none'; tournamentView.style.display = 'block'; winnerView.style.display = 'none'; if (skipToBreakBtn) skipToBreakBtn.style.display = 'block'; }
 
     function resumeTournament() {
         showTournamentView();

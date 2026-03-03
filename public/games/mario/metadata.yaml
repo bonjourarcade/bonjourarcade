@@ -6,7 +6,7 @@ controls:
   - "←↓↑→: Déplacer"
   - "Z: Sauter"
 
-to_start: Select -> Start
+to_start: Espace -> Enter
 
 # Message d'annonce personnalisé pour la newsletter
 # Ce message apparaîtra en haut de l'email et des webhooks

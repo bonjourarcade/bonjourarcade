@@ -43,6 +43,39 @@ const nextRoundBtn = document.getElementById('next-round-btn');
 const skipToBreakBtn = document.getElementById('skip-to-break-btn');
 const finalizeBtn = document.getElementById('finalize-btn');
 
+// helper toast message for visual feedback
+function showToast(msg) {
+    const t = document.createElement('div');
+    t.textContent = msg;
+    t.style.position = 'fixed';
+    t.style.bottom = '20px';
+    t.style.left = '50%';
+    t.style.transform = 'translateX(-50%)';
+    t.style.background = 'rgba(0,0,0,0.8)';
+    t.style.color = '#fff';
+    t.style.padding = '8px 16px';
+    t.style.borderRadius = '4px';
+    t.style.zIndex = '2000';
+    t.style.fontSize = '14px';
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 2000);
+}
+
+// add delegation to support status toggles without needing to rebind
+scoreboardEntriesEl.addEventListener('click', (evt) => {
+    const entry = evt.target.closest('.scoreboard-entry');
+    if (!entry || entry.classList.contains('eliminated')) return;
+    const playerName = entry.dataset.player || entry.querySelector('.player-name')?.textContent;
+    if (!playerName) return;
+    const current = entry.classList.contains('danger') ? 'danger' : 'safe';
+    const newStatus = current === 'danger' ? 'safe' : 'danger';
+    tournamentState.overrides = tournamentState.overrides || {};
+    tournamentState.overrides[playerName] = newStatus;
+    console.log('delegate override toggled', playerName, newStatus);
+    showToast(`Statut ${playerName} → ${newStatus}`);
+    saveState();
+    renderScoreboard();
+});
 
     // --- Config & State ---
     const TOURNAMENT_STATE_KEY = 'bonjourarcade_tournament_state';
@@ -718,7 +751,7 @@ const finalizeBtn = document.getElementById('finalize-btn');
     function loadState() { try { const s = sessionStorage.getItem(TOURNAMENT_STATE_KEY); if (s) { tournamentState = JSON.parse(s); return true; } } catch (e) { console.error("Could not load state:", e); } return false; } 
     function clearState() {
         sessionStorage.removeItem(TOURNAMENT_STATE_KEY);
-        tournamentState = { players: {} }; // Re-initialize tournamentState to ensure a clean slate, especially for players
+        tournamentState = { players: {}, overrides: {} }; // Re-initialize tournamentState to ensure a clean slate, especially for players and overrides
         simulatedPlayerNames = [];
         tournamentState.simulatedScoresGeneratedForRound = false;
     }
@@ -807,18 +840,26 @@ const finalizeBtn = document.getElementById('finalize-btn');
         if (activePlayers.length > 0) {
             scoreboardHTML += '<div class="scoreboard-section-title">Joueurs Actifs</div>';
             scoreboardHTML += activePlayers.map((p, i) => {
+                // allow manual override of safe/danger
                 let statusClass = '';
-                // Determine status based on round rank. This applies during both round and break.
-                // First round is warmup, everyone is safe.
-                if (roundIndex === 0) {
-                    statusClass = 'safe';
-                } else if (nextCutoff > 0) {
-                    // In subsequent rounds, compare rank (i) to the cutoff.
-                    statusClass = i < nextCutoff ? 'safe' : 'danger';
+                let isOverridden = false;
+                if (tournamentState.overrides && tournamentState.overrides[p.name]) {
+                    statusClass = tournamentState.overrides[p.name];
+                    isOverridden = true;
+                } else {
+                    // Determine status based on round rank. This applies during both round and break.
+                    // First round is warmup, everyone is safe.
+                    if (roundIndex === 0) {
+                        statusClass = 'safe';
+                    } else if (nextCutoff > 0) {
+                        // In subsequent rounds, compare rank (i) to the cutoff.
+                        statusClass = i < nextCutoff ? 'safe' : 'danger';
+                    }
                 }
                 
                 const avatarSrc = p.photoURL ? p.photoURL : '../assets/default-avatar.png';
-                return `<div class="scoreboard-entry ${statusClass}"><span class="rank">${i + 1}.</span><img src="${avatarSrc}" alt="${p.name}" class="player-avatar" style="width: 24px; height: 24px; border-radius: 50%; margin-right: 8px; vertical-align: middle;"><span class="player-name">${p.name}</span><span class="score">${p.roundScore.toLocaleString()}</span></div>`;
+                // include data-player for easier lookup when clicked
+                return `<div class="scoreboard-entry ${statusClass}${isOverridden ? ' override' : ''}" data-player="${p.name}"><span class="rank">${i + 1}.</span><img src="${avatarSrc}" alt="${p.name}" class="player-avatar" style="width: 24px; height: 24px; border-radius: 50%; margin-right: 8px; vertical-align: middle;"><span class="player-name">${p.name}${isOverridden ? ' *' : ''}</span><span class="score">${p.roundScore.toLocaleString()}</span></div>`;
             }).join('');
         }
 
@@ -831,6 +872,9 @@ const finalizeBtn = document.getElementById('finalize-btn');
             }).join('');
         }
         scoreboardEntriesEl.innerHTML = scoreboardHTML;
+
+        // We're using event delegation on the container so we don't need to rebind every render.
+        // (See additional listener set up during initialization below.)
     } // Correctly closes the renderScoreboard function.
 
     function startScoreFetching() { stopScoreFetching(); fetchScores(); const i = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 5000 : 30000; scoreFetchingInterval = setInterval(fetchScores, i); } 
@@ -1187,7 +1231,8 @@ const finalizeBtn = document.getElementById('finalize-btn');
         tournamentState = {
             games: gameIds, roundDuration: parseFloat(roundDurationInput.value) * 60, pauseDuration: parseFloat(pauseDurationInput.value) * 60,
             currentRoundIndex: -1, players: {}, roundHistory: [], status: 'setup', remainingTime: 0, currentCutoff: 0,
-            simulatedScoresGeneratedForRound: false
+            simulatedScoresGeneratedForRound: false,
+            overrides: {} // allow manual safe/danger toggles
         };
 
         if (simulationModeCheckbox.checked) {

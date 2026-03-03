@@ -25,9 +25,14 @@ if ! command -v python3 >/dev/null 2>&1; then
     exit 1
 fi
 
-# Run the PNG shrinking script
-echo "Running PNG optimization script..."
-python3 scripts/shrink_large_pngs_parallel.py
+# Ensure Pillow is available before running the script
+if ! python3 -c "import PIL" >/dev/null 2>&1; then
+    echo "Pillow library not found; skipping PNG optimization.\n"
+    echo "Install it with: pip install pillow (or pip install -r requirements.txt)"
+else
+    echo "Running PNG optimization script..."
+    python3 scripts/shrink_large_pngs_parallel.py
+fi
 
 # Check if the script ran successfully
 if [ $? -ne 0 ]; then

@@ -1,7 +1,16 @@
 import os
 import glob
 import multiprocessing as mp
-from PIL import Image
+import sys
+
+# optional dependency on Pillow; if it's missing we abort gracefully
+try:
+    from PIL import Image
+except ImportError:
+    print("PIL (Pillow) not installed, skipping PNG optimization.\n"
+          "Install with `pip install pillow` or add it to your environment.")
+    # exit with success so pre-commit doesn't block the commit
+    sys.exit(0)
 
 try:
     from tqdm import tqdm

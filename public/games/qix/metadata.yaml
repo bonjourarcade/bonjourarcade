@@ -2,5 +2,11 @@ title: Qix
 developer: Taito
 year: 1981
 genre: Puzzle, Action
-#added: 
+added: 2026-03-03
 hide: yes
+controls:
+  - "←↓↑→: Déplacer"
+  - "Z: Trait rapide"
+  - "X: Trait lent"
+
+to_start: Select -> Start

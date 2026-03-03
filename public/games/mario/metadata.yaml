@@ -2,12 +2,11 @@ title: Mario Bros.
 developer: Nintendo
 year: 1983
 genre: Action, Platform, Co-op
-#controls:
-#  - "←↓↑→: Déplacer"
-#  - "Z: Tirer"
-#  - "X: Bombe"
+controls:
+  - "←↓↑→: Déplacer"
+  - "Z: Sauter"
 
-#to_start: Select -> Start
+to_start: Select -> Start
 
 # Message d'annonce personnalisé pour la newsletter
 # Ce message apparaîtra en haut de l'email et des webhooks

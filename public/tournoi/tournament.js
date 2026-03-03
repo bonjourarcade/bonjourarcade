@@ -981,8 +981,12 @@ const finalizeBtn = document.getElementById('finalize-btn');
             saveState(); 
         }, endRound);
 
+        // always allow skipping a round once it has started - the button is useful
+        // even outside of simulation mode so that an operator can jump to the break early.
+        skipToBreakBtn.style.display = 'block';
+        // keep the visibility logic for simulation mode here just in case other flows rely on it
         if (simulationModeCheckbox.checked) {
-            skipToBreakBtn.style.display = 'block';
+            // no extra action required, button already shown
         }
     }
     
@@ -1066,14 +1070,16 @@ const finalizeBtn = document.getElementById('finalize-btn');
 
         renderScoreboard();
         // The timer now just reveals the button at the end.
+        // as soon as the break begins we display the "next round" button so the
+        // operator can skip the rest of the pause immediately; the timer callback
+        // will also make sure it is visible when the configured pause duration expires.
+        nextRoundBtn.style.display = 'block';
         startTimer(tournamentState.pauseDuration, updateTimerDisplay, () => {
-            nextRoundBtn.style.display = 'block'; // Show the button
+            nextRoundBtn.style.display = 'block'; // reinforce visibility at timer end
             roundSubtitleEl.textContent = "En attente du lancement de la prochaine ronde...";
         });
 
-        if (simulationModeCheckbox.checked) {
-            nextRoundBtn.style.display = 'block';
-        }
+        // simulation mode already shows the button above; no extra handling needed
     }
 
     function awaitFinalConfirmation() {
@@ -1093,7 +1099,10 @@ const finalizeBtn = document.getElementById('finalize-btn');
     async function endTournament() {
         stopScoreFetching(); // Now we can stop fetching.
         tournamentState.status = 'finished';
-        if (skipTimerBtn) skipTimerBtn.style.display = 'none';
+        // hide any leftover control buttons so the UI doesn't flicker or mislead
+        if (skipToBreakBtn) skipToBreakBtn.style.display = 'none';
+        if (nextRoundBtn) nextRoundBtn.style.display = 'none';
+        if (finalizeBtn) finalizeBtn.style.display = 'none';
 
         // --- Data preparation for results.html ---
         const finalRoundIndex = tournamentState.games.length - 1;
@@ -1192,6 +1201,10 @@ const finalizeBtn = document.getElementById('finalize-btn');
 
         showTournamentView();
         startNextRound();
+        // in case the countdown takes a moment we want the skip-to-break button
+        // already visible right away so the host can jump to the pause without a
+        // page refresh
+        skipToBreakBtn.style.display = 'block';
     });
 
     restartTournamentBtn.addEventListener('click', () => {
@@ -1270,6 +1283,9 @@ const finalizeBtn = document.getElementById('finalize-btn');
             renderScoreboard();
             startScoreFetching();
             startTimer(tournamentState.remainingTime, onTick, endRound);
+
+            // when resuming mid-round make the skip-to-break button available again
+            skipToBreakBtn.style.display = 'block';
         } else if (tournamentState.status === 'pause' || tournamentState.status === 'break') { // Updated to handle 'break'
              roundTitleEl.textContent = "Pause";
              roundSubtitleEl.textContent = "Approbation des scores en cours...";
@@ -1286,6 +1302,9 @@ const finalizeBtn = document.getElementById('finalize-btn');
              gameCoverEl.style.display = 'block';
              renderScoreboard();
              startScoreFetching(); // Ensure fetching continues on resume
+
+             // make the "next round" button available right away during a resumed pause
+             nextRoundBtn.style.display = 'block';
              startTimer(tournamentState.remainingTime, updateTimerDisplay, () => {
                 nextRoundBtn.style.display = 'block';
                 roundSubtitleEl.textContent = "En attente du lancement de la prochaine ronde...";

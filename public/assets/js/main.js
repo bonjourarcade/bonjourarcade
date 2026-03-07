@@ -1664,9 +1664,16 @@ function populatePreviousGames(games) {
         }
     }
 
-    // Handle case where there are no previous games
+    // Handle case where there are no games
     if (!visibleGames || visibleGames.length === 0) {
-        //gridContainer.innerHTML = '<p>No previous games found.</p>'; // Removed: now handled by search filter
+        gridContainer.innerHTML = '';
+        const noResults = document.createElement('div');
+        noResults.style.cssText = 'display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; padding:40px 20px; grid-column:1/-1; text-align:center;';
+        noResults.innerHTML = `
+            <p style="color:#888; font-size:1rem;">Aucun résultat trouvé.</p>
+            <a href="/all/" style="display:inline-flex; align-items:center; gap:8px; background:#ffd700; color:#000; font-weight:700; font-size:0.9rem; padding:10px 20px; border-radius:8px; text-decoration:none; transition:opacity .15s;" onmouseover="this.style.opacity='.8'" onmouseout="this.style.opacity='1'">📚 Voir tout le catalogue</a>
+        `;
+        gridContainer.appendChild(noResults);
         return;
     }
 
@@ -1788,6 +1795,15 @@ function populatePreviousGames(games) {
             handleGameClick(gameItem);
         });
     });
+
+    // Catalog CTA at the bottom of search results
+    const catalogCta = document.createElement('div');
+    catalogCta.style.cssText = 'display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:24px 20px 12px; grid-column:1/-1; text-align:center; border-top:1px solid rgba(255,255,255,0.06); margin-top:8px;';
+    catalogCta.innerHTML = `
+        <p style="color:#888; font-size:0.85rem;">Vous ne trouvez pas ce que vous cherchez ?</p>
+        <a href="/all/" style="display:inline-flex; align-items:center; gap:8px; background:#ffd700; color:#000; font-weight:700; font-size:0.85rem; padding:9px 18px; border-radius:8px; text-decoration:none; transition:opacity .15s;" onmouseover="this.style.opacity='.8'" onmouseout="this.style.opacity='1'">📚 Voir tout le catalogue</a>
+    `;
+    gridContainer.appendChild(catalogCta);
 }
 
 /**

@@ -117,17 +117,16 @@ async function sendDiscordNotification(user, score, game) {
     try {
         const response = await fetch(DISCORD_WEBHOOK_URL, {
             method: 'POST',
+            mode: 'no-cors', // Avoid CORS preflight
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'text/plain' // Use simple content-type to avoid CORS preflight
             },
             body: JSON.stringify(payload)
         });
-
-        if (!response.ok) {
-            console.error("Failed to send Discord notification:", await response.text());
-        }
+        // Note: With 'no-cors', response.ok will be false and we can't see the result,
+        // but the message should still be delivered to Discord.
     } catch (error) {
-        console.error("Error sending Discord notification:", error);
+        console.error("Error sending Discord notification (possibly CORS):", error);
     }
 }
 
@@ -139,17 +138,14 @@ async function sendGoogleChatNotification(user, score, game) {
     try {
         const response = await fetch(GOOGLE_CHAT_WEBHOOK_URL, {
             method: 'POST',
+            mode: 'no-cors', // Avoid CORS preflight
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'text/plain' // Use simple content-type to avoid CORS preflight
             },
             body: JSON.stringify(payload)
         });
-
-        if (!response.ok) {
-            console.error("Failed to send Google Chat notification:", await response.text());
-        }
     } catch (error) {
-        console.error("Error sending Google Chat notification:", error);
+        console.error("Error sending Google Chat notification (possibly CORS):", error);
     }
 }
 

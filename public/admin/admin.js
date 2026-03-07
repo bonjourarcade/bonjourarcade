@@ -109,9 +109,14 @@ function createScoreElement(score) {
     return div;
 }
 
+function formatScore(score) {
+    return new Intl.NumberFormat('en-US').format(score);
+}
+
 async function sendDiscordNotification(user, score, game) {
+    const formattedScore = formatScore(score);
     const payload = {
-        content: `📢 Nouveau score validé ! **${user}** a fait **${score}** sur **${game}**.`
+        content: `**${user}** a fait **${formattedScore}** sur **${game}**.`
     };
 
     try {
@@ -125,8 +130,9 @@ async function sendDiscordNotification(user, score, game) {
 }
 
 async function sendGoogleChatNotification(user, score, game) {
+    const formattedScore = formatScore(score);
     const payload = {
-        text: `📢 Nouveau score validé ! *${user}* a fait *${score}* sur *${game}*.`
+        text: `📢 Nouveau score validé ! *${user}* a fait *${formattedScore}* sur *${game}*.`
     };
 
     try {

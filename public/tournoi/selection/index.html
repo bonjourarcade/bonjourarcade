@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sélection Tournoi – BonjourArcade</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0d0d0f;
+            --surface: #18181c;
+            --surface2: #22222a;
+            --border: rgba(255, 255, 255, 0.08);
+            --accent: #ffd700;
+            --accent2: #ff6b35;
+            --text: #f0f0f5;
+            --muted: #888898;
+            --radius: 14px;
+            --current-glow: 0 0 0 3px rgba(255, 215, 0, 0.5), 0 8px 32px rgba(0, 0, 0, 0.6);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100dvh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- Header --- */
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 24px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--text);
+        }
+
+        .header-brand img {
+            height: 32px;
+        }
+
+        header h1 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--accent);
+            letter-spacing: 0.5px;
+        }
+
+        .header-meta {
+            font-size: 0.85rem;
+            color: var(--muted);
+            text-align: right;
+        }
+
+        /* --- Main content --- */
+        main {
+            flex: 1;
+            padding: 24px 20px 48px;
+            max-width: 900px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* --- Error / Loading state --- */
+        #state-msg {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--muted);
+            font-size: 1rem;
+            display: none;
+        }
+
+        #state-msg.visible {
+            display: block;
+        }
+
+        /* --- Game List --- */
+        #game-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .game-card {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 14px 18px;
+            cursor: pointer;
+            text-decoration: none;
+            color: var(--text);
+            transition: background 0.18s, border-color 0.18s, transform 0.15s, box-shadow 0.15s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-card:hover {
+            background: var(--surface2);
+            border-color: rgba(255, 255, 255, 0.18);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
+        }
+
+        .game-card.current {
+            border-color: var(--accent);
+            box-shadow: var(--current-glow);
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.07) 0%, var(--surface) 60%);
+        }
+
+        .game-card.done {
+            opacity: 0.45;
+        }
+
+        .game-rank {
+            font-size: 1.4rem;
+            font-weight: 900;
+            color: var(--muted);
+            min-width: 36px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .game-card.current .game-rank {
+            color: var(--accent);
+        }
+
+        .game-cover {
+            width: 72px;
+            height: 56px;
+            object-fit: cover;
+            border-radius: 8px;
+            background: var(--surface2);
+            flex-shrink: 0;
+        }
+
+        .game-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .game-title {
+            font-size: 1rem;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 4px;
+        }
+
+        .game-card.current .game-title {
+            color: var(--accent);
+        }
+
+        .game-meta {
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+
+        .game-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            flex-shrink: 0;
+            cursor: pointer;
+            transition: opacity 0.15s;
+            text-decoration: none;
+        }
+
+        .game-badge:hover {
+            opacity: 0.8;
+        }
+
+        .badge-play {
+            background: var(--accent);
+            color: #000;
+        }
+
+        .badge-current {
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            color: #000;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.4);
+            }
+
+            50% {
+                box-shadow: 0 0 0 7px rgba(255, 215, 0, 0);
+            }
+        }
+
+        .badge-done {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--muted);
+            cursor: default;
+        }
+
+        .current-label {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: var(--accent);
+            color: #000;
+            font-size: 0.68rem;
+            font-weight: 900;
+            letter-spacing: 1px;
+            padding: 3px 10px;
+            border-radius: 0 var(--radius) 0 10px;
+            text-transform: uppercase;
+        }
+
+        /* --- Controls bar --- */
+        #controls-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            transition: opacity 0.15s;
+        }
+
+        .btn:hover {
+            opacity: 0.85;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #000;
+        }
+
+        .btn-secondary {
+            background: var(--surface2);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        #progress-label {
+            margin-left: auto;
+            font-size: 0.85rem;
+            color: var(--muted);
+        }
+
+        /* --- Progress bar --- */
+        #progress-bar-wrap {
+            height: 4px;
+            background: var(--surface2);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        #progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            border-radius: 4px;
+            transition: width 0.4s ease;
+        }
+
+        @media (max-width: 480px) {
+            .game-cover {
+                width: 56px;
+                height: 44px;
+            }
+
+            .game-title {
+                font-size: 0.9rem;
+            }
+
+            header {
+                padding: 12px 16px;
+            }
+
+            main {
+                padding: 16px 12px 40px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <a class="header-brand" href="/">
+            <img src="../../assets/images/bonjourarcade-logo.png" alt="BonjourArcade"
+                onerror="this.style.display='none'">
+            <h1>🏆 Sélection Tournoi</h1>
+        </a>
+        <div class="header-meta" id="header-meta"></div>
+    </header>
+
+    <main>
+        <div id="state-msg">Chargement des jeux…</div>
+        <div id="controls-bar" style="display:none;">
+            <button class="btn btn-primary" id="btn-mark-done">✅ Marquer comme terminé</button>
+            <button class="btn btn-secondary" id="btn-prev">← Précédent</button>
+            <button class="btn btn-secondary" id="btn-next">Suivant →</button>
+            <span id="progress-label"></span>
+        </div>
+        <div id="progress-bar-wrap" style="display:none;">
+            <div id="progress-bar"></div>
+        </div>
+        <div id="game-list"></div>
+    </main>
+
+    <script>
+        // ----------- State -----------
+        const STATE_KEY = 'tournoi_selection_state';
+        let games = []; // [{id, title, coverArt, year, genre, pageUrl}]
+        let currentIndex = 0;
+        let doneSet = new Set();
+
+        // ----------- URL parsing -----------
+        function getGameIdsFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            // Support ?games=id1,id2,id3  OR  ?g=id1&g=id2&g=id3
+            if (params.has('games')) {
+                return params.get('games').split(',').map(s => s.trim()).filter(Boolean);
+            }
+            return params.getAll('g').map(s => s.trim()).filter(Boolean);
+        }
+
+        // ----------- Persistence -----------
+        function saveState() {
+            const urlKey = window.location.search;
+            const stored = { currentIndex, done: [...doneSet] };
+            try { localStorage.setItem(STATE_KEY + urlKey, JSON.stringify(stored)); } catch (e) { }
+        }
+
+        function loadState() {
+            const urlKey = window.location.search;
+            try {
+                const raw = localStorage.getItem(STATE_KEY + urlKey);
+                if (raw) {
+                    const s = JSON.parse(raw);
+                    currentIndex = Math.min(s.currentIndex || 0, games.length - 1);
+                    doneSet = new Set(s.done || []);
+                }
+            } catch (e) { }
+        }
+
+        // ----------- Game data -----------
+        async function fetchGameData(ids) {
+            const isLocalhost = location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.hostname.startsWith('192.168.');
+            const cacheBuster = '?v=' + Date.now();
+            const url = isLocalhost
+                ? '../../gamelist.json' + cacheBuster
+                : 'https://storage.googleapis.com/bonjourarcade/gamelist.json' + cacheBuster;
+
+            const resp = await fetch(url);
+            if (!resp.ok) throw new Error('Impossible de charger gamelist.json');
+            const data = await resp.json();
+
+            const byId = {};
+            for (const g of data.games || []) byId[g.id] = g;
+
+            return ids.map((id, i) => {
+                const g = byId[id];
+                if (!g) return { id, title: id, coverArt: null, year: '', genre: '', pageUrl: `/play/?game=${id}` };
+                return {
+                    id: g.id,
+                    title: g.title || id,
+                    coverArt: g.coverArt || null,
+                    year: g.year || '',
+                    genre: g.genre || '',
+                    pageUrl: `/play/?game=${g.id}`,
+                };
+            });
+        }
+
+        // ----------- Render -----------
+        function renderList() {
+            const list = document.getElementById('game-list');
+            list.innerHTML = '';
+
+            const total = games.length;
+            const done = doneSet.size;
+
+            document.getElementById('progress-label').textContent = `${done}/${total} terminé${done !== 1 ? 's' : ''}`;
+            document.getElementById('progress-bar').style.width = total > 0 ? `${(done / total) * 100}%` : '0%';
+
+            document.getElementById('header-meta').textContent = `${total} jeu${total !== 1 ? 'x' : ''} dans ce tournoi`;
+
+            games.forEach((g, i) => {
+                const isCurrent = i === currentIndex;
+                const isDone = doneSet.has(g.id);
+
+                const card = document.createElement('a');
+                card.className = 'game-card' + (isCurrent ? ' current' : '') + (isDone ? ' done' : '');
+                card.href = g.pageUrl;
+                card.target = '_blank';
+                card.rel = 'noopener';
+                card.setAttribute('data-index', i);
+
+                if (isCurrent) {
+                    card.innerHTML += `<div class="current-label">▶ EN COURS</div>`;
+                }
+
+                card.innerHTML += `
+                    <div class="game-rank">${i + 1}</div>
+                    <img class="game-cover" src="${g.coverArt || ''}" alt="${g.title}"
+                         onerror="this.style.opacity='0'">
+                    <div class="game-info">
+                        <div class="game-title">${g.title}</div>
+                        <div class="game-meta">${[g.year, g.genre].filter(Boolean).join(' · ')}</div>
+                    </div>
+                    <span class="game-badge ${isCurrent ? 'badge-current' : isDone ? 'badge-done' : 'badge-play'}">
+                        ${isCurrent ? '▶ Jouer maintenant' : isDone ? '✓ Terminé' : '▶ Jouer'}
+                    </span>
+                `;
+
+                // Don't navigate when clicking the card — it opens the play page in a new tab already via href
+                // But clicking anywhere should also set this as current
+                card.addEventListener('click', () => {
+                    currentIndex = i;
+                    saveState();
+                    renderList();
+                });
+
+                list.appendChild(card);
+            });
+
+            updateButtons();
+        }
+
+        function updateButtons() {
+            document.getElementById('btn-prev').disabled = currentIndex <= 0;
+            document.getElementById('btn-next').disabled = currentIndex >= games.length - 1;
+        }
+
+        // ----------- Controls -----------
+        document.getElementById('btn-mark-done').addEventListener('click', () => {
+            const current = games[currentIndex];
+            if (!current) return;
+            if (doneSet.has(current.id)) {
+                doneSet.delete(current.id);
+            } else {
+                doneSet.add(current.id);
+                // Auto-advance to next undone game
+                for (let i = currentIndex + 1; i < games.length; i++) {
+                    if (!doneSet.has(games[i].id)) { currentIndex = i; break; }
+                }
+            }
+            saveState();
+            renderList();
+            // Scroll to current
+            document.querySelector('.game-card.current')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+
+        document.getElementById('btn-prev').addEventListener('click', () => {
+            if (currentIndex > 0) { currentIndex--; saveState(); renderList(); }
+        });
+
+        document.getElementById('btn-next').addEventListener('click', () => {
+            if (currentIndex < games.length - 1) { currentIndex++; saveState(); renderList(); }
+        });
+
+        // ----------- Init -----------
+        async function init() {
+            const stateMsg = document.getElementById('state-msg');
+            stateMsg.classList.add('visible');
+            stateMsg.textContent = 'Chargement des jeux…';
+
+            const ids = getGameIdsFromUrl();
+
+            if (ids.length === 0) {
+                stateMsg.innerHTML = `
+                    <p style="font-size:1.5rem; margin-bottom:16px;">⚠️ Aucun jeu spécifié</p>
+                    <p>Ajoute des IDs de jeu dans l'URL, par exemple&nbsp;:</p>
+                    <code style="background:#1e1e24; padding:10px 18px; border-radius:8px; font-size:0.9rem; display:inline-block; margin-top:12px; color:#ffd700;">
+                        /tournoi/selection/?games=1943,outrun,tetris
+                    </code>
+                `;
+                return;
+            }
+
+            try {
+                games = await fetchGameData(ids);
+                loadState();
+                stateMsg.classList.remove('visible');
+                document.getElementById('controls-bar').style.display = 'flex';
+                document.getElementById('progress-bar-wrap').style.display = 'block';
+                renderList();
+                // Scroll to current on load
+                setTimeout(() => {
+                    document.querySelector('.game-card.current')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 100);
+            } catch (e) {
+                stateMsg.textContent = `Erreur : ${e.message}`;
+            }
+        }
+
+        init();
+    </script>
+</body>
+
+</html>

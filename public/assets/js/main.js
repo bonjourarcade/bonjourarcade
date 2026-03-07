@@ -1117,7 +1117,8 @@ async function fetchFeaturedGameLeaderboard(gameId, isRefresh = false) {
                     player: score.player,
                     score: score.score,
                     rank: score.rank,
-                    userId: userId
+                    userId: userId,
+                    comment: score.comment || ''
                 });
             }
         });
@@ -1214,8 +1215,11 @@ async function fetchFeaturedGameLeaderboard(gameId, isRefresh = false) {
                 ? `<img src="${score.photoURL}" alt="${playerName}">`
                 : initial;
 
+            const safeComment = score.comment ? score.comment.substring(0, 100) : '';
+            const commentAttr = safeComment ? ` data-comment="${escapeHtml(safeComment)}"` : '';
+
             leaderboardHTML += `
-                <div class="featured-leaderboard-entry" data-game-id="${escapeHtml(gameId)}" style="cursor: pointer;">
+                <div class="featured-leaderboard-entry"${commentAttr} data-game-id="${escapeHtml(gameId)}" style="cursor: pointer;">
                     <div class="featured-leaderboard-rank">${rankText}</div>
                     <div class="featured-leaderboard-avatar" style="background-color: ${score.photoURL ? 'transparent' : avatarColor}">${avatarContent}</div>
                     <div class="featured-leaderboard-player">${playerName}</div>
@@ -1282,6 +1286,7 @@ function generateMockScores(gameId) {
         photoURL: `https://via.placeholder.com/96/cccccc/666666?text=${player.name.charAt(0)}`,
         score: Math.floor(baseScore * (1 + Math.random() * 5) * (1 - index * 0.1)),
         game: gameId,
+        comment: Math.random() > 0.5 ? "Super match!" : "",
         date: {
             _seconds: Math.floor(Date.now() / 1000) - Math.floor(Math.random() * 86400 * 30),
             _nanoseconds: Math.floor(Math.random() * 1000000000)

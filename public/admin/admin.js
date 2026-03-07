@@ -99,7 +99,7 @@ function createScoreElement(score) {
             <input type="number" id="edit-score-${score.id}" value="${score.score}" placeholder="Score">
             <textarea id="edit-comment-${score.id}" placeholder="Commentaire">${score.comment || ''}</textarea>
         </div>
-        <div style="margin-top:15px;">
+        <div class="admin-actions">
             <button class="btn-approve" onclick="approveScore('${score.id}')">Valider (Accepter)</button>
             <button class="btn-reject" onclick="rejectScore('${score.id}')">Rejeter (Supprimer)</button>
         </div>

@@ -357,7 +357,8 @@ body.theme-dark .featured-leaderboard-entry:hover {
     font-weight: bold;
     font-size: 0.9rem;
     flex-shrink: 0;
-    overflow: hidden; /* Ensure avatar image doesn't bleed out */
+    overflow: hidden;
+    /* Ensure avatar image doesn't bleed out */
 }
 
 .featured-leaderboard-avatar img {
@@ -1490,6 +1491,60 @@ body.theme-dark #game-id-input::placeholder {
     pointer-events: none;
     opacity: 0.98;
     transition: opacity 0.15s;
+}
+
+/* Leaderboard Hover Tooltip */
+.leaderboard-entry,
+.featured-leaderboard-entry {
+    position: relative;
+}
+
+[data-comment]:hover::after {
+    content: attr(data-comment);
+    position: absolute;
+    bottom: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(30, 30, 30, 0.95);
+    color: white;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: normal;
+    white-space: pre-wrap;
+    width: 220px;
+    z-index: 10000;
+    pointer-events: none;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(8px);
+    text-align: center;
+    line-height: 1.4;
+    animation: tooltip-fade-in 0.2s ease-out;
+}
+
+[data-comment]:hover::before {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: rgba(30, 30, 30, 0.95);
+    z-index: 10000;
+    pointer-events: none;
+}
+
+@keyframes tooltip-fade-in {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
 }
 
 /* Basic Responsive Handling */

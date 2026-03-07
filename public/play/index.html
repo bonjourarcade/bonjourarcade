@@ -762,6 +762,7 @@
         }
     </style>
     <script src="../assets/js/analytics.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 </head>
 
 <body>
@@ -793,7 +794,7 @@
             </button>
             <button id="leaderboard-button">
                 <span>🏆</span>
-                <span>Soumettre</span>
+                <span>Soumettre (!)</span>
             </button>
             <button id="help-button">
                 <span>❔</span>
@@ -884,10 +885,15 @@
 
             <div id="score-form-section" style="display:none;">
                 <input type="number" id="score-input" placeholder="Ton score" required inputmode="numeric"
-                    style="width:100%; padding:12px; margin-bottom:10px; border-radius:6px; border:1px solid #555; background:#222; color:white; box-sizing:border-box; font-size:16px;">
+                    style="width:100%; padding:12px; margin-bottom:10px; border-radius:6px; border:1px solid #555; background:#222; color:white; box-sizing:border-box; font-size:32px; text-align:center; font-weight:bold;">
                 <!-- Comment section hidden as requested -->
-                <textarea id="score-comment-input" placeholder="Commentaire (optionnel)"
-                    style="display:none; width:100%; padding:10px; margin-bottom:14px; border-radius:6px; border:1px solid #555; background:#222; color:white; box-sizing:border-box; resize:vertical; min-height:60px; font-size:14px;"></textarea>
+                <div style="position: relative; width: 100%;">
+                    <textarea id="score-comment-input" placeholder="Commentaire (optionnel)" maxlength="100"
+                        style="width:100%; padding:10px; padding-bottom: 24px; margin-bottom:14px; border-radius:6px; border:1px solid #555; background:#222; color:white; box-sizing:border-box; resize:vertical; min-height:60px; font-size:14px;"></textarea>
+                    <div id="score-comment-counter"
+                        style="position: absolute; right: 8px; bottom: 20px; font-size: 11px; color: #888; pointer-events: none;">
+                        0/100</div>
+                </div>
                 <button id="score-submit-btn"
                     style="background:#00C851; color:white; border:none; padding:12px 20px; border-radius:8px; cursor:pointer; font-size:16px; width:100%; font-weight:bold;">Soumettre</button>
                 <div id="score-submission-status" style="margin-top:10px; font-size:14px;"></div>
@@ -1178,65 +1184,10 @@
                 }
 
                 try {
-                    // Check if we're on localhost and use mock data
-                    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.includes('localhost') || window.location.hostname.startsWith('192.168.');
+                    // Use Firebase function for both localhost and production
+                    console.log('Fetching leaderboard from Firebase');
 
-                    let data;
-
-                    if (isLocalhost) {
-                        // Use mock data for localhost
-                        console.log('Using mock leaderboard data for localhost');
-
-                        data = {
-                            result: {
-                                success: true,
-                                scores: generateMockScores(gameId)
-                            }
-                        }
-
-                            ;
-                    }
-
-                    else {
-
-                        // Use real API for production
-                        const response = await fetch('https://us-central1-alloarcade.cloudfunctions.net/listGameScores', {
-
-                            method: 'POST',
-                            headers: {
-                                'accept': '*/*',
-                                'accept-language': 'en-CA,en;q=0.9,fr-CA;q=0.8,fr;q=0.7,en-GB;q=0.6,en-US;q=0.5',
-                                'cache-control': 'no-cache',
-                                'content-type': 'application/json',
-                                'firebase-instance-id-token': 'd81DC0UGvyC6i41_okOipa:APA91bHNG-8qmIvzgyCLGKg54RBFwRyB2hx6QEcZ2BJUHcbmcvilEJnpCQscmrnOgpVrFlurW4Fg6b0Lkzs_Lzgl53iECK6E8-pPLVN_yHC8_beMww7Blxg',
-                                'origin': 'https://alloarcade.web.app',
-                                'pragma': 'no-cache',
-                                'priority': 'u=1, i',
-                                'referer': 'https://alloarcade.web.app/',
-                                'sec-ch-ua': '"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"',
-                                'sec-ch-ua-mobile': '?0',
-                                'sec-ch-ua-platform': '"Windows"',
-                                'sec-fetch-dest': 'empty',
-                                'sec-fetch-mode': 'cors',
-                                'sec-fetch-site': 'cross-site',
-                                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36'
-                            }
-
-                            ,
-                            body: JSON.stringify({
-                                data: {
-                                    timeRange: "all",
-                                    gameId: gameId
-                                }
-                            })
-                        });
-
-                        if (!response.ok) {
-                            throw new Error(`HTTP error ! status: ${response.status}`);
-                        }
-
-                        data = await response.json();
-                    }
+                    const data = await window.listGameScores(gameId);
 
                     if (!data.result || !data.result.success || !data.result.scores) {
                         throw new Error('Invalid response format');
@@ -1253,7 +1204,8 @@
                             playerBestScores.set(userId, {
                                 player: score.player,
                                 score: score.score,
-                                rank: score.rank
+                                rank: score.rank,
+                                comment: score.comment || ''
                             });
                         }
                     });
@@ -1299,6 +1251,14 @@
                         }
                     }
 
+                    // Helper function to escape HTML
+                    function escapeHtml(text) {
+                        if (!text) return '';
+                        const div = document.createElement('div');
+                        div.textContent = text;
+                        return div.innerHTML;
+                    }
+
                     // Build leaderboard HTML and mobile leaderboard HTML
                     let leaderboardHTML = '';
                     let mobileLeaderboardHTML = '';
@@ -1307,8 +1267,11 @@
                         const rank = index + 1;
                         const rankEmoji = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `${rank}.`;
 
-                        leaderboardHTML += `<div class="leaderboard-entry"><div class="leaderboard-rank">${rankEmoji}</div><div class="leaderboard-player">${score.player}</div><div class="leaderboard-score">${score.score.toLocaleString()}</div></div>`;
-                        mobileLeaderboardHTML += `<div class="mobile-leaderboard-entry"><div class="mobile-leaderboard-rank">${rankEmoji}</div><div class="mobile-leaderboard-player">${score.player}</div><div class="mobile-leaderboard-score">${score.score.toLocaleString()}</div></div>`;
+                        const safeComment = score.comment ? score.comment.substring(0, 100) : '';
+                        const commentAttr = safeComment ? ` data-comment="${escapeHtml(safeComment)}"` : '';
+
+                        leaderboardHTML += `<div class="leaderboard-entry"${commentAttr}><div class="leaderboard-rank">${rankEmoji}</div><div class="leaderboard-player">${score.player}</div><div class="leaderboard-score">${score.score.toLocaleString()}</div></div>`;
+                        mobileLeaderboardHTML += `<div class="mobile-leaderboard-entry"${commentAttr}><div class="mobile-leaderboard-rank">${rankEmoji}</div><div class="mobile-leaderboard-player">${score.player}</div><div class="mobile-leaderboard-score">${score.score.toLocaleString()}</div></div>`;
                     });
 
                     // Save to cache after successful fetch
@@ -1473,6 +1436,7 @@
 
                     score: Math.floor(baseScore * (1 + Math.random() * 5) * (1 - index * 0.1)),
                     game: gameId,
+                    comment: Math.random() > 0.5 ? "C'était super ! Un grand merci pour le jeu :)" : "",
                     date: {
                         _seconds: Math.floor(Date.now() / 1000) - Math.floor(Math.random() * 86400 * 30), // Random date within last 30 days
                         _nanoseconds: Math.floor(Math.random() * 1000000000)
@@ -2775,6 +2739,23 @@
                 statusDiv.style.color = "white";
             }
 
+            // Reset submit button state
+            const submitBtn = document.getElementById('score-submit-btn');
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Soumettre';
+            }
+
+            // Reset comment input and counter
+            const commentInput = document.getElementById('score-comment-input');
+            const commentCounter = document.getElementById('score-comment-counter');
+            if (commentInput) {
+                commentInput.value = '';
+                if (commentCounter) {
+                    commentCounter.textContent = '0/100';
+                }
+            }
+
             if (modal) {
                 modal.style.display = 'flex';
 
@@ -2920,6 +2901,39 @@
             }
         });
 
+        // Shortcut for score submission modal: "!" to open, "Escape" to close
+        document.addEventListener('keydown', (e) => {
+            const modal = document.getElementById('score-submission-modal');
+            const isVisible = modal && modal.style.display !== 'none';
+
+            if (e.key === '!' && !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
+                const leaderboardBtn = document.getElementById('leaderboard-button');
+                if (leaderboardBtn) {
+                    leaderboardBtn.click();
+                }
+            } else if (e.key === 'Escape' && isVisible) {
+                modal.style.display = 'none';
+            }
+        });
+
+        // Comment character counter logic
+        (function () {
+            const commentInput = document.getElementById('score-comment-input');
+            const commentCounter = document.getElementById('score-comment-counter');
+            if (commentInput && commentCounter) {
+                commentInput.addEventListener('input', function () {
+                    const count = this.value.length;
+                    commentCounter.textContent = `${count}/100`;
+                    // Optional: change color if approaching limit
+                    if (count >= 90) {
+                        commentCounter.style.color = '#ffaa00';
+                    } else {
+                        commentCounter.style.color = '#888';
+                    }
+                });
+            }
+        })();
+
         // Click-to-enlarge: open overlay when clicking the screenshot preview
         (function () {
             const screenshotPreviewEl = document.getElementById('score-screenshot-preview');
@@ -2978,20 +2992,32 @@
                 scoreSubmitBtn.textContent = 'Envoi...';
 
                 try {
-                    // Pass an empty string for the comment since we hid the field
-                    await window.submitGameScore(gameId, scoreValue, "", screenshotBase64);
+                    await window.submitGameScore(gameId, scoreValue, commentValue, screenshotBase64);
                     statusDiv.textContent = "Score soumis avec succès pour revue !";
                     statusDiv.style.color = "#00C851";
+
+                    // Trigger celebratory confetti
+                    if (window.confetti) {
+                        confetti({
+                            particleCount: 150,
+                            spread: 70,
+                            origin: { y: 0.6 },
+                            zIndex: 10001
+                        });
+                    }
 
                     setTimeout(() => {
                         document.getElementById('score-submission-modal').style.display = 'none';
                         document.getElementById('score-input').value = '';
+                        document.getElementById('score-comment-input').value = '';
+                        const commentCounter = document.getElementById('score-comment-counter');
+                        if (commentCounter) commentCounter.textContent = '0/100';
                         sessionStorage.removeItem('tempScoreScreenshot');
-                    }, 2000);
+                    }, 2500);
                 } catch (e) {
                     statusDiv.textContent = "Erreur: " + e.message;
                     statusDiv.style.color = "#ff4444";
-                } finally {
+                    // Only re-enable on error
                     scoreSubmitBtn.disabled = false;
                     scoreSubmitBtn.textContent = 'Soumettre';
                 }

@@ -115,18 +115,12 @@ async function sendDiscordNotification(user, score, game) {
     };
 
     try {
-        const response = await fetch(DISCORD_WEBHOOK_URL, {
-            method: 'POST',
-            mode: 'no-cors', // Avoid CORS preflight
-            headers: {
-                'Content-Type': 'text/plain' // Use simple content-type to avoid CORS preflight
-            },
-            body: JSON.stringify(payload)
-        });
-        // Note: With 'no-cors', response.ok will be false and we can't see the result,
-        // but the message should still be delivered to Discord.
+        const request = new XMLHttpRequest();
+        request.open("POST", DISCORD_WEBHOOK_URL);
+        request.setRequestHeader('Content-type', 'application/json');
+        request.send(JSON.stringify(payload));
     } catch (error) {
-        console.error("Error sending Discord notification (possibly CORS):", error);
+        console.error("Error sending Discord notification (XHR):", error);
     }
 }
 
@@ -136,16 +130,12 @@ async function sendGoogleChatNotification(user, score, game) {
     };
 
     try {
-        const response = await fetch(GOOGLE_CHAT_WEBHOOK_URL, {
-            method: 'POST',
-            mode: 'no-cors', // Avoid CORS preflight
-            headers: {
-                'Content-Type': 'text/plain' // Use simple content-type to avoid CORS preflight
-            },
-            body: JSON.stringify(payload)
-        });
+        const request = new XMLHttpRequest();
+        request.open("POST", GOOGLE_CHAT_WEBHOOK_URL);
+        request.setRequestHeader('Content-type', 'application/json');
+        request.send(JSON.stringify(payload));
     } catch (error) {
-        console.error("Error sending Google Chat notification (possibly CORS):", error);
+        console.error("Error sending Google Chat notification (XHR):", error);
     }
 }
 

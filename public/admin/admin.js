@@ -113,10 +113,11 @@ function formatScore(score) {
     return new Intl.NumberFormat('en-US').format(score);
 }
 
-async function sendDiscordNotification(user, score, game) {
+async function sendDiscordNotification(user, score, gameTitle, gameId) {
     const formattedScore = formatScore(score);
+    const gameLink = `[${gameTitle}](https://bonjourarcade.com/b/${gameId})`;
     const payload = {
-        content: `**${user}** a fait **${formattedScore}** sur **${game}**.`
+        content: `**${user}** a fait **${formattedScore}** sur **${gameLink}**.`
     };
 
     try {
@@ -129,10 +130,11 @@ async function sendDiscordNotification(user, score, game) {
     }
 }
 
-async function sendGoogleChatNotification(user, score, game) {
+async function sendGoogleChatNotification(user, score, gameTitle, gameId) {
     const formattedScore = formatScore(score);
+    const gameLink = `<https://bonjourarcade.com/b/${gameId}|${gameTitle}>`;
     const payload = {
-        text: `📢 Nouveau score validé ! *${user}* a fait *${formattedScore}* sur *${game}*.`
+        text: `📢 Nouveau score validé ! *${user}* a fait *${formattedScore}* sur *${gameLink}*.`
     };
 
     try {
@@ -175,8 +177,8 @@ window.approveScore = async (scoreId) => {
         if (originalSubmission) {
             const userDisplay = originalSubmission.user ? originalSubmission.user.displayName : originalSubmission.userId;
             const gameDisplay = originalSubmission.game ? originalSubmission.game.title : newGameId;
-            sendDiscordNotification(userDisplay, newScore, gameDisplay);
-            sendGoogleChatNotification(userDisplay, newScore, gameDisplay);
+            sendDiscordNotification(userDisplay, newScore, gameDisplay, newGameId);
+            sendGoogleChatNotification(userDisplay, newScore, gameDisplay, newGameId);
         }
 
         setTimeout(() => document.getElementById(`score-${scoreId}`).remove(), 1000);

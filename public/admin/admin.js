@@ -8,6 +8,12 @@ const getSubmissionQueueFn = httpsCallable(functions, 'getSubmissionQueue');
 const verifyScoreFn = httpsCallable(functions, 'verifyScore');
 const deleteScoreFn = httpsCallable(functions, 'deleteScore');
 
+const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1479674018251669771/B4c7AxxypBFFETNUvYBaaX5I0oa6w4w79Sgd_-fKHa1fH5DDtoQXqrqWat_SFffAEmMk";
+const GOOGLE_CHAT_WEBHOOK_URL = "https://chat.googleapis.com/v1/spaces/AAQAC7yXV9M/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=0SlrHWs8JWXHncfF0W7pXY-xeq6wjvvxlnx_79kqnsU";
+
+// Store submissions to access user and game info during validation
+let submissionsMap = {};
+
 const authSection = document.getElementById('auth-section');
 const adminSection = document.getElementById('admin-section');
 const loginBtn = document.getElementById('admin-login-btn');
@@ -49,7 +55,9 @@ async function loadPendingScores() {
         }
 
         scoresContainer.innerHTML = "";
+        submissionsMap = {}; // Reset map
         data.submissions.forEach((score) => {
+            submissionsMap[score.id] = score;
             scoresContainer.appendChild(createScoreElement(score));
         });
     } catch (error) {
@@ -101,6 +109,50 @@ function createScoreElement(score) {
     return div;
 }
 
+async function sendDiscordNotification(user, score, game) {
+    const payload = {
+        content: `📢 Nouveau score validé ! **${user}** a fait **${score}** sur **${game}**.`
+    };
+
+    try {
+        const response = await fetch(DISCORD_WEBHOOK_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+            console.error("Failed to send Discord notification:", await response.text());
+        }
+    } catch (error) {
+        console.error("Error sending Discord notification:", error);
+    }
+}
+
+async function sendGoogleChatNotification(user, score, game) {
+    const payload = {
+        text: `📢 Nouveau score validé ! *${user}* a fait *${score}* sur *${game}*.`
+    };
+
+    try {
+        const response = await fetch(GOOGLE_CHAT_WEBHOOK_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+            console.error("Failed to send Google Chat notification:", await response.text());
+        }
+    } catch (error) {
+        console.error("Error sending Google Chat notification:", error);
+    }
+}
+
 window.approveScore = async (scoreId) => {
     const newGameId = document.getElementById(`edit-game-${scoreId}`).value;
     const newScore = parseInt(document.getElementById(`edit-score-${scoreId}`).value, 10);
@@ -125,6 +177,16 @@ window.approveScore = async (scoreId) => {
 
         statusDiv.textContent = "Score validé !";
         statusDiv.style.color = "#00C851";
+
+        // Send Discord notification
+        const originalSubmission = submissionsMap[scoreId];
+        if (originalSubmission) {
+            const userDisplay = originalSubmission.user ? originalSubmission.user.displayName : originalSubmission.userId;
+            const gameDisplay = originalSubmission.game ? originalSubmission.game.title : newGameId;
+            sendDiscordNotification(userDisplay, newScore, gameDisplay);
+            sendGoogleChatNotification(userDisplay, newScore, gameDisplay);
+        }
+
         setTimeout(() => document.getElementById(`score-${scoreId}`).remove(), 1000);
     } catch (e) {
         console.error("Erreur de validation:", e);

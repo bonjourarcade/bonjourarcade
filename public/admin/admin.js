@@ -113,11 +113,16 @@ function formatScore(score) {
     return new Intl.NumberFormat('en-US').format(score);
 }
 
-async function sendDiscordNotification(user, score, gameTitle, gameId) {
+async function sendDiscordNotification(user, score, gameTitle, gameId, comment) {
     const formattedScore = formatScore(score);
     const gameLink = `[${gameTitle}](https://bonjourarcade.com/b/${gameId})`;
+    let content = `**${user}** a fait **${formattedScore}** sur **${gameLink}**.`;
+    if (comment) {
+        // include the comment (blockquote style)
+        content += `\n> ${comment}`;
+    }
     const payload = {
-        content: `**${user}** a fait **${formattedScore}** sur **${gameLink}**.`
+        content
     };
 
     try {
@@ -130,11 +135,15 @@ async function sendDiscordNotification(user, score, gameTitle, gameId) {
     }
 }
 
-async function sendGoogleChatNotification(user, score, gameTitle, gameId) {
+async function sendGoogleChatNotification(user, score, gameTitle, gameId, comment) {
     const formattedScore = formatScore(score);
     const gameLink = `<https://bonjourarcade.com/b/${gameId}|${gameTitle}>`;
+    let text = `📢 Nouveau score validé ! *${user}* a fait *${formattedScore}* sur *${gameLink}*.`;
+    if (comment) {
+        text += `\n> _${comment}_`;
+    }
     const payload = {
-        text: `📢 Nouveau score validé ! *${user}* a fait *${formattedScore}* sur *${gameLink}*.`
+        text
     };
 
     try {
@@ -177,8 +186,9 @@ window.approveScore = async (scoreId) => {
         if (originalSubmission) {
             const userDisplay = originalSubmission.user ? originalSubmission.user.displayName : originalSubmission.userId;
             const gameDisplay = originalSubmission.game ? originalSubmission.game.title : newGameId;
-            sendDiscordNotification(userDisplay, newScore, gameDisplay, newGameId);
-            sendGoogleChatNotification(userDisplay, newScore, gameDisplay, newGameId);
+            // send the comment that was submitted/updated
+            sendDiscordNotification(userDisplay, newScore, gameDisplay, newGameId, newComment);
+            sendGoogleChatNotification(userDisplay, newScore, gameDisplay, newGameId, newComment);
         }
 
         setTimeout(() => document.getElementById(`score-${scoreId}`).remove(), 1000);

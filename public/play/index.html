@@ -366,6 +366,11 @@
             border-radius: 6px;
         }
 
+        .mobile-leaderboard-entry[data-comment] {
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
         .mobile-leaderboard-rank {
             font-size: 20px;
             margin-right: 15px;
@@ -382,6 +387,19 @@
             font-size: 16px;
             color: #ffd700;
             font-weight: bold;
+        }
+
+        #mobile-comment-preview {
+            display: none;
+            margin-top: 12px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            color: #fff;
+            font-size: 14px;
+            line-height: 1.4;
+            white-space: pre-wrap;
         }
 
         #leaderboard-container h3 {
@@ -849,6 +867,7 @@
             <div id="mobile-leaderboard-content-data">
                 <div class="leaderboard-loading">Chargement...</div>
             </div>
+            <div id="mobile-comment-preview"></div>
         </div>
     </div>
 
@@ -1288,9 +1307,10 @@
                         const rankEmoji = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `${rank}.`;
                         const safeComment = score.comment ? score.comment.substring(0, 100) : '';
                         const commentAttr = safeComment ? ` data-comment="${escapeHtml(safeComment)}"` : '';
+                        const commentIndicator = safeComment ? ' <span class="comment-indicator" title="Commentaire disponible">💬</span>' : '';
 
-                        leaderboardHTML += `<div class="leaderboard-entry"${commentAttr}><div class="leaderboard-rank">${rankEmoji}</div><div class="leaderboard-player">${score.player}</div><div class="leaderboard-score">${score.score.toLocaleString()}</div></div>`;
-                        mobileLeaderboardHTML += `<div class="mobile-leaderboard-entry"${commentAttr}><div class="mobile-leaderboard-rank">${rankEmoji}</div><div class="mobile-leaderboard-player">${score.player}</div><div class="mobile-leaderboard-score">${score.score.toLocaleString()}</div></div>`;
+                        leaderboardHTML += `<div class="leaderboard-entry"${commentAttr}><div class="leaderboard-rank">${rankEmoji}</div><div class="leaderboard-player">${score.player}${commentIndicator}</div><div class="leaderboard-score">${score.score.toLocaleString()}</div></div>`;
+                        mobileLeaderboardHTML += `<div class="mobile-leaderboard-entry"${commentAttr}><div class="mobile-leaderboard-rank">${rankEmoji}</div><div class="mobile-leaderboard-player">${score.player}${commentIndicator}</div><div class="mobile-leaderboard-score">${score.score.toLocaleString()}</div></div>`;
                     });
 
                     // Save to cache after successful fetch
@@ -1325,6 +1345,11 @@
 
                             if (mobilePopup && mobileContent) {
                                 mobileContent.innerHTML = mobileLeaderboardHTML;
+                                const mobileCommentPreview = document.getElementById('mobile-comment-preview');
+                                if (mobileCommentPreview) {
+                                    mobileCommentPreview.style.display = 'none';
+                                    mobileCommentPreview.textContent = '';
+                                }
 
                                 // Only show popup on initial load, not on refresh
                                 if (!isRefresh) {
@@ -1366,6 +1391,11 @@
 
                                 if (mobilePopup && mobileContent && cachedData.mobileHTML) {
                                     mobileContent.innerHTML = cachedData.mobileHTML;
+                                    const mobileCommentPreview = document.getElementById('mobile-comment-preview');
+                                    if (mobileCommentPreview) {
+                                        mobileCommentPreview.style.display = 'none';
+                                        mobileCommentPreview.textContent = '';
+                                    }
 
                                     if (!isRefresh) {
                                         mobilePopup.style.display = 'flex';
@@ -3095,6 +3125,8 @@
         document.addEventListener('DOMContentLoaded', function () {
             const mobilePopup = document.getElementById('mobile-leaderboard-popup');
             const mobileCloseBtn = document.getElementById('mobile-leaderboard-close');
+            const mobileContentData = document.getElementById('mobile-leaderboard-content-data');
+            const mobileCommentPreview = document.getElementById('mobile-comment-preview');
 
             if (mobilePopup && mobileCloseBtn) {
 
@@ -3116,6 +3148,26 @@
                         e.stopPropagation();
                     });
                 }
+            }
+
+            // Mobile: tap a score row with a comment to reveal it in the popup.
+            if (mobileContentData && mobileCommentPreview && !mobileContentData.dataset.commentHandlerAdded) {
+                mobileContentData.addEventListener('click', function (e) {
+                    const entry = e.target.closest('.mobile-leaderboard-entry[data-comment]');
+                    if (!entry) {
+                        return;
+                    }
+
+                    const comment = entry.getAttribute('data-comment');
+                    if (!comment) {
+                        return;
+                    }
+
+                    mobileCommentPreview.textContent = comment;
+                    mobileCommentPreview.style.display = 'block';
+                });
+
+                mobileContentData.dataset.commentHandlerAdded = 'true';
             }
         });
 

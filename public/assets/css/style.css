@@ -1499,6 +1499,12 @@ body.theme-dark #game-id-input::placeholder {
     position: relative;
 }
 
+.comment-indicator {
+    margin-left: 6px;
+    font-size: 0.9em;
+    vertical-align: middle;
+}
+
 [data-comment]:hover::after {
     content: attr(data-comment);
     position: absolute;

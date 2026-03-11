@@ -1217,12 +1217,13 @@ async function fetchFeaturedGameLeaderboard(gameId, isRefresh = false) {
 
             const safeComment = score.comment ? score.comment.substring(0, 100) : '';
             const commentAttr = safeComment ? ` data-comment="${escapeHtml(safeComment)}"` : '';
+            const commentIndicator = safeComment ? ' <span class="comment-indicator" title="Commentaire disponible">💬</span>' : '';
 
             leaderboardHTML += `
                 <div class="featured-leaderboard-entry"${commentAttr} data-game-id="${escapeHtml(gameId)}" style="cursor: pointer;">
                     <div class="featured-leaderboard-rank">${rankText}</div>
                     <div class="featured-leaderboard-avatar" style="background-color: ${score.photoURL ? 'transparent' : avatarColor}">${avatarContent}</div>
-                    <div class="featured-leaderboard-player">${playerName}</div>
+                    <div class="featured-leaderboard-player">${playerName}${commentIndicator}</div>
                     <div class="featured-leaderboard-score">${isOldestPlayer ? '🍪 ' : ''}${score.score.toLocaleString()}</div>
                 </div>
             `;

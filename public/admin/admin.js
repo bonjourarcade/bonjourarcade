@@ -8,12 +8,6 @@ const getSubmissionQueueFn = httpsCallable(functions, 'getSubmissionQueue');
 const verifyScoreFn = httpsCallable(functions, 'verifyScore');
 const deleteScoreFn = httpsCallable(functions, 'deleteScore');
 
-const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1479674018251669771/B4c7AxxypBFFETNUvYBaaX5I0oa6w4w79Sgd_-fKHa1fH5DDtoQXqrqWat_SFffAEmMk";
-const GOOGLE_CHAT_WEBHOOK_URL = "https://chat.googleapis.com/v1/spaces/AAQAC7yXV9M/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=0SlrHWs8JWXHncfF0W7pXY-xeq6wjvvxlnx_79kqnsU";
-
-// Store submissions to access user and game info during validation
-let submissionsMap = {};
-
 const authSection = document.getElementById('auth-section');
 const adminSection = document.getElementById('admin-section');
 const loginBtn = document.getElementById('admin-login-btn');
@@ -55,9 +49,7 @@ async function loadPendingScores() {
         }
 
         scoresContainer.innerHTML = "";
-        submissionsMap = {}; // Reset map
         data.submissions.forEach((score) => {
-            submissionsMap[score.id] = score;
             scoresContainer.appendChild(createScoreElement(score));
         });
     } catch (error) {
@@ -109,53 +101,6 @@ function createScoreElement(score) {
     return div;
 }
 
-function formatScore(score) {
-    return new Intl.NumberFormat('en-US').format(score);
-}
-
-async function sendDiscordNotification(user, score, gameTitle, gameId, comment) {
-    const formattedScore = formatScore(score);
-    const gameLink = `[${gameTitle}](https://bonjourarcade.com/b/${gameId})`;
-    let content = `**${user}** a fait **${formattedScore}** sur **${gameLink}**.`;
-    if (comment) {
-        // include the comment (blockquote style)
-        content += `\n> ${comment}`;
-    }
-    const payload = {
-        content
-    };
-
-    try {
-        const request = new XMLHttpRequest();
-        request.open("POST", DISCORD_WEBHOOK_URL);
-        request.setRequestHeader('Content-type', 'application/json');
-        request.send(JSON.stringify(payload));
-    } catch (error) {
-        console.error("Error sending Discord notification (XHR):", error);
-    }
-}
-
-async function sendGoogleChatNotification(user, score, gameTitle, gameId, comment) {
-    const formattedScore = formatScore(score);
-    const gameLink = `<https://bonjourarcade.com/b/${gameId}|${gameTitle}>`;
-    let text = `📢 Nouveau score validé ! *${user}* a fait *${formattedScore}* sur *${gameLink}*.`;
-    if (comment) {
-        text += `\n> _${comment}_`;
-    }
-    const payload = {
-        text
-    };
-
-    try {
-        const request = new XMLHttpRequest();
-        request.open("POST", GOOGLE_CHAT_WEBHOOK_URL);
-        request.setRequestHeader('Content-type', 'application/json');
-        request.send(JSON.stringify(payload));
-    } catch (error) {
-        console.error("Error sending Google Chat notification (XHR):", error);
-    }
-}
-
 window.approveScore = async (scoreId) => {
     const newGameId = document.getElementById(`edit-game-${scoreId}`).value;
     const newScore = parseInt(document.getElementById(`edit-score-${scoreId}`).value, 10);
@@ -180,16 +125,6 @@ window.approveScore = async (scoreId) => {
 
         statusDiv.textContent = "Score validé !";
         statusDiv.style.color = "#00C851";
-
-        // Send Discord notification
-        const originalSubmission = submissionsMap[scoreId];
-        if (originalSubmission) {
-            const userDisplay = originalSubmission.user ? originalSubmission.user.displayName : originalSubmission.userId;
-            const gameDisplay = originalSubmission.game ? originalSubmission.game.title : newGameId;
-            // send the comment that was submitted/updated
-            sendDiscordNotification(userDisplay, newScore, gameDisplay, newGameId, newComment);
-            sendGoogleChatNotification(userDisplay, newScore, gameDisplay, newGameId, newComment);
-        }
 
         setTimeout(() => document.getElementById(`score-${scoreId}`).remove(), 1000);
     } catch (e) {

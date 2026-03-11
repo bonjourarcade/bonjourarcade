@@ -1184,10 +1184,41 @@
                 }
 
                 try {
-                    // Use Firebase function for both localhost and production
-                    console.log('Fetching leaderboard from Firebase');
+                    // Use direct fetch method as on the home page
+                    const isLocalhost = window.location.hostname === 'localhost' ||
+                        window.location.hostname === '127.0.0.1' ||
+                        window.location.hostname.includes('localhost') ||
+                        window.location.hostname.startsWith('192.168.');
 
-                    const data = await window.listGameScores(gameId);
+                    let data;
+                    if (isLocalhost) {
+                        // Use mock data for localhost
+                        data = {
+                            result: {
+                                success: true,
+                                scores: [] // Optionally, you can generate mock scores here
+                            }
+                        };
+                    } else {
+                        // Use real API for production
+                        const response = await fetch('https://us-central1-alloarcade.cloudfunctions.net/listGameScores', {
+                            method: 'POST',
+                            headers: {
+                                'accept': '*/*',
+                                'content-type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                data: {
+                                    timeRange: 'all',
+                                    gameId: gameId
+                                }
+                            })
+                        });
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        data = await response.json();
+                    }
 
                     if (!data.result || !data.result.success || !data.result.scores) {
                         throw new Error('Invalid response format');
@@ -1195,11 +1226,9 @@
 
                     // Get best score for each unique player
                     const playerBestScores = new Map();
-
                     data.result.scores.forEach(score => {
                         const userId = score.userId;
                         const currentBest = playerBestScores.get(userId);
-
                         if (!currentBest || score.score > currentBest.score) {
                             playerBestScores.set(userId, {
                                 player: score.player,
@@ -1217,7 +1246,6 @@
                         if (!isRefresh) {
                             leaderboardContent.innerHTML = '<div class="leaderboard-loading">Aucun score trouvé</div>';
                         }
-
                         return;
                     }
 
@@ -1225,27 +1253,20 @@
                     if (isRefresh) {
                         const currentEntries = leaderboardContent.querySelectorAll('.leaderboard-entry');
                         let scoresChanged = false;
-
-                        // Check if scores have changed
                         if (currentEntries.length !== sortedScores.length) {
                             scoresChanged = true;
-                        }
-
-                        else {
+                        } else {
                             for (let i = 0; i < sortedScores.length; i++) {
                                 const currentPlayer = currentEntries[i]?.querySelector('.leaderboard-player')?.textContent;
                                 const currentScore = currentEntries[i]?.querySelector('.leaderboard-score')?.textContent?.replace(/\s/g, '');
                                 const newPlayer = sortedScores[i].player;
                                 const newScore = sortedScores[i].score.toLocaleString();
-
                                 if (currentPlayer !== newPlayer || currentScore !== newScore) {
                                     scoresChanged = true;
                                     break;
                                 }
                             }
                         }
-
-                        // Only update if scores have changed
                         if (!scoresChanged) {
                             return;
                         }
@@ -1262,11 +1283,9 @@
                     // Build leaderboard HTML and mobile leaderboard HTML
                     let leaderboardHTML = '';
                     let mobileLeaderboardHTML = '';
-
                     sortedScores.forEach((score, index) => {
                         const rank = index + 1;
                         const rankEmoji = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `${rank}.`;
-
                         const safeComment = score.comment ? score.comment.substring(0, 100) : '';
                         const commentAttr = safeComment ? ` data-comment="${escapeHtml(safeComment)}"` : '';
 

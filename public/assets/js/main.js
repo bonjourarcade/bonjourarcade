@@ -1039,14 +1039,30 @@ async function fetchFeaturedGameLeaderboard(gameId, isRefresh = false) {
         let data;
 
         if (isLocalhost) {
-            // Use mock data for localhost
-            console.log('Using mock leaderboard data for localhost');
-            data = {
-                result: {
-                    success: true,
-                    scores: generateMockScores(gameId)
+            // Try emulator data first on localhost, then fallback to mock scores.
+            try {
+                if (typeof window.listGameScores !== 'function') {
+                    throw new Error('window.listGameScores is not available yet');
                 }
-            };
+
+                const localResultRaw = await window.listGameScores(gameId);
+                const localResult = localResultRaw && localResultRaw.result ? localResultRaw.result : localResultRaw;
+
+                if (!localResult || localResult.success !== true || !Array.isArray(localResult.scores)) {
+                    throw new Error('Invalid emulator leaderboard response format');
+                }
+
+                data = { result: localResult };
+                console.log('Using Firebase emulator leaderboard data for homepage localhost');
+            } catch (localError) {
+                console.warn('Failed to load emulator leaderboard data on homepage, using mock scores:', localError);
+                data = {
+                    result: {
+                        success: true,
+                        scores: generateMockScores(gameId)
+                    }
+                };
+            }
         } else {
             // Use real API for production
             console.log(`Fetching leaderboard from API for game: ${gameId}`);

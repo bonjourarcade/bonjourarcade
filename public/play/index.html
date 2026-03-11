@@ -452,6 +452,35 @@
             font-style: italic;
         }
 
+        /* Desktop hover comment tooltip, displayed outside the leaderboard box */
+        #leaderboard-comment-tooltip {
+            position: fixed;
+            display: none;
+            max-width: min(340px, 40vw);
+            padding: 10px 12px;
+            border-radius: 10px;
+            background: rgba(15, 15, 15, 0.97);
+            border: 1px solid rgba(255, 255, 255, 0.24);
+            color: #fff;
+            font-family: sans-serif;
+            font-size: 13px;
+            line-height: 1.4;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            z-index: 3500;
+            pointer-events: none;
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
+        }
+
+        /* Disable global pseudo-tooltips from style.css for /play leaderboard. */
+        #leaderboard-content [data-comment]:hover::before,
+        #leaderboard-content [data-comment]:hover::after,
+        #mobile-leaderboard-content-data [data-comment]:hover::before,
+        #mobile-leaderboard-content-data [data-comment]:hover::after {
+            content: none !important;
+            display: none !important;
+        }
+
         /* Header styling */
         #play-header {
             position: fixed !important;
@@ -858,6 +887,7 @@
             <div class="leaderboard-loading">Chargement...</div>
         </div>
     </div>
+    <div id="leaderboard-comment-tooltip" aria-hidden="true"></div>
 
     <!-- Mobile Leaderboard Popup -->
     <div id="mobile-leaderboard-popup">
@@ -903,7 +933,7 @@
             </div>
 
             <div id="score-form-section" style="display:none;">
-                <input type="number" id="score-input" placeholder="Ton score" required inputmode="numeric"
+                <input type="text" id="score-input" placeholder="Ton score" required inputmode="numeric" pattern="[0-9 ]*" autocomplete="off"
                     style="width:100%; padding:12px; margin-bottom:10px; border-radius:6px; border:1px solid #555; background:#222; color:white; box-sizing:border-box; font-size:32px; text-align:center; font-weight:bold;">
                 <!-- Comment section hidden as requested -->
                 <div style="position: relative; width: 100%;">
@@ -1211,13 +1241,30 @@
 
                     let data;
                     if (isLocalhost) {
-                        // Use mock data for localhost
-                        data = {
-                            result: {
-                                success: true,
-                                scores: [] // Optionally, you can generate mock scores here
+                        // Try emulator data first on localhost, then fallback to mock scores.
+                        try {
+                            if (typeof window.listGameScores !== 'function') {
+                                throw new Error('window.listGameScores is not available yet');
                             }
-                        };
+
+                            const localResultRaw = await window.listGameScores(gameId);
+                            const localResult = localResultRaw && localResultRaw.result ? localResultRaw.result : localResultRaw;
+
+                            if (!localResult || localResult.success !== true || !Array.isArray(localResult.scores)) {
+                                throw new Error('Invalid emulator leaderboard response format');
+                            }
+
+                            data = { result: localResult };
+                            console.log('Using Firebase emulator leaderboard data for localhost');
+                        } catch (localError) {
+                            console.warn('Failed to load emulator leaderboard data, using mock scores:', localError);
+                            data = {
+                                result: {
+                                    success: true,
+                                    scores: generateMockScores(gameId)
+                                }
+                            };
+                        }
                     } else {
                         // Use real API for production
                         const response = await fetch('https://us-central1-alloarcade.cloudfunctions.net/listGameScores', {
@@ -1307,7 +1354,7 @@
                         const rankEmoji = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `${rank}.`;
                         const safeComment = score.comment ? score.comment.substring(0, 100) : '';
                         const commentAttr = safeComment ? ` data-comment="${escapeHtml(safeComment)}"` : '';
-                        const commentIndicator = safeComment ? ' <span class="comment-indicator" title="Commentaire disponible">💬</span>' : '';
+                        const commentIndicator = safeComment ? ' <span class="comment-indicator" aria-label="Commentaire disponible">💬</span>' : '';
 
                         leaderboardHTML += `<div class="leaderboard-entry"${commentAttr}><div class="leaderboard-rank">${rankEmoji}</div><div class="leaderboard-player">${score.player}${commentIndicator}</div><div class="leaderboard-score">${score.score.toLocaleString()}</div></div>`;
                         mobileLeaderboardHTML += `<div class="mobile-leaderboard-entry"${commentAttr}><div class="mobile-leaderboard-rank">${rankEmoji}</div><div class="mobile-leaderboard-player">${score.player}${commentIndicator}</div><div class="mobile-leaderboard-score">${score.score.toLocaleString()}</div></div>`;
@@ -2983,6 +3030,42 @@
             }
         })();
 
+        // Score input formatting: allow only digits and display grouped thousands with spaces.
+        (function () {
+            const scoreInput = document.getElementById('score-input');
+            if (!scoreInput) return;
+
+            function formatScoreWithSpaces(rawValue) {
+                const digits = String(rawValue || '').replace(/\D/g, '');
+                if (!digits) return '';
+                return digits.replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+            }
+
+            function placeCursorAtEnd(input) {
+                const len = input.value.length;
+                input.setSelectionRange(len, len);
+            }
+
+            scoreInput.addEventListener('beforeinput', function (e) {
+                if (!e.data) return;
+                if (/\D/.test(e.data)) {
+                    e.preventDefault();
+                }
+            });
+
+            scoreInput.addEventListener('input', function () {
+                this.value = formatScoreWithSpaces(this.value);
+                placeCursorAtEnd(this);
+            });
+
+            scoreInput.addEventListener('paste', function (e) {
+                e.preventDefault();
+                const pasted = (e.clipboardData || window.clipboardData).getData('text') || '';
+                this.value = formatScoreWithSpaces(pasted);
+                placeCursorAtEnd(this);
+            });
+        })();
+
         // Click-to-enlarge: open overlay when clicking the screenshot preview
         (function () {
             const screenshotPreviewEl = document.getElementById('score-screenshot-preview');
@@ -3026,7 +3109,8 @@
             scoreSubmitBtn.addEventListener('click', async () => {
                 const urlParams = new URLSearchParams(window.location.search);
                 const gameId = urlParams.get('game');
-                const scoreValue = parseInt(document.getElementById('score-input').value, 10);
+                const scoreInputValue = document.getElementById('score-input').value || '';
+                const scoreValue = parseInt(scoreInputValue.replace(/\D/g, ''), 10);
                 const commentValue = document.getElementById('score-comment-input').value;
                 const screenshotBase64 = sessionStorage.getItem('tempScoreScreenshot');
                 const statusDiv = document.getElementById('score-submission-status');
@@ -3127,6 +3211,9 @@
             const mobileCloseBtn = document.getElementById('mobile-leaderboard-close');
             const mobileContentData = document.getElementById('mobile-leaderboard-content-data');
             const mobileCommentPreview = document.getElementById('mobile-comment-preview');
+            const desktopLeaderboardContent = document.getElementById('leaderboard-content');
+            const desktopLeaderboardContainer = document.getElementById('leaderboard-container');
+            const desktopCommentTooltip = document.getElementById('leaderboard-comment-tooltip');
 
             if (mobilePopup && mobileCloseBtn) {
 
@@ -3168,6 +3255,63 @@
                 });
 
                 mobileContentData.dataset.commentHandlerAdded = 'true';
+            }
+
+            // Desktop: hover a score row with a comment to reveal it outside the leaderboard box.
+            if (desktopLeaderboardContent && desktopLeaderboardContainer && desktopCommentTooltip) {
+                const canHover = window.matchMedia('(hover: hover)').matches;
+
+                const hideDesktopCommentTooltip = () => {
+                    desktopCommentTooltip.style.display = 'none';
+                    desktopCommentTooltip.textContent = '';
+                };
+
+                const positionDesktopCommentTooltip = (entry) => {
+                    const margin = 12;
+                    const entryRect = entry.getBoundingClientRect();
+                    const containerRect = desktopLeaderboardContainer.getBoundingClientRect();
+                    const tooltipRect = desktopCommentTooltip.getBoundingClientRect();
+
+                    // Prefer left side of leaderboard; fallback to right if no room.
+                    let left = containerRect.left - tooltipRect.width - margin;
+                    if (left < margin) {
+                        left = containerRect.right + margin;
+                    }
+
+                    let top = entryRect.top + (entryRect.height / 2) - (tooltipRect.height / 2);
+                    const maxTop = window.innerHeight - tooltipRect.height - margin;
+                    if (top < margin) top = margin;
+                    if (top > maxTop) top = Math.max(margin, maxTop);
+
+                    desktopCommentTooltip.style.left = `${Math.round(left)}px`;
+                    desktopCommentTooltip.style.top = `${Math.round(top)}px`;
+                };
+
+                desktopLeaderboardContent.addEventListener('mousemove', function (e) {
+                    if (!canHover) return;
+                    const entry = e.target.closest('.leaderboard-entry[data-comment]');
+                    if (!entry) {
+                        hideDesktopCommentTooltip();
+                        return;
+                    }
+
+                    const comment = entry.getAttribute('data-comment');
+                    if (!comment) {
+                        hideDesktopCommentTooltip();
+                        return;
+                    }
+
+                    if (desktopCommentTooltip.textContent !== comment) {
+                        desktopCommentTooltip.textContent = comment;
+                    }
+
+                    desktopCommentTooltip.style.display = 'block';
+                    positionDesktopCommentTooltip(entry);
+                });
+
+                desktopLeaderboardContent.addEventListener('mouseleave', hideDesktopCommentTooltip);
+                window.addEventListener('resize', hideDesktopCommentTooltip);
+                window.addEventListener('scroll', hideDesktopCommentTooltip, true);
             }
         });
 

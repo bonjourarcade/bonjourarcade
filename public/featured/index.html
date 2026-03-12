@@ -643,7 +643,6 @@
                 // Convert to array and sort by score (highest first)
                 const sortedScores = Array.from(playerBestScores.values())
                     .sort((a, b) => b.score - a.score)
-                    .slice(0, 5); // Show top 5 players for featured page
 
                 return {
                     scores: sortedScores,

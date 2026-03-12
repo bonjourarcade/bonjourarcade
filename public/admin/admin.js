@@ -90,6 +90,10 @@ function createScoreElement(score) {
             <input type="text" id="edit-game-${score.id}" value="${score.gameId}" placeholder="Game ID">
             <input type="number" id="edit-score-${score.id}" value="${score.score}" placeholder="Score">
             <textarea id="edit-comment-${score.id}" placeholder="Commentaire">${score.comment || ''}</textarea>
+            <label style="display:flex; align-items:center; gap:8px; margin-top:6px; color:#ddd; font-size:13px; cursor:pointer;">
+                <input type="checkbox" id="notify-webhooks-${score.id}" checked style="width:auto; margin:0;">
+                Emettre une notification webhook lors de la validation
+            </label>
         </div>
         <div class="admin-actions">
             <button class="btn-approve" onclick="approveScore('${score.id}')">Valider (Accepter)</button>
@@ -105,6 +109,7 @@ window.approveScore = async (scoreId) => {
     const newGameId = document.getElementById(`edit-game-${scoreId}`).value;
     const newScore = parseInt(document.getElementById(`edit-score-${scoreId}`).value, 10);
     const newComment = document.getElementById(`edit-comment-${scoreId}`).value;
+    const notifyWebhooks = document.getElementById(`notify-webhooks-${scoreId}`)?.checked ?? true;
     const statusDiv = document.getElementById(`status-${scoreId}`);
 
     const approveBtn = document.querySelector(`#score-${scoreId} .btn-approve`);
@@ -116,6 +121,7 @@ window.approveScore = async (scoreId) => {
 
         await verifyScoreFn({
             scoreId: scoreId,
+            notifyWebhooks: notifyWebhooks,
             override: {
                 gameId: newGameId,
                 score: newScore,

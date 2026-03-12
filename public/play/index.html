@@ -156,6 +156,35 @@
             background-color: rgba(255, 255, 255, 0.2);
         }
 
+        /* Scores button styling */
+        #scores-button {
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 8px 12px !important;
+            border-radius: 8px;
+            cursor: pointer;
+            display: none;
+            /* Hidden on desktop, shown on mobile */
+            align-items: center;
+            gap: 6px;
+            font-family: sans-serif;
+            font-size: 12px !important;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: background-color 0.2s;
+            margin: 0 !important;
+            backdrop-filter: blur(10px);
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        #scores-button:hover {
+            background-color: rgba(0, 0, 0, 0.9);
+        }
+
+        #scores-button:active {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
         /* Leaderboard button styling */
         #leaderboard-button {
             background-color: rgba(0, 0, 0, 0.7);
@@ -371,6 +400,18 @@
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
+        .mobile-inline-comment {
+            margin: -4px 0 10px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            color: #fff;
+            font-size: 14px;
+            line-height: 1.4;
+            white-space: pre-wrap;
+        }
+
         .mobile-leaderboard-rank {
             font-size: 20px;
             margin-right: 15px;
@@ -507,13 +548,11 @@
         }
 
         #play-header-center {
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
+            position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
-            flex: 0 0 auto;
+            flex: 1;
         }
 
         #play-header-right {
@@ -545,8 +584,6 @@
             }
 
             #play-header-center {
-                left: 50%;
-                transform: translateX(-50%);
                 width: auto;
                 max-width: none;
             }
@@ -560,6 +597,19 @@
                 flex: 0 0 auto;
                 min-width: 50px;
                 justify-content: flex-end;
+            }
+
+            #scores-button {
+                display: flex !important;
+                /* Show scores button on mobile */
+                padding: 6px 8px !important;
+                font-size: 11px !important;
+                gap: 4px;
+            }
+
+            #scores-button span:last-child {
+                display: none;
+                /* Hide "Scores" text on mobile, keep only icon */
             }
 
             #fastforward-button {
@@ -578,9 +628,9 @@
                 /* Hide "Soumettre" text on mobile, keep only icon */
             }
 
-            #help-button.is-visible {
-                display: none;
-                /* Hide help button on mobile to save space */
+            #help-button {
+                display: none !important;
+                /* Hide help button on mobile */
             }
         }
 
@@ -835,6 +885,10 @@
             </a>
         </div>
         <div id="play-header-right">
+            <button id="scores-button">
+                <span>📊</span>
+                <span>Scores</span>
+            </button>
             <button id="fastforward-button">
                 <span>⏩</span>
                 <span>FF</span>
@@ -3178,6 +3232,16 @@
             });
         }
 
+        // Scores button functionality (display mobile leaderboard on click)
+        document.getElementById('scores-button').addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const mobilePopup = document.getElementById('mobile-leaderboard-popup');
+            if (mobilePopup) {
+                mobilePopup.style.display = 'flex';
+            }
+        });
+
         // Help button functionality
         document.getElementById('help-button').addEventListener('click', function () {
             const helpModal = document.getElementById('help-modal');
@@ -3237,21 +3301,43 @@
                 }
             }
 
-            // Mobile: tap a score row with a comment to reveal it in the popup.
+            // Mobile: tap a score row with a comment to reveal it directly below that row.
             if (mobileContentData && mobileCommentPreview && !mobileContentData.dataset.commentHandlerAdded) {
                 mobileContentData.addEventListener('click', function (e) {
                     const entry = e.target.closest('.mobile-leaderboard-entry[data-comment]');
-                    if (!entry) {
+                    const existingInlineComment = mobileContentData.querySelector('.mobile-inline-comment');
+                    const openedEntry = mobileContentData.querySelector('.mobile-leaderboard-entry.comment-open');
+
+                    if (existingInlineComment) {
+                        existingInlineComment.remove();
+                    }
+                    if (openedEntry) {
+                        openedEntry.classList.remove('comment-open');
+                    }
+
+                    if (!entry || entry === openedEntry) {
+                        mobileCommentPreview.style.display = 'none';
+                        mobileCommentPreview.textContent = '';
                         return;
                     }
 
                     const comment = entry.getAttribute('data-comment');
                     if (!comment) {
+                        mobileCommentPreview.style.display = 'none';
+                        mobileCommentPreview.textContent = '';
                         return;
                     }
 
-                    mobileCommentPreview.textContent = comment;
-                    mobileCommentPreview.style.display = 'block';
+                    const inlineComment = document.createElement('div');
+                    inlineComment.className = 'mobile-inline-comment';
+                    inlineComment.textContent = comment;
+
+                    entry.classList.add('comment-open');
+                    entry.insertAdjacentElement('afterend', inlineComment);
+
+                    // Kept for backward compatibility while transitioning away from the old preview area.
+                    mobileCommentPreview.style.display = 'none';
+                    mobileCommentPreview.textContent = '';
                 });
 
                 mobileContentData.dataset.commentHandlerAdded = 'true';

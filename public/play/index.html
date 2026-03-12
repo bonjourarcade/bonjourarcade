@@ -553,6 +553,14 @@
             align-items: center;
             justify-content: center;
             flex: 1;
+            min-width: 0;
+            padding: 0 6px;
+        }
+
+        #play-header-center a {
+            display: flex;
+            justify-content: center;
+            min-width: 0;
         }
 
         #play-header-right {
@@ -565,9 +573,10 @@
 
         /* Logo styling */
         #play-header-logo {
-            height: 32px;
+            height: clamp(20px, 4.2vw, 32px);
             width: auto;
             max-height: 32px;
+            max-width: min(42vw, 240px);
             cursor: pointer;
             transition: opacity 0.2s;
         }
@@ -579,8 +588,9 @@
         /* Mobile adjustments to prevent logo from being hidden by FF button */
         @media (max-width: 768px) {
             #play-header-logo {
-                height: 24px;
+                height: clamp(18px, 3.8vw, 24px);
                 max-height: 24px;
+                max-width: min(34vw, 150px);
             }
 
             #play-header-center {
@@ -623,6 +633,12 @@
                 /* Hide "FF" text on mobile, keep only icon */
             }
 
+            #leaderboard-button {
+                padding: 6px 8px !important;
+                font-size: 11px !important;
+                gap: 4px;
+            }
+
             #leaderboard-button span:last-child {
                 display: none;
                 /* Hide "Soumettre" text on mobile, keep only icon */
@@ -631,6 +647,12 @@
             #help-button {
                 display: none !important;
                 /* Hide help button on mobile */
+            }
+        }
+
+        @media (max-width: 420px) {
+            #play-header-logo {
+                max-width: min(28vw, 120px);
             }
         }
 

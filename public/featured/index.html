@@ -635,7 +635,8 @@
                             player: score.player,
                             score: score.score,
                             rank: score.rank,
-                            userId: userId
+                            userId: userId,
+                            comment: score.comment || ''
                         });
                     }
                 });
@@ -680,6 +681,7 @@
                 photoURL: `https://via.placeholder.com/96/cccccc/666666?text=${player.name.charAt(0)}`,
                 score: Math.floor(baseScore * (1 + Math.random() * 5) * (1 - index * 0.1)),
                 game: gameId,
+                comment: Math.random() > 0.5 ? "Belle run, bravo !" : "",
                 date: {
                     _seconds: Math.floor(Date.now() / 1000) - (index === mockPlayers.length - 1 ? 1000000 : Math.floor(Math.random() * 86400 * 30)),
                     _nanoseconds: Math.floor(Math.random() * 1000000000)
@@ -707,11 +709,15 @@
                 scores.forEach((score, index) => {
                     const rankEmoji = index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉';
                     const isOldestPlayer = oldestPlayerId && score.userId === oldestPlayerId;
+                    const safePlayerName = escapeHtml(score.player || 'Joueur inconnu');
+                    const safeComment = score.comment ? score.comment.substring(0, 100) : '';
+                    const commentAttr = safeComment ? ` data-comment="${escapeHtml(safeComment)}"` : '';
+                    const commentIndicator = safeComment ? ' <span class="comment-indicator" title="Commentaire disponible">💬</span>' : '';
 
                     leaderboardHTML += `
-                        <div class="leaderboard-entry">
+                        <div class="leaderboard-entry"${commentAttr}>
                             <span class="leaderboard-rank">${index < 3 ? rankEmoji : (index + 1) + '.'}</span>
-                            <span class="leaderboard-player">${score.player}</span>
+                            <span class="leaderboard-player">${safePlayerName}${commentIndicator}</span>
                             <span class="leaderboard-score">${isOldestPlayer ? '🍪 ' : ''}${score.score.toLocaleString()}</span>
                         </div>
                     `;
@@ -721,6 +727,13 @@
             } catch (error) {
                 container.innerHTML = '<div class="leaderboard-error">Erreur de chargement</div>';
             }
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
     </script>
 </body>

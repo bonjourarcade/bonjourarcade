@@ -98,6 +98,36 @@
             text-align: center;
         }
 
+        .comment-wrapper {
+            position: relative;
+            width: 100%;
+            margin-bottom: 14px;
+        }
+
+        .comment-input {
+            width: 100%;
+            padding: 12px;
+            padding-bottom: 24px;
+            border-radius: 8px;
+            border: 1px solid #555;
+            background: #222;
+            color: white;
+            box-sizing: border-box;
+            resize: vertical;
+            min-height: 70px;
+            font-size: 14px;
+            line-height: 1.3;
+        }
+
+        .comment-counter {
+            position: absolute;
+            right: 10px;
+            bottom: 8px;
+            font-size: 11px;
+            color: #888;
+            pointer-events: none;
+        }
+
         #photo-hint {
             color: #aaa;
             font-size: 15px;
@@ -151,6 +181,12 @@
             <input type="number" id="score-input" placeholder="Ton score" required inputmode="numeric"
                 class="input-field">
 
+            <div class="comment-wrapper">
+                <textarea id="score-comment-input" class="comment-input" placeholder="Commentaire (optionnel)"
+                    maxlength="100"></textarea>
+                <div id="score-comment-counter" class="comment-counter">0/100</div>
+            </div>
+
             <button id="score-submit-btn" class="btn">Soumettre</button>
             <div id="score-submission-status"></div>
         </div>
@@ -169,6 +205,8 @@
             const submitBtn = document.getElementById('score-submit-btn');
             const photoInput = document.getElementById('score-photo-input');
             const screenshotPreview = document.getElementById('score-screenshot-preview');
+            const commentInput = document.getElementById('score-comment-input');
+            const commentCounter = document.getElementById('score-comment-counter');
             const statusDiv = document.getElementById('score-submission-status');
 
             let photoBase64 = null;
@@ -271,6 +309,7 @@
                 }
 
                 const scoreValue = parseInt(document.getElementById('score-input').value, 10);
+                const commentValue = (commentInput.value || '').trim().substring(0, 100);
 
                 if (isNaN(scoreValue) || scoreValue < 0) {
                     statusDiv.textContent = "Veuillez entrer un score valide.";
@@ -291,7 +330,7 @@
 
                 try {
                     if (typeof window.submitGameScore === 'function') {
-                        await window.submitGameScore(gameId, scoreValue, "", photoBase64);
+                        await window.submitGameScore(gameId, scoreValue, commentValue, photoBase64);
                         statusDiv.textContent = "Score soumis avec succès pour la vérification ! Redirection...";
                         statusDiv.style.color = "#00C851";
 
@@ -310,6 +349,14 @@
                     submitBtn.textContent = 'Soumettre';
                 }
             });
+
+            if (commentInput && commentCounter) {
+                commentInput.addEventListener('input', () => {
+                    const count = commentInput.value.length;
+                    commentCounter.textContent = `${count}/100`;
+                    commentCounter.style.color = count >= 90 ? '#ffaa00' : '#888';
+                });
+            }
         });
     </script>
 </body>

@@ -3,9 +3,12 @@ developer: Jupiter, HAL Laboratory
 year: 1999
 genre: Pinball
 controls:
-  - "W,A,S,D: Directions (Flèches)"
-  - "J, K: Bouton A, B"
-  - "Espace: Select"
+  - "A: Paddle gauche"
+  - "K: Paddle droit, OK"
+  - "J: Tilt, Retour"
+  - "S: Tilt"
+  - "W,A,S,D: Directions de menu"
+  - "Espace: Tilt"
   - "Enter: Start"
   - "[Guide visuel (image)](/games/pokepinball/controls.jpg)"
 

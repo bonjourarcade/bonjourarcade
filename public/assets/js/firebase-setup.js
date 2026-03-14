@@ -58,6 +58,29 @@ window.onFirebaseAuthStateChanged = (callback) => {
     return onAuthStateChanged(auth, callback);
 };
 
+window.checkFirebaseAdminAccess = async () => {
+    if (!auth.currentUser) {
+        return false;
+    }
+
+    try {
+        const token = await auth.currentUser.getIdTokenResult(true);
+        if (token && token.claims && token.claims.admin === true) {
+            return true;
+        }
+    } catch (error) {
+        console.warn('Admin claim refresh failed:', error);
+    }
+
+    try {
+        const fn = httpsCallable(functions, 'getSubmissionQueue');
+        await fn({ status: 'pending', limit: 1 });
+        return true;
+    } catch (error) {
+        return false;
+    }
+};
+
 // Global score submission function
 window.submitGameScore = async (gameId, score, comment, screenshotBase64) => {
     const submitScoreFn = httpsCallable(functions, 'submitScore');
@@ -86,5 +109,23 @@ window.getLatestScores = async () => {
 window.listGameScores = async (gameId) => {
     const fn = httpsCallable(functions, 'listGameScores');
     const result = await fn({ gameId: gameId || 'all' });
+    return result.data;
+};
+
+// Global admin function to update an existing score (uses verifyScore override contract)
+window.verifyGameScore = async (scoreId, override, notifyWebhooks) => {
+    const fn = httpsCallable(functions, 'verifyScore');
+    const result = await fn({
+        scoreId: scoreId,
+        override: override || undefined,
+        notifyWebhooks: notifyWebhooks === false ? false : undefined
+    });
+    return result.data;
+};
+
+// Global admin/owner function to delete a score
+window.deleteGameScore = async (scoreId) => {
+    const fn = httpsCallable(functions, 'deleteScore');
+    const result = await fn({ scoreId: scoreId });
     return result.data;
 };

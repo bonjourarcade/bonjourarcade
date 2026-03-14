@@ -10,12 +10,18 @@
         // Set title early to prevent 404 flash
         (function () {
             const path = window.location.pathname;
-            const match = path.match(/^\/b\/([^\/]+)$/);
-            if (match) {
+            const playMatch = path.match(/^\/b\/([^\/]+)$/);
+            const scoresMatch = path.match(/^\/scores\/([^\/]+)$/);
+
+            if (playMatch) {
                 // Use a capitalized version of the gameId as a much better fallback than "Redirection..."
-                const gameId = match[1];
+                const gameId = playMatch[1];
                 const fallbackTitle = gameId.charAt(0).toUpperCase() + gameId.slice(1).replace(/[-_]/g, ' ');
                 document.title = fallbackTitle + ' - BonjourArcade';
+            } else if (scoresMatch) {
+                const gameId = scoresMatch[1];
+                const fallbackTitle = gameId.charAt(0).toUpperCase() + gameId.slice(1).replace(/[-_]/g, ' ');
+                document.title = 'Scores - ' + fallbackTitle + ' - BonjourArcade';
             } else {
                 document.title = '404 - Page non trouvée';
             }
@@ -338,11 +344,12 @@
             const path = window.location.pathname;
 
             // Check if the path matches /b/game_id pattern
-            const match = path.match(/^\/b\/([^\/]+)$/);
+            const playMatch = path.match(/^\/b\/([^\/]+)$/);
+            const scoresMatch = path.match(/^\/scores\/([^\/]+)$/);
 
-            if (match) {
+            if (playMatch) {
                 // Extract the game_id from the path
-                const gameId = match[1];
+                const gameId = playMatch[1];
 
                 // Stop 404 content from showing
                 const errorOverlay = document.getElementById('errorOverlay');
@@ -379,6 +386,14 @@
                 iframe.src = `/play/?game=${encodeURIComponent(gameId)}&analytics=false`;
 
                 document.body.appendChild(iframe);
+                return;
+            } else if (scoresMatch) {
+                const gameId = scoresMatch[1];
+
+                const errorOverlay = document.getElementById('errorOverlay');
+                if (errorOverlay) errorOverlay.style.display = 'none';
+
+                window.location.replace(`/scores/?game=${encodeURIComponent(gameId)}`);
                 return;
             } else {
                 // Not a redirect - show 404 content
@@ -745,9 +760,10 @@
         function startInit() {
             // Only initialize if we're not redirecting
             const path = window.location.pathname;
-            const match = path.match(/^\/b\/([^\/]+)$/);
+            const playMatch = path.match(/^\/b\/([^\/]+)$/);
+            const scoresMatch = path.match(/^\/scores\/([^\/]+)$/);
 
-            if (match) {
+            if (playMatch || scoresMatch) {
                 // We're redirecting, don't initialize 404 content
                 return;
             }

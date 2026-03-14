@@ -56,7 +56,7 @@
             <a class="back-link" href="/scores/">Retour aux scores</a>
             <div class="game-header">
                 <img id="leaderboard-game-cover" class="game-cover" src="/assets/images/placeholder_thumb.png" alt="Cover du jeu">
-                <div>
+                <div class="game-header-main">
                     <h2 id="leaderboard-title">Leaderboard</h2>
                     <p id="leaderboard-subtitle">Chargement...</p>
                     <div class="toggle-group">
@@ -64,6 +64,19 @@
                         <button id="toggle-best-scores" class="toggle-button" type="button">Meilleur score par joueur</button>
                     </div>
                 </div>
+                <aside class="game-metrics-panel game-metrics-panel-inline" aria-label="Evolution des scores du jeu">
+                    <div class="game-metrics-head">
+                        <h3 class="game-metrics-title">Evolution des scores</h3>
+                        <div class="game-metrics-toggles" role="group" aria-label="Afficher ou masquer une courbe">
+                            <button id="toggle-metric-collective" class="metric-toggle is-active" type="button" aria-pressed="true">Collectif</button>
+                            <button id="toggle-metric-highscore" class="metric-toggle is-active" type="button" aria-pressed="true">High score</button>
+                        </div>
+                    </div>
+                    <div class="game-metrics-chart-wrap">
+                        <canvas id="game-metrics-chart" height="120" aria-label="Graphique de progression des scores" role="img"></canvas>
+                    </div>
+                    <p id="game-metrics-state" class="game-metrics-state loading">Preparation du graphique...</p>
+                </aside>
             </div>
 
             <section class="leaderboard-shell">
@@ -138,6 +151,7 @@
 
     <script type="module" src="../assets/js/firebase-setup.js"></script>
     <script src="../assets/js/scores-service.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
     <script src="../assets/js/scores-page.js"></script>
 </body>
 

@@ -1253,7 +1253,7 @@ async function fetchFeaturedGameLeaderboard(gameId, isRefresh = false) {
             entry.addEventListener('click', () => {
                 const entryGameId = entry.getAttribute('data-game-id');
                 if (entryGameId) {
-                    window.location.href = `https://alloarcade.web.app/leaderboards/${entryGameId}`;
+                    window.location.href = `/scores/${entryGameId}`;
                 }
             });
         });

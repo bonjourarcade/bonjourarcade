@@ -14,7 +14,12 @@
         observer: null,
         isAdmin: false,
         pendingDeleteScoreId: '',
-        pendingDeleteButton: null
+        pendingDeleteButton: null,
+        metricsChart: null,
+        metricVisibility: {
+            collective: true,
+            highscore: true
+        }
     };
 
     const elements = {
@@ -31,6 +36,10 @@
         gameCover: document.getElementById('leaderboard-game-cover'),
         toggleAll: document.getElementById('toggle-all-scores'),
         toggleBest: document.getElementById('toggle-best-scores'),
+        metricsChartCanvas: document.getElementById('game-metrics-chart'),
+        metricsState: document.getElementById('game-metrics-state'),
+        toggleMetricCollective: document.getElementById('toggle-metric-collective'),
+        toggleMetricHighscore: document.getElementById('toggle-metric-highscore'),
         tableBody: document.getElementById('leaderboard-body'),
         leaderboardState: document.getElementById('leaderboard-state'),
         loadMoreState: document.getElementById('load-more-state'),
@@ -73,6 +82,56 @@
         const div = document.createElement('div');
         div.textContent = String(text);
         return div.innerHTML;
+    }
+
+    function getPlayerInitial(playerName) {
+        if (!playerName) {
+            return '?';
+        }
+
+        const cleaned = String(playerName).replace(/\[.*?\]/g, '').trim();
+        if (!cleaned.length) {
+            return '?';
+        }
+
+        return cleaned.charAt(0).toUpperCase();
+    }
+
+    function getAvatarColor(playerName) {
+        if (!playerName) {
+            return '#999999';
+        }
+
+        let hash = 0;
+        const value = String(playerName);
+
+        for (let i = 0; i < value.length; i += 1) {
+            hash = value.charCodeAt(i) + ((hash << 5) - hash);
+        }
+
+        const hue = Math.abs(hash) % 360;
+        return 'hsl(' + hue + ', 70%, 50%)';
+    }
+
+    function renderPlayerCell(score) {
+        const name = score.playerName || 'Anonymous';
+        const safeName = escapeHtml(name);
+        const initial = escapeHtml(getPlayerInitial(name));
+        const avatarColor = getAvatarColor(name);
+        const hasPhoto = Boolean(score.playerPhotoUrl);
+
+        const avatarHtml = hasPhoto
+            ? '<img src="' + escapeHtml(score.playerPhotoUrl) + '" alt="Avatar de ' + safeName + '" loading="lazy" referrerpolicy="no-referrer">'
+            : initial;
+
+        return [
+            '<div class="player-cell">',
+            '<span class="player-avatar" style="background-color:', hasPhoto ? 'transparent' : avatarColor, '">',
+            avatarHtml,
+            '</span>',
+            '<span class="player-name">', safeName, '</span>',
+            '</div>'
+        ].join('');
     }
 
     function setSectionState(node, message, type) {
@@ -177,6 +236,219 @@
         });
 
         return Array.from(byPlayer.values());
+    }
+
+    function sortScoresChronologically(scores) {
+        return scores.slice().sort(function (a, b) {
+            if (a.createdAtMs !== b.createdAtMs) {
+                return a.createdAtMs - b.createdAtMs;
+            }
+            return String(a.id).localeCompare(String(b.id));
+        });
+    }
+
+    function formatTimelineLabel(timestampMs) {
+        if (!timestampMs) {
+            return 'N/A';
+        }
+
+        return new Date(timestampMs).toLocaleString('fr-FR', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric'
+        });
+    }
+
+    function buildMetricsTimeline(scores) {
+        const ordered = sortScoresChronologically(scores);
+        const bestByPlayer = new Map();
+        const labels = [];
+        const collective = [];
+        const highscore = [];
+
+        let collectiveTotal = 0;
+        let highScoreValue = 0;
+
+        ordered.forEach(function (score) {
+            const playerKey = score.userId || ('name:' + score.playerName);
+            const previousBest = bestByPlayer.has(playerKey) ? bestByPlayer.get(playerKey) : 0;
+            let hasChanged = false;
+
+            if (score.score > previousBest) {
+                bestByPlayer.set(playerKey, score.score);
+                collectiveTotal += score.score - previousBest;
+                hasChanged = true;
+            }
+
+            if (score.score > highScoreValue) {
+                highScoreValue = score.score;
+                hasChanged = true;
+            }
+
+            if (!hasChanged) {
+                return;
+            }
+
+            labels.push(formatTimelineLabel(score.createdAtMs));
+            collective.push(collectiveTotal);
+            highscore.push(highScoreValue);
+        });
+
+        return {
+            labels: labels,
+            collective: collective,
+            highscore: highscore
+        };
+    }
+
+    function setMetricsState(message, type) {
+        if (!elements.metricsState) {
+            return;
+        }
+
+        elements.metricsState.textContent = message || '';
+        elements.metricsState.className = 'game-metrics-state ' + (type || 'loading');
+    }
+
+    function updateMetricToggleButtons() {
+        if (elements.toggleMetricCollective) {
+            elements.toggleMetricCollective.classList.toggle('is-active', state.metricVisibility.collective);
+            elements.toggleMetricCollective.setAttribute('aria-pressed', state.metricVisibility.collective ? 'true' : 'false');
+        }
+
+        if (elements.toggleMetricHighscore) {
+            elements.toggleMetricHighscore.classList.toggle('is-active', state.metricVisibility.highscore);
+            elements.toggleMetricHighscore.setAttribute('aria-pressed', state.metricVisibility.highscore ? 'true' : 'false');
+        }
+    }
+
+    function destroyMetricsChart() {
+        if (state.metricsChart) {
+            state.metricsChart.destroy();
+            state.metricsChart = null;
+        }
+    }
+
+    function applyChartVisibility() {
+        if (!state.metricsChart) {
+            return;
+        }
+
+        state.metricsChart.setDatasetVisibility(0, state.metricVisibility.collective);
+        state.metricsChart.setDatasetVisibility(1, state.metricVisibility.highscore);
+        state.metricsChart.update('none');
+    }
+
+    function renderMetricsChart() {
+        if (!elements.metricsChartCanvas || !elements.metricsState) {
+            return;
+        }
+
+        if (!Array.isArray(state.rawScores) || !state.rawScores.length) {
+            destroyMetricsChart();
+            elements.metricsChartCanvas.style.display = 'none';
+            setMetricsState('Aucun score approuve pour tracer une evolution.', 'empty');
+            return;
+        }
+
+        if (typeof window.Chart !== 'function') {
+            destroyMetricsChart();
+            elements.metricsChartCanvas.style.display = 'none';
+            setMetricsState('Chart.js indisponible. Impossible d\'afficher le graphique.', 'error');
+            return;
+        }
+
+        const timeline = buildMetricsTimeline(state.rawScores);
+
+        if (!timeline.labels.length) {
+            destroyMetricsChart();
+            elements.metricsChartCanvas.style.display = 'none';
+            setMetricsState('Pas assez de variations pour construire le graphique.', 'empty');
+            return;
+        }
+
+        elements.metricsChartCanvas.style.display = 'block';
+        setMetricsState('', 'hidden');
+
+        destroyMetricsChart();
+
+        state.metricsChart = new window.Chart(elements.metricsChartCanvas, {
+            type: 'line',
+            data: {
+                labels: timeline.labels,
+                datasets: [
+                    {
+                        label: 'Score collectif',
+                        data: timeline.collective,
+                        borderColor: '#0b7a63',
+                        backgroundColor: 'rgba(11, 122, 99, 0.14)',
+                        borderWidth: 2,
+                        pointRadius: 2,
+                        pointHoverRadius: 4,
+                        tension: 0,
+                        fill: false
+                    },
+                    {
+                        label: 'High score',
+                        data: timeline.highscore,
+                        borderColor: '#cc6b1f',
+                        backgroundColor: 'rgba(204, 107, 31, 0.14)',
+                        borderWidth: 2,
+                        pointRadius: 2,
+                        pointHoverRadius: 4,
+                        tension: 0,
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false
+                },
+                plugins: {
+                    legend: {
+                        position: 'top'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                return context.dataset.label + ': ' + formatScore(context.parsed.y);
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function (value) {
+                                return formatScore(value);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        applyChartVisibility();
+    }
+
+    function toggleMetricVisibility(metric) {
+        if (metric !== 'collective' && metric !== 'highscore') {
+            return;
+        }
+
+        state.metricVisibility[metric] = !state.metricVisibility[metric];
+
+        if (!state.metricVisibility.collective && !state.metricVisibility.highscore) {
+            state.metricVisibility[metric] = true;
+        }
+
+        updateMetricToggleButtons();
+        applyChartVisibility();
     }
 
     function renderSearchResults(games) {
@@ -350,11 +622,12 @@
             const proofButton = score.screenshotUrl
                 ? '<button class="proof-btn" type="button" data-proof-url="' + escapeHtml(score.screenshotUrl) + '">Voir</button>'
                 : '';
+            const playerCell = renderPlayerCell(score);
 
             return [
                 '<tr data-score-id="', escapeHtml(score.id), '" data-user-id="', escapeHtml(score.userId), '" data-game-id="', escapeHtml(score.gameId), '">',
                 '<td>', String(score.rank), '</td>',
-                '<td>', escapeHtml(score.playerName), '</td>',
+                '<td>', playerCell, '</td>',
                 '<td class="col-score">', formatScore(score.score), '</td>',
                 '<td>', window.BonjourArcadeScoresService.formatDate(score.createdAtMs), '</td>',
                 '<td>', proofButton, '</td>',
@@ -399,6 +672,7 @@
     async function refreshGameScoresSilently() {
         state.rawScores = await window.BonjourArcadeScoresService.listGameScores(state.gameId);
         recomputeGameScores();
+        renderMetricsChart();
     }
 
     function handleAdminDelete(scoreId, button) {
@@ -562,7 +836,7 @@
         const game = getGameById(gameId);
         if (game) {
             elements.leaderboardTitle.textContent = game.title || game.id;
-            elements.leaderboardSubtitle.textContent = 'Classement des scores approuves';
+            elements.leaderboardSubtitle.textContent = 'Classement des scores approuvés';
             elements.gameCover.src = game.coverArt || '/assets/images/placeholder_thumb.png';
             elements.gameCover.alt = game.title || game.id;
         } else {
@@ -613,9 +887,16 @@
             elements.toggleAll.classList.add('is-active');
             elements.toggleBest.classList.remove('is-active');
             recomputeGameScores();
+            updateMetricToggleButtons();
+            renderMetricsChart();
             setupInfiniteScroll();
         } catch (error) {
             console.error(error);
+            destroyMetricsChart();
+            if (elements.metricsChartCanvas) {
+                elements.metricsChartCanvas.style.display = 'none';
+            }
+            setMetricsState('Impossible de calculer l\'evolution des scores pour ce jeu.', 'error');
             setSectionState(elements.leaderboardState, 'Impossible de charger les scores pour ce jeu.', 'error');
         }
     }
@@ -634,6 +915,18 @@
             elements.toggleAll.classList.remove('is-active');
             recomputeGameScores();
         });
+
+        if (elements.toggleMetricCollective) {
+            elements.toggleMetricCollective.addEventListener('click', function () {
+                toggleMetricVisibility('collective');
+            });
+        }
+
+        if (elements.toggleMetricHighscore) {
+            elements.toggleMetricHighscore.addEventListener('click', function () {
+                toggleMetricVisibility('highscore');
+            });
+        }
 
         elements.tableBody.addEventListener('click', function (event) {
             const proofButton = event.target.closest('[data-proof-url]');
@@ -758,6 +1051,8 @@
     }
 
     async function initialize() {
+        updateMetricToggleButtons();
+
         try {
             state.games = await window.BonjourArcadeScoresService.getGameList();
             state.gamesById = new Map(state.games.map(function (game) {

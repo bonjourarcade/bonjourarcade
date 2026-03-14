@@ -161,6 +161,11 @@
         const gameImageUrl = (score.game && (score.game.imageUrl || score.game.coverArt)) || '';
         const playerName = (score.player && score.player.username) || score.player || 'Anonymous';
         const userId = (score.player && score.player.userId) || score.userId || '';
+        const playerPhotoUrl = (score.player && (score.player.photoURL || score.player.photoUrl))
+            || score.photoURL
+            || score.photoUrl
+            || score.playerPhotoUrl
+            || null;
         const scoreValue = Number(score.value != null ? score.value : score.score);
 
         return {
@@ -170,6 +175,7 @@
             gameImageUrl: gameImageUrl,
             playerName: playerName,
             userId: userId,
+            playerPhotoUrl: playerPhotoUrl,
             score: Number.isFinite(scoreValue) ? scoreValue : 0,
             comment: score.comment || '',
             createdAtMs: toTimestampMs(score.createdAt || score.date),
@@ -181,6 +187,11 @@
     function normalizeGameScore(score) {
         const gameId = score.gameId || score.game || '';
         const scoreValue = Number(score.score != null ? score.score : score.value);
+        const playerPhotoUrl = (score.player && (score.player.photoURL || score.player.photoUrl))
+            || score.photoURL
+            || score.photoUrl
+            || score.playerPhotoUrl
+            || null;
 
         return {
             id: score.id || '',
@@ -189,6 +200,7 @@
             gameImageUrl: score.gameImageUrl || '',
             playerName: score.player || (score.player && score.player.username) || 'Anonymous',
             userId: score.userId || (score.player && score.player.userId) || '',
+            playerPhotoUrl: playerPhotoUrl,
             score: Number.isFinite(scoreValue) ? scoreValue : 0,
             comment: score.comment || '',
             createdAtMs: toTimestampMs(score.date || score.createdAt),

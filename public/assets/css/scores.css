@@ -248,9 +248,10 @@ body {
 
 .game-header {
     display: grid;
-    grid-template-columns: 180px 1fr;
+    grid-template-columns: 180px fit-content(560px) minmax(420px, 1fr);
     gap: 16px;
     margin-bottom: 18px;
+    align-items: start;
 }
 
 .game-cover {
@@ -264,6 +265,11 @@ body {
 .game-header h2 {
     margin: 0 0 10px;
     font-size: clamp(24px, 3vw, 38px);
+}
+
+.game-header-main {
+    min-width: 0;
+    justify-self: start;
 }
 
 .game-header p {
@@ -303,6 +309,81 @@ body {
     border-color: var(--accent);
 }
 
+.game-metrics-panel {
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    padding: 14px;
+    margin-bottom: 14px;
+}
+
+.game-metrics-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.game-metrics-title {
+    margin: 0;
+    font-size: 17px;
+}
+
+.game-metrics-toggles {
+    display: inline-flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.metric-toggle {
+    border: 1px solid var(--border);
+    background: #fff;
+    border-radius: 999px;
+    padding: 7px 12px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.metric-toggle.is-active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+}
+
+.game-metrics-chart-wrap {
+    margin-top: 12px;
+    min-height: 200px;
+}
+
+.game-metrics-chart-wrap canvas {
+    width: 100%;
+    height: 220px;
+    display: block;
+}
+
+.game-metrics-panel-inline {
+    margin-bottom: 0;
+    width: 100%;
+}
+
+.game-metrics-state {
+    margin: 10px 0 0;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.game-metrics-state.error {
+    color: #b53333;
+}
+
+.game-metrics-state.hidden {
+    display: none;
+}
+
 .leaderboard-shell {
     border: 1px solid var(--border);
     border-radius: 16px;
@@ -339,6 +420,39 @@ body {
 .col-score {
     font-weight: 700;
     color: var(--accent-strong);
+}
+
+.player-cell {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 180px;
+}
+
+.player-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    flex: 0 0 auto;
+}
+
+.player-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.player-name {
+    min-width: 0;
+    overflow-wrap: anywhere;
 }
 
 .col-comment {
@@ -597,5 +711,9 @@ body[data-is-admin='true'] .admin-actions {
 
     .game-cover {
         max-width: 260px;
+    }
+
+    .game-metrics-chart-wrap canvas {
+        height: 220px;
     }
 }

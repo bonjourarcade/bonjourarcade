@@ -46,6 +46,8 @@
         loadMoreSentinel: document.getElementById('load-more-sentinel'),
         proofModal: document.getElementById('proof-modal'),
         proofModalImage: document.getElementById('proof-modal-image'),
+        proofModalLoader: document.getElementById('proof-modal-loader'),
+        proofModalLoaderText: document.querySelector('#proof-modal-loader .proof-modal-loader-text'),
         proofModalClose: document.getElementById('proof-modal-close'),
         adminEditModal: document.getElementById('admin-edit-modal'),
         adminEditModalClose: document.getElementById('admin-edit-modal-close'),
@@ -601,13 +603,34 @@
             return;
         }
 
+        elements.proofModal.classList.remove('is-error');
+        elements.proofModal.classList.add('is-loading');
+        if (elements.proofModalLoaderText) {
+            elements.proofModalLoaderText.textContent = 'Chargement de la preuve...';
+        }
+        elements.proofModalImage.removeAttribute('src');
         elements.proofModalImage.src = url;
         elements.proofModal.style.display = 'flex';
     }
 
     function closeProofModal() {
         elements.proofModal.style.display = 'none';
+        elements.proofModal.classList.remove('is-loading', 'is-error');
         elements.proofModalImage.src = '';
+    }
+
+    function bindProofImageLoadingEvents() {
+        elements.proofModalImage.addEventListener('load', function () {
+            elements.proofModal.classList.remove('is-loading', 'is-error');
+        });
+
+        elements.proofModalImage.addEventListener('error', function () {
+            elements.proofModal.classList.remove('is-loading');
+            elements.proofModal.classList.add('is-error');
+            if (elements.proofModalLoaderText) {
+                elements.proofModalLoaderText.textContent = 'Impossible de charger cette preuve.';
+            }
+        });
     }
 
     function openAdminEditModal(score) {
@@ -1001,6 +1024,8 @@
     }
 
     function bindModalEvents() {
+        bindProofImageLoadingEvents();
+
         elements.proofModalClose.addEventListener('click', closeProofModal);
         elements.proofModal.addEventListener('click', function (event) {
             if (event.target === elements.proofModal) {

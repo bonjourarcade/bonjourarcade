@@ -259,10 +259,23 @@
         });
     }
 
+    function formatTimelineTooltipLabel(timestampMs) {
+        if (!timestampMs) {
+            return 'N/A';
+        }
+
+        return new Date(timestampMs).toLocaleString('fr-FR', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }
+
     function buildMetricsTimeline(scores) {
         const ordered = sortScoresChronologically(scores);
         const bestByPlayer = new Map();
-        const labels = [];
         const collective = [];
         const highscore = [];
 
@@ -270,32 +283,42 @@
         let highScoreValue = 0;
 
         ordered.forEach(function (score) {
+            if (!score.createdAtMs) {
+                return;
+            }
+
             const playerKey = score.userId || ('name:' + score.playerName);
             const previousBest = bestByPlayer.has(playerKey) ? bestByPlayer.get(playerKey) : 0;
-            let hasChanged = false;
+            let collectiveChanged = false;
+            let collectiveContribution = 0;
 
             if (score.score > previousBest) {
                 bestByPlayer.set(playerKey, score.score);
-                collectiveTotal += score.score - previousBest;
-                hasChanged = true;
+                collectiveContribution = score.score - previousBest;
+                collectiveTotal += collectiveContribution;
+                collectiveChanged = true;
+            }
+
+            if (collectiveChanged) {
+                collective.push({
+                    x: score.createdAtMs,
+                    y: collectiveTotal,
+                    playerName: score.playerName || 'Anonymous',
+                    contribution: collectiveContribution
+                });
             }
 
             if (score.score > highScoreValue) {
                 highScoreValue = score.score;
-                hasChanged = true;
+                highscore.push({
+                    x: score.createdAtMs,
+                    y: highScoreValue,
+                    playerName: score.playerName || 'Anonymous'
+                });
             }
-
-            if (!hasChanged) {
-                return;
-            }
-
-            labels.push(formatTimelineLabel(score.createdAtMs));
-            collective.push(collectiveTotal);
-            highscore.push(highScoreValue);
         });
 
         return {
-            labels: labels,
             collective: collective,
             highscore: highscore
         };
@@ -360,7 +383,7 @@
 
         const timeline = buildMetricsTimeline(state.rawScores);
 
-        if (!timeline.labels.length) {
+        if (!timeline.collective.length && !timeline.highscore.length) {
             destroyMetricsChart();
             elements.metricsChartCanvas.style.display = 'none';
             setMetricsState('Pas assez de variations pour construire le graphique.', 'empty');
@@ -375,7 +398,6 @@
         state.metricsChart = new window.Chart(elements.metricsChartCanvas, {
             type: 'line',
             data: {
-                labels: timeline.labels,
                 datasets: [
                     {
                         label: 'Score collectif',
@@ -405,7 +427,8 @@
                 responsive: true,
                 maintainAspectRatio: false,
                 interaction: {
-                    mode: 'index',
+                    mode: 'nearest',
+                    axis: 'x',
                     intersect: false
                 },
                 plugins: {
@@ -414,13 +437,34 @@
                     },
                     tooltip: {
                         callbacks: {
+                            title: function (items) {
+                                if (!items || !items.length || !items[0].parsed) {
+                                    return '';
+                                }
+                                return formatTimelineTooltipLabel(items[0].parsed.x);
+                            },
                             label: function (context) {
-                                return context.dataset.label + ': ' + formatScore(context.parsed.y);
+                                const playerName = context.raw && context.raw.playerName ? context.raw.playerName : 'Anonymous';
+                                if (context.datasetIndex === 0) {
+                                    const contribution = context.raw && Number.isFinite(context.raw.contribution) ? context.raw.contribution : 0;
+                                    return context.dataset.label + ': ' + formatScore(context.parsed.y) + ' (par ' + playerName + ', +' + formatScore(contribution) + ')';
+                                }
+
+                                return context.dataset.label + ': ' + formatScore(context.parsed.y) + ' (par ' + playerName + ')';
                             }
                         }
                     }
                 },
                 scales: {
+                    x: {
+                        type: 'linear',
+                        ticks: {
+                            callback: function (value) {
+                                return formatTimelineLabel(value);
+                            },
+                            maxTicksLimit: 6
+                        }
+                    },
                     y: {
                         beginAtZero: true,
                         ticks: {

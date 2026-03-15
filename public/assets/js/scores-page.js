@@ -17,7 +17,7 @@
         pendingDeleteButton: null,
         metricsChart: null,
         metricVisibility: {
-            collective: true,
+            collective: false,
             highscore: true
         }
     };
@@ -354,6 +354,24 @@
         }
     }
 
+    function computeYAxisBoundsFromValues(values) {
+        if (!Array.isArray(values) || !values.length) {
+            return null;
+        }
+
+        const valueMin = Math.min.apply(null, values);
+        const valueMax = Math.max.apply(null, values);
+        const span = valueMax - valueMin;
+        const padding = span > 0
+            ? Math.max(1, Math.round(span * 0.08))
+            : Math.max(1, Math.round(valueMax * 0.1));
+
+        return {
+            min: Math.max(0, valueMin - padding),
+            max: valueMax + padding
+        };
+    }
+
     function applyChartVisibility() {
         if (!state.metricsChart) {
             return;
@@ -361,7 +379,43 @@
 
         state.metricsChart.setDatasetVisibility(0, state.metricVisibility.collective);
         state.metricsChart.setDatasetVisibility(1, state.metricVisibility.highscore);
-        state.metricsChart.update('none');
+
+        const yScaleOptions = state.metricsChart.options && state.metricsChart.options.scales
+            ? state.metricsChart.options.scales.y
+            : null;
+
+        if (yScaleOptions) {
+            const visibleValues = [];
+
+            if (state.metricsChart.isDatasetVisible(0)) {
+                (state.metricsChart.data.datasets[0].data || []).forEach(function (point) {
+                    if (point && Number.isFinite(point.y)) {
+                        visibleValues.push(point.y);
+                    }
+                });
+            }
+
+            if (state.metricsChart.isDatasetVisible(1)) {
+                (state.metricsChart.data.datasets[1].data || []).forEach(function (point) {
+                    if (point && Number.isFinite(point.y)) {
+                        visibleValues.push(point.y);
+                    }
+                });
+            }
+
+            const bounds = computeYAxisBoundsFromValues(visibleValues);
+            if (bounds) {
+                yScaleOptions.beginAtZero = false;
+                yScaleOptions.min = bounds.min;
+                yScaleOptions.max = bounds.max;
+            } else {
+                yScaleOptions.beginAtZero = true;
+                delete yScaleOptions.min;
+                delete yScaleOptions.max;
+            }
+        }
+
+        state.metricsChart.update();
     }
 
     function renderMetricsChart() {
@@ -392,6 +446,23 @@
             return;
         }
 
+        const initialVisibleValues = [];
+        if (state.metricVisibility.collective) {
+            timeline.collective.forEach(function (point) {
+                if (point && Number.isFinite(point.y)) {
+                    initialVisibleValues.push(point.y);
+                }
+            });
+        }
+        if (state.metricVisibility.highscore) {
+            timeline.highscore.forEach(function (point) {
+                if (point && Number.isFinite(point.y)) {
+                    initialVisibleValues.push(point.y);
+                }
+            });
+        }
+        const initialBounds = computeYAxisBoundsFromValues(initialVisibleValues);
+
         elements.metricsChartCanvas.style.display = 'block';
         setMetricsState('', 'hidden');
 
@@ -404,6 +475,7 @@
                     {
                         label: 'Score collectif',
                         data: timeline.collective,
+                        hidden: !state.metricVisibility.collective,
                         borderColor: '#0b7a63',
                         backgroundColor: 'rgba(11, 122, 99, 0.14)',
                         borderWidth: 2,
@@ -415,6 +487,7 @@
                     {
                         label: 'High score',
                         data: timeline.highscore,
+                        hidden: !state.metricVisibility.highscore,
                         borderColor: '#cc6b1f',
                         backgroundColor: 'rgba(204, 107, 31, 0.14)',
                         borderWidth: 2,
@@ -468,7 +541,9 @@
                         }
                     },
                     y: {
-                        beginAtZero: true,
+                        beginAtZero: !initialBounds,
+                        min: initialBounds ? initialBounds.min : undefined,
+                        max: initialBounds ? initialBounds.max : undefined,
                         ticks: {
                             callback: function (value) {
                                 return formatScore(value);

@@ -2,14 +2,15 @@ title: Dr Robotnik's Mean Bean Machine
 developer: Compile
 year: 1993
 genre: Puzzle
-#controls:
-#  - "←↓↑→: Déplacer"
-#  - "Z: Tirer"
-#  - "X: Bombe"
+controls:
+  - "←↓↑→: Déplacer"
+  - "Z: Pivoter"
+  - "X: Pivoter"
+  - "C: Pivoter"
 
-#to_start: Select -> Start
+to_start: Enter
 
-announcement_message:
+announcement_message: "Le maléfique Dr. Eggman (alias Dr. Robotnik) a construit une machine qui transformera les pauvres habitants de Beanville en machines, mais l'union fait la force ! Dans ce jeu de casse-tête coloré, aidez-les en les regroupant par quatre couleurs identiques afin qu'ils restent unis et échappent à un destin funeste."
 
 hide: yes
 

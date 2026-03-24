@@ -382,8 +382,7 @@
                 iframe.style.border = 'none';
                 iframe.style.zIndex = '9999';
 
-                // Add analytics=false to prevent double counting
-                iframe.src = `/play/?game=${encodeURIComponent(gameId)}&analytics=false`;
+                iframe.src = `/play/?game=${encodeURIComponent(gameId)}`;
 
                 document.body.appendChild(iframe);
                 return;

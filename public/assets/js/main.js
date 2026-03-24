@@ -1023,6 +1023,7 @@ async function fetchFeaturedGameLeaderboard(gameId, isRefresh = false) {
         console.warn('Leaderboard content not found');
         return;
     }
+    const isTouchDevice = window.matchMedia && window.matchMedia('(hover: none), (pointer: coarse)').matches;
 
     // Show loading state only on initial load, not on silent refresh
     if (!isRefresh) {
@@ -1124,6 +1125,18 @@ async function fetchFeaturedGameLeaderboard(gameId, isRefresh = false) {
         // Get best score for each unique player
         const playerBestScores = new Map();
 
+        function getScorePlayerPhotoUrl(score) {
+            if (!score || typeof score !== 'object') {
+                return '';
+            }
+
+            if (score.player && typeof score.player === 'object') {
+                return score.player.photoURL || score.player.photoUrl || '';
+            }
+
+            return score.photoURL || score.photoUrl || score.playerPhotoUrl || '';
+        }
+
         data.result.scores.forEach(score => {
             const userId = score.userId;
             const currentBest = playerBestScores.get(userId);
@@ -1134,7 +1147,8 @@ async function fetchFeaturedGameLeaderboard(gameId, isRefresh = false) {
                     score: score.score,
                     rank: score.rank,
                     userId: userId,
-                    comment: score.comment || ''
+                    comment: score.comment || '',
+                    playerPhotoUrl: getScorePlayerPhotoUrl(score)
                 });
             }
         });
@@ -1227,33 +1241,77 @@ async function fetchFeaturedGameLeaderboard(gameId, isRefresh = false) {
             const isOldestPlayer = isOldestInTop10 && score.userId === oldestPlayerId;
 
             // Avatar content: use photoURL if available, otherwise fallback to initial
-            const avatarContent = score.photoURL
-                ? `<img src="${score.photoURL}" alt="${playerName}">`
+            const avatarContent = score.playerPhotoUrl
+                ? `<img src="${escapeHtml(score.playerPhotoUrl)}" alt="Avatar de ${playerName}" loading="lazy" referrerpolicy="no-referrer">`
                 : initial;
 
             const safeComment = score.comment ? score.comment.substring(0, 100) : '';
             const commentAttr = safeComment ? ` data-comment="${escapeHtml(safeComment)}"` : '';
-            const commentIndicator = safeComment ? ' <span class="comment-indicator" title="Commentaire disponible">💬</span>' : '';
+            const commentIndicator = safeComment
+                ? (isTouchDevice
+                    ? ' <button type="button" class="comment-indicator comment-toggle" aria-label="Afficher le commentaire" aria-expanded="false">💬</button>'
+                    : ' <span class="comment-indicator" title="Commentaire disponible">💬</span>')
+                : '';
+            const mobileComment = isTouchDevice && safeComment
+                ? `<div class="mobile-comment" hidden>${escapeHtml(safeComment)}</div>`
+                : '';
+            const mobileScoresLink = isTouchDevice
+                ? `<a class="leaderboard-details-link" href="/scores/${encodeURIComponent(gameId)}">Scores</a>`
+                : '';
 
             leaderboardHTML += `
-                <div class="featured-leaderboard-entry"${commentAttr} data-game-id="${escapeHtml(gameId)}" style="cursor: pointer;">
+                <div class="featured-leaderboard-entry${isTouchDevice ? ' is-touch' : ''}"${commentAttr} data-game-id="${escapeHtml(gameId)}" style="cursor: ${isTouchDevice ? 'default' : 'pointer'};">
                     <div class="featured-leaderboard-rank">${rankText}</div>
-                    <div class="featured-leaderboard-avatar" style="background-color: ${score.photoURL ? 'transparent' : avatarColor}">${avatarContent}</div>
+                    <div class="featured-leaderboard-avatar" style="background-color: ${score.playerPhotoUrl ? 'transparent' : avatarColor}">${avatarContent}</div>
                     <div class="featured-leaderboard-player">${playerName}${commentIndicator}</div>
                     <div class="featured-leaderboard-score">${isOldestPlayer ? '🍪 ' : ''}${score.score.toLocaleString()}</div>
+                    ${mobileScoresLink}
+                    ${mobileComment}
                 </div>
             `;
         });
 
         leaderboardContent.innerHTML = leaderboardHTML;
 
-        // Add click handlers to each leaderboard entry
+        // Desktop: entire entry opens the detailed scores page.
         const leaderboardEntries = leaderboardContent.querySelectorAll('.featured-leaderboard-entry');
         leaderboardEntries.forEach(entry => {
-            entry.addEventListener('click', () => {
-                const entryGameId = entry.getAttribute('data-game-id');
-                if (entryGameId) {
-                    window.location.href = `/scores/${entryGameId}`;
+            if (!isTouchDevice) {
+                entry.addEventListener('click', () => {
+                    const entryGameId = entry.getAttribute('data-game-id');
+                    if (entryGameId) {
+                        window.location.href = `/scores/${entryGameId}`;
+                    }
+                });
+                return;
+            }
+
+            const commentToggle = entry.querySelector('.comment-toggle');
+            const mobileComment = entry.querySelector('.mobile-comment');
+            if (!commentToggle || !mobileComment) {
+                return;
+            }
+
+            commentToggle.addEventListener('click', (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+
+                const willShow = mobileComment.hasAttribute('hidden');
+
+                leaderboardEntries.forEach(otherEntry => {
+                    const otherComment = otherEntry.querySelector('.mobile-comment');
+                    const otherToggle = otherEntry.querySelector('.comment-toggle');
+                    if (otherComment && !otherComment.hasAttribute('hidden')) {
+                        otherComment.setAttribute('hidden', '');
+                    }
+                    if (otherToggle) {
+                        otherToggle.setAttribute('aria-expanded', 'false');
+                    }
+                });
+
+                if (willShow) {
+                    mobileComment.removeAttribute('hidden');
+                    commentToggle.setAttribute('aria-expanded', 'true');
                 }
             });
         });
@@ -1574,8 +1632,7 @@ function addRandomAndLeaderboardButtons(container) {
     if (!leaderboardLink) {
         leaderboardLink = document.createElement('a');
         leaderboardLink.id = 'leaderboard-link';
-        leaderboardLink.href = 'https://alloarcade.web.app';
-        leaderboardLink.target = '_blank';
+        leaderboardLink.href = '/scores';
         leaderboardLink.textContent = 'Classements';
     }
 

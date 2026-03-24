@@ -309,6 +309,100 @@
             height: 100%;
         }
 
+        /* Problem warning modal styling */
+        #problem-warning-modal {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            background-color: rgba(0, 0, 0, 0.82);
+            z-index: 3500;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        #problem-warning-content {
+            background-color: #1a1a1a;
+            border-radius: 12px;
+            border: 2px solid #6b4f00;
+            box-shadow: 0 10px 36px rgba(0, 0, 0, 0.45);
+            width: min(92vw, 520px);
+            padding: 18px 18px 16px;
+            color: #f3f3f3;
+            position: relative;
+            text-align: left;
+            font-family: sans-serif;
+        }
+
+        #problem-warning-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #ff4444;
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        #problem-warning-content h3 {
+            margin: 0 34px 10px 0;
+            color: #ffd166;
+            font-size: 1.05rem;
+            line-height: 1.35;
+        }
+
+        #problem-warning-text {
+            margin: 0;
+            color: #e4e4e4;
+            font-size: 0.95rem;
+            line-height: 1.45;
+        }
+
+        #problem-warning-remember {
+            margin-top: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.88rem;
+            color: #d6d6d6;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        #problem-warning-remember input {
+            accent-color: #ffd166;
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        #problem-warning-actions {
+            margin-top: 14px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        #problem-warning-continue {
+            border: none;
+            border-radius: 8px;
+            background: #ffd166;
+            color: #1f1f1f;
+            font-weight: 700;
+            font-size: 0.9rem;
+            padding: 9px 14px;
+            cursor: pointer;
+        }
+
         /* Leaderboard styling */
         #leaderboard-container {
             position: fixed !important;
@@ -956,6 +1050,22 @@
         </div>
     </div>
 
+    <!-- Problem Warning Modal -->
+    <div id="problem-warning-modal" aria-hidden="true">
+        <div id="problem-warning-content" role="dialog" aria-modal="true" aria-labelledby="problem-warning-title">
+            <button id="problem-warning-close" type="button" aria-label="Fermer">×</button>
+            <h3 id="problem-warning-title">⚠️ Ce jeu est connu pour avoir des problèmes</h3>
+            <p id="problem-warning-text"></p>
+            <label id="problem-warning-remember" for="problem-warning-skip">
+                <input id="problem-warning-skip" type="checkbox">
+                Ne plus afficher pour ce jeu
+            </label>
+            <div id="problem-warning-actions">
+                <button id="problem-warning-continue" type="button">OK, continuer</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Leaderboard Container -->
     <div id="leaderboard-container">
         <h3>🏆 Meilleurs Scores</h3>
@@ -1184,6 +1294,47 @@
 
             // Also set a generic error title for the page tab
             document.title = "Error Loading Game";
+        }
+
+        function showProblemWarningModal(selectedGame, gameId) {
+            const modal = document.getElementById('problem-warning-modal');
+            const content = document.getElementById('problem-warning-content');
+            const closeButton = document.getElementById('problem-warning-close');
+            const continueButton = document.getElementById('problem-warning-continue');
+            const text = document.getElementById('problem-warning-text');
+            const skipCheckbox = document.getElementById('problem-warning-skip');
+            const storageKey = `problem-warning-dismissed:${gameId}`;
+
+            if (localStorage.getItem(storageKey) === '1') {
+                return;
+            }
+
+            if (!modal || !content || !closeButton || !continueButton || !text || !skipCheckbox) {
+                return;
+            }
+
+            const gameTitle = selectedGame && selectedGame.title ? selectedGame.title : gameId;
+            text.textContent = `${gameTitle} peut avoir des ralentissements, glitches, plantages ou comportements imprévisibles selon l'appareil. Le jeu reste jouable, mais l'experience peut etre degradée.`;
+            skipCheckbox.checked = false;
+
+            function closeModal() {
+                if (skipCheckbox.checked) {
+                    localStorage.setItem(storageKey, '1');
+                }
+                modal.style.display = 'none';
+                modal.setAttribute('aria-hidden', 'true');
+            }
+
+            closeButton.onclick = closeModal;
+            continueButton.onclick = closeModal;
+            modal.onclick = function (event) {
+                if (event.target === modal) {
+                    closeModal();
+                }
+            };
+
+            modal.style.display = 'flex';
+            modal.setAttribute('aria-hidden', 'false');
         }
 
         /**
@@ -1661,6 +1812,11 @@
                 }
 
                 console.log("Found game data:", selectedGame);
+
+                const gameHasKnownProblems = selectedGame.problem === true || selectedGame.problem === 'true';
+                if (gameHasKnownProblems) {
+                    showProblemWarningModal(selectedGame, gameId);
+                }
 
                 // --- Hide leaderboard button if enable_score is explicitly false ---
                 if (selectedGame.enable_score === false || selectedGame.enable_score === "false") {

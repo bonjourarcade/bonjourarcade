@@ -381,7 +381,7 @@ class NewsletterSender:
         import re
         cover_url = f'{BASE_URL}/games/{game_id}/cover.png'
         play_url = f'{BASE_URL}/b/{game_id}'
-        leaderboard_url = f'https://alloarcade.web.app/leaderboards/{game_id}'
+        leaderboard_url = f'{BASE_URL}/scores/{game_id}'
         title = meta.get('title', game_id)
         # Remove parenthetical content for display in email body
         clean_title = re.sub(r'\s*\([^)]*\)', '', title).strip()
@@ -579,7 +579,7 @@ class NewsletterSender:
                 return
         play_url = f'{BASE_URL}/b/{game_id}'
         cover_url = f'{BASE_URL}/games/{game_id}/cover.png'
-        leaderboard_url = f'https://alloarcade.web.app/leaderboards/{game_id}'
+        leaderboard_url = f'{BASE_URL}/scores/{game_id}'
         title = meta.get('title', game_id)
         developer = meta.get('developer', 'Inconnu')
         year = meta.get('year', 'Inconnue')

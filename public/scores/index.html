@@ -55,7 +55,12 @@
         <section id="game-view" style="display:none;">
             <a class="back-link" href="/scores/">Retour aux scores</a>
             <div class="game-header">
-                <img id="leaderboard-game-cover" class="game-cover" src="/assets/images/placeholder_thumb.png" alt="Cover du jeu">
+                <div class="game-cover-panel">
+                    <a id="leaderboard-game-link" class="game-cover-link" href="/b/" aria-label="Jouer a ce jeu">
+                        <img id="leaderboard-game-cover" class="game-cover" src="/assets/images/placeholder_thumb.png" alt="Cover du jeu">
+                    </a>
+                    <a id="leaderboard-play-link" class="play-game-link" href="/b/" aria-label="Jouer a ce jeu">Jouer a ce jeu</a>
+                </div>
                 <div class="game-header-main">
                     <h2 id="leaderboard-title">Leaderboard</h2>
                     <p id="leaderboard-subtitle">Chargement...</p>

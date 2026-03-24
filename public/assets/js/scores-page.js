@@ -33,6 +33,8 @@
         latestScoresState: document.getElementById('latest-scores-state'),
         leaderboardTitle: document.getElementById('leaderboard-title'),
         leaderboardSubtitle: document.getElementById('leaderboard-subtitle'),
+        leaderboardGameLink: document.getElementById('leaderboard-game-link'),
+        leaderboardPlayLink: document.getElementById('leaderboard-play-link'),
         gameCover: document.getElementById('leaderboard-game-cover'),
         toggleAll: document.getElementById('toggle-all-scores'),
         toggleBest: document.getElementById('toggle-best-scores'),
@@ -187,6 +189,10 @@
 
     function buildGameUrl(gameId) {
         return '/scores/' + encodeURIComponent(gameId);
+    }
+
+    function buildPlayUrl(gameId) {
+        return '/b/' + encodeURIComponent(gameId);
     }
 
     function sortScores(list) {
@@ -976,6 +982,16 @@
 
     function renderGameHeader(gameId) {
         const game = getGameById(gameId);
+        const playUrl = buildPlayUrl(gameId);
+
+        if (elements.leaderboardGameLink) {
+            elements.leaderboardGameLink.href = playUrl;
+        }
+
+        if (elements.leaderboardPlayLink) {
+            elements.leaderboardPlayLink.href = playUrl;
+        }
+
         if (game) {
             elements.leaderboardTitle.textContent = game.title || game.id;
             elements.leaderboardSubtitle.textContent = 'Classement des scores approuvés';

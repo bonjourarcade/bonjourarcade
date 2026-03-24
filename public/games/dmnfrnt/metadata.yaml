@@ -1,0 +1,18 @@
+title: Demon Front
+developer: International Games System
+year: 2002
+genre: Shooter, Run 'n gun
+#controls:
+#  - "←↓↑→: Mouvement"
+#  - "Z: "
+#  - "X: "
+#  - "C: "
+#  - "V: "
+
+to_start: Espace, puis Enter
+announcement_message: "Demon Front est un jeu de tir et de course en 2D à défilement horizontal, similaire à la série Metal Slug. L'histoire se déroule sur Andres, une planète autrefois paisible située à vingt années-lumière de la Terre, désormais envahie par de maléfiques après une éclipse de lune rouge. Ces créatures ont exterminé ou assimilé la majorité des habitants. Seuls quelques survivants ont réussi à s'échapper. Vous incarnez Jake, le Dr J ou Sara, trois Terriens qui ont promis d'aider Maya, un homme-singe. Ce dernier, l'un des rares survivants, est déterminé à reconquérir sa planète natale et à sauver son peuple."
+
+enable_score: true
+hide: yes
+
+added: 2026-03-24

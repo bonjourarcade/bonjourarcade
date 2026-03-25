@@ -273,7 +273,7 @@ body {
 .medals-table,
 .player-scores-table {
     width: 100%;
-    min-width: 620px;
+    min-width: 700px;
     border-collapse: collapse;
 }
 
@@ -505,6 +505,10 @@ body.player-scores-open {
     color: var(--accent-strong);
     text-decoration: none;
     font-weight: 700;
+}
+
+.player-score-proof {
+    width: 88px;
 }
 
 .player-score-comment {
@@ -777,7 +781,7 @@ body.player-scores-open {
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.78);
-    z-index: 120;
+    z-index: 140;
     align-items: center;
     justify-content: center;
     padding: 24px;

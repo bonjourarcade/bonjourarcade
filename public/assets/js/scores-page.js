@@ -873,6 +873,7 @@
     }
 
     function hidePlayerScores() {
+        closeProofModal();
         state.selectedPlayerKey = '';
         setPlayerScoresVisibility(false);
         elements.playerScoresBody.innerHTML = '';
@@ -1071,12 +1072,16 @@
             const game = getGameById(score.gameId);
             const gameLabel = escapeHtml((game && game.title) || score.gameTitle || score.gameId || 'Jeu inconnu');
             const comment = score.comment ? escapeHtml(score.comment) : '—';
+            const proofButton = score.screenshotUrl
+                ? '<button class="proof-btn" type="button" data-proof-url="' + escapeHtml(score.screenshotUrl) + '">Voir</button>'
+                : '';
 
             return [
                 '<tr>',
                 '<td><a class="player-score-game" href="', buildGameUrl(score.gameId), '">', gameLabel, '</a></td>',
                 '<td class="col-score">', formatScore(score.score), '</td>',
                 '<td>', window.BonjourArcadeScoresService.formatDate(score.createdAtMs), '</td>',
+                '<td class="player-score-proof">', proofButton, '</td>',
                 '<td class="player-score-comment">', comment, '</td>',
                 '</tr>'
             ].join('');
@@ -1575,6 +1580,17 @@
             elements.playerScoresClose.addEventListener('click', hidePlayerScores);
         }
 
+        if (elements.playerScoresBody) {
+            elements.playerScoresBody.addEventListener('click', function (event) {
+                const proofButton = event.target.closest('[data-proof-url]');
+                if (!proofButton) {
+                    return;
+                }
+
+                openProofModal(proofButton.getAttribute('data-proof-url'));
+            });
+        }
+
         if (elements.playerScoresCopyLink) {
             elements.playerScoresCopyLink.addEventListener('click', handleCopyPlayerLink);
         }
@@ -1633,6 +1649,11 @@
 
         document.addEventListener('keydown', function (event) {
             if (event.key !== 'Escape') {
+                return;
+            }
+
+            if (elements.proofModal && elements.proofModal.style.display === 'flex') {
+                closeProofModal();
                 return;
             }
 

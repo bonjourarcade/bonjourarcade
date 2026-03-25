@@ -65,40 +65,15 @@
                             <tr>
                                 <th>Rang</th>
                                 <th>Joueur</th>
-                                <th>Or</th>
-                                <th>Argent</th>
-                                <th>Bronze</th>
+                                <th>🥇 Or</th>
+                                <th>🥈 Argent</th>
+                                <th>🥉 Bronze</th>
                                 <th>Total</th>
                             </tr>
                         </thead>
                         <tbody id="medals-body"></tbody>
                     </table>
                 </div>
-                <section id="player-scores-panel" class="player-scores-panel" aria-live="polite" style="display:none;">
-                    <div class="player-scores-head">
-                        <div>
-                            <h3 id="player-scores-title" class="player-scores-title">Scores du joueur</h3>
-                            <p id="player-scores-subtitle" class="player-scores-subtitle"></p>
-                        </div>
-                        <div class="player-scores-actions">
-                            <button id="player-scores-copy-link" class="player-scores-copy-link" type="button">Copier le lien</button>
-                            <button id="player-scores-close" class="player-scores-close" type="button">Fermer</button>
-                        </div>
-                    </div>
-                    <div class="player-scores-table-wrap">
-                        <table class="player-scores-table" aria-label="Tous les scores du joueur selectionne">
-                            <thead>
-                                <tr>
-                                    <th>Jeu</th>
-                                    <th>Score</th>
-                                    <th>Date</th>
-                                    <th>Commentaire</th>
-                                </tr>
-                            </thead>
-                            <tbody id="player-scores-body"></tbody>
-                        </table>
-                    </div>
-                </section>
             </section>
         </section>
 
@@ -157,6 +132,44 @@
             </section>
         </section>
     </main>
+
+    <section id="player-scores-panel" class="player-scores-panel" aria-live="polite" aria-hidden="true" style="display:none;">
+        <div id="player-scores-dialog" class="player-scores-dialog" role="dialog" aria-modal="true" aria-labelledby="player-scores-title" aria-describedby="player-scores-subtitle" tabindex="-1">
+            <div class="player-scores-head">
+                <div>
+                    <h3 id="player-scores-title" class="player-scores-title">Scores du joueur</h3>
+                    <p id="player-scores-subtitle" class="player-scores-subtitle"></p>
+                </div>
+                <div class="player-scores-actions">
+                    <button id="player-name-edit-button" class="player-name-edit-button" type="button" hidden>Modifier mon nom</button>
+                    <button id="player-scores-copy-link" class="player-scores-copy-link" type="button">Copier le lien</button>
+                    <button id="player-scores-close" class="player-scores-close" type="button">Fermer</button>
+                </div>
+            </div>
+            <form id="player-name-edit-form" class="player-name-edit-form" hidden>
+                <label class="player-name-edit-label" for="player-name-edit-input">Nom d'affichage</label>
+                <div class="player-name-edit-row">
+                    <input id="player-name-edit-input" class="player-name-edit-input" type="text" maxlength="40" autocomplete="nickname">
+                    <button id="player-name-edit-save" class="player-name-edit-save" type="submit">Enregistrer</button>
+                    <button id="player-name-edit-cancel" class="player-name-edit-cancel" type="button">Annuler</button>
+                </div>
+                <p id="player-name-edit-status" class="player-name-edit-status" aria-live="polite"></p>
+            </form>
+            <div class="player-scores-table-wrap">
+                <table class="player-scores-table" aria-label="Tous les scores du joueur selectionne">
+                    <thead>
+                        <tr>
+                            <th>Jeu</th>
+                            <th>Score</th>
+                            <th>Date</th>
+                            <th>Commentaire</th>
+                        </tr>
+                    </thead>
+                    <tbody id="player-scores-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
 
     <div id="proof-modal" class="proof-modal" role="dialog" aria-modal="true" aria-label="Preuve du score">
         <div class="proof-modal-content">

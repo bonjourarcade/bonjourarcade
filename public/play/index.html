@@ -186,7 +186,8 @@
         }
 
         /* Leaderboard button styling */
-        #leaderboard-button {
+        #leaderboard-button,
+        #game-scores-button {
             background-color: rgba(0, 0, 0, 0.7);
             color: white;
             padding: 8px 12px !important;
@@ -727,15 +728,17 @@
                 /* Hide "FF" text on mobile, keep only icon */
             }
 
-            #leaderboard-button {
+        #leaderboard-button,
+        #game-scores-button {
                 padding: 6px 8px !important;
                 font-size: 11px !important;
                 gap: 4px;
             }
 
-            #leaderboard-button span:last-child {
+            #leaderboard-button span:last-child,
+            #game-scores-button span:last-child {
                 display: none;
-                /* Hide "Soumettre" text on mobile, keep only icon */
+                /* Hide text on mobile, keep only icon */
             }
 
             #help-button {
@@ -1004,6 +1007,10 @@
             <button id="scores-button">
                 <span>📊</span>
                 <span>Scores</span>
+            </button>
+            <button id="game-scores-button">
+                <span>📈</span>
+                <span>Classement</span>
             </button>
             <button id="fastforward-button">
                 <span>⏩</span>
@@ -3418,6 +3425,19 @@
             if (mobilePopup) {
                 mobilePopup.style.display = 'flex';
             }
+        });
+
+        document.getElementById('game-scores-button').addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const gameId = urlParams.get('game');
+            if (!gameId) {
+                return;
+            }
+
+            window.open(`/scores/${encodeURIComponent(gameId)}`, '_blank');
         });
 
         // Help button functionality

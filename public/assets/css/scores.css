@@ -222,6 +222,11 @@ body {
     border-radius: 12px;
     padding: 10px;
     background: var(--surface-soft);
+    transition: background-color 160ms ease;
+}
+
+.latest-score-row:hover {
+    background: #f1f1f1;
 }
 
 .latest-score-game {
@@ -288,6 +293,18 @@ body {
     background: #f7f7f7;
 }
 
+.medals-table tbody tr,
+.player-scores-table tbody tr,
+.leaderboard-table tbody tr {
+    transition: background-color 160ms ease;
+}
+
+.medals-table tbody tr:hover,
+.player-scores-table tbody tr:hover,
+.leaderboard-table tbody tr:hover {
+    background: #f1f1f1;
+}
+
 .medal-rank {
     font-weight: 700;
     color: var(--accent-strong);
@@ -335,11 +352,31 @@ body {
 }
 
 .player-scores-panel {
-    margin-top: 18px;
+    position: fixed;
+    inset: 0;
+    z-index: 130;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(23, 28, 26, 0.58);
+    backdrop-filter: blur(6px);
+}
+
+body.player-scores-open {
+    overflow: hidden;
+}
+
+.player-scores-dialog {
+    width: min(1100px, 100%);
+    max-height: min(88vh, 920px);
     border: 1px solid var(--border);
-    border-radius: 14px;
-    background: linear-gradient(180deg, #fcfffd 0%, #f7fbf9 100%);
-    padding: 14px;
+    border-radius: 18px;
+    background: linear-gradient(180deg, #fcfffd 0%, #f5faf7 100%);
+    box-shadow: 0 28px 80px rgba(17, 24, 22, 0.22);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 .player-scores-head {
@@ -347,7 +384,9 @@ body {
     align-items: start;
     justify-content: space-between;
     gap: 12px;
-    margin-bottom: 10px;
+    padding: 20px 20px 16px;
+    border-bottom: 1px solid rgba(11, 122, 99, 0.14);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(243, 249, 246, 0.96) 100%);
 }
 
 .player-scores-actions {
@@ -360,17 +399,21 @@ body {
 
 .player-scores-title {
     margin: 0;
-    font-size: 18px;
+    font-size: clamp(22px, 3vw, 30px);
 }
 
 .player-scores-subtitle {
     margin: 4px 0 0;
     color: var(--muted);
     line-height: 1.5;
+    max-width: 70ch;
 }
 
 .player-scores-copy-link,
-.player-scores-close {
+.player-scores-close,
+.player-name-edit-button,
+.player-name-edit-save,
+.player-name-edit-cancel {
     border: 1px solid var(--border);
     background: #fff;
     color: var(--text);
@@ -378,11 +421,84 @@ body {
     padding: 8px 12px;
     cursor: pointer;
     font-size: 14px;
+    transition: background-color 160ms ease, border-color 160ms ease;
 }
 
 .player-scores-copy-link {
     border-color: rgba(11, 122, 99, 0.28);
     color: var(--accent-strong);
+}
+
+.player-name-edit-button,
+.player-name-edit-save {
+    border-color: rgba(47, 127, 218, 0.28);
+    color: #1f5fa9;
+}
+
+.player-scores-copy-link:hover,
+.player-scores-close:hover,
+.player-name-edit-button:hover,
+.player-name-edit-save:hover,
+.player-name-edit-cancel:hover {
+    background: #f1f1f1;
+}
+
+.player-name-edit-form {
+    padding: 16px 20px 4px;
+    border-bottom: 1px solid rgba(11, 122, 99, 0.1);
+    background: rgba(255, 255, 255, 0.72);
+}
+
+.player-name-edit-label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--muted);
+}
+
+.player-name-edit-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.player-name-edit-input {
+    flex: 1 1 260px;
+    min-width: 0;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 12px;
+    font: inherit;
+    background: #fff;
+    color: var(--text);
+}
+
+.player-name-edit-status {
+    min-height: 20px;
+    margin: 8px 0 0;
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.player-name-edit-status.is-error {
+    color: #a12929;
+}
+
+.player-name-edit-status.is-success {
+    color: #1d7a4f;
+}
+
+.player-scores-table-wrap {
+    overflow: auto;
+    padding: 0 20px 20px;
+}
+
+.player-scores-table th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
 }
 
 .player-score-game {
@@ -966,5 +1082,20 @@ body[data-is-admin='true'] .admin-actions {
     .player-scores-head {
         flex-direction: column;
         align-items: stretch;
+    }
+
+    .player-scores-panel {
+        padding: 12px;
+    }
+
+    .player-scores-dialog {
+        max-height: 92vh;
+    }
+
+    .player-scores-head,
+    .player-name-edit-form,
+    .player-scores-table-wrap {
+        padding-left: 14px;
+        padding-right: 14px;
     }
 }

@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut, connectAuthEmulator } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut, connectAuthEmulator, updateProfile } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { getFunctions, httpsCallable, connectFunctionsEmulator } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-functions.js";
 
 // Your web app's Firebase configuration
@@ -128,4 +128,23 @@ window.deleteGameScore = async (scoreId) => {
     const fn = httpsCallable(functions, 'deleteScore');
     const result = await fn({ scoreId: scoreId });
     return result.data;
+};
+
+window.updateFirebaseDisplayName = async (displayName) => {
+    const nextDisplayName = String(displayName || '').trim();
+
+    if (!auth.currentUser) {
+        throw new Error('Utilisateur non connecte');
+    }
+
+    if (!nextDisplayName) {
+        throw new Error('Nom d\'affichage vide');
+    }
+
+    await updateProfile(auth.currentUser, {
+        displayName: nextDisplayName
+    });
+
+    await auth.currentUser.reload();
+    return auth.currentUser;
 };

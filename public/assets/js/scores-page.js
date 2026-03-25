@@ -19,6 +19,8 @@
         pendingDeleteScoreId: '',
         pendingDeleteButton: null,
         metricsChart: null,
+        lastFocusedElement: null,
+        currentUser: null,
         metricVisibility: {
             collective: false,
             highscore: true
@@ -37,9 +39,16 @@
         medalsState: document.getElementById('medals-state'),
         medalsBody: document.getElementById('medals-body'),
         playerScoresPanel: document.getElementById('player-scores-panel'),
+        playerScoresDialog: document.getElementById('player-scores-dialog'),
         playerScoresTitle: document.getElementById('player-scores-title'),
         playerScoresSubtitle: document.getElementById('player-scores-subtitle'),
         playerScoresBody: document.getElementById('player-scores-body'),
+        playerNameEditButton: document.getElementById('player-name-edit-button'),
+        playerNameEditForm: document.getElementById('player-name-edit-form'),
+        playerNameEditInput: document.getElementById('player-name-edit-input'),
+        playerNameEditSave: document.getElementById('player-name-edit-save'),
+        playerNameEditCancel: document.getElementById('player-name-edit-cancel'),
+        playerNameEditStatus: document.getElementById('player-name-edit-status'),
         playerScoresCopyLink: document.getElementById('player-scores-copy-link'),
         playerScoresClose: document.getElementById('player-scores-close'),
         leaderboardTitle: document.getElementById('leaderboard-title'),
@@ -865,11 +874,18 @@
 
     function hidePlayerScores() {
         state.selectedPlayerKey = '';
-        elements.playerScoresPanel.style.display = 'none';
+        setPlayerScoresVisibility(false);
         elements.playerScoresBody.innerHTML = '';
         elements.playerScoresTitle.textContent = 'Scores du joueur';
         elements.playerScoresSubtitle.textContent = '';
+        closePlayerNameEditor(true);
         updatePlayerQueryParam('');
+
+        if (state.lastFocusedElement && typeof state.lastFocusedElement.focus === 'function') {
+            state.lastFocusedElement.focus();
+        }
+
+        state.lastFocusedElement = null;
     }
 
     async function handleCopyPlayerLink() {
@@ -885,6 +901,137 @@
             console.error(error);
             showToast('Impossible de copier le lien du joueur.', 'error');
         }
+    }
+
+    function setPlayerScoresVisibility(isVisible) {
+        if (!elements.playerScoresPanel) {
+            return;
+        }
+
+        elements.playerScoresPanel.style.display = isVisible ? 'flex' : 'none';
+        elements.playerScoresPanel.setAttribute('aria-hidden', isVisible ? 'false' : 'true');
+        document.body.classList.toggle('player-scores-open', isVisible);
+    }
+
+    function isViewingOwnPlayerProfile() {
+        return Boolean(
+            state.currentUser
+            && state.currentUser.uid
+            && state.selectedPlayerKey
+            && state.currentUser.uid === state.selectedPlayerKey
+        );
+    }
+
+    function setPlayerNameEditStatus(message, type) {
+        if (!elements.playerNameEditStatus) {
+            return;
+        }
+
+        elements.playerNameEditStatus.textContent = message || '';
+        elements.playerNameEditStatus.className = 'player-name-edit-status' + (type ? ' is-' + type : '');
+    }
+
+    function closePlayerNameEditor(clearStatus) {
+        if (elements.playerNameEditForm) {
+            elements.playerNameEditForm.hidden = true;
+        }
+
+        if (elements.playerNameEditButton) {
+            elements.playerNameEditButton.hidden = !isViewingOwnPlayerProfile();
+        }
+
+        if (clearStatus) {
+            setPlayerNameEditStatus('');
+        }
+    }
+
+    function syncPlayerNameEditingAvailability() {
+        if (!elements.playerNameEditButton || !elements.playerNameEditForm || !elements.playerNameEditInput) {
+            return;
+        }
+
+        if (!isViewingOwnPlayerProfile()) {
+            elements.playerNameEditButton.hidden = true;
+            elements.playerNameEditForm.hidden = true;
+            setPlayerNameEditStatus('');
+            return;
+        }
+
+        elements.playerNameEditButton.hidden = false;
+        elements.playerNameEditInput.value = (state.currentUser && state.currentUser.displayName) || '';
+    }
+
+    function applyPlayerNameLocally(userId, displayName) {
+        function updateList(list) {
+            list.forEach(function (score) {
+                if (score && score.userId === userId) {
+                    score.playerName = displayName;
+                }
+            });
+        }
+
+        updateList(state.allScores);
+        updateList(state.latestScores);
+        updateList(state.rawScores);
+        updateList(state.filteredScores);
+
+        renderLatestScores();
+        state.medalsRanking = computeMedalsRanking(state.allScores);
+        renderMedalsRanking();
+
+        if (state.selectedPlayerKey === userId) {
+            elements.playerScoresTitle.textContent = 'Tous les scores de ' + displayName;
+        }
+    }
+
+    async function handlePlayerNameEditSubmit(event) {
+        event.preventDefault();
+
+        if (!isViewingOwnPlayerProfile() || typeof window.updateFirebaseDisplayName !== 'function') {
+            setPlayerNameEditStatus('Modification indisponible pour le moment.', 'error');
+            return;
+        }
+
+        const nextDisplayName = String(elements.playerNameEditInput.value || '').trim();
+
+        if (!nextDisplayName) {
+            setPlayerNameEditStatus('Entre un nom d\'affichage.', 'error');
+            return;
+        }
+
+        elements.playerNameEditSave.disabled = true;
+        elements.playerNameEditCancel.disabled = true;
+        setPlayerNameEditStatus('Mise a jour du nom en cours...');
+
+        try {
+            const updatedUser = await window.updateFirebaseDisplayName(nextDisplayName);
+            state.currentUser = updatedUser || state.currentUser;
+            applyPlayerNameLocally(state.currentUser.uid, nextDisplayName);
+            closePlayerNameEditor(false);
+            setPlayerNameEditStatus('Nom mis a jour.', 'success');
+            showToast('Nom d\'affichage mis a jour.', 'success');
+        } catch (error) {
+            console.error(error);
+            setPlayerNameEditStatus('Impossible de mettre a jour le nom.', 'error');
+        } finally {
+            elements.playerNameEditSave.disabled = false;
+            elements.playerNameEditCancel.disabled = false;
+        }
+    }
+
+    function openPlayerNameEditor() {
+        if (!isViewingOwnPlayerProfile() || !elements.playerNameEditForm || !elements.playerNameEditInput) {
+            return;
+        }
+
+        elements.playerNameEditForm.hidden = false;
+        elements.playerNameEditButton.hidden = true;
+        elements.playerNameEditInput.value = (state.currentUser && state.currentUser.displayName) || '';
+        setPlayerNameEditStatus('');
+        window.requestAnimationFrame(function () {
+            elements.playerNameEditInput.focus();
+            elements.playerNameEditInput.select();
+        });
     }
 
     function showPlayerScores(playerKey) {
@@ -914,10 +1061,12 @@
         const gameCount = new Set(playerScores.map(function (score) {
             return score.gameId;
         })).size;
+        state.lastFocusedElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
         state.selectedPlayerKey = playerKey;
         updatePlayerQueryParam(playerKey);
         elements.playerScoresTitle.textContent = 'Tous les scores de ' + (player.playerName || 'Anonymous');
         elements.playerScoresSubtitle.textContent = playerScores.length + ' score' + (playerScores.length > 1 ? 's' : '') + ' approuve' + (playerScores.length > 1 ? 's' : '') + ' sur ' + gameCount + ' jeu' + (gameCount > 1 ? 'x' : '') + '.';
+        syncPlayerNameEditingAvailability();
         elements.playerScoresBody.innerHTML = playerScores.map(function (score) {
             const game = getGameById(score.gameId);
             const gameLabel = escapeHtml((game && game.title) || score.gameTitle || score.gameId || 'Jeu inconnu');
@@ -932,8 +1081,17 @@
                 '</tr>'
             ].join('');
         }).join('');
-        elements.playerScoresPanel.style.display = 'block';
-        elements.playerScoresPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        setPlayerScoresVisibility(true);
+        window.requestAnimationFrame(function () {
+            if (elements.playerScoresDialog) {
+                elements.playerScoresDialog.focus();
+            }
+
+            const tableWrap = elements.playerScoresPanel.querySelector('.player-scores-table-wrap');
+            if (tableWrap) {
+                tableWrap.scrollTop = 0;
+            }
+        });
     }
 
     function openProofModal(url) {
@@ -1420,6 +1578,28 @@
         if (elements.playerScoresCopyLink) {
             elements.playerScoresCopyLink.addEventListener('click', handleCopyPlayerLink);
         }
+
+        if (elements.playerNameEditButton) {
+            elements.playerNameEditButton.addEventListener('click', openPlayerNameEditor);
+        }
+
+        if (elements.playerNameEditCancel) {
+            elements.playerNameEditCancel.addEventListener('click', function () {
+                closePlayerNameEditor(true);
+            });
+        }
+
+        if (elements.playerNameEditForm) {
+            elements.playerNameEditForm.addEventListener('submit', handlePlayerNameEditSubmit);
+        }
+
+        if (elements.playerScoresPanel) {
+            elements.playerScoresPanel.addEventListener('click', function (event) {
+                if (event.target === elements.playerScoresPanel) {
+                    hidePlayerScores();
+                }
+            });
+        }
     }
 
     function bindModalEvents() {
@@ -1450,6 +1630,16 @@
             }
         });
         elements.adminDeleteConfirm.addEventListener('click', confirmAdminDelete);
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key !== 'Escape') {
+                return;
+            }
+
+            if (elements.playerScoresPanel && elements.playerScoresPanel.style.display === 'flex') {
+                hidePlayerScores();
+            }
+        });
     }
 
     function applyAdminState(isAdmin) {
@@ -1464,6 +1654,9 @@
     }
 
     async function syncAdminStateFromUser(user) {
+        state.currentUser = user || null;
+        syncPlayerNameEditingAvailability();
+
         if (!user || typeof user.getIdTokenResult !== 'function') {
             applyAdminState(false);
             return;

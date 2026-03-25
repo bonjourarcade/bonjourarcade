@@ -1258,12 +1258,17 @@ async function fetchFeaturedGameLeaderboard(gameId, isRefresh = false) {
             const mobileScoresLink = isTouchDevice
                 ? `<a class="leaderboard-details-link" href="/scores/${encodeURIComponent(gameId)}">Scores</a>`
                 : '';
+            const playerProfileUrl = score.userId ? `/scores/?player=${encodeURIComponent(score.userId)}` : '';
+            const playerLabel = playerProfileUrl
+                ? `<a class="featured-player-link" href="${playerProfileUrl}">${playerName}</a>`
+                : playerName;
+            const playerMarkup = `<div class="featured-leaderboard-player">${playerLabel}${commentIndicator}</div>`;
 
             leaderboardHTML += `
                 <div class="featured-leaderboard-entry${isTouchDevice ? ' is-touch' : ''}"${commentAttr} data-game-id="${escapeHtml(gameId)}" style="cursor: ${isTouchDevice ? 'default' : 'pointer'};">
                     <div class="featured-leaderboard-rank">${rankText}</div>
                     <div class="featured-leaderboard-avatar" style="background-color: ${score.playerPhotoUrl ? 'transparent' : avatarColor}">${avatarContent}</div>
-                    <div class="featured-leaderboard-player">${playerName}${commentIndicator}</div>
+                    ${playerMarkup}
                     <div class="featured-leaderboard-score">${isOldestPlayer ? '🍪 ' : ''}${score.score.toLocaleString()}</div>
                     ${mobileScoresLink}
                     ${mobileComment}
@@ -1276,8 +1281,19 @@ async function fetchFeaturedGameLeaderboard(gameId, isRefresh = false) {
         // Desktop: entire entry opens the detailed scores page.
         const leaderboardEntries = leaderboardContent.querySelectorAll('.featured-leaderboard-entry');
         leaderboardEntries.forEach(entry => {
+            const playerLink = entry.querySelector('.featured-player-link');
+            if (playerLink) {
+                playerLink.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                });
+            }
+
             if (!isTouchDevice) {
-                entry.addEventListener('click', () => {
+                entry.addEventListener('click', (event) => {
+                    if (event.target.closest('a, button')) {
+                        return;
+                    }
+
                     const entryGameId = entry.getAttribute('data-game-id');
                     if (entryGameId) {
                         window.location.href = `/scores/${entryGameId}`;

@@ -125,6 +125,70 @@
         return score.userId || ('name:' + (score.playerName || 'Anonymous'));
     }
 
+    function buildPlayerProfileLookup(scores) {
+        const byUserId = new Map();
+        const byName = new Map();
+
+        scores.forEach(function (score) {
+            if (!score) {
+                return;
+            }
+
+            const userId = String(score.userId || '').trim();
+            const normalizedName = removeAccents(score.playerName || '');
+            const existingByUserId = userId ? byUserId.get(userId) : null;
+            const existingByName = normalizedName ? byName.get(normalizedName) : null;
+            const existing = existingByUserId || existingByName;
+            const shouldReplace = !existing
+                || (!existing.playerPhotoUrl && score.playerPhotoUrl)
+                || (existing.playerName === 'Anonymous' && score.playerName);
+            const profile = {
+                playerName: score.playerName || 'Anonymous',
+                playerPhotoUrl: score.playerPhotoUrl || null
+            };
+
+            if (!shouldReplace) {
+                return;
+            }
+
+            if (userId) {
+                byUserId.set(userId, profile);
+            }
+            if (normalizedName) {
+                byName.set(normalizedName, profile);
+            }
+        });
+
+        return {
+            byUserId: byUserId,
+            byName: byName
+        };
+    }
+
+    function syncLatestScoresWithKnownPlayers() {
+        if (!state.latestScores.length || !state.allScores.length) {
+            return;
+        }
+
+        const lookup = buildPlayerProfileLookup(state.allScores);
+
+        state.latestScores = state.latestScores.map(function (score) {
+            const userId = String(score.userId || '').trim();
+            const normalizedName = removeAccents(score.playerName || '');
+            const profile = (userId && lookup.byUserId.get(userId))
+                || (normalizedName && lookup.byName.get(normalizedName));
+
+            if (!profile) {
+                return score;
+            }
+
+            return Object.assign({}, score, {
+                playerName: profile.playerName || score.playerName,
+                playerPhotoUrl: profile.playerPhotoUrl || score.playerPhotoUrl || null
+            });
+        });
+    }
+
     function getAvatarColor(playerName) {
         if (!playerName) {
             return '#999999';
@@ -1449,7 +1513,6 @@
 
         if (results[1].status === 'fulfilled') {
             state.latestScores = results[1].value;
-            renderLatestScores();
         } else {
             console.error(results[1].reason);
             setSectionState(elements.latestScoresState, 'Erreur pendant le chargement des derniers scores.', 'error');
@@ -1457,6 +1520,10 @@
 
         if (results[2].status === 'fulfilled') {
             state.allScores = results[2].value;
+            if (results[1].status === 'fulfilled') {
+                syncLatestScoresWithKnownPlayers();
+                renderLatestScores();
+            }
             state.medalsRanking = computeMedalsRanking(state.allScores);
             renderMedalsRanking();
             if (state.selectedPlayerKey) {

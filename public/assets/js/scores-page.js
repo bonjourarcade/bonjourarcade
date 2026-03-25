@@ -6,6 +6,9 @@
         gamesById: new Map(),
         featuredIds: [],
         latestScores: [],
+        allScores: [],
+        medalsRanking: [],
+        selectedPlayerKey: '',
         rawScores: [],
         filteredScores: [],
         visibleCount: 0,
@@ -31,6 +34,14 @@
         featuredState: document.getElementById('featured-games-state'),
         latestScoresList: document.getElementById('latest-scores-list'),
         latestScoresState: document.getElementById('latest-scores-state'),
+        medalsState: document.getElementById('medals-state'),
+        medalsBody: document.getElementById('medals-body'),
+        playerScoresPanel: document.getElementById('player-scores-panel'),
+        playerScoresTitle: document.getElementById('player-scores-title'),
+        playerScoresSubtitle: document.getElementById('player-scores-subtitle'),
+        playerScoresBody: document.getElementById('player-scores-body'),
+        playerScoresCopyLink: document.getElementById('player-scores-copy-link'),
+        playerScoresClose: document.getElementById('player-scores-close'),
         leaderboardTitle: document.getElementById('leaderboard-title'),
         leaderboardSubtitle: document.getElementById('leaderboard-subtitle'),
         leaderboardGameLink: document.getElementById('leaderboard-game-link'),
@@ -101,6 +112,10 @@
         return cleaned.charAt(0).toUpperCase();
     }
 
+    function getPlayerKey(score) {
+        return score.userId || ('name:' + (score.playerName || 'Anonymous'));
+    }
+
     function getAvatarColor(playerName) {
         if (!playerName) {
             return '#999999';
@@ -135,6 +150,24 @@
             '</span>',
             '<span class="player-name">', safeName, '</span>',
             '</div>'
+        ].join('');
+    }
+
+    function renderPlayerButton(score, label) {
+        const buttonLabel = escapeHtml(label || ('Voir tous les scores de ' + (score.playerName || 'Anonymous')));
+        return [
+            '<button class="player-link" type="button" data-player-key="', escapeHtml(getPlayerKey(score)), '" aria-label="', buttonLabel, '">',
+            renderPlayerCell(score),
+            '</button>'
+        ].join('');
+    }
+
+    function renderPlayerAnchor(score, label) {
+        const anchorLabel = escapeHtml(label || ('Voir tous les scores de ' + (score.playerName || 'Anonymous')));
+        return [
+            '<a class="player-link player-link-anchor" href="', buildPlayerScoresUrl(getPlayerKey(score)), '" aria-label="', anchorLabel, '">',
+            renderPlayerCell(score),
+            '</a>'
         ].join('');
     }
 
@@ -183,6 +216,11 @@
         return (params.get('game') || '').trim();
     }
 
+    function getQueryPlayerKey() {
+        const params = new URLSearchParams(window.location.search);
+        return (params.get('player') || '').trim();
+    }
+
     function getGameById(gameId) {
         return state.gamesById.get(gameId) || null;
     }
@@ -193,6 +231,52 @@
 
     function buildPlayUrl(gameId) {
         return '/b/' + encodeURIComponent(gameId);
+    }
+
+    function buildPlayerScoresUrl(playerKey) {
+        const params = new URLSearchParams();
+        if (playerKey) {
+            params.set('player', playerKey);
+        }
+        const query = params.toString();
+        return '/scores/' + (query ? '?' + query : '');
+    }
+
+    function updatePlayerQueryParam(playerKey) {
+        if (!window.history || typeof window.history.replaceState !== 'function') {
+            return;
+        }
+        window.history.replaceState({}, '', buildPlayerScoresUrl(playerKey));
+    }
+
+    async function copyTextToClipboard(text) {
+        if (!text) {
+            throw new Error('Texte vide');
+        }
+
+        if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+            await navigator.clipboard.writeText(text);
+            return;
+        }
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.value = text;
+        input.setAttribute('readonly', 'readonly');
+        input.style.position = 'absolute';
+        input.style.left = '-9999px';
+        document.body.appendChild(input);
+        input.select();
+        input.setSelectionRange(0, input.value.length);
+
+        try {
+            const copied = document.execCommand('copy');
+            if (!copied) {
+                throw new Error('Copie impossible');
+            }
+        } finally {
+            document.body.removeChild(input);
+        }
     }
 
     function sortScores(list) {
@@ -225,7 +309,7 @@
         const byPlayer = new Map();
 
         scores.forEach(function (score) {
-            const key = score.userId || ('name:' + score.playerName);
+            const key = getPlayerKey(score);
             const current = byPlayer.get(key);
 
             if (!current) {
@@ -670,13 +754,186 @@
                 '<article class="latest-score-row">',
                 '<div class="latest-score-main">',
                 '<a class="latest-score-game" href="', buildGameUrl(score.gameId), '">', escapeHtml(score.gameTitle || score.gameId), '</a>',
-                '<p class="latest-score-player">', escapeHtml(score.playerName), ' · ', formatScore(score.score), '</p>',
+                '<p class="latest-score-player">', renderPlayerButton(score), ' · ', formatScore(score.score), '</p>',
                 '<p class="latest-score-date">', window.BonjourArcadeScoresService.formatDate(score.createdAtMs), '</p>',
                 commentHtml,
                 '</div>',
                 '</article>'
             ].join('');
         }).join('');
+    }
+
+    function computeMedalsRanking(scores) {
+        const scoresByGame = new Map();
+
+        scores.forEach(function (score) {
+            if (!score || !score.gameId) {
+                return;
+            }
+
+            if (!scoresByGame.has(score.gameId)) {
+                scoresByGame.set(score.gameId, []);
+            }
+
+            scoresByGame.get(score.gameId).push(score);
+        });
+
+        const medalsByPlayer = new Map();
+
+        function ensurePlayerEntry(score) {
+            const key = getPlayerKey(score);
+            if (!medalsByPlayer.has(key)) {
+                medalsByPlayer.set(key, {
+                    key: key,
+                    playerName: score.playerName || 'Anonymous',
+                    playerPhotoUrl: score.playerPhotoUrl || null,
+                    userId: score.userId || '',
+                    gold: 0,
+                    silver: 0,
+                    bronze: 0
+                });
+            }
+
+            const entry = medalsByPlayer.get(key);
+            if (!entry.playerPhotoUrl && score.playerPhotoUrl) {
+                entry.playerPhotoUrl = score.playerPhotoUrl;
+            }
+            return entry;
+        }
+
+        scoresByGame.forEach(function (gameScores) {
+            const rankedBestScores = withCompetitionRanks(sortScores(bestScoresByPlayer(gameScores)));
+
+            rankedBestScores.forEach(function (score) {
+                if (score.rank < 1 || score.rank > 3) {
+                    return;
+                }
+
+                const entry = ensurePlayerEntry(score);
+                if (score.rank === 1) {
+                    entry.gold += 1;
+                    return;
+                }
+                if (score.rank === 2) {
+                    entry.silver += 1;
+                    return;
+                }
+                entry.bronze += 1;
+            });
+        });
+
+        return Array.from(medalsByPlayer.values()).map(function (entry) {
+            return Object.assign(entry, {
+                total: entry.gold + entry.silver + entry.bronze
+            });
+        }).sort(function (a, b) {
+            if (b.gold !== a.gold) {
+                return b.gold - a.gold;
+            }
+            if (b.silver !== a.silver) {
+                return b.silver - a.silver;
+            }
+            if (b.bronze !== a.bronze) {
+                return b.bronze - a.bronze;
+            }
+            return String(a.playerName || '').localeCompare(String(b.playerName || ''), 'fr', { sensitivity: 'base' });
+        });
+    }
+
+    function renderMedalsRanking() {
+        if (!state.medalsRanking.length) {
+            setSectionState(elements.medalsState, 'Aucune medaille a calculer pour le moment.', 'empty');
+            elements.medalsBody.innerHTML = '';
+            hidePlayerScores();
+            return;
+        }
+
+        elements.medalsState.style.display = 'none';
+        elements.medalsBody.innerHTML = state.medalsRanking.map(function (entry, index) {
+            return [
+                '<tr>',
+                '<td class="medal-rank">', String(index + 1), '</td>',
+                '<td>', renderPlayerButton(entry, 'Voir tous les scores de ' + (entry.playerName || 'Anonymous')), '</td>',
+                '<td class="medal-count is-gold">', String(entry.gold), '</td>',
+                '<td class="medal-count is-silver">', String(entry.silver), '</td>',
+                '<td class="medal-count is-bronze">', String(entry.bronze), '</td>',
+                '<td class="medal-count">', String(entry.total), '</td>',
+                '</tr>'
+            ].join('');
+        }).join('');
+    }
+
+    function hidePlayerScores() {
+        state.selectedPlayerKey = '';
+        elements.playerScoresPanel.style.display = 'none';
+        elements.playerScoresBody.innerHTML = '';
+        elements.playerScoresTitle.textContent = 'Scores du joueur';
+        elements.playerScoresSubtitle.textContent = '';
+        updatePlayerQueryParam('');
+    }
+
+    async function handleCopyPlayerLink() {
+        if (!state.selectedPlayerKey) {
+            showToast('Aucun joueur selectionne.', 'info');
+            return;
+        }
+
+        try {
+            await copyTextToClipboard(window.location.origin + buildPlayerScoresUrl(state.selectedPlayerKey));
+            showToast('Lien du joueur copie.', 'success');
+        } catch (error) {
+            console.error(error);
+            showToast('Impossible de copier le lien du joueur.', 'error');
+        }
+    }
+
+    function showPlayerScores(playerKey) {
+        if (!playerKey) {
+            hidePlayerScores();
+            return;
+        }
+
+        const playerScores = state.allScores.filter(function (score) {
+            return getPlayerKey(score) === playerKey;
+        }).sort(function (a, b) {
+            if (b.createdAtMs !== a.createdAtMs) {
+                return b.createdAtMs - a.createdAtMs;
+            }
+            if (b.score !== a.score) {
+                return b.score - a.score;
+            }
+            return String(a.id).localeCompare(String(b.id));
+        });
+
+        if (!playerScores.length) {
+            hidePlayerScores();
+            return;
+        }
+
+        const player = playerScores[0];
+        const gameCount = new Set(playerScores.map(function (score) {
+            return score.gameId;
+        })).size;
+        state.selectedPlayerKey = playerKey;
+        updatePlayerQueryParam(playerKey);
+        elements.playerScoresTitle.textContent = 'Tous les scores de ' + (player.playerName || 'Anonymous');
+        elements.playerScoresSubtitle.textContent = playerScores.length + ' score' + (playerScores.length > 1 ? 's' : '') + ' approuve' + (playerScores.length > 1 ? 's' : '') + ' sur ' + gameCount + ' jeu' + (gameCount > 1 ? 'x' : '') + '.';
+        elements.playerScoresBody.innerHTML = playerScores.map(function (score) {
+            const game = getGameById(score.gameId);
+            const gameLabel = escapeHtml((game && game.title) || score.gameTitle || score.gameId || 'Jeu inconnu');
+            const comment = score.comment ? escapeHtml(score.comment) : '—';
+
+            return [
+                '<tr>',
+                '<td><a class="player-score-game" href="', buildGameUrl(score.gameId), '">', gameLabel, '</a></td>',
+                '<td class="col-score">', formatScore(score.score), '</td>',
+                '<td>', window.BonjourArcadeScoresService.formatDate(score.createdAtMs), '</td>',
+                '<td class="player-score-comment">', comment, '</td>',
+                '</tr>'
+            ].join('');
+        }).join('');
+        elements.playerScoresPanel.style.display = 'block';
+        elements.playerScoresPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
     function openProofModal(url) {
@@ -770,7 +1027,7 @@
             const proofButton = score.screenshotUrl
                 ? '<button class="proof-btn" type="button" data-proof-url="' + escapeHtml(score.screenshotUrl) + '">Voir</button>'
                 : '';
-            const playerCell = renderPlayerCell(score);
+            const playerCell = renderPlayerAnchor(score);
 
             return [
                 '<tr data-score-id="', escapeHtml(score.id), '" data-user-id="', escapeHtml(score.userId), '" data-game-id="', escapeHtml(score.gameId), '">',
@@ -1011,22 +1268,43 @@
 
         setSectionState(elements.featuredState, 'Chargement des jeux vedettes...', 'loading');
         setSectionState(elements.latestScoresState, 'Chargement des derniers scores...', 'loading');
+        setSectionState(elements.medalsState, 'Calcul du classement des medailles...', 'loading');
 
-        try {
-            const [featuredIds, latestScores] = await Promise.all([
+        const results = await Promise.allSettled([
                 window.BonjourArcadeScoresService.getFeaturedGameIds(5),
-                window.BonjourArcadeScoresService.getLatestScores()
+                window.BonjourArcadeScoresService.getLatestScores(),
+                window.BonjourArcadeScoresService.listGameScores('all')
             ]);
 
-            state.featuredIds = featuredIds;
-            state.latestScores = latestScores;
-
+        if (results[0].status === 'fulfilled') {
+            state.featuredIds = results[0].value;
             renderFeaturedGames();
-            renderLatestScores();
-        } catch (error) {
-            console.error(error);
+        } else {
+            console.error(results[0].reason);
             setSectionState(elements.featuredState, 'Erreur pendant le chargement des jeux vedettes.', 'error');
+        }
+
+        if (results[1].status === 'fulfilled') {
+            state.latestScores = results[1].value;
+            renderLatestScores();
+        } else {
+            console.error(results[1].reason);
             setSectionState(elements.latestScoresState, 'Erreur pendant le chargement des derniers scores.', 'error');
+        }
+
+        if (results[2].status === 'fulfilled') {
+            state.allScores = results[2].value;
+            state.medalsRanking = computeMedalsRanking(state.allScores);
+            renderMedalsRanking();
+            if (state.selectedPlayerKey) {
+                showPlayerScores(state.selectedPlayerKey);
+            }
+        } else {
+            console.error(results[2].reason);
+            state.allScores = [];
+            state.medalsRanking = [];
+            hidePlayerScores();
+            setSectionState(elements.medalsState, 'Erreur pendant le calcul des medailles.', 'error');
         }
     }
 
@@ -1112,6 +1390,36 @@
                 handleAdminEdit(scoreId);
             }
         });
+
+        if (elements.medalsBody) {
+            elements.medalsBody.addEventListener('click', function (event) {
+                const playerButton = event.target.closest('[data-player-key]');
+                if (!playerButton) {
+                    return;
+                }
+
+                showPlayerScores(playerButton.getAttribute('data-player-key'));
+            });
+        }
+
+        if (elements.latestScoresList) {
+            elements.latestScoresList.addEventListener('click', function (event) {
+                const playerButton = event.target.closest('[data-player-key]');
+                if (!playerButton) {
+                    return;
+                }
+
+                showPlayerScores(playerButton.getAttribute('data-player-key'));
+            });
+        }
+
+        if (elements.playerScoresClose) {
+            elements.playerScoresClose.addEventListener('click', hidePlayerScores);
+        }
+
+        if (elements.playerScoresCopyLink) {
+            elements.playerScoresCopyLink.addEventListener('click', handleCopyPlayerLink);
+        }
     }
 
     function bindModalEvents() {
@@ -1230,6 +1538,7 @@
         setupAdminHooks();
 
         const requestedGameId = getQueryGameId();
+        state.selectedPlayerKey = getQueryPlayerKey();
 
         if (requestedGameId) {
             await loadGameView(requestedGameId);

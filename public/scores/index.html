@@ -50,6 +50,56 @@
                 <div id="latest-scores-state" class="section-state loading">Chargement des derniers scores...</div>
                 <div id="latest-scores-list" class="latest-scores-list"></div>
             </section>
+
+            <section class="section-card medals-section">
+                <div class="medals-section-head">
+                    <div>
+                        <h2 class="section-title">Classement des medailles</h2>
+                        <p class="medals-section-intro">Compte le nombre de medailles d'or, d'argent et de bronze obtenues par joueur sur l'ensemble des jeux.</p>
+                    </div>
+                </div>
+                <div id="medals-state" class="section-state loading">Calcul du classement des medailles...</div>
+                <div class="medals-table-wrap">
+                    <table class="medals-table" aria-label="Classement des medailles par joueur">
+                        <thead>
+                            <tr>
+                                <th>Rang</th>
+                                <th>Joueur</th>
+                                <th>Or</th>
+                                <th>Argent</th>
+                                <th>Bronze</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="medals-body"></tbody>
+                    </table>
+                </div>
+                <section id="player-scores-panel" class="player-scores-panel" aria-live="polite" style="display:none;">
+                    <div class="player-scores-head">
+                        <div>
+                            <h3 id="player-scores-title" class="player-scores-title">Scores du joueur</h3>
+                            <p id="player-scores-subtitle" class="player-scores-subtitle"></p>
+                        </div>
+                        <div class="player-scores-actions">
+                            <button id="player-scores-copy-link" class="player-scores-copy-link" type="button">Copier le lien</button>
+                            <button id="player-scores-close" class="player-scores-close" type="button">Fermer</button>
+                        </div>
+                    </div>
+                    <div class="player-scores-table-wrap">
+                        <table class="player-scores-table" aria-label="Tous les scores du joueur selectionne">
+                            <thead>
+                                <tr>
+                                    <th>Jeu</th>
+                                    <th>Score</th>
+                                    <th>Date</th>
+                                    <th>Commentaire</th>
+                                </tr>
+                            </thead>
+                            <tbody id="player-scores-body"></tbody>
+                        </table>
+                    </div>
+                </section>
+            </section>
         </section>
 
         <section id="game-view" style="display:none;">

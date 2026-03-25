@@ -246,6 +246,156 @@ body {
     padding: 8px;
 }
 
+.medals-section-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: end;
+    margin-bottom: 12px;
+}
+
+.medals-section-intro {
+    margin: 0;
+    color: var(--muted);
+    line-height: 1.5;
+}
+
+.medals-table-wrap,
+.player-scores-table-wrap {
+    overflow-x: auto;
+}
+
+.medals-table,
+.player-scores-table {
+    width: 100%;
+    min-width: 620px;
+    border-collapse: collapse;
+}
+
+.medals-table th,
+.medals-table td,
+.player-scores-table th,
+.player-scores-table td {
+    padding: 12px 10px;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+    vertical-align: top;
+    font-size: 14px;
+}
+
+.medals-table th,
+.player-scores-table th {
+    background: #f7f7f7;
+}
+
+.medal-rank {
+    font-weight: 700;
+    color: var(--accent-strong);
+}
+
+.medal-count {
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+}
+
+.medal-count.is-gold {
+    color: #9b6b00;
+}
+
+.medal-count.is-silver {
+    color: #5c6470;
+}
+
+.medal-count.is-bronze {
+    color: #8f4f21;
+}
+
+.player-link {
+    border: none;
+    padding: 0;
+    background: transparent;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+    font: inherit;
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+}
+
+.player-link:hover .player-name,
+.player-link:focus-visible .player-name {
+    text-decoration: underline;
+}
+
+.player-link:focus-visible {
+    outline: 2px solid rgba(11, 122, 99, 0.35);
+    outline-offset: 4px;
+    border-radius: 10px;
+}
+
+.player-scores-panel {
+    margin-top: 18px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: linear-gradient(180deg, #fcfffd 0%, #f7fbf9 100%);
+    padding: 14px;
+}
+
+.player-scores-head {
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.player-scores-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.player-scores-title {
+    margin: 0;
+    font-size: 18px;
+}
+
+.player-scores-subtitle {
+    margin: 4px 0 0;
+    color: var(--muted);
+    line-height: 1.5;
+}
+
+.player-scores-copy-link,
+.player-scores-close {
+    border: 1px solid var(--border);
+    background: #fff;
+    color: var(--text);
+    border-radius: 999px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.player-scores-copy-link {
+    border-color: rgba(11, 122, 99, 0.28);
+    color: var(--accent-strong);
+}
+
+.player-score-game {
+    color: var(--accent-strong);
+    text-decoration: none;
+    font-weight: 700;
+}
+
+.player-score-comment {
+    white-space: pre-wrap;
+    color: var(--muted);
+}
+
 .game-header {
     display: grid;
     grid-template-columns: 180px fit-content(560px) minmax(420px, 1fr);
@@ -811,5 +961,10 @@ body[data-is-admin='true'] .admin-actions {
 
     .game-metrics-chart-wrap canvas {
         height: 220px;
+    }
+
+    .player-scores-head {
+        flex-direction: column;
+        align-items: stretch;
     }
 }

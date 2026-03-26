@@ -1255,9 +1255,6 @@ async function fetchFeaturedGameLeaderboard(gameId, isRefresh = false) {
             const mobileComment = isTouchDevice && safeComment
                 ? `<div class="mobile-comment" hidden>${escapeHtml(safeComment)}</div>`
                 : '';
-            const mobileScoresLink = isTouchDevice
-                ? `<a class="leaderboard-details-link" href="/scores/${encodeURIComponent(gameId)}">Scores</a>`
-                : '';
             const playerProfileUrl = score.userId ? `/scores/?player=${encodeURIComponent(score.userId)}` : '';
             const playerLabel = playerProfileUrl
                 ? `<a class="featured-player-link" href="${playerProfileUrl}">${playerName}</a>`
@@ -1270,7 +1267,6 @@ async function fetchFeaturedGameLeaderboard(gameId, isRefresh = false) {
                     <div class="featured-leaderboard-avatar" style="background-color: ${score.playerPhotoUrl ? 'transparent' : avatarColor}">${avatarContent}</div>
                     ${playerMarkup}
                     <div class="featured-leaderboard-score">${isOldestPlayer ? '🍪 ' : ''}${score.score.toLocaleString()}</div>
-                    ${mobileScoresLink}
                     ${mobileComment}
                 </div>
             `;
@@ -1288,17 +1284,18 @@ async function fetchFeaturedGameLeaderboard(gameId, isRefresh = false) {
                 });
             }
 
-            if (!isTouchDevice) {
-                entry.addEventListener('click', (event) => {
-                    if (event.target.closest('a, button')) {
-                        return;
-                    }
+            entry.addEventListener('click', (event) => {
+                if (event.target.closest('a, button')) {
+                    return;
+                }
 
-                    const entryGameId = entry.getAttribute('data-game-id');
-                    if (entryGameId) {
-                        window.location.href = `/scores/${entryGameId}`;
-                    }
-                });
+                const entryGameId = entry.getAttribute('data-game-id');
+                if (entryGameId) {
+                    window.location.href = `/scores/${entryGameId}`;
+                }
+            });
+
+            if (!isTouchDevice) {
                 return;
             }
 

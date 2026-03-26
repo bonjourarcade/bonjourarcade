@@ -1542,10 +1542,6 @@ body.theme-dark #game-id-input::placeholder {
     cursor: pointer;
 }
 
-.leaderboard-details-link {
-    display: none;
-}
-
 .mobile-comment {
     display: none;
 }
@@ -1561,20 +1557,6 @@ body.theme-dark #game-id-input::placeholder {
     text-overflow: unset;
 }
 
-.featured-leaderboard-entry.is-touch .leaderboard-details-link {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    margin-left: auto;
-    padding: 0.2rem 0.5rem;
-    border: 1px solid rgba(76, 175, 80, 0.45);
-    border-radius: 999px;
-    color: #2e7d32;
-    font-size: 0.8rem;
-    font-weight: 600;
-    text-decoration: none;
-}
-
 .featured-leaderboard-entry.is-touch .mobile-comment {
     display: block;
     width: 100%;
@@ -1588,9 +1570,8 @@ body.theme-dark #game-id-input::placeholder {
     box-sizing: border-box;
 }
 
-body.theme-dark .featured-leaderboard-entry.is-touch .leaderboard-details-link {
-    color: #81c784;
-    border-color: rgba(129, 199, 132, 0.5);
+.featured-leaderboard-entry.is-touch .mobile-comment[hidden] {
+    display: none;
 }
 
 body.theme-dark .featured-leaderboard-entry.is-touch .mobile-comment {

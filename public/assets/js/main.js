@@ -1246,11 +1246,11 @@ async function fetchFeaturedGameLeaderboard(gameId, isRefresh = false) {
                 : initial;
 
             const safeComment = score.comment ? score.comment.substring(0, 100) : '';
-            const commentAttr = safeComment ? ` data-comment="${escapeHtml(safeComment)}"` : '';
+            const desktopCommentAttr = !isTouchDevice && safeComment ? ` data-comment="${escapeHtml(safeComment)}"` : '';
             const commentIndicator = safeComment
                 ? (isTouchDevice
                     ? ' <button type="button" class="comment-indicator comment-toggle" aria-label="Afficher le commentaire" aria-expanded="false">💬</button>'
-                    : ' <span class="comment-indicator" title="Commentaire disponible">💬</span>')
+                    : ' <span class="comment-indicator" aria-label="Commentaire disponible">💬</span>')
                 : '';
             const mobileComment = isTouchDevice && safeComment
                 ? `<div class="mobile-comment" hidden>${escapeHtml(safeComment)}</div>`
@@ -1262,7 +1262,7 @@ async function fetchFeaturedGameLeaderboard(gameId, isRefresh = false) {
             const playerMarkup = `<div class="featured-leaderboard-player">${playerLabel}${commentIndicator}</div>`;
 
             leaderboardHTML += `
-                <div class="featured-leaderboard-entry${isTouchDevice ? ' is-touch' : ''}"${commentAttr} data-game-id="${escapeHtml(gameId)}" style="cursor: ${isTouchDevice ? 'default' : 'pointer'};">
+                <div class="featured-leaderboard-entry${isTouchDevice ? ' is-touch' : ''}"${desktopCommentAttr} data-game-id="${escapeHtml(gameId)}" style="cursor: ${isTouchDevice ? 'default' : 'pointer'};">
                     <div class="featured-leaderboard-rank">${rankText}</div>
                     <div class="featured-leaderboard-avatar" style="background-color: ${score.playerPhotoUrl ? 'transparent' : avatarColor}">${avatarContent}</div>
                     ${playerMarkup}
@@ -1273,6 +1273,8 @@ async function fetchFeaturedGameLeaderboard(gameId, isRefresh = false) {
         });
 
         leaderboardContent.innerHTML = leaderboardHTML;
+
+        updateFeaturedLeaderboardCommentAnchors(leaderboardContent);
 
         // Desktop: entire entry opens the detailed scores page.
         const leaderboardEntries = leaderboardContent.querySelectorAll('.featured-leaderboard-entry');
@@ -1339,6 +1341,28 @@ async function fetchFeaturedGameLeaderboard(gameId, isRefresh = false) {
     }
 }
 
+function updateFeaturedLeaderboardCommentAnchors(container = document) {
+    const entries = container.querySelectorAll('.featured-leaderboard-entry[data-comment]');
+
+    entries.forEach(entry => {
+        const commentIndicator = entry.querySelector('.comment-indicator');
+        if (!commentIndicator) {
+            entry.style.removeProperty('--comment-anchor-x');
+            return;
+        }
+
+        const entryRect = entry.getBoundingClientRect();
+        const indicatorRect = commentIndicator.getBoundingClientRect();
+        const anchorX = indicatorRect.left - entryRect.left + (indicatorRect.width / 2);
+
+        entry.style.setProperty('--comment-anchor-x', `${anchorX}px`);
+    });
+}
+
+window.addEventListener('resize', () => {
+    updateFeaturedLeaderboardCommentAnchors();
+});
+
 /**
  * Generates mock scores for localhost testing
  * @param {string} gameId - The game ID
@@ -1374,7 +1398,7 @@ function generateMockScores(gameId) {
         photoURL: `https://via.placeholder.com/96/cccccc/666666?text=${player.name.charAt(0)}`,
         score: Math.floor(baseScore * (1 + Math.random() * 5) * (1 - index * 0.1)),
         game: gameId,
-        comment: Math.random() > 0.5 ? "Super match!" : "",
+        comment: Math.random() > 0.5 ? "Super match! J'ai adore le rythme, les rebondissements et la tension jusqu'a la toute derniere sec" : "",
         date: {
             _seconds: Math.floor(Date.now() / 1000) - Math.floor(Math.random() * 86400 * 30),
             _nanoseconds: Math.floor(Math.random() * 1000000000)

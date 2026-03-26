@@ -1579,7 +1579,7 @@ body.theme-dark .featured-leaderboard-entry.is-touch .mobile-comment {
     color: #fff;
 }
 
-[data-comment]:hover::after {
+[data-comment]:not(.featured-leaderboard-entry):hover::after {
     content: attr(data-comment);
     position: absolute;
     bottom: calc(100% + 10px);
@@ -1603,7 +1603,7 @@ body.theme-dark .featured-leaderboard-entry.is-touch .mobile-comment {
     animation: tooltip-fade-in 0.2s ease-out;
 }
 
-[data-comment]:hover::before {
+[data-comment]:not(.featured-leaderboard-entry):hover::before {
     content: '';
     position: absolute;
     bottom: 100%;
@@ -1611,6 +1611,41 @@ body.theme-dark .featured-leaderboard-entry.is-touch .mobile-comment {
     transform: translateX(-50%);
     border: 6px solid transparent;
     border-top-color: rgba(30, 30, 30, 0.95);
+    z-index: 10000;
+    pointer-events: none;
+}
+
+.featured-leaderboard-entry[data-comment]:hover::after {
+    content: attr(data-comment);
+    position: absolute;
+    top: 0;
+    left: calc(var(--comment-anchor-x, 0px) + 18px);
+    background: rgba(30, 30, 30, 0.95);
+    color: white;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: normal;
+    white-space: pre-wrap;
+    width: min(220px, calc(100% - var(--comment-anchor-x, 0px) - 32px));
+    z-index: 10000;
+    pointer-events: none;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(8px);
+    text-align: left;
+    line-height: 1.4;
+    animation: tooltip-fade-in-side 0.2s ease-out;
+}
+
+.featured-leaderboard-entry[data-comment]:hover::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: calc(var(--comment-anchor-x, 0px) + 6px);
+    transform: translateY(-50%);
+    border: 6px solid transparent;
+    border-right-color: rgba(30, 30, 30, 0.95);
     z-index: 10000;
     pointer-events: none;
 }
@@ -1624,6 +1659,18 @@ body.theme-dark .featured-leaderboard-entry.is-touch .mobile-comment {
     to {
         opacity: 1;
         transform: translateX(-50%) translateY(0);
+    }
+}
+
+@keyframes tooltip-fade-in-side {
+    from {
+        opacity: 0;
+        transform: translateX(6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
     }
 }
 

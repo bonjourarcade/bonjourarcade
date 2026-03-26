@@ -1,67 +1,67 @@
 #!/bin/bash
 
-echo "We don't bother generating thumbnails anymore, because we already resize covers at every commit (see commented code below and use as .git/hooks/pre-commit, in case you need to recreate it)."
+#echo "We don't bother generating thumbnails anymore, because we already resize covers at every commit (see commented code below and use as .git/hooks/pre-commit, in case you need to recreate it)."
 
-#################################################################
-##!/bin/sh
-##
-## Pre-commit hook to automatically shrink large PNG files
-## This hook runs the parallel PNG shrinking script before each commit
-##
+################################################################
+#!/bin/sh
 #
-## Redirect output to stderr
-#exec 1>&2
+# Pre-commit hook to automatically shrink large PNG files
+# This hook runs the parallel PNG shrinking script before each commit
 #
-## Get the repository root directory
-#REPO_ROOT=$(git rev-parse --show-toplevel)
-#
-## Change to the repository root directory
-#cd "$REPO_ROOT"
-#
-## Check if the Python script exists
-#if [ ! -f "scripts/shrink_large_pngs_parallel.py" ]; then
-#    echo "Error: scripts/shrink_large_pngs_parallel.py not found"
-#    exit 1
-#fi
-#
-## Check if python3 is available
-#if ! command -v python3 >/dev/null 2>&1; then
-#    echo "Error: python3 not found in PATH"
-#    exit 1
-#fi
-#
-## Run the PNG shrinking script
-#echo "Running PNG optimization script..."
-#python3 scripts/shrink_large_pngs_parallel.py
-#
-## Check if the script ran successfully
-#if [ $? -ne 0 ]; then
-#    echo "Error: PNG optimization script failed"
-#    exit 1
-#fi
-#
-## Check if any PNG files were modified and need to be staged
-#MODIFIED_PNGS=$(git diff --cached --name-only | grep '\.png$' || true)
-#if [ -n "$MODIFIED_PNGS" ]; then
-#    echo "PNG files were optimized and will be re-staged."
-#    git add $MODIFIED_PNGS
-#fi
-#
-#echo "PNG optimization completed successfully"
-#
-## Push ROMs
-#cd ~/perso/roms
-#git add -A && git commit -m "Update ROM collection: $(git diff --cached --name-only | wc -l | tr -d ' ') files modified
-#
-#Files changed:
-#$(git diff --cached --name-only | sed 's/^/- /')"
-#git push origin main
-#
-#echo "Pushed ROMs successfully"
-#
-#cd -
-#exit 0
-#################################################################
+
+# Redirect output to stderr
+exec 1>&2
+
+# Get the repository root directory
+REPO_ROOT=$(git rev-parse --show-toplevel)
+
+# Change to the repository root directory
+cd "$REPO_ROOT"
+
+# Check if the Python script exists
+if [ ! -f "scripts/shrink_large_pngs_parallel.py" ]; then
+    echo "Error: scripts/shrink_large_pngs_parallel.py not found"
+    exit 1
+fi
+
+# Check if python3 is available
+if ! command -v python3 >/dev/null 2>&1; then
+    echo "Error: python3 not found in PATH"
+    exit 1
+fi
+
+# Run the PNG shrinking script
+echo "Running PNG optimization script..."
+python3 scripts/shrink_large_pngs_parallel.py
+
+# Check if the script ran successfully
+if [ $? -ne 0 ]; then
+    echo "Error: PNG optimization script failed"
+    exit 1
+fi
+
+# Check if any PNG files were modified and need to be staged
+MODIFIED_PNGS=$(git diff --cached --name-only | grep '\.png$' || true)
+if [ -n "$MODIFIED_PNGS" ]; then
+    echo "PNG files were optimized and will be re-staged."
+    git add $MODIFIED_PNGS
+fi
+
+echo "PNG optimization completed successfully"
+
+# Push ROMs
+cd ~/perso/roms
+git add -A && git commit -m "Update ROM collection: $(git diff --cached --name-only | wc -l | tr -d ' ') files modified
+
+Files changed:
+$(git diff --cached --name-only | sed 's/^/- /')"
+git push origin main
+
+echo "Pushed ROMs successfully"
+
+cd -
+exit 0
+################################################################
 
 
 # PREVIOUS VERSION OF THIS SCRIPT, BEFORE WE MADE IT AN ECHO STATEMENT

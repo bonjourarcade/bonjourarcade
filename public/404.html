@@ -349,7 +349,9 @@
 
             if (playMatch) {
                 // Extract the game_id from the path
-                const gameId = playMatch[1];
+                const rawGameId = playMatch[1];
+                const gameId = decodeURIComponent(rawGameId);
+                const gameRoute = `/b/${encodeURIComponent(gameId)}`;
 
                 // Stop 404 content from showing
                 const errorOverlay = document.getElementById('errorOverlay');
@@ -372,19 +374,29 @@
                     })
                     .catch(e => console.error(e));
 
-                // Create full-screen iframe
-                const iframe = document.createElement('iframe');
-                iframe.style.position = 'fixed';
-                iframe.style.top = '0';
-                iframe.style.left = '0';
-                iframe.style.width = '100%';
-                iframe.style.height = '100%';
-                iframe.style.border = 'none';
-                iframe.style.zIndex = '9999';
-
-                iframe.src = `/play/?game=${encodeURIComponent(gameId)}`;
-
-                document.body.appendChild(iframe);
+                fetch('/play/index.html', { cache: 'no-store' })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`Unable to load play shell: ${response.status}`);
+                        }
+                        return response.text();
+                    })
+                    .then(html => {
+                        const bootstrapScript = `<script>window.__BA_ALLOW_B_GAME_ANALYTICS__=true;window.__BA_PLAY_ROUTE__=${JSON.stringify({ gameId: gameId, route: gameRoute })};<\/script>`;
+                        const patchedHtml = html.replace('<head>', `<head><base href="/play/">${bootstrapScript}`);
+                        document.open();
+                        document.write(patchedHtml);
+                        document.close();
+                    })
+                    .catch(error => {
+                        console.error(error);
+                        const errorOverlay = document.getElementById('errorOverlay');
+                        const actionButtons = document.getElementById('actionButtons');
+                        const coversContainer = document.getElementById('coversContainer');
+                        if (errorOverlay) errorOverlay.classList.add('show-404');
+                        if (actionButtons) actionButtons.classList.add('show-404');
+                        if (coversContainer) coversContainer.classList.add('show-404');
+                    });
                 return;
             } else if (scoresMatch) {
                 const gameId = scoresMatch[1];

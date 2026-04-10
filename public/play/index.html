@@ -1166,6 +1166,22 @@
             }
         }
 
+        function getCurrentGameId() {
+            const routeState = window.__BA_PLAY_ROUTE__;
+            if (routeState && typeof routeState.gameId === 'string' && routeState.gameId.trim() !== '') {
+                return routeState.gameId.trim();
+            }
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const queryGameId = urlParams.get('game');
+            if (typeof queryGameId === 'string' && queryGameId.trim() !== '') {
+                return queryGameId.trim();
+            }
+
+            const shortRouteMatch = window.location.pathname.match(/^\/b\/([^/]+)$/);
+            return shortRouteMatch ? decodeURIComponent(shortRouteMatch[1]) : null;
+        }
+
         function downloadFile(url, filename) {
             const link = document.createElement('a');
             link.href = url;
@@ -1355,9 +1371,9 @@
          * 7. Load the EmulatorJS engine.
          */
         async function loadSelectedGame() {
-            // Step 1: Get Game ID from URL parameter (?game=...)
+            // Step 1: Get Game ID from URL parameter (?game=...) or short route (/b/:gameId)
             const urlParams = new URLSearchParams(window.location.search);
-            const gameId = urlParams.get('game');
+            const gameId = getCurrentGameId();
 
             if (!gameId) {
                 const urlParams = new URLSearchParams(window.location.search);
@@ -3346,8 +3362,7 @@
         const scoreSubmitBtn = document.getElementById('score-submit-btn');
         if (scoreSubmitBtn) {
             scoreSubmitBtn.addEventListener('click', async () => {
-                const urlParams = new URLSearchParams(window.location.search);
-                const gameId = urlParams.get('game');
+                const gameId = getCurrentGameId();
                 const scoreInputValue = document.getElementById('score-input').value || '';
                 const scoreValue = parseInt(scoreInputValue.replace(/\D/g, ''), 10);
                 const commentValue = document.getElementById('score-comment-input').value;
@@ -3431,8 +3446,7 @@
             e.preventDefault();
             e.stopPropagation();
 
-            const urlParams = new URLSearchParams(window.location.search);
-            const gameId = urlParams.get('game');
+            const gameId = getCurrentGameId();
             if (!gameId) {
                 return;
             }

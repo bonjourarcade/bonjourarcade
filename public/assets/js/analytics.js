@@ -64,6 +64,16 @@
             return;
         }
 
+        const existingHeartbeat = window.__BA_GAME_SESSION_HEARTBEAT__;
+        if (existingHeartbeat && existingHeartbeat.route === route && existingHeartbeat.gameId === currentGameId) {
+            console.warn('BonjourArcade: Duplicate game heartbeat initialization skipped');
+            return;
+        }
+
+        if (existingHeartbeat && typeof existingHeartbeat.endSession === 'function') {
+            existingHeartbeat.endSession();
+        }
+
         const HEARTBEAT_MS = 15000;
         const sessionId = createSessionId();
         const startedAt = Date.now();
@@ -119,7 +129,18 @@
                 activeSeconds: Math.floor(activeMs / 1000),
                 elapsedSeconds: Math.floor((Date.now() - startedAt) / 1000)
             });
+
+            if (window.__BA_GAME_SESSION_HEARTBEAT__ && window.__BA_GAME_SESSION_HEARTBEAT__.sessionId === sessionId) {
+                delete window.__BA_GAME_SESSION_HEARTBEAT__;
+            }
         }
+
+        window.__BA_GAME_SESSION_HEARTBEAT__ = {
+            sessionId: sessionId,
+            gameId: currentGameId,
+            route: route,
+            endSession: endSession
+        };
 
         document.addEventListener('visibilitychange', function () {
             flushActiveDelta();

@@ -429,6 +429,7 @@
         const columnWidth = 120; // pixels
         const scrollSpeed = 0.5; // pixels per frame
         let animationId = null;
+        const isRedirectRoute = /^\/(b|scores)\/[^/]+$/.test(window.location.pathname);
 
         // Initialize
         async function init() {
@@ -510,6 +511,10 @@
         // Create columns
         function createColumns() {
             const container = document.getElementById('coversContainer');
+            if (!container) {
+                return;
+            }
+
             const viewportWidth = window.innerWidth || document.documentElement.clientWidth;
             const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
 
@@ -634,6 +639,11 @@
 
         // Animation loop
         function animate() {
+            if (!document.getElementById('coversContainer')) {
+                animationId = null;
+                return;
+            }
+
             const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
             const viewportWidth = window.innerWidth || document.documentElement.clientWidth;
 
@@ -734,38 +744,52 @@
 
         // Handle window resize
         let resizeTimeout;
-        window.addEventListener('resize', () => {
-            clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(() => {
-                // Recreate columns on resize to ensure full coverage
-                if (animationId) {
-                    cancelAnimationFrame(animationId);
-                }
-                document.getElementById('coversContainer').innerHTML = '';
-                columns = [];
-                createColumns();
-                animate();
-            }, 250);
-        });
+        if (!isRedirectRoute) {
+            window.addEventListener('resize', () => {
+                clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(() => {
+                    const coversContainer = document.getElementById('coversContainer');
+                    if (!coversContainer) {
+                        return;
+                    }
+
+                    // Recreate columns on resize to ensure full coverage
+                    if (animationId) {
+                        cancelAnimationFrame(animationId);
+                    }
+                    coversContainer.innerHTML = '';
+                    columns = [];
+                    createColumns();
+                    animate();
+                }, 250);
+            });
+        }
 
         // Periodic check to ensure columns always cover the viewport
-        setInterval(() => {
-            const viewportWidth = window.innerWidth;
-            const currentColumns = document.querySelectorAll('.cover-column').length;
-            const expectedColumns = Math.ceil(viewportWidth / columnWidth) + 2;
-
-            // If columns are missing, recreate them
-            if (currentColumns < expectedColumns - 1) {
-                console.log('Recreating columns to fix coverage');
-                if (animationId) {
-                    cancelAnimationFrame(animationId);
+        if (!isRedirectRoute) {
+            setInterval(() => {
+                const coversContainer = document.getElementById('coversContainer');
+                if (!coversContainer) {
+                    return;
                 }
-                document.getElementById('coversContainer').innerHTML = '';
-                columns = [];
-                createColumns();
-                animate();
-            }
-        }, 2000);
+
+                const viewportWidth = window.innerWidth;
+                const currentColumns = document.querySelectorAll('.cover-column').length;
+                const expectedColumns = Math.ceil(viewportWidth / columnWidth) + 2;
+
+                // If columns are missing, recreate them
+                if (currentColumns < expectedColumns - 1) {
+                    console.log('Recreating columns to fix coverage');
+                    if (animationId) {
+                        cancelAnimationFrame(animationId);
+                    }
+                    coversContainer.innerHTML = '';
+                    columns = [];
+                    createColumns();
+                    animate();
+                }
+            }, 2000);
+        }
 
         // Initialize on load
         function startInit() {

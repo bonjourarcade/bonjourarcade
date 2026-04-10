@@ -24,6 +24,12 @@
         return;
     }
 
+    if (window.__BA_ANALYTICS_INITIALIZED__ === true) {
+        console.warn('BonjourArcade: Analytics already initialized');
+        return;
+    }
+    window.__BA_ANALYTICS_INITIALIZED__ = true;
+
     const normalizedGameId = shortRouteGameId || (typeof gameId === 'string' && gameId.trim() !== '' ? gameId.trim() : '');
     const trackedGameRoute = normalizedGameId ? '/b/' + encodeURIComponent(normalizedGameId) : '';
     const hasGameRoute = trackedGameRoute !== '';

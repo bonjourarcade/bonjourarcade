@@ -22,39 +22,3 @@ function normalizeTitleForSorting(title) {
 
     return title;
 }
-
-
-
-
-// Inject Analytics
-(function () {
-    try {
-        // Attempt to load analytics.js from the same directory as utils.js
-        var script = document.createElement('script');
-        script.async = true;
-
-        // Use currentScript to find the path, or fallback to searching for utils.js
-        var src = '';
-        if (document.currentScript) {
-            src = document.currentScript.src;
-        } else {
-            var scripts = document.getElementsByTagName('script');
-            for (var i = 0; i < scripts.length; i++) {
-                if (scripts[i].src.indexOf('utils.js') !== -1) {
-                    src = scripts[i].src;
-                    break;
-                }
-            }
-        }
-
-        if (src) {
-            // Replace utils.js with analytics.js
-            script.src = src.replace('utils.js', 'analytics.js');
-            document.head.appendChild(script);
-        } else {
-            console.warn('BonjourArcade: Could not find utils.js path to inject analytics.');
-        }
-    } catch (e) {
-        console.error('BonjourArcade: Analytics injection failed', e);
-    }
-})();

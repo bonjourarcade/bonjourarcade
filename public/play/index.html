@@ -98,36 +98,6 @@
             border: 1px solid red;
         }
 
-        /* Styling for QR code */
-        #qr-code-container {
-            position: fixed !important;
-            top: 60px !important;
-            right: 10px !important;
-            background-color: white;
-            padding: 8px !important;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            z-index: 2000;
-            /* Raised above banner */
-            display: none;
-            /* Hidden by default, will be shown by JS */
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            /* Indicate it's clickable */
-            margin: 0 !important;
-        }
-
-        #qr-code-container p {
-            font-family: sans-serif;
-            font-size: 14px;
-            color: #333;
-            margin-top: 5px;
-            margin-bottom: 0;
-            text-align: center;
-        }
-
         /* Fast-forward button styling */
         #fastforward-button {
             background-color: rgba(0, 0, 0, 0.7);
@@ -1042,12 +1012,6 @@
         <div id="game"></div>
     </div>
 
-    <!-- QR Code Container -->
-    <div id="qr-code-container">
-        <div id="qr-code"></div>
-        <p>Scan pour soumettre !</p>
-    </div>
-
     <!-- Help Modal -->
     <div id="help-modal">
         <div id="help-modal-content">
@@ -1155,7 +1119,6 @@
     <script src="../assets/js/banner.js"></script>
     <script src="../assets/js/game-history.js"></script>
     <script src="../assets/js/utils.js"></script>
-    <script src="../assets/js/qrcode.min.js"></script>
     <script>
         // Helper to navigate even if in iframe
         function navigate(url) {
@@ -1388,35 +1351,6 @@
             }
 
             console.log(`Attempting to load game with ID: ${gameId}`);
-
-            // QR Code generation logic
-            const qrCodeContainer = document.getElementById('qr-code-container');
-            const leaderboardUrl = `${window.location.origin}/submit/?game=${gameId}`;
-
-            if (qrCodeContainer) {
-                if (!isMobileDevice()) {
-                    qrCodeContainer.style.display = 'flex'; // Show container for desktop
-
-                    new QRCode(document.getElementById("qr-code"), {
-                        text: leaderboardUrl,
-                        width: 90,
-                        height: 90,
-                        colorDark: "#000000",
-                        colorLight: "#ffffff",
-                        correctLevel: QRCode.CorrectLevel.H
-                    });
-
-                    // Make the container clickable for desktop
-                    qrCodeContainer.addEventListener('click', () => {
-                        window.open(leaderboardUrl, '_blank');
-                    });
-                }
-
-                else {
-                    // On mobile, hide the entire container
-                    qrCodeContainer.style.display = 'none';
-                }
-            }
 
             // Leaderboard fetching logic with localStorage caching
             async function fetchLeaderboard(gameId, isRefresh = false) {
@@ -1843,10 +1777,8 @@
 
                 // --- Hide leaderboard button if enable_score is explicitly false ---
                 if (selectedGame.enable_score === false || selectedGame.enable_score === "false") {
-                    const qrCodeContainer = document.getElementById('qr-code-container');
                     const leaderboardContainer = document.getElementById('leaderboard-container');
                     const helpButton = document.getElementById('help-button');
-                    if (qrCodeContainer) qrCodeContainer.style.display = 'none';
                     if (leaderboardContainer) leaderboardContainer.style.display = 'none';
                     if (helpButton) helpButton.classList.remove('is-visible');
                 }

@@ -77,10 +77,12 @@ def get_upcoming_games():
         period_diff = current_period - start_period
         
         upcoming_games = []
-        # Show the next 20 upcoming games
-        for i in range(1, 21):
-            future_period = current_period + i
-            game_index = (period_diff + i) % len(games)
+        next_game_index = period_diff + 1
+
+        # Show only the remaining planned games, without wrapping to already featured ones.
+        for game_index in range(next_game_index, len(games)):
+            periods_ahead = game_index - period_diff
+            future_period = current_period + periods_ahead
             game_id = games[game_index]
             game_date = _get_date_from_period(future_period)
             

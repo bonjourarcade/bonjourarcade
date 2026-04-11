@@ -792,6 +792,7 @@ Bonne semaine ! ☀️
 
         play_url = f'{BASE_URL}/b/{game_id}'
         leaderboard_url = f'{BASE_URL}/scores/{game_id}'
+        cover_url = f'{BASE_URL}/games/{game_id}/cover.png'
         title = meta.get('title', game_id)
         announcement_message = meta.get('announcement_message', '') or custom_message or ''
 
@@ -822,12 +823,15 @@ Bonne semaine ! ☀️
             print("\n" + "=" * 50)
             print("📣 FACEBOOK POST PREVIEW (DRY RUN)")
             print("=" * 50)
+            print(f"Image: {cover_url}")
+            print("-" * 50)
             print(message)
             print("=" * 50)
             return True
 
-        endpoint = f'https://graph.facebook.com/v25.0/{page_id}/feed'
+        endpoint = f'https://graph.facebook.com/v25.0/{page_id}/photos'
         payload = {
+            'url': cover_url,
             'message': message,
             'access_token': page_access_token,
         }
@@ -836,7 +840,11 @@ Bonne semaine ! ☀️
             response = requests.post(endpoint, data=payload, timeout=30)
             response.raise_for_status()
             response_data = response.json()
-            print(f"✅ Facebook post published successfully (post id: {response_data.get('id', 'unknown')})")
+            print(
+                "✅ Facebook photo post published successfully "
+                f"(photo id: {response_data.get('id', 'unknown')}, "
+                f"post id: {response_data.get('post_id', 'unknown')})"
+            )
             return True
         except requests.exceptions.RequestException as e:
             print(f"❌ Error posting to Facebook: {e}")

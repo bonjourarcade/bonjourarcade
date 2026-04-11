@@ -3,7 +3,8 @@
 Newsletter Email Sender for BonjourArcade
 
 This script reads the current game of the week and sends a newsletter email
-to subscribers using ConvertKit API and to one or more webhooks (e.g., Google Chat, Discord).
+to subscribers using ConvertKit API, to one or more webhooks (e.g., Google Chat, Discord),
+and optionally to a Facebook Page.
 
 The announcement message is automatically read from the game's metadata.yaml file
 under the 'announcement_message' field. You can also override it with --custom-message.
@@ -19,14 +20,17 @@ Requirements:
 - Set CONVERTKIT_API_SECRET environment variable
 - Set up a JSON file mapping webhook labels to env var names (see --webhook-map)
 - Set the corresponding environment variables for webhook URLs
+- To post on Facebook: set FACEBOOK_PAGE_ID and FACEBOOK_PAGE_ACCESS_TOKEN
 
 Usage:
-    python send_newsletter.py [--dry-run] [--mail-api-url URL] [--mail-only] [--webhook-only] [--webhook-map webhook_map.json] [--webhook-label LABEL] [--webhook-all] [--custom-message MESSAGE]
+    python send_newsletter.py [--dry-run] [--mail-api-url URL] [--mail-only] [--webhook-only] [--facebook] [--facebook-only] [--webhook-map webhook_map.json] [--webhook-label LABEL] [--webhook-all] [--custom-message MESSAGE]
 
 Options:
     --mail-api-url      Override the ConvertKit API URL for sending email (default: https://api.convertkit.com/v3)
     --mail-only         Only send the email (no webhooks)
     --webhook-only      Only send to webhooks (no email)
+    --facebook          Also post to Facebook Page during this run
+    --facebook-only     Only post to Facebook Page (no email/webhooks)
     --webhook-map       Path to JSON file mapping webhook labels to env var names
     --webhook-label     Only send to the webhook with this label from the map
     --webhook-all       Non-interactive: select all webhooks from the map (use with --webhook-only)
@@ -52,11 +56,13 @@ DEFAULT_API_URL = 'https://api.convertkit.com/v3'
 BASE_URL = 'https://bonjourarcade.com'
 
 class NewsletterSender:
-    def __init__(self, api_secret, api_url=DEFAULT_API_URL, dry_run=False, webhook_only=False):
+    def __init__(self, api_secret, api_url=DEFAULT_API_URL, dry_run=False, webhook_only=False, facebook_only=False, post_to_facebook=False):
         self.api_secret = api_secret
         self.api_url = api_url
         self.dry_run = dry_run
         self.webhook_only = webhook_only
+        self.facebook_only = facebook_only
+        self.post_to_facebook = post_to_facebook
         self.plinko_url = f"https://f-l.ca/plinko/{self._get_plinko_seed()}"
 
     def _get_plinko_seed(self):
@@ -775,11 +781,77 @@ Bonne semaine ! ☀️
         if not sent_any:
             print("⚠️  No webhook messages sent (no valid URLs found).")
 
+    def send_facebook_post(self, game_id, meta, custom_message=None, last_week_highlight=None):
+        """Post the weekly game announcement to a Facebook Page."""
+        page_id = os.getenv('FACEBOOK_PAGE_ID')
+        page_access_token = os.getenv('FACEBOOK_PAGE_ACCESS_TOKEN')
+
+        if not page_id or not page_access_token:
+            print("⚠️  FACEBOOK_PAGE_ID or FACEBOOK_PAGE_ACCESS_TOKEN is not set. Skipping Facebook post.")
+            return False
+
+        play_url = f'{BASE_URL}/b/{game_id}'
+        leaderboard_url = f'{BASE_URL}/scores/{game_id}'
+        title = meta.get('title', game_id)
+        announcement_message = meta.get('announcement_message', '') or custom_message or ''
+
+        message_parts = []
+        if announcement_message.strip():
+            message_parts.append(announcement_message.strip())
+
+        message_parts.append(f"Jeu en vedette cette semaine : {title}")
+        message_parts.append(f"Jouer : {play_url}")
+        message_parts.append(f"Classement : {leaderboard_url}")
+
+        if last_week_highlight:
+            top_scores = []
+            for score in last_week_highlight.get('top_scores', []):
+                medal = "🥇" if score['rank'] == 1 else "🥈" if score['rank'] == 2 else "🥉"
+                top_scores.append(f"{medal} {score['player']}: {score['score']:,} points")
+            if top_scores:
+                message_parts.append(
+                    "Champions du dernier defi sur "
+                    f"{last_week_highlight['game_title']} :\n" + "\n".join(top_scores)
+                )
+
+        message_parts.append("Bonne semaine !")
+        message = "\n\n".join(message_parts)
+
+        if self.dry_run:
+            print("🛑 DRY RUN MODE: Skipping Facebook post.")
+            print("\n" + "=" * 50)
+            print("📣 FACEBOOK POST PREVIEW (DRY RUN)")
+            print("=" * 50)
+            print(message)
+            print("=" * 50)
+            return True
+
+        endpoint = f'https://graph.facebook.com/v25.0/{page_id}/feed'
+        payload = {
+            'message': message,
+            'access_token': page_access_token,
+        }
+
+        try:
+            response = requests.post(endpoint, data=payload, timeout=30)
+            response.raise_for_status()
+            response_data = response.json()
+            print(f"✅ Facebook post published successfully (post id: {response_data.get('id', 'unknown')})")
+            return True
+        except requests.exceptions.RequestException as e:
+            print(f"❌ Error posting to Facebook: {e}")
+            if hasattr(e, 'response') and e.response is not None:
+                print(f"Response status: {e.response.status_code}")
+                print(f"Response body: {e.response.text}")
+            return False
+
     def run(self, webhook_map_path=None, filter_label=None, mail_only=False, custom_message=None, game_id_override=None):
         """
         Run the newsletter process with the following safety rules:
         - If webhook_only=True: Send webhooks (respecting filter_label) and skip email
+        - If facebook_only=True: Send Facebook post and skip email/webhooks
         - If mail_only=True: Send only the email (no webhooks)
+        - If post_to_facebook=True: Also post to Facebook during this run
         - If neither flag is set: Send both webhooks and email
         - If dry_run=True: Skip ConvertKit API call, but still generate and preview content
         """
@@ -810,6 +882,19 @@ Bonne semaine ! ☀️
         content = self.create_email_content(game_id, meta, custom_message=custom_message, last_week_highlight=last_week_highlight)
         print(f'✅ Email content ready: {content["subject"]}')
         
+        # Facebook-only: send Facebook post and exit before email/webhooks
+        if self.facebook_only:
+            success = self.send_facebook_post(
+                game_id,
+                meta,
+                custom_message=custom_message,
+                last_week_highlight=last_week_highlight,
+            )
+            if not success:
+                sys.exit(1)
+            print("🛑 Facebook-only mode: Skipping email and webhook sends.")
+            return
+
         # Webhook-only: send webhooks and exit before email
         if self.webhook_only:
             self.send_webhook(
@@ -831,10 +916,23 @@ Bonne semaine ! ☀️
                 custom_message=custom_message,
                 last_week_highlight=last_week_highlight
             )
-        
+
+        if self.post_to_facebook:
+            success = self.send_facebook_post(
+                game_id,
+                meta,
+                custom_message=custom_message,
+                last_week_highlight=last_week_highlight,
+            )
+            if not success:
+                sys.exit(1)
+
         # Mail-only: do NOT return early; proceed to email sending only
         # Send email (but respect dry_run flag)
         if not self.dry_run:
+            if not self.api_secret:
+                print('❌ Error: API secret is required to send email. Set CONVERTKIT_API_SECRET environment variable.')
+                sys.exit(1)
             print("📤 Sending email...")
             success = self.send_email(content)
             if success:
@@ -859,6 +957,10 @@ def main():
                        help='ConvertKit API URL (for sending email/broadcasts)')
     parser.add_argument('--webhook-only', action='store_true',
                        help='Send only to webhook and skip email (for testing)')
+    parser.add_argument('--facebook', action='store_true',
+                       help='Also post to Facebook Page during this run')
+    parser.add_argument('--facebook-only', action='store_true',
+                       help='Post only to Facebook Page and skip email/webhooks')
     parser.add_argument('--webhook-all', action='store_true',
                       help='Non-interactive: send to all webhooks from --webhook-map (use with --webhook-only)')
     parser.add_argument('--mail-only', action='store_true',
@@ -880,29 +982,28 @@ def main():
     custom_message = args.custom_message
 
     api_secret = os.getenv('CONVERTKIT_API_SECRET')
-    if not api_secret:
-        print('❌ Error: API secret is required. Set CONVERTKIT_API_SECRET environment variable.')
-        sys.exit(1)
-    
-    # Debug: Check API secret format (without exposing the actual secret)
-    print(f"🔍 API Secret Debug Info:")
-    print(f"   - Length: {len(api_secret)} characters")
-    print(f"   - Starts with: {api_secret[:4]}...")
-    print(f"   - Ends with: ...{api_secret[-4:]}")
-    print(f"   - Contains only alphanumeric chars: {api_secret.replace('_', '').isalnum()}")
-    print(f"   - Contains underscores: {'_' in api_secret}")
-    
-    # Check for common GitLab CI/CD issues
-    if api_secret.startswith('$'):
-        print("⚠️  WARNING: API secret appears to be a variable reference (starts with $)")
-        print("   This might indicate the environment variable wasn't properly substituted.")
-    if api_secret.endswith('\n') or api_secret.endswith('\r'):
-        print("⚠️  WARNING: API secret has trailing newline/carriage return")
-        print("   This can happen when copying from certain text editors.")
-        api_secret = api_secret.strip()
-    if ' ' in api_secret:
-        print("⚠️  WARNING: API secret contains spaces")
-        print("   This might indicate improper quoting in the CI/CD configuration.")
+    if api_secret:
+        # Debug: Check API secret format (without exposing the actual secret)
+        print(f"🔍 API Secret Debug Info:")
+        print(f"   - Length: {len(api_secret)} characters")
+        print(f"   - Starts with: {api_secret[:4]}...")
+        print(f"   - Ends with: ...{api_secret[-4:]}")
+        print(f"   - Contains only alphanumeric chars: {api_secret.replace('_', '').isalnum()}")
+        print(f"   - Contains underscores: {'_' in api_secret}")
+        
+        # Check for common GitLab CI/CD issues
+        if api_secret.startswith('$'):
+            print("⚠️  WARNING: API secret appears to be a variable reference (starts with $)")
+            print("   This might indicate the environment variable wasn't properly substituted.")
+        if api_secret.endswith('\n') or api_secret.endswith('\r'):
+            print("⚠️  WARNING: API secret has trailing newline/carriage return")
+            print("   This can happen when copying from certain text editors.")
+            api_secret = api_secret.strip()
+        if ' ' in api_secret:
+            print("⚠️  WARNING: API secret contains spaces")
+            print("   This might indicate improper quoting in the CI/CD configuration.")
+    else:
+        print('ℹ️  CONVERTKIT_API_SECRET is not set. Email sending will be unavailable for this run.')
     
     # EARLY VALIDATION: Check if we have an announcement message and required metadata fields before any user interaction
     if not custom_message:
@@ -913,7 +1014,9 @@ def main():
                 api_secret=api_secret,
                 api_url=args.mail_api_url,
                 dry_run=True,  # Use dry run to avoid any actual sending
-                webhook_only=False
+                webhook_only=False,
+                facebook_only=False,
+                post_to_facebook=False,
             )
             
             # Read game data and metadata to check announcement and required fields
@@ -951,7 +1054,7 @@ def main():
     
     # Interactive webhook selection if no --webhook-label is provided
     selected_webhook_labels = None
-    if args.webhook_label is None and not args.mail_only and not args.webhook_all:
+    if args.webhook_label is None and not args.mail_only and not args.webhook_all and not args.facebook_only:
         webhook_map_path = args.webhook_map
         if not os.path.exists(webhook_map_path):
             print(f"⚠️  Webhook map file '{webhook_map_path}' not found. Skipping webhook selection.")
@@ -995,7 +1098,9 @@ def main():
         api_secret=api_secret,
         api_url=args.mail_api_url,
         dry_run=args.dry_run,
-        webhook_only=args.webhook_only
+        webhook_only=args.webhook_only,
+        facebook_only=args.facebook_only,
+        post_to_facebook=args.facebook,
     )
     
     # Handle API testing mode
@@ -1067,6 +1172,14 @@ def main():
                     custom_message=custom_message,
                     game_id_override=args.game_id
                 )
+        elif args.facebook_only:
+            sender.run(
+                webhook_map_path=args.webhook_map,
+                filter_label=None,
+                mail_only=False,
+                custom_message=custom_message,
+                game_id_override=args.game_id
+            )
         elif args.mail_only or (not args.webhook_label and not args.webhook_only):
             # Default to email only if no webhook label is specified and not webhook-only
             sender.run(

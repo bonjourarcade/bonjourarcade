@@ -63,6 +63,8 @@ send_newsletter:
     - echo "Email sent successfully"
     - python3 scripts/send_newsletter.py --webhook-only --webhook-all
     - echo "Webhooks sent successfully"
+    - python3 scripts/send_newsletter.py --facebook-only
+    - echo "Facebook post sent successfully"
     - echo "Newsletter automation completed"
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"

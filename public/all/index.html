@@ -35,18 +35,11 @@
 
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
             gap: 1.5rem;
             width: 100%;
             max-width: 100%;
             box-sizing: border-box;
-        }
-
-        /* Limit maximum columns to 7 */
-        @media (min-width: 1200px) {
-            .grid {
-                grid-template-columns: repeat(7, 1fr);
-            }
         }
 
         .game {
@@ -446,17 +439,10 @@
 
         .section-games {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
             gap: 1.2rem;
             margin-bottom: 0.5rem;
             width: 100%;
-        }
-
-        /* Limit maximum columns to 7 for section games */
-        @media (min-width: 1200px) {
-            .section-games {
-                grid-template-columns: repeat(7, 1fr);
-            }
         }
 
         /* Responsive section adjustments */
@@ -1155,12 +1141,8 @@
                     searchGrid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(100px, 1fr))';
                     searchGrid.style.gap = '12px';
                     searchGrid.style.marginBottom = '0.3rem';
-                } else if (window.innerWidth >= 1200) {
-                    searchGrid.style.gridTemplateColumns = 'repeat(7, 1fr)';
-                    searchGrid.style.gap = '1.2rem';
-                    searchGrid.style.marginBottom = '0.5rem';
                 } else {
-                    searchGrid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(150px, 1fr))';
+                    searchGrid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(130px, 1fr))';
                     searchGrid.style.gap = '1.2rem';
                     searchGrid.style.marginBottom = '0.5rem';
                 }
@@ -1221,12 +1203,8 @@
                             sectionContainer.style.gridTemplateColumns = 'repeat(auto-fill, minmax(100px, 1fr))';
                             sectionContainer.style.gap = '12px';
                             sectionContainer.style.marginBottom = '0.3rem';
-                        } else if (window.innerWidth >= 1200) {
-                            sectionContainer.style.gridTemplateColumns = 'repeat(7, 1fr)';
-                            sectionContainer.style.gap = '1.2rem';
-                            sectionContainer.style.marginBottom = '0.5rem';
                         } else {
-                            sectionContainer.style.gridTemplateColumns = 'repeat(auto-fit, minmax(150px, 1fr))';
+                            sectionContainer.style.gridTemplateColumns = 'repeat(auto-fill, minmax(130px, 1fr))';
                             sectionContainer.style.gap = '1.2rem';
                             sectionContainer.style.marginBottom = '0.5rem';
                         }
@@ -1550,12 +1528,8 @@
                         nouveautesContainer.style.gridTemplateColumns = 'repeat(auto-fill, minmax(100px, 1fr))';
                         nouveautesContainer.style.gap = '12px';
                         nouveautesContainer.style.marginBottom = '0.3rem';
-                    } else if (window.innerWidth >= 1200) {
-                        nouveautesContainer.style.gridTemplateColumns = 'repeat(7, 1fr)';
-                        nouveautesContainer.style.gap = '1.2rem';
-                        nouveautesContainer.style.marginBottom = '0.5rem';
                     } else {
-                        nouveautesContainer.style.gridTemplateColumns = 'repeat(auto-fit, minmax(150px, 1fr))';
+                        nouveautesContainer.style.gridTemplateColumns = 'repeat(auto-fill, minmax(130px, 1fr))';
                         nouveautesContainer.style.gap = '1.2rem';
                         nouveautesContainer.style.marginBottom = '0.5rem';
                     }
@@ -1632,12 +1606,8 @@
                         searchGrid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(100px, 1fr))';
                         searchGrid.style.gap = '12px';
                         searchGrid.style.marginBottom = '0.3rem';
-                    } else if (window.innerWidth >= 1200) {
-                        searchGrid.style.gridTemplateColumns = 'repeat(7, 1fr)';
-                        searchGrid.style.gap = '1.2rem';
-                        searchGrid.style.marginBottom = '0.5rem';
                     } else {
-                        searchGrid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(150px, 1fr))';
+                        searchGrid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(130px, 1fr))';
                         searchGrid.style.gap = '1.2rem';
                         searchGrid.style.marginBottom = '0.5rem';
                     }
@@ -1693,12 +1663,8 @@
                         searchGrid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(100px, 1fr))';
                         searchGrid.style.gap = '12px';
                         searchGrid.style.marginBottom = '0.3rem';
-                    } else if (window.innerWidth >= 1200) {
-                        searchGrid.style.gridTemplateColumns = 'repeat(7, 1fr)';
-                        searchGrid.style.gap = '1.2rem';
-                        searchGrid.style.marginBottom = '0.5rem';
                     } else {
-                        searchGrid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(150px, 1fr))';
+                        searchGrid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(130px, 1fr))';
                         searchGrid.style.gap = '1.2rem';
                         searchGrid.style.marginBottom = '0.5rem';
                     }
@@ -1832,12 +1798,8 @@
                             sectionContainer.style.gridTemplateColumns = 'repeat(auto-fill, minmax(100px, 1fr))';
                             sectionContainer.style.gap = '12px';
                             sectionContainer.style.marginBottom = '0.3rem';
-                        } else if (window.innerWidth >= 1200) {
-                            sectionContainer.style.gridTemplateColumns = 'repeat(7, 1fr)';
-                            sectionContainer.style.gap = '1.2rem';
-                            sectionContainer.style.marginBottom = '0.5rem';
                         } else {
-                            sectionContainer.style.gridTemplateColumns = 'repeat(auto-fit, minmax(150px, 1fr))';
+                            sectionContainer.style.gridTemplateColumns = 'repeat(auto-fill, minmax(130px, 1fr))';
                             sectionContainer.style.gap = '1.2rem';
                             sectionContainer.style.marginBottom = '0.5rem';
                         }
@@ -1949,12 +1911,8 @@
                         sectionContainer.style.gridTemplateColumns = 'repeat(auto-fill, minmax(100px, 1fr))';
                         sectionContainer.style.gap = '12px';
                         sectionContainer.style.marginBottom = '0.3rem';
-                    } else if (window.innerWidth >= 1200) {
-                        sectionContainer.style.gridTemplateColumns = 'repeat(7, 1fr)';
-                        sectionContainer.style.gap = '1.2rem';
-                        sectionContainer.style.marginBottom = '0.5rem';
                     } else {
-                        sectionContainer.style.gridTemplateColumns = 'repeat(auto-fit, minmax(150px, 1fr))';
+                        sectionContainer.style.gridTemplateColumns = 'repeat(auto-fill, minmax(130px, 1fr))';
                         sectionContainer.style.gap = '1.2rem';
                         sectionContainer.style.marginBottom = '0.5rem';
                     }

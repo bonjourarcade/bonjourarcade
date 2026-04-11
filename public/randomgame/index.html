@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Loading Random Game...</title>
+    <title>Chargement d'un jeu aléatoire...</title>
     <style>
         * {
             margin: 0;
@@ -98,14 +98,14 @@
 <body>
     <div class="loading-container">
         <div class="spinner"></div>
-        <div class="loading-text">Finding a random game...</div>
+        <div class="loading-text">Recherche d'un jeu aléatoire...</div>
         <div id="game-info" class="game-info" style="display: none;">
             <div id="game-title"></div>
             <div id="game-system"></div>
         </div>
         <div id="error-container" class="game-info error" style="display: none;">
             <div id="error-message"></div>
-            <button class="retry-btn" onclick="retryRandomGame()">Try Again</button>
+            <button class="retry-btn" onclick="retryRandomGame()">Réessayer</button>
             <div id="retry-countdown" class="retry-countdown" style="display: none;"></div>
         </div>
     </div>
@@ -135,7 +135,7 @@
                 const gamelistUrl = isLocalhost ? '../gamelist.json' + cacheBuster : 'https://storage.googleapis.com/bonjourarcade/gamelist.json' + cacheBuster;
                 const response = await fetch(gamelistUrl);
                 if (!response.ok) {
-                    throw new Error(`Failed to fetch game list (Status: ${response.status})`);
+                    throw new Error(`Impossible de charger la liste des jeux (statut : ${response.status})`);
                 }
 
                 const data = await response.json();
@@ -211,7 +211,7 @@
                 gameData = gameData.filter(game => game.problem !== "true");
 
                 if (gameData.length === 0) {
-                    throw new Error('No games available');
+                    throw new Error('Aucun jeu disponible');
                 }
 
                 // Decide whether to use sequential looping: latest, upcoming or featured use sequential; random does not
@@ -268,7 +268,7 @@
                 }
 
                 // Show game info briefly
-                document.getElementById('game-title').textContent = currentGame.title || 'Unknown Game';
+                document.getElementById('game-title').textContent = currentGame.title || 'Jeu inconnu';
 
                 // Map core to system name
                 const systemMap = {
@@ -290,7 +290,7 @@
                     'vb': 'Virtual Boy',
                     'ws': 'WonderSwan'
                 };
-                const systemName = currentGame.core ? (systemMap[currentGame.core] || currentGame.core) : 'Unknown System';
+                const systemName = currentGame.core ? (systemMap[currentGame.core] || currentGame.core) : 'Système inconnu';
                 document.getElementById('game-system').textContent = systemName;
                 document.getElementById('game-info').style.display = 'block';
 
@@ -301,7 +301,7 @@
 
             } catch (error) {
                 console.error('Error loading random game:', error);
-                document.getElementById('error-message').textContent = `Error: ${error.message}`;
+                document.getElementById('error-message').textContent = `Erreur : ${error.message}`;
                 document.getElementById('error-container').style.display = 'block';
 
                 // Start automatic retry mechanism
@@ -324,7 +324,7 @@
                 // Redirect to the play page with the random game
                 window.location.href = `/play/?game=${currentGame.id}`;
             } else {
-                throw new Error('Invalid game data');
+                throw new Error('Données de jeu invalides');
             }
         }
 
@@ -347,7 +347,7 @@
             // Start countdown timer
             let countdownSeconds = 60;
             countdownInterval = setInterval(() => {
-                countdownElement.textContent = `Next retry in ${countdownSeconds} seconds...`;
+                countdownElement.textContent = `Nouvel essai dans ${countdownSeconds} secondes...`;
                 countdownSeconds--;
 
                 if (countdownSeconds < 0) {
@@ -363,8 +363,8 @@
 
                 // Update error message to show retry status
                 const errorMessage = document.getElementById('error-message');
-                const originalError = errorMessage.textContent.replace(/ \(Retry \d+\)/, '');
-                errorMessage.textContent = `${originalError} (Retry ${retryCount})`;
+                const originalError = errorMessage.textContent.replace(/ \(Nouvel essai \d+\)/, '');
+                errorMessage.textContent = `${originalError} (Nouvel essai ${retryCount})`;
 
                 // Try to load a random game again
                 loadRandomGame();

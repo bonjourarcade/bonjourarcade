@@ -1,0 +1,18 @@
+title: "Time Diver: Eon Man"
+developer: A.I.
+year: 1993
+genre: Action
+#controls:
+#  - "←↓↑→: Mouvement"
+#  - "Z: "
+#  - "X: "
+#  - "C: "
+#  - "V: "
+
+#to_start: Espace, puis Enter
+#announcement_message: ""
+
+enable_score: true
+hide: yes
+
+added: 2026-04-14

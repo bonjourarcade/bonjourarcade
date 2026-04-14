@@ -1,0 +1,18 @@
+title: Wrecking Crew '98
+developer: Nintendo EAD, Pax Softnica
+year: 1998
+genre: Compilation, Puzzle
+#controls:
+#  - "←↓↑→: Mouvement"
+#  - "Z: "
+#  - "X: "
+#  - "C: "
+#  - "V: "
+
+#to_start: Espace, puis Enter
+#announcement_message: ""
+
+enable_score: true
+hide: yes
+
+added: 2026-04-14

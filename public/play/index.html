@@ -995,6 +995,52 @@
             return shortRouteMatch ? decodeURIComponent(shortRouteMatch[1]) : null;
         }
 
+        function getCurrentGameRoute() {
+            const gameId = getCurrentGameId();
+            return gameId ? '/b/' + encodeURIComponent(gameId) : window.location.pathname;
+        }
+
+        function trackCurrentGameEvent(eventName, data) {
+            if (typeof window.__BA_TRACK_GAME_EVENT__ !== 'function') {
+                return;
+            }
+
+            const gameId = getCurrentGameId();
+            if (!gameId) {
+                return;
+            }
+
+            const route = getCurrentGameRoute();
+            window.__BA_TRACK_GAME_EVENT__(route, eventName, {
+                gameId: gameId,
+                route: route,
+                ...(data || {})
+            });
+        }
+
+        (function bindEmulatorStateAnalytics() {
+            if (window.__BA_EJS_STATE_ANALYTICS_BOUND__ === true) {
+                return;
+            }
+            window.__BA_EJS_STATE_ANALYTICS_BOUND__ = true;
+
+            window.addEventListener('ba:ejs-state-save', function (event) {
+                const detail = event && event.detail ? event.detail : {};
+                trackCurrentGameEvent('ba_game_state_save', {
+                    method: detail.method || 'unknown',
+                    slot: detail.slot || undefined
+                });
+            });
+
+            window.addEventListener('ba:ejs-state-load', function (event) {
+                const detail = event && event.detail ? event.detail : {};
+                trackCurrentGameEvent('ba_game_state_load', {
+                    method: detail.method || 'unknown',
+                    slot: detail.slot || undefined
+                });
+            });
+        })();
+
         function downloadFile(url, filename) {
             const link = document.createElement('a');
             link.href = url;
@@ -1719,6 +1765,7 @@
 
                 // Step 6: Set the Core EJS Variables Globally (used by EmulatorJS loader)
                 console.log(`Setting EJS Vars - Core: ${selectedGame.core}, ROM: ${selectedGame.romPath}`);
+                window.EJS_FORCE_SRC = true;
                 window.EJS_player = "#game"; // Emulator renders in the #game div
                 window.EJS_core = selectedGame.core; // Core name from gamelist.json
                 window.EJS_gameName = selectedGame.title;

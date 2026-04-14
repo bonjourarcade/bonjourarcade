@@ -69,7 +69,7 @@
         }
     }
 
-    if (("undefined" != typeof EJS_DEBUG_XX && true === EJS_DEBUG_XX)) {
+    if (window.EJS_FORCE_SRC === true || ("undefined" != typeof EJS_DEBUG_XX && true === EJS_DEBUG_XX)) {
         for (let i = 0; i < scripts.length; i++) {
             await loadScript(scripts[i]);
         }

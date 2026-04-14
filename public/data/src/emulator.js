@@ -415,6 +415,11 @@ class EmulatorJS {
         this.functions[event].forEach(e => e(data));
         return this.functions[event].length;
     }
+    dispatchWindowEvent(event, detail) {
+        try {
+            window.dispatchEvent(new CustomEvent(event, { detail: detail }));
+        } catch (e) {}
+    }
     setElements(element) {
         const game = this.createElement("div");
         const elem = document.querySelector(element);
@@ -1481,6 +1486,10 @@ class EmulatorJS {
             const slot = this.getSettingValue("save-state-slot") ? this.getSettingValue("save-state-slot") : "1";
             if (this.gameManager.quickSave(slot)) {
                 this.displayMessage(this.localization("SAVED STATE TO SLOT") + " " + slot);
+                this.dispatchWindowEvent("ba:ejs-state-save", {
+                    method: "quick",
+                    slot: slot
+                });
             } else {
                 this.displayMessage(this.localization("FAILED TO SAVE STATE"));
             }
@@ -1490,6 +1499,10 @@ class EmulatorJS {
             const slot = this.getSettingValue("save-state-slot") ? this.getSettingValue("save-state-slot") : "1";
             this.gameManager.quickLoad(slot);
             this.displayMessage(this.localization("LOADED STATE FROM SLOT") + " " + slot);
+            this.dispatchWindowEvent("ba:ejs-state-load", {
+                method: "quick",
+                slot: slot
+            });
             hideMenu();
         });
         this.elements.contextMenu = {
@@ -1910,6 +1923,9 @@ class EmulatorJS {
             if (this.getSettingValue("save-state-location") === "browser" && this.saveInBrowserSupported()) {
                 this.storage.states.put(this.getBaseFileName() + ".state", state);
                 this.displayMessage(this.localization("SAVE SAVED TO BROWSER"));
+                this.dispatchWindowEvent("ba:ejs-state-save", {
+                    method: "browser"
+                });
             } else {
                 const blob = new Blob([state]);
                 stateUrl = URL.createObjectURL(blob);
@@ -1917,6 +1933,9 @@ class EmulatorJS {
                 a.href = stateUrl;
                 a.download = this.getBaseFileName() + ".state";
                 a.click();
+                this.dispatchWindowEvent("ba:ejs-state-save", {
+                    method: "file"
+                });
             }
         });
         const loadState = addButton(this.config.buttonOpts.loadState, async () => {
@@ -1926,11 +1945,17 @@ class EmulatorJS {
                 this.storage.states.get(this.getBaseFileName() + ".state").then(e => {
                     this.gameManager.loadState(e);
                     this.displayMessage(this.localization("SAVE LOADED FROM BROWSER"));
+                    this.dispatchWindowEvent("ba:ejs-state-load", {
+                        method: "browser"
+                    });
                 })
             } else {
                 const file = await this.selectFile();
                 const state = new Uint8Array(await file.arrayBuffer());
                 this.gameManager.loadState(state);
+                this.dispatchWindowEvent("ba:ejs-state-load", {
+                    method: "file"
+                });
             }
         });
         const controlMenu = addButton(this.config.buttonOpts.gamepad, () => {

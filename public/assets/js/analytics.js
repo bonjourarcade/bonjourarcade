@@ -59,6 +59,8 @@
         });
     }
 
+    window.__BA_TRACK_GAME_EVENT__ = trackGameEvent;
+
     function setupGameSessionHeartbeat(currentGameId, route) {
         if (!window.umami || typeof window.umami.track !== 'function') {
             return;

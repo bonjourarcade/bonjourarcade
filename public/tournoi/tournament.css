@@ -98,6 +98,27 @@ textarea { resize: vertical; }
     margin: 0;
     text-align: center;
 }
+
+#game-info-container.is-randomizing {
+    box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.55), 0 0 28px rgba(255, 193, 7, 0.28);
+}
+
+#game-info-container.is-randomizing #game-title,
+#game-info-container.is-randomizing #game-cover {
+    animation: random-pulse 0.18s ease-in-out infinite alternate;
+}
+
+@keyframes random-pulse {
+    from {
+        transform: scale(1);
+        filter: saturate(0.85) brightness(0.95);
+    }
+
+    to {
+        transform: scale(1.02);
+        filter: saturate(1.15) brightness(1.08);
+    }
+}
 #game-cover { 
     width: 100%; 
     max-width: 300px; 

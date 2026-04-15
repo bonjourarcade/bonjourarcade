@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const gameLinkTextEl = document.getElementById('game-link-text');
     const gameTitleEl = document.getElementById('game-title');
     const gameMetadataEl = document.getElementById('game-metadata');
+    const gameInfoContainerEl = document.getElementById('game-info-container');
     const scoreboardEntriesEl = document.getElementById('scoreboard-entries');
 
     const eliminationModal = document.getElementById('elimination-modal');
@@ -884,7 +885,84 @@ document.addEventListener('DOMContentLoaded', () => {
     function startTimer(duration, onTick, onEnd) { clearInterval(timerInterval); tournamentState.remainingTime = duration; timerInterval = setInterval(() => { tournamentState.remainingTime--; onTick(tournamentState.remainingTime); if (tournamentState.remainingTime <= 0) { clearInterval(timerInterval); onEnd(); } }, 1000); }
     function updateTimerDisplay(time) { if (time < 0) time = 0; timerEl.textContent = `${String(Math.floor(time / 60)).padStart(2, '0')}:${String(time % 60).padStart(2, '0')}`; }
 
-    function startNextRound() {
+    function getGameUrl(gameId) {
+        return `https://bonjourarcade.com/b/${gameId}`;
+    }
+
+    function renderGameMetadata(gameData) {
+        if (!gameData) {
+            gameMetadataEl.innerHTML = '';
+            return;
+        }
+
+        gameMetadataEl.innerHTML = `
+            <p><strong>Développeur:</strong> ${gameData.developer || 'N/A'}</p>
+            <p><strong>Année:</strong> ${gameData.year || 'N/A'}</p>
+            <p><strong>Genre:</strong> ${gameData.genre || 'N/A'}</p>
+            <p><strong>Console:</strong> ${gameData.core || 'N/A'}</p>
+        `;
+    }
+
+    function renderGamePresentation(gameId) {
+        const gameData = gamelist.find(g => g.id === gameId);
+
+        if (gameData) {
+            gameTitleEl.textContent = gameData.title;
+            renderGameMetadata(gameData);
+        } else {
+            gameTitleEl.textContent = gameId || '';
+            gameMetadataEl.innerHTML = '';
+        }
+
+        if (gameId) {
+            gameCoverEl.src = `/games/${gameId}/cover.png`;
+            gameCoverEl.alt = `Couverture de ${gameTitleEl.textContent || gameId}`;
+            const gameUrl = getGameUrl(gameId);
+            gameLinkEl.href = gameUrl;
+            gameLinkTextEl.textContent = gameUrl;
+        } else {
+            gameCoverEl.removeAttribute('src');
+            gameCoverEl.alt = '';
+            gameLinkEl.removeAttribute('href');
+            gameLinkTextEl.textContent = '';
+        }
+    }
+
+    function getAvailableGamesForRound() {
+        const selectedGames = new Set((tournamentState.games || []).filter(Boolean));
+        return (tournamentState.gamePool || tournamentState.games || []).filter(gameId => !selectedGames.has(gameId));
+    }
+
+    async function animateRandomGameSelection(roundIndex) {
+        const availableGameIds = getAvailableGamesForRound();
+        if (availableGameIds.length === 0) return null;
+
+        roundTitleEl.textContent = `Ronde ${roundIndex + 1}`;
+        roundSubtitleEl.textContent = 'Tirage du jeu...';
+        gameCoverEl.style.display = 'block';
+        gameLinkEl.style.display = 'none';
+        gameMetadataEl.style.display = '';
+        scoreboardEntriesEl.style.display = 'none';
+        gameInfoContainerEl.classList.add('is-randomizing');
+
+        const animationSteps = Math.min(18, Math.max(8, availableGameIds.length * 2));
+        for (let i = 0; i < animationSteps; i++) {
+            const previewGameId = availableGameIds[Math.floor(Math.random() * availableGameIds.length)];
+            renderGamePresentation(previewGameId);
+            await new Promise(resolve => setTimeout(resolve, 85 + i * 8));
+        }
+
+        const selectedGameId = availableGameIds[Math.floor(Math.random() * availableGameIds.length)];
+        tournamentState.games[roundIndex] = selectedGameId;
+        renderGamePresentation(selectedGameId);
+        saveState();
+
+        await new Promise(resolve => setTimeout(resolve, 450));
+        gameInfoContainerEl.classList.remove('is-randomizing');
+        return selectedGameId;
+    }
+
+    async function startNextRound() {
         // Stop fetching scores from the break period before starting a new round.
         stopScoreFetching();
         nextRoundBtn.style.display = 'none'; // Hide button when round starts
@@ -921,7 +999,23 @@ document.addEventListener('DOMContentLoaded', () => {
         // If roundIndex is 0 (warmup), tournamentState.cutoffs[0] will be the initial player count,
         // effectively meaning everyone qualifies.
 
-        startCountdown(runRound);
+        tournamentState.status = 'countdown';
+        saveState();
+
+        startCountdown(async () => {
+            if (!tournamentState.games[roundIndex]) {
+                tournamentState.status = 'randomizing';
+                saveState();
+
+                const selectedGameId = await animateRandomGameSelection(roundIndex);
+                if (!selectedGameId) {
+                    endTournament();
+                    return;
+                }
+            }
+
+            runRound();
+        });
     }
 
     // Making startCountdown global to fix ReferenceError
@@ -971,6 +1065,11 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     function runRound() {
+        roundTitleEl.style.display = '';
+        roundSubtitleEl.style.display = '';
+        gameLinkEl.style.display = '';
+        gameMetadataEl.style.display = '';
+        scoreboardEntriesEl.style.display = '';
         gameCoverEl.style.display = 'block'; // Ensure game cover is visible
 
 
@@ -981,24 +1080,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         const roundIndex = tournamentState.currentRoundIndex;
         const gameId = tournamentState.games[roundIndex];
-        const gameData = gamelist.find(g => g.id === gameId);
         tournamentState.status = 'round';
         tournamentState.roundStartTime = new Date().toISOString();
 
         // Set titles
         roundTitleEl.textContent = `Ronde ${roundIndex + 1}`;
-        if (gameData) {
-            gameTitleEl.textContent = gameData.title;
-            gameMetadataEl.innerHTML = `
-                <p><strong>Développeur:</strong> ${gameData.developer || 'N/A'}</p>
-                <p><strong>Année:</strong> ${gameData.year || 'N/A'}</p>
-                <p><strong>Genre:</strong> ${gameData.genre || 'N/A'}</p>
-                <p><strong>Console:</strong> ${gameData.core || 'N/A'}</p>
-            `;
-        } else {
-            gameTitleEl.textContent = gameId;
-            gameMetadataEl.innerHTML = '';
-        }
+        renderGamePresentation(gameId);
 
         if (roundIndex === tournamentState.games.length - 1) { // Final round
             roundSubtitleEl.textContent = "Finale";
@@ -1009,11 +1096,6 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             roundSubtitleEl.textContent = "Échauffement";
         }
-
-        // Set game links
-        gameCoverEl.src = `/games/${gameId}/cover.png`;
-        const gameUrl = `https://bonjourarcade.com/b/${gameId}`;
-        gameLinkEl.href = gameUrl; gameLinkTextEl.textContent = gameUrl;
 
         renderScoreboard();
         startScoreFetching();
@@ -1238,7 +1320,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         tournamentState = {
-            games: gameIds, roundDuration: parseFloat(roundDurationInput.value) * 60, pauseDuration: parseFloat(pauseDurationInput.value) * 60,
+            games: Array(gameIds.length).fill(null), gamePool: gameIds, roundDuration: parseFloat(roundDurationInput.value) * 60, pauseDuration: parseFloat(pauseDurationInput.value) * 60,
             currentRoundIndex: -1, players: {}, roundHistory: [], status: 'setup', remainingTime: 0, currentCutoff: 0,
             simulatedScoresGeneratedForRound: false,
             overrides: {} // allow manual safe/danger toggles
@@ -1255,10 +1337,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         showTournamentView();
         startNextRound();
-        // in case the countdown takes a moment we want the skip-to-break button
-        // already visible right away so the host can jump to the pause without a
-        // page refresh
-        skipToBreakBtn.style.display = 'block';
     });
 
     restartTournamentBtn.addEventListener('click', () => {
@@ -1295,7 +1373,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // skip-timer button removed: using existing rectangular skip-to-break button `skipToBreakBtn`
 
     function showSetupView() { setupView.style.display = 'block'; tournamentView.style.display = 'none'; winnerView.style.display = 'none'; }
-    function showTournamentView() { setupView.style.display = 'none'; tournamentView.style.display = 'block'; winnerView.style.display = 'none'; if (skipToBreakBtn) skipToBreakBtn.style.display = 'block'; }
+    function showTournamentView() { setupView.style.display = 'none'; tournamentView.style.display = 'block'; winnerView.style.display = 'none'; if (skipToBreakBtn) skipToBreakBtn.style.display = 'none'; }
 
     function resumeTournament() {
         showTournamentView();
@@ -1311,35 +1389,52 @@ document.addEventListener('DOMContentLoaded', () => {
             renderScoreboard();
             saveState();
         };
-        if (tournamentState.status === 'round') {
+        if (tournamentState.status === 'countdown') {
+            startCountdown(async () => {
+                const roundIndex = tournamentState.currentRoundIndex;
+
+                if (!tournamentState.games[roundIndex]) {
+                    tournamentState.status = 'randomizing';
+                    saveState();
+
+                    const selectedGameId = await animateRandomGameSelection(roundIndex);
+                    if (!selectedGameId) {
+                        endTournament();
+                        return;
+                    }
+                }
+
+                runRound();
+            });
+        } else if (tournamentState.status === 'round') {
             const roundIndex = tournamentState.currentRoundIndex;
             const gameId = tournamentState.games[roundIndex];
-            const gameData = gamelist.find(g => g.id === gameId);
 
             roundTitleEl.textContent = `Ronde ${roundIndex + 1}`;
-            if (gameData) {
-                gameTitleEl.textContent = gameData.title;
-                gameMetadataEl.innerHTML = `
-                    <p><strong>Développeur:</strong> ${gameData.developer || 'N/A'}</p>
-                    <p><strong>Année:</strong> ${gameData.year || 'N/A'}</p>
-                    <p><strong>Genre:</strong> ${gameData.genre || 'N/A'}</p>
-                    <p><strong>Console:</strong> ${gameData.core || 'N/A'}</p>
-                `;
-            } else {
-                gameTitleEl.textContent = gameId;
-                gameMetadataEl.innerHTML = '';
-            }
+            renderGamePresentation(gameId);
 
             roundSubtitleEl.textContent = roundIndex === 0 ? "Échauffement" : `Top ${tournamentState.currentCutoff} se qualifient`;
-            gameCoverEl.src = `/games/${gameId}/cover.png`;
-            const url = `https://bonjourarcade.com/b/${gameId}`;
-            gameLinkEl.href = url; gameLinkTextEl.textContent = url;
             renderScoreboard();
             startScoreFetching();
             startTimer(tournamentState.remainingTime, onTick, endRound);
 
             // when resuming mid-round make the skip-to-break button available again
             skipToBreakBtn.style.display = 'block';
+        } else if (tournamentState.status === 'randomizing') {
+            const roundIndex = tournamentState.currentRoundIndex;
+            const resumeRandomizing = async () => {
+                if (!tournamentState.games[roundIndex]) {
+                    const selectedGameId = await animateRandomGameSelection(roundIndex);
+                    if (!selectedGameId) {
+                        endTournament();
+                        return;
+                    }
+                }
+
+                runRound();
+            };
+
+            resumeRandomizing();
         } else if (tournamentState.status === 'pause' || tournamentState.status === 'break') { // Updated to handle 'break'
             roundTitleEl.textContent = "Pause";
             roundSubtitleEl.textContent = "Approbation des scores en cours...";
@@ -1403,6 +1498,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         await fetchGamelist();
         if (loadState() && tournamentState.status && tournamentState.status !== 'setup' && tournamentState.status !== 'finished') {
+            if (!Array.isArray(tournamentState.gamePool) || tournamentState.gamePool.length === 0) {
+                tournamentState.gamePool = [...(tournamentState.games || []).filter(Boolean)];
+            }
             resumeTournament();
         } else {
             clearState(); showSetupView();

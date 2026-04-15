@@ -162,6 +162,14 @@
             color: var(--muted);
         }
 
+        .game-description {
+            margin-top: 10px;
+            font-size: 0.95rem;
+            line-height: 1.45;
+            color: var(--text);
+            text-align: left;
+        }
+
         @media (max-width: 720px) {
             #game-list {
                 grid-template-columns: 1fr;
@@ -210,7 +218,7 @@
     </main>
 
     <script>
-        let games = []; // [{id, title, coverArt, year, genre, pageUrl}]
+        let games = []; // [{id, title, coverArt, year, genre, announcementMessage, pageUrl}]
 
         // ----------- URL parsing -----------
         function getGameIdsFromUrl() {
@@ -239,13 +247,14 @@
 
             return ids.map((id) => {
                 const g = byId[id];
-                if (!g) return { id, title: id, coverArt: null, year: '', genre: '', pageUrl: `/play/?game=${id}` };
+                if (!g) return { id, title: id, coverArt: null, year: '', genre: '', announcementMessage: '', pageUrl: `/play/?game=${id}` };
                 return {
                     id: g.id,
                     title: g.title || id,
                     coverArt: g.coverArt || null,
                     year: g.year || '',
                     genre: g.genre || '',
+                    announcementMessage: g.announcement_message || '',
                     pageUrl: `/play/?game=${g.id}`,
                 };
             }).sort((a, b) => a.title.localeCompare(b.title, 'fr', { sensitivity: 'base' }));
@@ -277,6 +286,13 @@
                         <div class="game-meta">${[g.year, g.genre].filter(Boolean).join(' · ')}</div>
                     </div>
                 `;
+
+                if (g.announcementMessage && g.announcementMessage.trim()) {
+                    const description = document.createElement('div');
+                    description.className = 'game-description';
+                    description.textContent = g.announcementMessage.trim();
+                    card.appendChild(description);
+                }
 
                 list.appendChild(card);
             });

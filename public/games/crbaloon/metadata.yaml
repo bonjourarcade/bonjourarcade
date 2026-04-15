@@ -2,16 +2,14 @@ title: Crazy Balloon
 developer: Taito
 year: 1980
 genre: Action, Puzzle
-#controls:
-#  - "←↓↑→: Déplacer"
-#  - "Z: Tirer"
-#  - "X: Bombe"
+controls:
+  - "←↓↑→: Déplacer"
 
-#to_start: Select -> Start
+to_start: Espace, puis Enter
 
 # Message d'annonce personnalisé pour la newsletter
 # Ce message apparaîtra en haut de l'email et des webhooks
-announcement_message:
+announcement_message: "Dans Crazy Balloon, le but est de guider votre ballon du départ jusqu'à l'arrivée. Si cela paraît simple, détrompez-vous ! Les murs du labyrinthe sont hérissés de pointes qui éclatent les ballons, ces derniers oscillent constamment et, dans les niveaux suivants, Hurricane Man vous projette contre les murs. Attention au temps : la partie est chronométrée ! Lorsque vous perdez vos quatre ballons, la partie est terminée."
 
 hide: yes
 

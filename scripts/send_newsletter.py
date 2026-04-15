@@ -4,7 +4,7 @@ Newsletter Email Sender for BonjourArcade
 
 This script reads the current game of the week and sends a newsletter email
 to subscribers using ConvertKit API, to one or more webhooks (e.g., Google Chat, Discord),
-and optionally to a Facebook Page.
+and optionally to Facebook and Instagram.
 
 The announcement message is automatically read from the game's metadata.yaml file
 under the 'announcement_message' field. You can also override it with --custom-message.
@@ -21,10 +21,11 @@ Requirements:
 - Set up a JSON file mapping webhook labels to env var names (see --webhook-map)
 - Set the corresponding environment variables for webhook URLs
 - To post on Facebook: set FACEBOOK_PAGE_ID and either FACEBOOK_PAGE_ACCESS_TOKEN or FACEBOOK_USER_ACCESS_TOKEN
+- To post on Instagram: set INSTAGRAM_BUSINESS_ACCOUNT_ID or let the script derive it from FACEBOOK_PAGE_ID
 - For automatic long-lived token exchange in CI: also set FACEBOOK_APP_ID and FACEBOOK_APP_SECRET
 
 Usage:
-    python send_newsletter.py [--dry-run] [--mail-api-url URL] [--mail-only] [--webhook-only] [--facebook] [--facebook-only] [--webhook-map webhook_map.json] [--webhook-label LABEL] [--webhook-all] [--custom-message MESSAGE]
+    python send_newsletter.py [--dry-run] [--mail-api-url URL] [--mail-only] [--webhook-only] [--facebook] [--facebook-only] [--instagram] [--instagram-only] [--webhook-map webhook_map.json] [--webhook-label LABEL] [--webhook-all] [--custom-message MESSAGE]
 
 Options:
     --mail-api-url      Override the ConvertKit API URL for sending email (default: https://api.convertkit.com/v3)
@@ -32,6 +33,8 @@ Options:
     --webhook-only      Only send to webhooks (no email)
     --facebook          Also post to Facebook Page during this run
     --facebook-only     Only post to Facebook Page (no email/webhooks)
+    --instagram         Also post to Instagram during this run
+    --instagram-only    Only post to Instagram (no email/webhooks)
     --webhook-map       Path to JSON file mapping webhook labels to env var names
     --webhook-label     Only send to the webhook with this label from the map
     --webhook-all       Non-interactive: select all webhooks from the map (use with --webhook-only)
@@ -57,14 +60,53 @@ DEFAULT_API_URL = 'https://api.convertkit.com/v3'
 BASE_URL = 'https://bonjourarcade.com'
 
 class NewsletterSender:
-    def __init__(self, api_secret, api_url=DEFAULT_API_URL, dry_run=False, webhook_only=False, facebook_only=False, post_to_facebook=False):
+    def __init__(
+        self,
+        api_secret,
+        api_url=DEFAULT_API_URL,
+        dry_run=False,
+        webhook_only=False,
+        facebook_only=False,
+        instagram_only=False,
+        post_to_facebook=False,
+        post_to_instagram=False,
+    ):
         self.api_secret = api_secret
         self.api_url = api_url
         self.dry_run = dry_run
         self.webhook_only = webhook_only
         self.facebook_only = facebook_only
+        self.instagram_only = instagram_only
         self.post_to_facebook = post_to_facebook
+        self.post_to_instagram = post_to_instagram
         self.plinko_url = f"https://f-l.ca/plinko/{self._get_plinko_seed()}"
+
+    def _sanitize_meta_error(self, value):
+        """Redact sensitive Meta query parameters from logs."""
+        if not value:
+            return value
+        return re.sub(
+            r'((?:access_token|client_secret|fb_exchange_token)=)([^&\s]+)',
+            r'\1[REDACTED]',
+            str(value),
+        )
+
+    def _log_meta_request_error(self, context, error):
+        """Log Meta API errors without leaking tokens or app secrets."""
+        print(f"⚠️  {context}: {self._sanitize_meta_error(error)}")
+        if hasattr(error, 'response') and error.response is not None:
+            print(f"Response status: {error.response.status_code}")
+            print(f"Response body: {error.response.text}")
+            try:
+                error_payload = error.response.json().get('error', {})
+            except ValueError:
+                error_payload = {}
+
+            if error_payload.get('code') == 190 and error_payload.get('error_subcode') == 463:
+                print(
+                    "⚠️  Meta access token expired. Refresh FACEBOOK_USER_ACCESS_TOKEN "
+                    "and update the GitLab CI/CD variable if applicable."
+                )
 
     def _get_plinko_seed(self):
         """Get the current week's seed in YYYYWW format for the plinko game."""
@@ -794,33 +836,13 @@ Bonne semaine ! ☀️
             )
             return False
 
-        play_url = f'{BASE_URL}/b/{game_id}'
-        leaderboard_url = f'{BASE_URL}/scores/{game_id}'
         cover_url = f'{BASE_URL}/games/{game_id}/cover.png'
-        title = meta.get('title', game_id)
-        announcement_message = meta.get('announcement_message', '') or custom_message or ''
-
-        message_parts = []
-        if announcement_message.strip():
-            message_parts.append(announcement_message.strip())
-
-        message_parts.append(f"Jeu en vedette cette semaine : {title}")
-        message_parts.append(f"Jouer : {play_url}")
-        message_parts.append(f"Classement : {leaderboard_url}")
-
-        if last_week_highlight:
-            top_scores = []
-            for score in last_week_highlight.get('top_scores', []):
-                medal = "🥇" if score['rank'] == 1 else "🥈" if score['rank'] == 2 else "🥉"
-                top_scores.append(f"{medal} {score['player']}: {score['score']:,} points")
-            if top_scores:
-                message_parts.append(
-                    "Champions du dernier defi sur "
-                    f"{last_week_highlight['game_title']} :\n" + "\n".join(top_scores)
-                )
-
-        message_parts.append("Bonne semaine !")
-        message = "\n\n".join(message_parts)
+        message = self._build_social_post_message(
+            game_id,
+            meta,
+            custom_message=custom_message,
+            last_week_highlight=last_week_highlight,
+        )
 
         if self.dry_run:
             print("🛑 DRY RUN MODE: Skipping Facebook post.")
@@ -851,21 +873,130 @@ Bonne semaine ! ☀️
             )
             return True
         except requests.exceptions.RequestException as e:
-            print(f"❌ Error posting to Facebook: {e}")
-            if hasattr(e, 'response') and e.response is not None:
-                print(f"Response status: {e.response.status_code}")
-                print(f"Response body: {e.response.text}")
-                try:
-                    error_payload = e.response.json().get('error', {})
-                except ValueError:
-                    error_payload = {}
-
-                if error_payload.get('code') == 190 and error_payload.get('error_subcode') == 463:
-                    print(
-                        "⚠️  FACEBOOK_PAGE_ACCESS_TOKEN has expired. "
-                        "Refresh the upstream Facebook user token or update the GitLab CI/CD variable."
-                    )
+            self._log_meta_request_error('Error posting to Facebook', e)
             return False
+
+    def _build_social_post_message(self, game_id, meta, custom_message=None, last_week_highlight=None):
+        """Build the shared social post message used by Facebook and Instagram."""
+        play_url = f'{BASE_URL}/b/{game_id}'
+        leaderboard_url = f'{BASE_URL}/scores/{game_id}'
+        title = meta.get('title', game_id)
+        announcement_message = meta.get('announcement_message', '') or custom_message or ''
+
+        message_parts = []
+        if announcement_message.strip():
+            message_parts.append(announcement_message.strip())
+
+        message_parts.append(f"Jeu en vedette cette semaine : {title}")
+        message_parts.append(f"Jouer : {play_url}")
+        message_parts.append(f"Classement : {leaderboard_url}")
+
+        if last_week_highlight:
+            top_scores = []
+            for score in last_week_highlight.get('top_scores', []):
+                medal = "🥇" if score['rank'] == 1 else "🥈" if score['rank'] == 2 else "🥉"
+                top_scores.append(f"{medal} {score['player']}: {score['score']:,} points")
+            if top_scores:
+                message_parts.append(
+                    "Champions du dernier defi sur "
+                    f"{last_week_highlight['game_title']} :\n" + "\n".join(top_scores)
+                )
+
+        message_parts.append("Bonne semaine !")
+        return "\n\n".join(message_parts)
+
+    def send_instagram_post(self, game_id, meta, custom_message=None, last_week_highlight=None):
+        """Post the weekly game announcement to Instagram."""
+        page_id = os.getenv('FACEBOOK_PAGE_ID')
+        page_access_token = self._get_facebook_page_access_token(page_id)
+        instagram_account_id = self._get_instagram_business_account_id(page_id, page_access_token)
+
+        if not instagram_account_id or not page_access_token:
+            print(
+                "⚠️  Instagram posting requires a usable Facebook Page token and either "
+                "INSTAGRAM_BUSINESS_ACCOUNT_ID or a linked Instagram business account on FACEBOOK_PAGE_ID. "
+                "Skipping Instagram post."
+            )
+            return False
+
+        cover_url = f'{BASE_URL}/games/{game_id}/cover.png'
+        caption = self._build_social_post_message(
+            game_id,
+            meta,
+            custom_message=custom_message,
+            last_week_highlight=last_week_highlight,
+        )
+
+        if self.dry_run:
+            print("🛑 DRY RUN MODE: Skipping Instagram post.")
+            print("\n" + "=" * 50)
+            print("📸 INSTAGRAM POST PREVIEW (DRY RUN)")
+            print("=" * 50)
+            print(f"Image: {cover_url}")
+            print("-" * 50)
+            print(caption)
+            print("=" * 50)
+            return True
+
+        creation_endpoint = f'https://graph.facebook.com/v25.0/{instagram_account_id}/media'
+        creation_payload = {
+            'image_url': cover_url,
+            'caption': caption,
+            'access_token': page_access_token,
+        }
+
+        try:
+            creation_response = requests.post(creation_endpoint, data=creation_payload, timeout=30)
+            creation_response.raise_for_status()
+            creation_id = creation_response.json().get('id')
+            if not creation_id:
+                print("❌ Instagram media creation succeeded but returned no creation id.")
+                return False
+
+            publish_endpoint = f'https://graph.facebook.com/v25.0/{instagram_account_id}/media_publish'
+            publish_payload = {
+                'creation_id': creation_id,
+                'access_token': page_access_token,
+            }
+            publish_response = requests.post(publish_endpoint, data=publish_payload, timeout=30)
+            publish_response.raise_for_status()
+            publish_data = publish_response.json()
+            print(
+                "✅ Instagram post published successfully "
+                f"(media id: {publish_data.get('id', 'unknown')})"
+            )
+            return True
+        except requests.exceptions.RequestException as e:
+            self._log_meta_request_error('Error posting to Instagram', e)
+            return False
+
+    def _get_instagram_business_account_id(self, page_id, page_access_token):
+        """Return the linked Instagram business account id when available."""
+        direct_instagram_account_id = os.getenv('INSTAGRAM_BUSINESS_ACCOUNT_ID')
+        if direct_instagram_account_id:
+            return direct_instagram_account_id
+
+        if not page_id or not page_access_token:
+            return None
+
+        endpoint = f'https://graph.facebook.com/v25.0/{page_id}'
+        params = {
+            'fields': 'instagram_business_account',
+            'access_token': page_access_token,
+        }
+
+        try:
+            response = requests.get(endpoint, params=params, timeout=30)
+            response.raise_for_status()
+            instagram_account = response.json().get('instagram_business_account', {})
+            instagram_account_id = instagram_account.get('id')
+            if instagram_account_id:
+                return instagram_account_id
+            print(f"⚠️  No Instagram business account linked to Facebook page {page_id}.")
+        except requests.exceptions.RequestException as e:
+            self._log_meta_request_error(f'Unable to fetch Instagram business account from page {page_id}', e)
+
+        return None
 
     def _get_facebook_page_access_token(self, page_id):
         """Return a Page access token, deriving it from the user token when needed."""
@@ -908,10 +1039,8 @@ Bonne semaine ! ☀️
                 return exchanged_token
             print("⚠️  Facebook token exchange succeeded but returned no access_token. Falling back to provided user token.")
         except requests.exceptions.RequestException as e:
-            print(f"⚠️  Unable to exchange Facebook user token: {e}. Falling back to provided user token.")
-            if hasattr(e, 'response') and e.response is not None:
-                print(f"Response status: {e.response.status_code}")
-                print(f"Response body: {e.response.text}")
+            self._log_meta_request_error('Unable to exchange Facebook user token', e)
+            print("⚠️  Falling back to provided user token.")
 
         return user_token
 
@@ -931,10 +1060,7 @@ Bonne semaine ! ☀️
             if page_token:
                 return page_token
         except requests.exceptions.RequestException as e:
-            print(f"⚠️  Unable to fetch Facebook Page token from page endpoint: {e}")
-            if hasattr(e, 'response') and e.response is not None:
-                print(f"Response status: {e.response.status_code}")
-                print(f"Response body: {e.response.text}")
+            self._log_meta_request_error('Unable to fetch Facebook Page token from page endpoint', e)
 
         accounts_endpoint = 'https://graph.facebook.com/v25.0/me/accounts'
         accounts_params = {
@@ -950,10 +1076,7 @@ Bonne semaine ! ☀️
                     return page['access_token']
             print(f"⚠️  Facebook user token does not expose access to page {page_id}.")
         except requests.exceptions.RequestException as e:
-            print(f"⚠️  Unable to fetch Facebook Page token from /me/accounts: {e}")
-            if hasattr(e, 'response') and e.response is not None:
-                print(f"Response status: {e.response.status_code}")
-                print(f"Response body: {e.response.text}")
+            self._log_meta_request_error('Unable to fetch Facebook Page token from /me/accounts', e)
 
         return None
 
@@ -962,8 +1085,10 @@ Bonne semaine ! ☀️
         Run the newsletter process with the following safety rules:
         - If webhook_only=True: Send webhooks (respecting filter_label) and skip email
         - If facebook_only=True: Send Facebook post and skip email/webhooks
+        - If instagram_only=True: Send Instagram post and skip email/webhooks
         - If mail_only=True: Send only the email (no webhooks)
         - If post_to_facebook=True: Also post to Facebook during this run
+        - If post_to_instagram=True: Also post to Instagram during this run
         - If neither flag is set: Send both webhooks and email
         - If dry_run=True: Skip ConvertKit API call, but still generate and preview content
         """
@@ -1007,6 +1132,19 @@ Bonne semaine ! ☀️
             print("🛑 Facebook-only mode: Skipping email and webhook sends.")
             return
 
+        # Instagram-only: send Instagram post and exit before email/webhooks
+        if self.instagram_only:
+            success = self.send_instagram_post(
+                game_id,
+                meta,
+                custom_message=custom_message,
+                last_week_highlight=last_week_highlight,
+            )
+            if not success:
+                sys.exit(1)
+            print("🛑 Instagram-only mode: Skipping email and webhook sends.")
+            return
+
         # Webhook-only: send webhooks and exit before email
         if self.webhook_only:
             self.send_webhook(
@@ -1031,6 +1169,16 @@ Bonne semaine ! ☀️
 
         if self.post_to_facebook:
             success = self.send_facebook_post(
+                game_id,
+                meta,
+                custom_message=custom_message,
+                last_week_highlight=last_week_highlight,
+            )
+            if not success:
+                sys.exit(1)
+
+        if self.post_to_instagram:
+            success = self.send_instagram_post(
                 game_id,
                 meta,
                 custom_message=custom_message,
@@ -1073,6 +1221,10 @@ def main():
                        help='Also post to Facebook Page during this run')
     parser.add_argument('--facebook-only', action='store_true',
                        help='Post only to Facebook Page and skip email/webhooks')
+    parser.add_argument('--instagram', action='store_true',
+                       help='Also post to Instagram during this run')
+    parser.add_argument('--instagram-only', action='store_true',
+                       help='Post only to Instagram and skip email/webhooks')
     parser.add_argument('--webhook-all', action='store_true',
                       help='Non-interactive: send to all webhooks from --webhook-map (use with --webhook-only)')
     parser.add_argument('--mail-only', action='store_true',
@@ -1128,7 +1280,9 @@ def main():
                 dry_run=True,  # Use dry run to avoid any actual sending
                 webhook_only=False,
                 facebook_only=False,
+                instagram_only=False,
                 post_to_facebook=False,
+                post_to_instagram=False,
             )
             
             # Read game data and metadata to check announcement and required fields
@@ -1166,7 +1320,7 @@ def main():
     
     # Interactive webhook selection if no --webhook-label is provided
     selected_webhook_labels = None
-    if args.webhook_label is None and not args.mail_only and not args.webhook_all and not args.facebook_only:
+    if args.webhook_label is None and not args.mail_only and not args.webhook_all and not args.facebook_only and not args.instagram_only:
         webhook_map_path = args.webhook_map
         if not os.path.exists(webhook_map_path):
             print(f"⚠️  Webhook map file '{webhook_map_path}' not found. Skipping webhook selection.")
@@ -1212,7 +1366,9 @@ def main():
         dry_run=args.dry_run,
         webhook_only=args.webhook_only,
         facebook_only=args.facebook_only,
+        instagram_only=args.instagram_only,
         post_to_facebook=args.facebook,
+        post_to_instagram=args.instagram,
     )
     
     # Handle API testing mode
@@ -1285,6 +1441,14 @@ def main():
                     game_id_override=args.game_id
                 )
         elif args.facebook_only:
+            sender.run(
+                webhook_map_path=args.webhook_map,
+                filter_label=None,
+                mail_only=False,
+                custom_message=custom_message,
+                game_id_override=args.game_id
+            )
+        elif args.instagram_only:
             sender.run(
                 webhook_map_path=args.webhook_map,
                 filter_label=None,

@@ -47,6 +47,21 @@ else
     exit 1
 fi
 
+# Test Instagram posting (dry run)
+echo ""
+echo "📸 Testing Instagram posting (dry run)..."
+if [ -n "$FACEBOOK_PAGE_ID" ] && { [ -n "$FACEBOOK_PAGE_ACCESS_TOKEN" ] || [ -n "$FACEBOOK_USER_ACCESS_TOKEN" ]; }; then
+    python3 scripts/send_newsletter.py --instagram-only --dry-run
+    if [ $? -eq 0 ]; then
+        echo "✅ Instagram test completed successfully"
+    else
+        echo "❌ Instagram test failed"
+        exit 1
+    fi
+else
+    echo "⚠️  Skipping Instagram test: set FACEBOOK_PAGE_ID and a Facebook token to exercise the Meta flow"
+fi
+
 echo ""
 echo "🎉 All tests passed! The automated newsletter is ready to run."
 echo ""
@@ -58,3 +73,4 @@ echo ""
 echo "🔧 To test with real sending (remove --dry-run flags):"
 echo "   python3 scripts/send_newsletter.py --mail-only"
 echo "   python3 scripts/send_newsletter.py --webhook-only"
+echo "   python3 scripts/send_newsletter.py --instagram-only"

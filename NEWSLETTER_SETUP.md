@@ -31,6 +31,10 @@ export FACEBOOK_APP_SECRET="your_app_secret"
 export FACEBOOK_USER_ACCESS_TOKEN="your_user_token"
 export FACEBOOK_PAGE_ID="your_page_id"
 
+# For Instagram posting:
+# Optional if the Instagram Business account is linked to the Facebook Page
+export INSTAGRAM_BUSINESS_ACCOUNT_ID="your_instagram_business_account_id"
+
 # Optional fallback only:
 export FACEBOOK_PAGE_ACCESS_TOKEN="your_page_token"
 ```
@@ -56,6 +60,7 @@ python scripts/send_newsletter.py --dry-run
 - **Newsletter**: Reads current week's game from upcoming.yaml
 - **Content**: Includes game info, cover image, play link, and plinko seed
 - **Facebook**: Derives a Page token at runtime from your Facebook user token when needed
+- **Instagram**: Reuses the Facebook Page token and posts to the linked Instagram Business account
 
 ## 🤖 Automated Newsletter (GitLab CI)
 
@@ -111,6 +116,9 @@ python3 scripts/send_newsletter.py --webhook-only --dry-run
 
 # Test Facebook posting only
 python3 scripts/send_newsletter.py --facebook-only --dry-run
+
+# Test Instagram posting only
+python3 scripts/send_newsletter.py --instagram-only --dry-run
 
 # Test both (interactive mode)
 python3 scripts/send_newsletter.py --dry-run

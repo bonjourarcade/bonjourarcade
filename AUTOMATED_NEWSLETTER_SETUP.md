@@ -9,6 +9,7 @@ The automated newsletter system:
 - **Sends emails** to ConvertKit subscribers
 - **Sends webhooks** to all configured Discord/Google Chat channels
 - **Posts to Facebook** using a Page token derived at runtime from your Facebook user token
+- **Posts to Instagram** using the same Page token and a linked Instagram Business account
 - **Validates metadata** to ensure quality (requires `controls` and `to_start` fields)
 - **Fails safely** if metadata is incomplete
 
@@ -42,10 +43,12 @@ The `.gitlab-ci.yml` file has been updated with a new `send_newsletter` job that
       - Value: Your Facebook App Secret
       - Key: `FACEBOOK_USER_ACCESS_TOKEN`
       - Value: A valid Facebook user access token with access to the Page
-      - Key: `FACEBOOK_PAGE_ID`
-      - Value: Your Facebook Page ID
-      - Optional Key: `FACEBOOK_PAGE_ACCESS_TOKEN`
-      - Optional Value: A pre-generated Facebook Page access token used as a direct fallback
+       - Key: `FACEBOOK_PAGE_ID`
+       - Value: Your Facebook Page ID
+       - Optional Key: `INSTAGRAM_BUSINESS_ACCOUNT_ID`
+       - Optional Value: Your Instagram Business account ID if it cannot be derived from the Facebook Page
+       - Optional Key: `FACEBOOK_PAGE_ACCESS_TOKEN`
+       - Optional Value: A pre-generated Facebook Page access token used as a direct fallback
       - Check "Protected" if you want to restrict to protected branches
 
 3. **Save the schedule**
@@ -95,6 +98,9 @@ python3 scripts/send_newsletter.py --webhook-only --dry-run --webhook-label "tes
 # Test Facebook posting (dry run)
 python3 scripts/send_newsletter.py --facebook-only --dry-run
 
+# Test Instagram posting (dry run)
+python3 scripts/send_newsletter.py --instagram-only --dry-run
+
 # Test both (interactive mode)
 python3 scripts/send_newsletter.py --dry-run
 ```
@@ -113,7 +119,9 @@ python3 scripts/send_newsletter.py --dry-run
 4. **Sends webhooks** to all configured channels
 5. **Derives a Facebook Page token** from the Facebook user token when needed
 6. **Posts to Facebook**
-7. **Logs completion** with timestamps
+7. **Resolves the Instagram Business account** from the Page or `INSTAGRAM_BUSINESS_ACCOUNT_ID`
+8. **Posts to Instagram**
+9. **Logs completion** with timestamps
 
 ### 3. Safety Features
 - **Metadata validation** prevents incomplete newsletters
@@ -163,9 +171,14 @@ python3 scripts/send_newsletter.py --dry-run
    - Solution: refresh or replace `FACEBOOK_USER_ACCESS_TOKEN`
 
 6. **Facebook page token cannot be derived**
-   - Verify `FACEBOOK_PAGE_ID` and `FACEBOOK_USER_ACCESS_TOKEN`
-   - If you want the script to exchange the user token automatically, also set `FACEBOOK_APP_ID` and `FACEBOOK_APP_SECRET`
-   - Confirm the user token has access to the Page and the required Facebook permissions
+    - Verify `FACEBOOK_PAGE_ID` and `FACEBOOK_USER_ACCESS_TOKEN`
+    - If you want the script to exchange the user token automatically, also set `FACEBOOK_APP_ID` and `FACEBOOK_APP_SECRET`
+    - Confirm the user token has access to the Page and the required Facebook permissions
+
+7. **Instagram account cannot be found**
+   - Confirm the Instagram account is a Business account linked to the Facebook Page
+   - Set `INSTAGRAM_BUSINESS_ACCOUNT_ID` explicitly if auto-discovery is unavailable
+   - Ensure the token has the required Instagram Graph API permissions
 
 ### Debug Commands
 

@@ -4,6 +4,7 @@ year: 1980
 genre: Action, Puzzle
 controls:
   - "←↓↑→: Déplacer"
+  - "↓: Entrer highscore"
 
 to_start: Espace, puis Enter
 

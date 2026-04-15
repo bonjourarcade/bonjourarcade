@@ -20,7 +20,8 @@ Requirements:
 - Set CONVERTKIT_API_SECRET environment variable
 - Set up a JSON file mapping webhook labels to env var names (see --webhook-map)
 - Set the corresponding environment variables for webhook URLs
-- To post on Facebook: set FACEBOOK_PAGE_ID and FACEBOOK_PAGE_ACCESS_TOKEN
+- To post on Facebook: set FACEBOOK_PAGE_ID and either FACEBOOK_PAGE_ACCESS_TOKEN or FACEBOOK_USER_ACCESS_TOKEN
+- For automatic long-lived token exchange in CI: also set FACEBOOK_APP_ID and FACEBOOK_APP_SECRET
 
 Usage:
     python send_newsletter.py [--dry-run] [--mail-api-url URL] [--mail-only] [--webhook-only] [--facebook] [--facebook-only] [--webhook-map webhook_map.json] [--webhook-label LABEL] [--webhook-all] [--custom-message MESSAGE]
@@ -784,10 +785,13 @@ Bonne semaine ! ☀️
     def send_facebook_post(self, game_id, meta, custom_message=None, last_week_highlight=None):
         """Post the weekly game announcement to a Facebook Page."""
         page_id = os.getenv('FACEBOOK_PAGE_ID')
-        page_access_token = os.getenv('FACEBOOK_PAGE_ACCESS_TOKEN')
+        page_access_token = self._get_facebook_page_access_token(page_id)
 
         if not page_id or not page_access_token:
-            print("⚠️  FACEBOOK_PAGE_ID or FACEBOOK_PAGE_ACCESS_TOKEN is not set. Skipping Facebook post.")
+            print(
+                "⚠️  Facebook posting requires FACEBOOK_PAGE_ID and either "
+                "FACEBOOK_PAGE_ACCESS_TOKEN or FACEBOOK_USER_ACCESS_TOKEN. Skipping Facebook post."
+            )
             return False
 
         play_url = f'{BASE_URL}/b/{game_id}'
@@ -851,7 +855,107 @@ Bonne semaine ! ☀️
             if hasattr(e, 'response') and e.response is not None:
                 print(f"Response status: {e.response.status_code}")
                 print(f"Response body: {e.response.text}")
+                try:
+                    error_payload = e.response.json().get('error', {})
+                except ValueError:
+                    error_payload = {}
+
+                if error_payload.get('code') == 190 and error_payload.get('error_subcode') == 463:
+                    print(
+                        "⚠️  FACEBOOK_PAGE_ACCESS_TOKEN has expired. "
+                        "Refresh the upstream Facebook user token or update the GitLab CI/CD variable."
+                    )
             return False
+
+    def _get_facebook_page_access_token(self, page_id):
+        """Return a Page access token, deriving it from the user token when needed."""
+        if not page_id:
+            return None
+
+        direct_page_token = os.getenv('FACEBOOK_PAGE_ACCESS_TOKEN')
+        if direct_page_token:
+            return direct_page_token
+
+        user_token = os.getenv('FACEBOOK_USER_ACCESS_TOKEN')
+        if not user_token:
+            return None
+
+        long_lived_user_token = self._exchange_facebook_user_token(user_token)
+        return self._fetch_facebook_page_token(page_id, long_lived_user_token)
+
+    def _exchange_facebook_user_token(self, user_token):
+        """Exchange a user token for a long-lived one when app credentials are available."""
+        app_id = os.getenv('FACEBOOK_APP_ID')
+        app_secret = os.getenv('FACEBOOK_APP_SECRET')
+
+        if not app_id or not app_secret:
+            return user_token
+
+        endpoint = 'https://graph.facebook.com/v25.0/oauth/access_token'
+        params = {
+            'grant_type': 'fb_exchange_token',
+            'client_id': app_id,
+            'client_secret': app_secret,
+            'fb_exchange_token': user_token,
+        }
+
+        try:
+            response = requests.get(endpoint, params=params, timeout=30)
+            response.raise_for_status()
+            response_data = response.json()
+            exchanged_token = response_data.get('access_token')
+            if exchanged_token:
+                return exchanged_token
+            print("⚠️  Facebook token exchange succeeded but returned no access_token. Falling back to provided user token.")
+        except requests.exceptions.RequestException as e:
+            print(f"⚠️  Unable to exchange Facebook user token: {e}. Falling back to provided user token.")
+            if hasattr(e, 'response') and e.response is not None:
+                print(f"Response status: {e.response.status_code}")
+                print(f"Response body: {e.response.text}")
+
+        return user_token
+
+    def _fetch_facebook_page_token(self, page_id, user_token):
+        """Fetch the Page access token using the current user token."""
+        endpoint = f'https://graph.facebook.com/v25.0/{page_id}'
+        params = {
+            'fields': 'access_token',
+            'access_token': user_token,
+        }
+
+        try:
+            response = requests.get(endpoint, params=params, timeout=30)
+            response.raise_for_status()
+            response_data = response.json()
+            page_token = response_data.get('access_token')
+            if page_token:
+                return page_token
+        except requests.exceptions.RequestException as e:
+            print(f"⚠️  Unable to fetch Facebook Page token from page endpoint: {e}")
+            if hasattr(e, 'response') and e.response is not None:
+                print(f"Response status: {e.response.status_code}")
+                print(f"Response body: {e.response.text}")
+
+        accounts_endpoint = 'https://graph.facebook.com/v25.0/me/accounts'
+        accounts_params = {
+            'access_token': user_token,
+        }
+
+        try:
+            response = requests.get(accounts_endpoint, params=accounts_params, timeout=30)
+            response.raise_for_status()
+            response_data = response.json()
+            for page in response_data.get('data', []):
+                if str(page.get('id')) == str(page_id) and page.get('access_token'):
+                    return page['access_token']
+            print(f"⚠️  Facebook user token does not expose access to page {page_id}.")
+        except requests.exceptions.RequestException as e:
+            print(f"⚠️  Unable to fetch Facebook Page token from /me/accounts: {e}")
+            if hasattr(e, 'response') and e.response is not None:
+                print(f"Response status: {e.response.status_code}")
+                print(f"Response body: {e.response.text}")
+
+        return None
 
     def run(self, webhook_map_path=None, filter_label=None, mail_only=False, custom_message=None, game_id_override=None):
         """

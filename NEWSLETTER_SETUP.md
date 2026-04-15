@@ -24,6 +24,15 @@ python scripts/generate_plinko_link.py
 # Set environment variables:
 export CONVERTKIT_API_SECRET="your_api_secret"
 export CONVERTKIT_BROADCAST_ID="your_broadcast_id"
+
+# For Facebook posting:
+export FACEBOOK_APP_ID="your_app_id"
+export FACEBOOK_APP_SECRET="your_app_secret"
+export FACEBOOK_USER_ACCESS_TOKEN="your_user_token"
+export FACEBOOK_PAGE_ID="your_page_id"
+
+# Optional fallback only:
+export FACEBOOK_PAGE_ACCESS_TOKEN="your_page_token"
 ```
 
 ### 3. Dependencies
@@ -46,6 +55,7 @@ python scripts/send_newsletter.py --dry-run
 - **Game Selection**: Plinko automatically selects games using weekly seeds
 - **Newsletter**: Reads current week's game from upcoming.yaml
 - **Content**: Includes game info, cover image, play link, and plinko seed
+- **Facebook**: Derives a Page token at runtime from your Facebook user token when needed
 
 ## 🤖 Automated Newsletter (GitLab CI)
 
@@ -62,9 +72,19 @@ The newsletter can be automatically sent every Monday morning using GitLab CI/CD
    - Set **Interval Pattern**: `0 8 * * 1` (8 AM every Monday)
    - Set **Target Branch**: `main` (or your default branch)
    - Set **Variables**:
-     - Key: `CONVERTKIT_API_SECRET`
-     - Value: Your ConvertKit API secret
-     - Check "Protected" if you want to restrict to protected branches
+       - Key: `CONVERTKIT_API_SECRET`
+       - Value: Your ConvertKit API secret
+       - Key: `FACEBOOK_APP_ID`
+       - Value: Your Facebook App ID
+       - Key: `FACEBOOK_APP_SECRET`
+       - Value: Your Facebook App Secret
+       - Key: `FACEBOOK_USER_ACCESS_TOKEN`
+       - Value: A valid Facebook user access token with access to the Page
+       - Key: `FACEBOOK_PAGE_ID`
+       - Value: Your Facebook Page ID
+       - Optional Key: `FACEBOOK_PAGE_ACCESS_TOKEN`
+       - Optional Value: A pre-generated Facebook Page access token used as a direct fallback
+       - Check "Protected" if you want to restrict to protected branches
 
 3. **Save the schedule**
    - The schedule will appear in your CI/CD → Schedules list
@@ -88,6 +108,9 @@ python3 scripts/send_newsletter.py --mail-only --dry-run
 
 # Test webhook sending only  
 python3 scripts/send_newsletter.py --webhook-only --dry-run
+
+# Test Facebook posting only
+python3 scripts/send_newsletter.py --facebook-only --dry-run
 
 # Test both (interactive mode)
 python3 scripts/send_newsletter.py --dry-run

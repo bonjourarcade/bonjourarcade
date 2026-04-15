@@ -8,6 +8,7 @@ The automated newsletter system:
 - **Runs automatically** every Monday at 8 AM
 - **Sends emails** to ConvertKit subscribers
 - **Sends webhooks** to all configured Discord/Google Chat channels
+- **Posts to Facebook** using a Page token derived at runtime from your Facebook user token
 - **Validates metadata** to ensure quality (requires `controls` and `to_start` fields)
 - **Fails safely** if metadata is incomplete
 
@@ -33,9 +34,19 @@ The `.gitlab-ci.yml` file has been updated with a new `send_newsletter` job that
    - **Interval Pattern**: `0 8 * * 1` (8 AM every Monday)
    - **Target Branch**: `main` (or your default branch)
    - **Variables**:
-     - Key: `CONVERTKIT_API_SECRET`
-     - Value: Your ConvertKit API secret
-     - Check "Protected" if you want to restrict to protected branches
+      - Key: `CONVERTKIT_API_SECRET`
+      - Value: Your ConvertKit API secret
+      - Key: `FACEBOOK_APP_ID`
+      - Value: Your Facebook App ID
+      - Key: `FACEBOOK_APP_SECRET`
+      - Value: Your Facebook App Secret
+      - Key: `FACEBOOK_USER_ACCESS_TOKEN`
+      - Value: A valid Facebook user access token with access to the Page
+      - Key: `FACEBOOK_PAGE_ID`
+      - Value: Your Facebook Page ID
+      - Optional Key: `FACEBOOK_PAGE_ACCESS_TOKEN`
+      - Optional Value: A pre-generated Facebook Page access token used as a direct fallback
+      - Check "Protected" if you want to restrict to protected branches
 
 3. **Save the schedule**
    - The schedule will appear in your CI/CD → Schedules list
@@ -60,6 +71,12 @@ Use the provided test script to verify everything works:
 # Make sure CONVERTKIT_API_SECRET is set
 export CONVERTKIT_API_SECRET="your_secret_here"
 
+# For Facebook posting tests, also set:
+export FACEBOOK_APP_ID="your_app_id"
+export FACEBOOK_APP_SECRET="your_app_secret"
+export FACEBOOK_USER_ACCESS_TOKEN="your_user_token"
+export FACEBOOK_PAGE_ID="your_page_id"
+
 # Run the test script
 ./scripts/test_automated_newsletter.sh
 ```
@@ -74,6 +91,9 @@ python3 scripts/send_newsletter.py --mail-only --dry-run
 
 # Test webhook sending (dry run)
 python3 scripts/send_newsletter.py --webhook-only --dry-run --webhook-label "test_hook"
+
+# Test Facebook posting (dry run)
+python3 scripts/send_newsletter.py --facebook-only --dry-run
 
 # Test both (interactive mode)
 python3 scripts/send_newsletter.py --dry-run
@@ -91,7 +111,9 @@ python3 scripts/send_newsletter.py --dry-run
 2. **Validates metadata** (requires `controls` and `to_start` fields)
 3. **Sends email** to ConvertKit subscribers
 4. **Sends webhooks** to all configured channels
-5. **Logs completion** with timestamps
+5. **Derives a Facebook Page token** from the Facebook user token when needed
+6. **Posts to Facebook**
+7. **Logs completion** with timestamps
 
 ### 3. Safety Features
 - **Metadata validation** prevents incomplete newsletters
@@ -135,6 +157,15 @@ python3 scripts/send_newsletter.py --dry-run
    - Check webhook_map.json configuration
    - Verify environment variables are set
    - Test individual webhooks manually
+
+5. **Facebook token expired**
+   - Error code: `190` with subcode `463`
+   - Solution: refresh or replace `FACEBOOK_USER_ACCESS_TOKEN`
+
+6. **Facebook page token cannot be derived**
+   - Verify `FACEBOOK_PAGE_ID` and `FACEBOOK_USER_ACCESS_TOKEN`
+   - If you want the script to exchange the user token automatically, also set `FACEBOOK_APP_ID` and `FACEBOOK_APP_SECRET`
+   - Confirm the user token has access to the Page and the required Facebook permissions
 
 ### Debug Commands
 

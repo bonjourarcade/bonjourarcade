@@ -1,0 +1,6 @@
+{
+    "EJS_externalFiles": {
+      "/mame2003/samples/turbo/": "/roms/samples/turbo.zip",
+      "/mame2003-plus/samples/turbo/": "/roms/samples/turbo.zip"
+    }
+}

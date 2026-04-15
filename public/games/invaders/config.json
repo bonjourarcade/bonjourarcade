@@ -1,0 +1,6 @@
+{
+    "EJS_externalFiles": {
+      "/mame2003/samples/invaders/": "/roms/samples/invaders.zip",
+      "/mame2003-plus/samples/invaders/": "/roms/samples/invaders.zip"
+    }
+}

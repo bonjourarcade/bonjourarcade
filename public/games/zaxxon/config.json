@@ -1,0 +1,6 @@
+{
+    "EJS_externalFiles": {
+      "/mame2003/samples/zaxxon/": "/roms/samples/zaxxon.zip",
+      "/mame2003-plus/samples/zaxxon/": "/roms/samples/zaxxon.zip"
+    }
+}

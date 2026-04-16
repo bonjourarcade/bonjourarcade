@@ -85,20 +85,6 @@ function showTooltipForItem(item) {
             table.appendChild(row);
         }
     });
-    // Add summarized controls row if present
-    if (game.controls && summarizeControls(game.controls)) {
-        hasData = true;
-        const row = document.createElement('tr');
-        const labelCell = document.createElement('td');
-        labelCell.innerHTML = `<strong>Contrôles:</strong>`;
-        labelCell.className = 'meta-label';
-        const valueCell = document.createElement('td');
-        valueCell.textContent = summarizeControls(game.controls);
-        valueCell.className = 'meta-value';
-        row.appendChild(labelCell);
-        row.appendChild(valueCell);
-        table.appendChild(row);
-    }
     if (hasData) {
         tooltip.appendChild(table);
         document.body.appendChild(tooltip);

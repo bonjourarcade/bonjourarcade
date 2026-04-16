@@ -1,6 +1,6 @@
 {
     "EJS_externalFiles": {
-      "/mame2003/samples/polepos/": "/roms/samples/polepos.zip",
-      "/mame2003-plus/samples/polepos/": "/roms/samples/polepos.zip"
+      "/mame2003/samples/polepos/": "/samples/polepos.zip",
+      "/mame2003-plus/samples/polepos/": "/samples/polepos.zip"
     }
 }

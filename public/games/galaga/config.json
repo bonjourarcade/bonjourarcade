@@ -1,6 +1,6 @@
 {
     "EJS_externalFiles": {
-      "/mame2003/samples/galaga/": "/roms/samples/galaga.zip",
-      "/mame2003-plus/samples/galaga/": "/roms/samples/galaga.zip"
+      "/mame2003/samples/galaga/": "/samples/galaga.zip",
+      "/mame2003-plus/samples/galaga/": "/samples/galaga.zip"
     }
 }

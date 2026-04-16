@@ -1,6 +1,6 @@
 {
     "EJS_externalFiles": {
-      "/mame2003/samples/dkong/": "/roms/samples/dkong.zip",
-      "/mame2003-plus/samples/dkong/": "/roms/samples/dkong.zip"
+      "/mame2003/samples/dkong/": "/samples/dkong.zip",
+      "/mame2003-plus/samples/dkong/": "/samples/dkong.zip"
     }
 }

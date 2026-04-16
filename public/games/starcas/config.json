@@ -1,6 +1,6 @@
 {
     "EJS_externalFiles": {
-      "/mame2003/samples/starcas/": "/roms/samples/starcas.zip",
-      "/mame2003-plus/samples/starcas/": "/roms/samples/starcas.zip"
+      "/mame2003/samples/starcas/": "/samples/starcas.zip",
+      "/mame2003-plus/samples/starcas/": "/samples/starcas.zip"
     }
 }

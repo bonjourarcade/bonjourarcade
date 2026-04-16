@@ -36,6 +36,8 @@ pages:
       - public
     expire_in: 1 week
   rules:
+    - if: '$CI_COMMIT_MESSAGE =~ /\[skip gitlab\]/i'
+      when: never
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       changes: 
         - public/**/*
@@ -70,8 +72,6 @@ send_newsletter:
     - echo "Newsletter automation completed"
   rules:
     # Allow a GitLab-only skip token in commit messages without affecting GitHub Actions.
-    - if: '$CI_COMMIT_MESSAGE =~ /\[skip gitlab\]/i'
-      when: never
     - if: $CI_PIPELINE_SOURCE == "schedule"
   interruptible: true
   dependencies:

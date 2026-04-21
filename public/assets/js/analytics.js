@@ -76,7 +76,7 @@
             existingHeartbeat.endSession();
         }
 
-        const HEARTBEAT_MS = 15000;
+        const HEARTBEAT_MS = 60000;
         const sessionId = createSessionId();
         const startedAt = Date.now();
         let activeMs = 0;

@@ -64,3 +64,4 @@ jeux en vedette est sélectionné automatiquement à l’aide de :
 - **Prédictions** : jeux présélectionnés dans `public/upcoming/upcoming.yaml`
 - **Automatique** : aucune modification manuelle de fichiers nécessaire
  
+ 

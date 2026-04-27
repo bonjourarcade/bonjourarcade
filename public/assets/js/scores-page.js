@@ -21,6 +21,8 @@
         metricsChart: null,
         lastFocusedElement: null,
         currentUser: null,
+        currentUserScores: [],
+        currentUserScoresLoadedFor: '',
         metricVisibility: {
             collective: false,
             highscore: true
@@ -38,10 +40,13 @@
         latestScoresState: document.getElementById('latest-scores-state'),
         medalsState: document.getElementById('medals-state'),
         medalsBody: document.getElementById('medals-body'),
+        myScoresButton: document.getElementById('my-scores-button'),
         playerScoresPanel: document.getElementById('player-scores-panel'),
         playerScoresDialog: document.getElementById('player-scores-dialog'),
         playerScoresTitle: document.getElementById('player-scores-title'),
         playerScoresSubtitle: document.getElementById('player-scores-subtitle'),
+        playerScoresScrollArea: document.getElementById('player-scores-scroll-area'),
+        playerScoresPending: document.getElementById('player-scores-pending'),
         playerScoresBody: document.getElementById('player-scores-body'),
         playerNameEditButton: document.getElementById('player-name-edit-button'),
         playerNameEditForm: document.getElementById('player-name-edit-form'),
@@ -940,6 +945,7 @@
         closeProofModal();
         state.selectedPlayerKey = '';
         setPlayerScoresVisibility(false);
+        renderPendingScoresState('', 'empty');
         elements.playerScoresBody.innerHTML = '';
         elements.playerScoresTitle.textContent = 'Scores du joueur';
         elements.playerScoresSubtitle.textContent = '';
@@ -968,6 +974,15 @@
         }
     }
 
+    function handleMyScoresClick() {
+        if (!state.currentUser || !state.currentUser.uid) {
+            showToast('Connecte-toi pour voir tes scores.', 'info');
+            return;
+        }
+
+        showPlayerScores(state.currentUser.uid);
+    }
+
     function setPlayerScoresVisibility(isVisible) {
         if (!elements.playerScoresPanel) {
             return;
@@ -985,6 +1000,168 @@
             && state.selectedPlayerKey
             && state.currentUser.uid === state.selectedPlayerKey
         );
+    }
+
+    function getUserScoreStatusLabel(status) {
+        if (status === 'approved') {
+            return 'Approuve';
+        }
+
+        if (status === 'rejected') {
+            return 'Refuse';
+        }
+
+        return 'En attente';
+    }
+
+    function renderPendingScoresState(message, type) {
+        if (!elements.playerScoresPending) {
+            return;
+        }
+
+        if (!message) {
+            elements.playerScoresPending.hidden = true;
+            elements.playerScoresPending.innerHTML = '';
+            return;
+        }
+
+        elements.playerScoresPending.hidden = false;
+        elements.playerScoresPending.innerHTML = [
+            '<section class="player-pending-section">',
+            '<div class="player-pending-head">',
+            '<h4>Mes soumissions en attente</h4>',
+            '<p>Ces scores ne sont visibles que par toi jusqu\'a leur approbation.</p>',
+            '</div>',
+            '<div class="section-state', type === 'loading' ? ' loading' : '', '">', escapeHtml(message), '</div>',
+            '</section>'
+        ].join('');
+    }
+
+    function renderPendingScoresSection(scores) {
+        if (!elements.playerScoresPending) {
+            return;
+        }
+
+        if (!scores.length) {
+            renderPendingScoresState('Aucune soumission en attente pour le moment.', 'empty');
+            return;
+        }
+
+        elements.playerScoresPending.hidden = false;
+        elements.playerScoresPending.innerHTML = [
+            '<section class="player-pending-section">',
+            '<div class="player-pending-head">',
+            '<h4>Mes soumissions en attente</h4>',
+            '<p>Ces scores ne sont visibles que par toi jusqu\'a leur approbation.</p>',
+            '</div>',
+            '<table class="player-pending-table" aria-label="Mes soumissions en attente">',
+            '<thead><tr><th>Jeu</th><th>Score</th><th>Date</th><th>Statut</th><th>Preuve</th><th>Commentaire</th></tr></thead>',
+            '<tbody>',
+            scores.map(function (score) {
+                const game = getGameById(score.gameId);
+                const gameLabel = escapeHtml((game && game.title) || (score.gameTitle && score.gameTitle !== 'Unknown Game' ? score.gameTitle : '') || score.gameId || 'Jeu inconnu');
+                const comment = score.comment ? escapeHtml(score.comment) : '—';
+                const proofButton = score.screenshotUrl
+                    ? '<button class="proof-btn" type="button" data-proof-url="' + escapeHtml(score.screenshotUrl) + '">Voir</button>'
+                    : '—';
+
+                return [
+                    '<tr>',
+                    '<td><a class="player-score-game" href="', buildGameUrl(score.gameId), '">', gameLabel, '</a></td>',
+                    '<td class="col-score">', formatScore(score.score), '</td>',
+                    '<td>', window.BonjourArcadeScoresService.formatDate(score.createdAtMs), '</td>',
+                    '<td><span class="player-score-status is-', escapeHtml(score.status || 'pending'), '">', escapeHtml(getUserScoreStatusLabel(score.status)), '</span></td>',
+                    '<td class="player-score-proof">', proofButton, '</td>',
+                    '<td class="player-score-comment">', comment, '</td>',
+                    '</tr>'
+                ].join('');
+            }).join(''),
+            '</tbody></table>',
+            '</section>'
+        ].join('');
+    }
+
+    async function ensureCurrentUserScoresLoaded(playerKey) {
+        if (!state.currentUser || state.currentUser.uid !== playerKey) {
+            state.currentUserScores = [];
+            state.currentUserScoresLoadedFor = '';
+            return [];
+        }
+
+        const scores = await window.BonjourArcadeScoresService.getUserScores(playerKey);
+        state.currentUserScores = scores;
+        state.currentUserScoresLoadedFor = playerKey;
+        return scores.slice();
+    }
+
+    function renderApprovedPlayerScoresRows(playerScores) {
+        if (!playerScores.length) {
+            return '<tr><td class="player-scores-empty" colspan="5">Aucun score approuve pour le moment.</td></tr>';
+        }
+
+        return playerScores.map(function (score) {
+            const game = getGameById(score.gameId);
+            const gameLabel = escapeHtml((game && game.title) || score.gameTitle || score.gameId || 'Jeu inconnu');
+            const comment = score.comment ? escapeHtml(score.comment) : '—';
+            const proofButton = score.screenshotUrl
+                ? '<button class="proof-btn" type="button" data-proof-url="' + escapeHtml(score.screenshotUrl) + '">Voir</button>'
+                : '';
+
+            return [
+                '<tr>',
+                '<td><a class="player-score-game" href="', buildGameUrl(score.gameId), '">', gameLabel, '</a></td>',
+                '<td class="col-score">', formatScore(score.score), '</td>',
+                '<td>', window.BonjourArcadeScoresService.formatDate(score.createdAtMs), '</td>',
+                '<td class="player-score-proof">', proofButton, '</td>',
+                '<td class="player-score-comment">', comment, '</td>',
+                '</tr>'
+            ].join('');
+        }).join('');
+    }
+
+    function updatePlayerScoresSummary(playerKey, playerScores, pendingScores) {
+        const approvedGameCount = new Set(playerScores.map(function (score) {
+            return score.gameId;
+        })).size;
+        const fallbackName = state.currentUser && state.currentUser.uid === playerKey
+            ? (state.currentUser.displayName || 'Anonymous')
+            : 'Anonymous';
+        const playerName = (playerScores[0] && playerScores[0].playerName) || fallbackName;
+        const subtitleParts = [];
+
+        elements.playerScoresTitle.textContent = 'Tous les scores de ' + playerName;
+
+        if (playerScores.length) {
+            subtitleParts.push(playerScores.length + ' score' + (playerScores.length > 1 ? 's' : '') + ' approuve' + (playerScores.length > 1 ? 's' : '') + ' sur ' + approvedGameCount + ' jeu' + (approvedGameCount > 1 ? 'x' : '') + '.');
+        } else {
+            subtitleParts.push('Aucun score approuve pour le moment.');
+        }
+
+        if (pendingScores.length) {
+            subtitleParts.push(pendingScores.length + ' soumission' + (pendingScores.length > 1 ? 's' : '') + ' en attente de validation.');
+        }
+
+        elements.playerScoresSubtitle.textContent = subtitleParts.join(' ');
+    }
+
+    function syncPlayerScoresScrollPosition() {
+        window.requestAnimationFrame(function () {
+            if (elements.playerScoresDialog) {
+                elements.playerScoresDialog.focus();
+            }
+
+            if (elements.playerScoresScrollArea) {
+                elements.playerScoresScrollArea.scrollTop = 0;
+            }
+        });
+    }
+
+    function syncMyScoresButton() {
+        if (!elements.myScoresButton) {
+            return;
+        }
+
+        elements.myScoresButton.hidden = !(state.currentUser && state.currentUser.uid);
     }
 
     function setPlayerNameEditStatus(message, type) {
@@ -1099,7 +1276,7 @@
         });
     }
 
-    function showPlayerScores(playerKey) {
+    async function showPlayerScores(playerKey) {
         if (!playerKey) {
             hidePlayerScores();
             return;
@@ -1117,50 +1294,83 @@
             return String(a.id).localeCompare(String(b.id));
         });
 
-        if (!playerScores.length) {
+        const isOwnProfile = Boolean(state.currentUser && state.currentUser.uid === playerKey);
+        const isDirectPlayerRoute = getQueryPlayerKey() === playerKey;
+
+        if (!playerScores.length && !isOwnProfile && !isDirectPlayerRoute) {
             hidePlayerScores();
             return;
         }
 
-        const player = playerScores[0];
-        const gameCount = new Set(playerScores.map(function (score) {
-            return score.gameId;
-        })).size;
         state.lastFocusedElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
         state.selectedPlayerKey = playerKey;
         updatePlayerQueryParam(playerKey);
-        elements.playerScoresTitle.textContent = 'Tous les scores de ' + (player.playerName || 'Anonymous');
-        elements.playerScoresSubtitle.textContent = playerScores.length + ' score' + (playerScores.length > 1 ? 's' : '') + ' approuve' + (playerScores.length > 1 ? 's' : '') + ' sur ' + gameCount + ' jeu' + (gameCount > 1 ? 'x' : '') + '.';
         syncPlayerNameEditingAvailability();
-        elements.playerScoresBody.innerHTML = playerScores.map(function (score) {
-            const game = getGameById(score.gameId);
-            const gameLabel = escapeHtml((game && game.title) || score.gameTitle || score.gameId || 'Jeu inconnu');
-            const comment = score.comment ? escapeHtml(score.comment) : '—';
-            const proofButton = score.screenshotUrl
-                ? '<button class="proof-btn" type="button" data-proof-url="' + escapeHtml(score.screenshotUrl) + '">Voir</button>'
-                : '';
+        updatePlayerScoresSummary(playerKey, playerScores, []);
+        elements.playerScoresBody.innerHTML = renderApprovedPlayerScoresRows(playerScores);
 
-            return [
-                '<tr>',
-                '<td><a class="player-score-game" href="', buildGameUrl(score.gameId), '">', gameLabel, '</a></td>',
-                '<td class="col-score">', formatScore(score.score), '</td>',
-                '<td>', window.BonjourArcadeScoresService.formatDate(score.createdAtMs), '</td>',
-                '<td class="player-score-proof">', proofButton, '</td>',
-                '<td class="player-score-comment">', comment, '</td>',
-                '</tr>'
-            ].join('');
-        }).join('');
+        if (isOwnProfile) {
+            renderPendingScoresState('Chargement de tes soumissions...', 'loading');
+        } else if (!playerScores.length && isDirectPlayerRoute) {
+            renderPendingScoresState('Connecte-toi pour voir d\'eventuelles soumissions privees associees a ce profil.', 'empty');
+        } else {
+            renderPendingScoresState('', 'empty');
+        }
+
         setPlayerScoresVisibility(true);
-        window.requestAnimationFrame(function () {
-            if (elements.playerScoresDialog) {
-                elements.playerScoresDialog.focus();
+        syncPlayerScoresScrollPosition();
+
+        if (!isOwnProfile) {
+            return;
+        }
+
+        try {
+            const ownScores = await ensureCurrentUserScoresLoaded(playerKey);
+
+            if (state.selectedPlayerKey !== playerKey) {
+                return;
             }
 
-            const tableWrap = elements.playerScoresPanel.querySelector('.player-scores-table-wrap');
-            if (tableWrap) {
-                tableWrap.scrollTop = 0;
+            const pendingScores = ownScores.filter(function (score) {
+                return score.status !== 'approved';
+            });
+
+            updatePlayerScoresSummary(playerKey, playerScores, pendingScores);
+            renderPendingScoresSection(pendingScores);
+        } catch (error) {
+            console.error(error);
+
+            if (state.selectedPlayerKey !== playerKey) {
+                return;
             }
-        });
+
+            renderPendingScoresState('Impossible de charger tes soumissions privees.', 'error');
+        }
+    }
+
+    function trapScrollWithin(container) {
+        if (!container) {
+            return;
+        }
+
+        container.addEventListener('wheel', function (event) {
+            const maxScrollTop = container.scrollHeight - container.clientHeight;
+
+            if (maxScrollTop <= 0) {
+                event.preventDefault();
+                return;
+            }
+
+            const nextScrollTop = container.scrollTop + event.deltaY;
+            const isPastTop = nextScrollTop <= 0 && event.deltaY < 0;
+            const isPastBottom = nextScrollTop >= maxScrollTop && event.deltaY > 0;
+
+            event.stopPropagation();
+
+            if (isPastTop || isPastBottom) {
+                event.preventDefault();
+            }
+        }, { passive: false });
     }
 
     function openProofModal(url) {
@@ -1647,8 +1857,8 @@
             elements.playerScoresClose.addEventListener('click', hidePlayerScores);
         }
 
-        if (elements.playerScoresBody) {
-            elements.playerScoresBody.addEventListener('click', function (event) {
+        if (elements.playerScoresScrollArea) {
+            elements.playerScoresScrollArea.addEventListener('click', function (event) {
                 const proofButton = event.target.closest('[data-proof-url]');
                 if (!proofButton) {
                     return;
@@ -1660,6 +1870,10 @@
 
         if (elements.playerScoresCopyLink) {
             elements.playerScoresCopyLink.addEventListener('click', handleCopyPlayerLink);
+        }
+
+        if (elements.myScoresButton) {
+            elements.myScoresButton.addEventListener('click', handleMyScoresClick);
         }
 
         if (elements.playerNameEditButton) {
@@ -1687,6 +1901,7 @@
 
     function bindModalEvents() {
         bindProofImageLoadingEvents();
+        trapScrollWithin(elements.playerScoresScrollArea);
 
         elements.proofModalClose.addEventListener('click', closeProofModal);
         elements.proofModal.addEventListener('click', function (event) {
@@ -1743,10 +1958,22 @@
 
     async function syncAdminStateFromUser(user) {
         state.currentUser = user || null;
+
+        if (!user || !state.selectedPlayerKey || user.uid !== state.selectedPlayerKey) {
+            state.currentUserScores = [];
+            state.currentUserScoresLoadedFor = '';
+        }
+
+        syncMyScoresButton();
         syncPlayerNameEditingAvailability();
 
         if (!user || typeof user.getIdTokenResult !== 'function') {
             applyAdminState(false);
+
+            if (state.selectedPlayerKey) {
+                showPlayerScores(state.selectedPlayerKey);
+            }
+
             return;
         }
 
@@ -1756,6 +1983,11 @@
 
             if (hasAdminClaim) {
                 applyAdminState(true);
+
+                if (state.selectedPlayerKey) {
+                    showPlayerScores(state.selectedPlayerKey);
+                }
+
                 return;
             }
         } catch (error) {
@@ -1765,6 +1997,11 @@
         if (typeof window.checkFirebaseAdminAccess === 'function') {
             try {
                 applyAdminState(await window.checkFirebaseAdminAccess());
+
+                if (state.selectedPlayerKey) {
+                    showPlayerScores(state.selectedPlayerKey);
+                }
+
                 return;
             } catch (error) {
                 console.warn('Impossible de verifier l\'acces admin via backend:', error);
@@ -1772,6 +2009,10 @@
         }
 
         applyAdminState(false);
+
+        if (state.selectedPlayerKey) {
+            showPlayerScores(state.selectedPlayerKey);
+        }
     }
 
     function setupAdminHooks(attempt) {

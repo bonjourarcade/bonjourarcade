@@ -75,6 +75,27 @@ body {
     background: #fff;
 }
 
+.scores-nav-button {
+    border: 1px solid rgba(11, 122, 99, 0.28);
+    background: #fff;
+    color: var(--accent-strong);
+    border-radius: 999px;
+    padding: 8px 12px;
+    font-size: 14px;
+    font-family: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.scores-nav-button:hover {
+    background: #f1f1f1;
+}
+
+.scores-nav-button[hidden] {
+    display: none;
+}
+
 .scores-main {
     max-width: 1240px;
     margin: 22px auto 50px;
@@ -361,6 +382,7 @@ body {
     padding: 24px;
     background: rgba(23, 28, 26, 0.58);
     backdrop-filter: blur(6px);
+    overscroll-behavior: contain;
 }
 
 body.player-scores-open {
@@ -370,6 +392,7 @@ body.player-scores-open {
 .player-scores-dialog {
     width: min(1100px, 100%);
     max-height: min(88vh, 920px);
+    min-height: 0;
     border: 1px solid var(--border);
     border-radius: 18px;
     background: linear-gradient(180deg, #fcfffd 0%, #f5faf7 100%);
@@ -377,6 +400,7 @@ body.player-scores-open {
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    overscroll-behavior: contain;
 }
 
 .player-scores-head {
@@ -491,8 +515,94 @@ body.player-scores-open {
 }
 
 .player-scores-table-wrap {
+    flex: 1 1 auto;
+    min-height: 0;
     overflow: auto;
     padding: 0 20px 20px;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+}
+
+#player-scores-pending[hidden] {
+    display: none;
+}
+
+.player-pending-section {
+    margin: 16px 0 18px;
+    border: 1px solid rgba(11, 122, 99, 0.16);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.9);
+    overflow: hidden;
+}
+
+.player-pending-head {
+    padding: 14px 16px 10px;
+    border-bottom: 1px solid rgba(11, 122, 99, 0.1);
+}
+
+.player-pending-head h4 {
+    margin: 0;
+    font-size: 16px;
+}
+
+.player-pending-head p {
+    margin: 6px 0 0;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.player-pending-table {
+    width: 100%;
+    min-width: 700px;
+    border-collapse: collapse;
+}
+
+.player-pending-table th,
+.player-pending-table td {
+    padding: 12px 10px;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+    vertical-align: top;
+    font-size: 14px;
+}
+
+.player-pending-table th {
+    background: #f7f7f7;
+}
+
+.player-pending-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.player-score-status {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+.player-score-status.is-pending {
+    color: #855700;
+    background: #fff4cf;
+}
+
+.player-score-status.is-approved {
+    color: #0f6a42;
+    background: #dff6eb;
+}
+
+.player-score-status.is-rejected {
+    color: #962b2b;
+    background: #fbe1e1;
+}
+
+.player-scores-empty {
+    color: var(--muted);
 }
 
 .player-scores-table th {

@@ -227,6 +227,30 @@
         return scores.map(normalizeGameScore);
     }
 
+    async function getUserScores(userId) {
+        if (typeof window.getOwnScores !== 'function') {
+            throw new Error('Fonction Firebase getOwnScores indisponible');
+        }
+
+        const result = await window.getOwnScores(userId);
+        const scores = Array.isArray(result && result.scores) ? result.scores : [];
+
+        return scores.map(function (score) {
+            const scoreValue = Number(score.score != null ? score.score : score.value);
+
+            return {
+                id: score.id || '',
+                gameId: score.gameId || '',
+                gameTitle: score.gameTitle || score.gameId || 'Jeu inconnu',
+                score: Number.isFinite(scoreValue) ? scoreValue : 0,
+                status: score.status || 'pending',
+                comment: score.comment || '',
+                createdAtMs: toTimestampMs(score.createdAt || score.date),
+                screenshotUrl: score.screenshotUrl || score.imageUrl || score.screenshotDataUrl || null
+            };
+        });
+    }
+
     function formatDate(timestampMs) {
         if (!timestampMs) {
             return 'N/A';
@@ -246,6 +270,7 @@
         getFeaturedGameIds: getFeaturedGameIds,
         getLatestScores: getLatestScores,
         listGameScores: listGameScores,
+        getUserScores: getUserScores,
         toTimestampMs: toTimestampMs,
         formatDate: formatDate
     };

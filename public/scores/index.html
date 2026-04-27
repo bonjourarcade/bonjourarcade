@@ -21,7 +21,7 @@
             <nav class="scores-nav">
                 <a href="/">Accueil</a>
                 <a href="/all/">Tous les jeux</a>
-                <a class="is-active" href="/scores/">Scores</a>
+                <button id="my-scores-button" class="scores-nav-button" type="button" hidden>Mes scores</button>
             </nav>
         </div>
     </header>
@@ -155,7 +155,8 @@
                 </div>
                 <p id="player-name-edit-status" class="player-name-edit-status" aria-live="polite"></p>
             </form>
-            <div class="player-scores-table-wrap">
+            <div id="player-scores-scroll-area" class="player-scores-table-wrap">
+                <div id="player-scores-pending" hidden></div>
                 <table class="player-scores-table" aria-label="Tous les scores du joueur selectionne">
                     <thead>
                         <tr>

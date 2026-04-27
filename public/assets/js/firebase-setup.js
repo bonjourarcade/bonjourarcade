@@ -112,6 +112,12 @@ window.listGameScores = async (gameId) => {
     return result.data;
 };
 
+window.getOwnScores = async (userId) => {
+    const fn = httpsCallable(functions, 'getOwnScores');
+    const result = await fn({ userId: userId });
+    return result.data;
+};
+
 // Global admin function to update an existing score (uses verifyScore override contract)
 window.verifyGameScore = async (scoreId, override, notifyWebhooks) => {
     const fn = httpsCallable(functions, 'verifyScore');

@@ -273,8 +273,9 @@
         /* Leaderboard styling */
         #leaderboard-container {
             position: fixed !important;
-            top: 190px !important;
+            top: 50% !important;
             right: 10px !important;
+            transform: translateY(-50%);
             background-color: rgba(0, 0, 0, 0.9);
             color: white;
             padding: 8px !important;
@@ -285,12 +286,53 @@
             /* Hidden by default, will be shown by JS */
             flex-direction: column;
             max-width: 200px;
-            max-height: 350px;
-            overflow-y: auto;
+            max-height: min(520px, calc(100vh - 210px));
+            overflow: hidden;
             font-family: sans-serif;
             font-size: 11px;
             border: 1px solid rgba(255, 255, 255, 0.2);
             cursor: pointer;
+        }
+
+        #leaderboard-content {
+            flex: 1 1 auto;
+            min-height: 0;
+            overflow-y: auto;
+        }
+
+        #leaderboard-submit-qr {
+            display: none;
+            align-items: center;
+            flex-direction: column;
+            gap: 6px;
+            margin: 0 0 10px;
+            padding: 8px;
+            border-radius: 8px;
+            background: #000;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            flex-shrink: 0;
+        }
+
+        #leaderboard-submit-qr-label {
+            color: rgba(255, 255, 255, 0.76);
+            font-size: 10px;
+            letter-spacing: 0.02em;
+            text-align: center;
+            text-transform: uppercase;
+        }
+
+        #leaderboard-submit-qr-code {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 104px;
+            min-height: 104px;
+            background: #000;
+        }
+
+        #leaderboard-submit-qr-code img,
+        #leaderboard-submit-qr-code canvas {
+            display: block;
         }
 
         /* Mobile leaderboard popup styling */
@@ -888,6 +930,10 @@
     <!-- Leaderboard Container -->
     <div id="leaderboard-container">
         <h3>🏆 Meilleurs Scores</h3>
+        <div id="leaderboard-submit-qr" aria-label="QR code pour soumettre un score depuis un autre appareil">
+            <div id="leaderboard-submit-qr-label">Soumettre via mobile</div>
+            <div id="leaderboard-submit-qr-code"></div>
+        </div>
         <div id="leaderboard-content">
             <div class="leaderboard-loading">Chargement...</div>
         </div>
@@ -969,6 +1015,7 @@
     <script src="../assets/js/banner.js"></script>
     <script src="../assets/js/game-history.js"></script>
     <script src="../assets/js/utils.js"></script>
+    <script src="../assets/js/qrcode.min.js"></script>
     <script>
         // Helper to navigate even if in iframe
         function navigate(url) {
@@ -1093,6 +1140,40 @@
         // Function to detect if the device is mobile
         function isMobileDevice() {
             return /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+
+        function setupLeaderboardSubmitQrCode(gameId, gameDetails) {
+            if (isMobileDevice() || typeof QRCode === 'undefined' || !gameId) {
+                return;
+            }
+
+            const qrContainer = document.getElementById('leaderboard-submit-qr');
+            const qrCodeMount = document.getElementById('leaderboard-submit-qr-code');
+            if (!qrContainer || !qrCodeMount) {
+                return;
+            }
+
+            const submitUrl = new URL('/submit', window.location.origin);
+            submitUrl.searchParams.set('game', gameId);
+            if (gameDetails && gameDetails.title) {
+                submitUrl.searchParams.set('title', gameDetails.title);
+            }
+
+            qrCodeMount.innerHTML = '';
+            new QRCode(qrCodeMount, {
+                text: submitUrl.toString(),
+                width: 104,
+                height: 104,
+                colorDark: '#ffffff',
+                colorLight: '#000000',
+                correctLevel: QRCode.CorrectLevel.H
+            });
+
+            qrContainer.style.display = 'flex';
+            qrContainer.onclick = function (event) {
+                event.stopPropagation();
+                window.open(submitUrl.toString(), '_blank');
+            };
         }
 
         // Function to detect if the browser is Chrome
@@ -1247,6 +1328,8 @@
             }
 
             console.log(`Attempting to load game with ID: ${gameId}`);
+
+            setupLeaderboardSubmitQrCode(gameId);
 
             // Leaderboard fetching logic with localStorage caching
             async function fetchLeaderboard(gameId, isRefresh = false) {
@@ -1665,6 +1748,7 @@
                 }
 
                 console.log("Found game data:", selectedGame);
+                setupLeaderboardSubmitQrCode(gameId, selectedGame);
 
                 const gameHasKnownProblems = selectedGame.problem === true || selectedGame.problem === 'true';
                 if (gameHasKnownProblems) {

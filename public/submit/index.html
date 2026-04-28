@@ -37,6 +37,44 @@
             box-sizing: border-box;
         }
 
+        .game-indicator {
+            display: none;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 18px;
+            padding: 10px;
+            border-radius: 10px;
+            background: #141414;
+            border: 1px solid #2d2d2d;
+            text-align: left;
+        }
+
+        .game-indicator-thumb {
+            width: 56px;
+            height: 56px;
+            border-radius: 8px;
+            object-fit: cover;
+            flex-shrink: 0;
+            background: #222;
+            border: 1px solid #333;
+        }
+
+        .game-indicator-label {
+            color: #8f8f8f;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 2px;
+        }
+
+        .game-indicator-title {
+            color: #fff;
+            font-size: 16px;
+            font-weight: 700;
+            line-height: 1.25;
+            word-break: break-word;
+        }
+
         h3 {
             color: #ffd700;
             margin-top: 0;
@@ -165,6 +203,14 @@
     <div class="submit-container">
         <h3>Soumettre ton score</h3>
 
+        <div id="game-indicator" class="game-indicator">
+            <img id="game-indicator-thumb" class="game-indicator-thumb" src="/assets/images/placeholder_thumb.png" alt="Miniature du jeu">
+            <div>
+                <div class="game-indicator-label">Jeu cible</div>
+                <div id="game-indicator-title" class="game-indicator-title">Chargement...</div>
+            </div>
+        </div>
+
         <div id="score-auth-section" style="display:none;">
             <p style="color:#aaa; margin-bottom:20px;">Connecte-toi pour soumettre ton score.</p>
             <button id="score-login-btn" class="btn">Connexion avec Google</button>
@@ -196,7 +242,9 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
-            const gameId = urlParams.get('game');
+            const gameId = (urlParams.get('game') || '').trim();
+            const gameTitleParam = (urlParams.get('title') || '').trim();
+            const gameCoverParam = (urlParams.get('cover') || '').trim();
 
             // Elements
             const authSection = document.getElementById('score-auth-section');
@@ -208,8 +256,66 @@
             const commentInput = document.getElementById('score-comment-input');
             const commentCounter = document.getElementById('score-comment-counter');
             const statusDiv = document.getElementById('score-submission-status');
+            const gameIndicator = document.getElementById('game-indicator');
+            const gameIndicatorThumb = document.getElementById('game-indicator-thumb');
+            const gameIndicatorTitle = document.getElementById('game-indicator-title');
 
             let photoBase64 = null;
+
+            function setGameIndicator(title, coverArt) {
+                if (!gameIndicator || !gameIndicatorThumb || !gameIndicatorTitle || !gameId) {
+                    return;
+                }
+
+                gameIndicator.style.display = 'flex';
+                gameIndicatorTitle.textContent = title || gameId;
+                gameIndicatorThumb.src = coverArt || `/games/${encodeURIComponent(gameId)}/cover.png`;
+            }
+
+            async function loadGameIndicator() {
+                if (!gameId || !gameIndicator || !gameIndicatorThumb || !gameIndicatorTitle) {
+                    return;
+                }
+
+                setGameIndicator(gameTitleParam || gameId, gameCoverParam || `/games/${encodeURIComponent(gameId)}/cover.png`);
+
+                gameIndicatorThumb.onerror = function () {
+                    this.onerror = null;
+                    this.src = '/assets/images/placeholder_thumb.png';
+                };
+
+                try {
+                    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.startsWith('192.168.');
+                    const cacheBuster = '?v=' + Date.now();
+                    const gamelistUrl = isLocalhost ? '../gamelist.json' + cacheBuster : 'https://storage.googleapis.com/bonjourarcade/gamelist.json' + cacheBuster;
+                    const response = await fetch(gamelistUrl);
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+
+                    const gameData = await response.json();
+                    const allGames = [];
+                    if (Array.isArray(gameData.games)) {
+                        allGames.push(...gameData.games);
+                    }
+                    if (gameData.gameOfTheWeek) {
+                        allGames.push(gameData.gameOfTheWeek);
+                    }
+                    if (Array.isArray(gameData.previousGames)) {
+                        allGames.push(...gameData.previousGames);
+                    }
+
+                    const normalizedGameId = gameId.toLowerCase();
+                    const selectedGame = allGames.find((game) => game && typeof game.id === 'string' && game.id.trim().toLowerCase() === normalizedGameId);
+                    if (!selectedGame) {
+                        return;
+                    }
+
+                    setGameIndicator(selectedGame.title || selectedGame.name || gameTitleParam || gameId, selectedGame.coverArt || gameCoverParam || `/games/${encodeURIComponent(gameId)}/cover.png`);
+                } catch (error) {
+                    console.warn('Unable to load submit game indicator:', error);
+                }
+            }
 
             // Handle Auth State
             const checkAuth = () => {
@@ -230,6 +336,7 @@
 
             // Initial Auth Check
             checkAuth();
+            loadGameIndicator();
 
             // Handle Login
             loginBtn.addEventListener('click', async () => {

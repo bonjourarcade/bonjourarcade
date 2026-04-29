@@ -47,7 +47,10 @@
 
         async function loadDailyGame() {
             try {
-                const response = await fetch('/gamelist.json', { cache: 'no-cache' });
+                const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.startsWith('192.168.');
+                const cacheBuster = '?v=' + Date.now();
+                const gamelistUrl = isLocalhost ? '/gamelist.json' + cacheBuster : 'https://storage.googleapis.com/bonjourarcade/gamelist.json' + cacheBuster;
+                const response = await fetch(gamelistUrl, { cache: 'no-cache' });
                 if (!response.ok) {
                     throw new Error(`Impossible de charger gamelist.json (${response.status})`);
                 }

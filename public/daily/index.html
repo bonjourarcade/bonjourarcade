@@ -19,7 +19,7 @@
 
 <body>
     <script>
-        function getTorontoSeed() {
+        function getTorontoDateParts(offsetDays = 0) {
             const formatter = new Intl.DateTimeFormat('en-CA', {
                 timeZone: 'America/Toronto',
                 year: 'numeric',
@@ -27,10 +27,23 @@
                 day: '2-digit'
             });
             const parts = formatter.formatToParts(new Date());
-            const year = parts.find(part => part.type === 'year').value;
-            const month = parts.find(part => part.type === 'month').value;
-            const day = parts.find(part => part.type === 'day').value;
-            return Number(`${year}${month}${day}`);
+            const year = Number(parts.find(part => part.type === 'year').value);
+            const month = Number(parts.find(part => part.type === 'month').value);
+            const day = Number(parts.find(part => part.type === 'day').value);
+            const shiftedDate = new Date(Date.UTC(year, month - 1, day + offsetDays));
+
+            return {
+                year: shiftedDate.getUTCFullYear(),
+                month: shiftedDate.getUTCMonth() + 1,
+                day: shiftedDate.getUTCDate()
+            };
+        }
+
+        function getTorontoSeed(offsetDays = 0) {
+            const { year, month, day } = getTorontoDateParts(offsetDays);
+            return Number(
+                `${year}${String(month).padStart(2, '0')}${String(day).padStart(2, '0')}`
+            );
         }
 
         function createSeededRandom(seed) {
@@ -43,6 +56,26 @@
 
         function isProblemGame(game) {
             return String(game.problem || '').trim().toLowerCase() === 'true';
+        }
+
+        function pickGameForSeed(games, seedOffset = 0) {
+            const seed = getTorontoSeed(seedOffset);
+            const random = createSeededRandom(seed);
+            return games[Math.floor(random() * games.length)];
+        }
+
+        function selectDailyGame(games) {
+            const recentGameIds = new Set();
+            for (let i = 1; i <= 7; i += 1) {
+                const previousGame = pickGameForSeed(games, -i);
+                if (previousGame && previousGame.id) {
+                    recentGameIds.add(previousGame.id);
+                }
+            }
+
+            const eligibleGames = games.filter(game => !recentGameIds.has(game.id));
+            const pool = eligibleGames.length > 0 ? eligibleGames : games;
+            return pickGameForSeed(pool, 0);
         }
 
         async function loadDailyGame() {
@@ -61,9 +94,7 @@
                     throw new Error('Aucun jeu éligible disponible');
                 }
 
-                const seed = getTorontoSeed();
-                const random = createSeededRandom(seed);
-                const game = games[Math.floor(random() * games.length)];
+                const game = selectDailyGame(games);
                 const targetUrl = game.pageUrl || `/play?game=${encodeURIComponent(game.id)}`;
 
                 window.location.replace(targetUrl);

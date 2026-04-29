@@ -389,3 +389,4 @@ rm -rf "$TEMP_DIR"
 
 echo -e "${GREEN}✅ Sequential gamelist generation completed successfully!${NC}"
 echo -e "${GREEN}📊 Processed $TOTAL_FILES ROM files and $EXTERNAL_GAMES_COUNT external games${NC}"
+

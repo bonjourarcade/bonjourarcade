@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jeu du jour</title>
+    <script async src="/assets/js/analytics.js"></script>
+    <style>
+        html,
+        body {
+            margin: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        function getTorontoSeed() {
+            const formatter = new Intl.DateTimeFormat('en-CA', {
+                timeZone: 'America/Toronto',
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
+            });
+            const parts = formatter.formatToParts(new Date());
+            const year = parts.find(part => part.type === 'year').value;
+            const month = parts.find(part => part.type === 'month').value;
+            const day = parts.find(part => part.type === 'day').value;
+            return Number(`${year}${month}${day}`);
+        }
+
+        function createSeededRandom(seed) {
+            let state = seed >>> 0;
+            return function () {
+                state = (state * 1664525 + 1013904223) >>> 0;
+                return state / 4294967296;
+            };
+        }
+
+        function isProblemGame(game) {
+            return String(game.problem || '').trim().toLowerCase() === 'true';
+        }
+
+        async function loadDailyGame() {
+            try {
+                const response = await fetch('/gamelist.json', { cache: 'no-cache' });
+                if (!response.ok) {
+                    throw new Error(`Impossible de charger gamelist.json (${response.status})`);
+                }
+
+                const data = await response.json();
+                const games = Array.isArray(data.games) ? data.games.filter(game => !isProblemGame(game)) : [];
+                if (games.length === 0) {
+                    throw new Error('Aucun jeu éligible disponible');
+                }
+
+                const seed = getTorontoSeed();
+                const random = createSeededRandom(seed);
+                const game = games[Math.floor(random() * games.length)];
+                const targetUrl = game.pageUrl || `/play?game=${encodeURIComponent(game.id)}`;
+
+                window.location.replace(targetUrl);
+            } catch (error) {
+                document.title = 'Jeu du jour indisponible';
+                document.body.textContent = `Le jeu du jour n'a pas pu être déterminé: ${error.message}`;
+            }
+        }
+
+        loadDailyGame();
+    </script>
+</body>
+
+</html>

@@ -19,7 +19,9 @@
 
 <body>
     <script>
-        function getTorontoDateParts(offsetDays = 0) {
+        const DAILY_SEQUENCE_START = '20000101';
+
+        function getTorontoTodayDate() {
             const formatter = new Intl.DateTimeFormat('en-CA', {
                 timeZone: 'America/Toronto',
                 year: 'numeric',
@@ -30,7 +32,36 @@
             const year = Number(parts.find(part => part.type === 'year').value);
             const month = Number(parts.find(part => part.type === 'month').value);
             const day = Number(parts.find(part => part.type === 'day').value);
-            const shiftedDate = new Date(Date.UTC(year, month - 1, day + offsetDays));
+
+            return new Date(Date.UTC(year, month - 1, day));
+        }
+
+        function parseSeedDate(seedValue) {
+            if (!/^\d{8}$/.test(String(seedValue || ''))) {
+                return null;
+            }
+
+            const seed = String(seedValue);
+            const year = Number(seed.slice(0, 4));
+            const month = Number(seed.slice(4, 6));
+            const day = Number(seed.slice(6, 8));
+            const parsedDate = new Date(Date.UTC(year, month - 1, day));
+
+            if (
+                parsedDate.getUTCFullYear() !== year ||
+                parsedDate.getUTCMonth() + 1 !== month ||
+                parsedDate.getUTCDate() !== day
+            ) {
+                return null;
+            }
+
+            return parsedDate;
+        }
+
+        function getSeedDateParts(seedValue = null, offsetDays = 0) {
+            const baseDate = parseSeedDate(seedValue) || getTorontoTodayDate();
+            const shiftedDate = new Date(baseDate);
+            shiftedDate.setUTCDate(shiftedDate.getUTCDate() + offsetDays);
 
             return {
                 year: shiftedDate.getUTCFullYear(),
@@ -39,11 +70,20 @@
             };
         }
 
-        function getTorontoSeed(offsetDays = 0) {
-            const { year, month, day } = getTorontoDateParts(offsetDays);
+        function getSeedValue(seedValue = null, offsetDays = 0) {
+            const { year, month, day } = getSeedDateParts(seedValue, offsetDays);
             return Number(
                 `${year}${String(month).padStart(2, '0')}${String(day).padStart(2, '0')}`
             );
+        }
+
+        function getCanonicalSeed(seedValue = null) {
+            const { year, month, day } = getSeedDateParts(seedValue, 0);
+            return `${year}${String(month).padStart(2, '0')}${String(day).padStart(2, '0')}`;
+        }
+
+        function formatSeedFromDate(date) {
+            return `${date.getUTCFullYear()}${String(date.getUTCMonth() + 1).padStart(2, '0')}${String(date.getUTCDate()).padStart(2, '0')}`;
         }
 
         function createSeededRandom(seed) {
@@ -54,28 +94,54 @@
             };
         }
 
+        function getDeterministicallyShuffledGames(games, seedValue = null, seedOffset = 0) {
+            const shuffledGames = [...games];
+            const seed = getSeedValue(seedValue, seedOffset);
+            const random = createSeededRandom(seed);
+
+            for (let i = shuffledGames.length - 1; i > 0; i -= 1) {
+                const j = Math.floor(random() * (i + 1));
+                [shuffledGames[i], shuffledGames[j]] = [shuffledGames[j], shuffledGames[i]];
+            }
+
+            return shuffledGames;
+        }
+
         function isProblemGame(game) {
             return String(game.problem || '').trim().toLowerCase() === 'true';
         }
 
-        function pickGameForSeed(games, seedOffset = 0) {
-            const seed = getTorontoSeed(seedOffset);
-            const random = createSeededRandom(seed);
-            return games[Math.floor(random() * games.length)];
+        function pickGameForSeed(games, seedValue = null, seedOffset = 0) {
+            return getDeterministicallyShuffledGames(games, seedValue, seedOffset)[0];
         }
 
-        function selectDailyGame(games) {
-            const recentGameIds = new Set();
-            for (let i = 1; i <= 7; i += 1) {
-                const previousGame = pickGameForSeed(games, -i);
-                if (previousGame && previousGame.id) {
-                    recentGameIds.add(previousGame.id);
+        function selectDailyGame(games, seedValue = null) {
+            const canonicalSeed = getCanonicalSeed(seedValue);
+            const startDate = parseSeedDate(DAILY_SEQUENCE_START);
+            const targetDate = parseSeedDate(canonicalSeed);
+
+            if (!startDate || !targetDate || targetDate < startDate) {
+                return pickGameForSeed(games, canonicalSeed, 0);
+            }
+
+            const recentGames = [];
+            let selectedGame = null;
+
+            for (let currentDate = new Date(startDate); currentDate <= targetDate; currentDate.setUTCDate(currentDate.getUTCDate() + 1)) {
+                const currentSeed = formatSeedFromDate(currentDate);
+                const recentGameIds = new Set(recentGames.map(game => game.id));
+                const eligibleGames = games.filter(game => !recentGameIds.has(game.id));
+                const pool = eligibleGames.length > 0 ? eligibleGames : games;
+
+                selectedGame = pickGameForSeed(pool, currentSeed, 0);
+                recentGames.push(selectedGame);
+
+                if (recentGames.length > 7) {
+                    recentGames.shift();
                 }
             }
 
-            const eligibleGames = games.filter(game => !recentGameIds.has(game.id));
-            const pool = eligibleGames.length > 0 ? eligibleGames : games;
-            return pickGameForSeed(pool, 0);
+            return selectedGame;
         }
 
         async function loadDailyGame() {
@@ -94,7 +160,16 @@
                     throw new Error('Aucun jeu éligible disponible');
                 }
 
-                const game = selectDailyGame(games);
+                const url = new URL(window.location.href);
+                const requestedSeed = url.searchParams.get('seed');
+                const canonicalSeed = getCanonicalSeed(requestedSeed);
+
+                if (requestedSeed !== canonicalSeed) {
+                    url.searchParams.set('seed', canonicalSeed);
+                    window.history.replaceState({}, '', `${url.pathname}?${url.searchParams.toString()}`);
+                }
+
+                const game = selectDailyGame(games, canonicalSeed);
                 const targetUrl = game.pageUrl || `/play?game=${encodeURIComponent(game.id)}`;
 
                 window.location.replace(targetUrl);

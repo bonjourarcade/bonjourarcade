@@ -53,6 +53,7 @@ import re
 import yaml
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from get_current_week_game import get_current_game_id, get_previous_game_id
+from newsletter_metadata import NEWSLETTER_REQUIRED_FIELDS
 import questionary
 
 # Configuration - Only keep what's needed
@@ -380,23 +381,23 @@ class NewsletterSender:
             with open(meta_path, 'r') as f:
                 meta = yaml.safe_load(f)
             
-            # Validate required fields
-            missing_fields = []
-            if not meta.get('controls'):
-                missing_fields.append('controls')
-            if not meta.get('to_start'):
-                missing_fields.append('to_start')
+            # Keep newsletter metadata validation in sync with validate_metadata.py.
+            missing_fields = [field for field in NEWSLETTER_REQUIRED_FIELDS if not meta.get(field)]
             
             if missing_fields:
                 print(f"❌ ERROR: Game of the week metadata is missing required fields: {', '.join(missing_fields)}")
                 print(f"📁 File: {meta_path}")
                 print("📝 These fields are required for the newsletter to be sent:")
+                if 'announcement_message' in missing_fields:
+                    print("   - announcement_message: Description of the game for the newsletter")
                 if 'controls' in missing_fields:
                     print("   - controls: Array of control instructions for the game")
                 if 'to_start' in missing_fields:
                     print("   - to_start: Instructions on how to start the game")
                 print("\n🛑 Aborting newsletter send to allow you to add the missing fields.")
                 print("\n💡 Example of what to add to metadata.yaml:")
+                if 'announcement_message' in missing_fields:
+                    print("   announcement_message: 'Un classique arcade rapide et nerveux a essayer cette semaine.'")
                 if 'controls' in missing_fields:
                     print("   controls:")
                     print("     - '🕹️ Use arrow keys to move'")

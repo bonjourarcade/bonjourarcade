@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """
-Script to validate that all games in upcoming.yaml have complete metadata.yaml files.
-A metadata.yaml is considered complete if it has a value for each field present in the
-archetypal metadata.yaml at the root of the project.
+Script to validate that all games in upcoming.yaml have the metadata fields required by
+send_newsletter.py.
 """
 
 import os
@@ -10,24 +9,7 @@ import sys
 import json
 import yaml
 from pathlib import Path
-
-def get_archetypal_fields(archetypal_path):
-    """
-    Extract all top-level keys from the archetypal metadata.yaml.
-    Only includes non-commented fields.
-    """
-    try:
-        with open(archetypal_path, 'r') as f:
-            data = yaml.safe_load(f)
-        
-        if data is None:
-            return set()
-        
-        # Get all top-level keys
-        return set(data.keys())
-    except Exception as e:
-        print(f"Error reading archetypal metadata.yaml: {e}", file=sys.stderr)
-        sys.exit(1)
+from newsletter_metadata import NEWSLETTER_REQUIRED_FIELDS
 
 def get_game_ids_from_predictions(predictions_path):
     """
@@ -169,16 +151,11 @@ def main():
     script_dir = Path(__file__).parent
     project_root = script_dir.parent
     
-    archetypal_path = project_root / 'metadata.yaml'
     predictions_path = project_root / 'public' / 'upcoming' / 'upcoming.yaml'
     gamelist_path = project_root / 'public' / 'gamelist.json'
     games_dir = project_root / 'public' / 'games'
     
     # Check that required files exist
-    if not archetypal_path.exists():
-        print(f"Error: Archetypal metadata.yaml not found at {archetypal_path}", file=sys.stderr)
-        sys.exit(1)
-    
     if not predictions_path.exists():
         print(f"Error: upcoming.yaml not found at {predictions_path}", file=sys.stderr)
         sys.exit(1)
@@ -186,12 +163,8 @@ def main():
     if not gamelist_path.exists():
         print(f"Warning: gamelist.json not found at {gamelist_path}, titles will be 'Unknown'", file=sys.stderr)
     
-    # Get required fields from archetypal metadata
-    all_fields = get_archetypal_fields(archetypal_path)
-    # Ignore hide and enable_score fields
-    fields_to_ignore = {'hide', 'enable_score'}
-    required_fields = all_fields - fields_to_ignore
-    print(f"Archetypal metadata.yaml has {len(all_fields)} fields (ignoring: {', '.join(sorted(fields_to_ignore))})")
+    required_fields = set(NEWSLETTER_REQUIRED_FIELDS)
+    print("Validating the metadata fields required by send_newsletter.py")
     print(f"Validating {len(required_fields)} required fields: {', '.join(sorted(required_fields))}")
     print()
     
@@ -252,4 +225,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

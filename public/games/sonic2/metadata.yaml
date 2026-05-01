@@ -7,4 +7,5 @@ controls:
 - '←↓↑→: Déplacer'
 - 'Z: Sauter/Dash'
 to_start: Start
+announcement_message: "Sonic le Hedgehog est là pour sauver la situation, et cette fois, il est aidé par son ami Miles « Tails » Prower ! Le Dr Eggman (alias Dr Robotnik) est de retour et projette de construire son arme ultime : le Death Egg. Pour ce faire, il compte transformer les animaux de Mobius en une armée de Badniks. Sonic parviendra-t-il à récupérer les 7 Émeraudes du Chaos et à l'arrêter une fois pour toutes ?"
 enable_score: true

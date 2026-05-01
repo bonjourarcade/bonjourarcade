@@ -9,7 +9,7 @@ controls:
   - "Espace: Accroupir"
   - "I,J,K,L,C: Caméra"
 
-#to_start: Select -> Start
+to_start: Enter
 announcement_message: "Mario est super, et pas qu'un peu ! Avec des graphismes 3D d'une qualité exceptionnelle et une bande-son explosive, Super Mario 64 redéfinit les standards du jeu vidéo. Au programme : des combats intenses, des parcours d'obstacles redoutables et des aventures sous-marines palpitantes. Récupérez les Étoiles de Puissance cachées et affrontez votre ennemi juré : Bowser, le roi des Koopas !"
 
 

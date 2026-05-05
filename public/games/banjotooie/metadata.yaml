@@ -1,0 +1,18 @@
+title: Banjo-Tooie
+developer: Rare
+year: 2000
+genre: Action, Metroidvania, Platform, Puzzle, Collectathon
+#controls:
+#  - "←↓↑→: Mouvement"
+#  - "Z: "
+#  - "X: "
+#  - "C: "
+#  - "V: "
+
+#to_start: Espace, puis Enter
+#announcement_message: ""
+
+enable_score: true
+hide: yes
+
+added: 2026-05-04

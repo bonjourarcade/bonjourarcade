@@ -1,0 +1,18 @@
+title: "Ogre Battle 64: Person of Lordly Caliber"
+developer: Quest Corporation
+year: 1999
+genre: Role-Playing, Turn-based
+#controls:
+#  - "←↓↑→: Mouvement"
+#  - "Z: "
+#  - "X: "
+#  - "C: "
+#  - "V: "
+
+#to_start: Espace, puis Enter
+#announcement_message: ""
+
+enable_score: true
+hide: yes
+
+added: 2026-05-06

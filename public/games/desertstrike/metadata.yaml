@@ -1,0 +1,18 @@
+title: "Desert Strike: Return to the Gulf"
+developer: Electronic Arts, Granite Bay Software
+year: 1992
+genre: Helicopter, Action, Isometric, Shooter
+#controls:
+#  - "←↓↑→: Mouvement"
+#  - "Z: "
+#  - "X: "
+#  - "C: "
+#  - "V: "
+
+#to_start: Espace, puis Enter
+#announcement_message: ""
+
+enable_score: true
+hide: yes
+
+added: 2026-05-06

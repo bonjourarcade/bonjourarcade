@@ -1,0 +1,18 @@
+title: Friday the 13th Revisited
+developer: ZeichiGames
+year: 2026
+genre: Horror, Platform, First-person
+#controls:
+#  - "←↓↑→: Mouvement"
+#  - "Z: "
+#  - "X: "
+#  - "C: "
+#  - "V: "
+
+#to_start: Espace, puis Enter
+#announcement_message: ""
+
+enable_score: true
+hide: yes
+
+added: DATE_PLACEHOLDER

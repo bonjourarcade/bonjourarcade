@@ -30,6 +30,12 @@
     };
 
     const elements = {
+        authStatus: document.getElementById('scores-auth-status'),
+        authText: document.getElementById('scores-auth-text'),
+        authButton: document.getElementById('scores-auth-button'),
+        dropdownAuthButton: document.getElementById('dropdown-auth-button'),
+        optionsToggleButton: document.getElementById('options-toggle-btn'),
+        optionsDropdown: document.getElementById('options-dropdown'),
         catalogView: document.getElementById('catalog-view'),
         gameView: document.getElementById('game-view'),
         searchInput: document.getElementById('game-search-input'),
@@ -92,6 +98,176 @@
         adminDeleteCancel: document.getElementById('admin-delete-cancel'),
         adminDeleteConfirm: document.getElementById('admin-delete-confirm')
     };
+
+    function getTorontoDailySeed() {
+        const now = new Date();
+        const formatter = new Intl.DateTimeFormat('en-CA', {
+            timeZone: 'America/Toronto',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
+        });
+        const parts = formatter.formatToParts(now);
+        const year = parts.find(function (part) { return part.type === 'year'; });
+        const month = parts.find(function (part) { return part.type === 'month'; });
+        const day = parts.find(function (part) { return part.type === 'day'; });
+
+        return (year ? year.value : '') + (month ? month.value : '') + (day ? day.value : '');
+    }
+
+    function updateDailyGameLink() {
+        const dailyGameLink = document.getElementById('daily-game-link');
+        if (dailyGameLink) {
+            dailyGameLink.href = '/daily?seed=' + getTorontoDailySeed();
+        }
+    }
+
+    function getSystemTheme() {
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'theme-dark' : 'theme-light';
+    }
+
+    function setTheme(theme) {
+        const selectedTheme = theme || 'system';
+        const classToAdd = selectedTheme === 'system'
+            ? getSystemTheme()
+            : (selectedTheme === 'dark' ? 'theme-dark' : 'theme-light');
+
+        document.body.classList.remove('theme-light', 'theme-dark');
+        document.documentElement.classList.remove('theme-light', 'theme-dark');
+        document.body.classList.add(classToAdd);
+        document.documentElement.classList.add(classToAdd);
+
+        document.querySelectorAll('.theme-option').forEach(function (button) {
+            button.style.background = button.dataset.theme === selectedTheme ? '#444' : 'none';
+        });
+    }
+
+    function setupThemeControls() {
+        document.querySelectorAll('.theme-option').forEach(function (button) {
+            button.addEventListener('click', function () {
+                const selectedTheme = button.dataset.theme;
+                if (selectedTheme === 'system') {
+                    localStorage.removeItem('theme');
+                } else {
+                    localStorage.setItem('theme', selectedTheme);
+                }
+                setTheme(selectedTheme);
+            });
+        });
+
+        setTheme(localStorage.getItem('theme') || 'system');
+
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function () {
+            if (!localStorage.getItem('theme')) {
+                setTheme('system');
+            }
+        });
+    }
+
+    function setupOptionsDropdown() {
+        if (!elements.optionsToggleButton || !elements.optionsDropdown) {
+            return;
+        }
+
+        elements.optionsToggleButton.addEventListener('click', function (event) {
+            event.stopPropagation();
+            const isOpen = elements.optionsDropdown.classList.toggle('active');
+            elements.optionsToggleButton.setAttribute('aria-expanded', String(isOpen));
+        });
+
+        document.addEventListener('click', function (event) {
+            if (!elements.optionsDropdown.classList.contains('active')) {
+                return;
+            }
+
+            if (!elements.optionsToggleButton.contains(event.target) && !elements.optionsDropdown.contains(event.target)) {
+                elements.optionsDropdown.classList.remove('active');
+                elements.optionsToggleButton.setAttribute('aria-expanded', 'false');
+            }
+        });
+
+        elements.optionsDropdown.addEventListener('click', function (event) {
+            event.stopPropagation();
+        });
+    }
+
+    function getUserDisplayLabel(user) {
+        if (!user) {
+            return 'Non connecte';
+        }
+
+        return user.displayName || user.email || 'Connecte';
+    }
+
+    function syncAuthDisplay() {
+        const user = state.currentUser;
+        const isAuthenticated = Boolean(user && user.uid);
+        const statusText = isAuthenticated ? 'Connecte: ' + getUserDisplayLabel(user) : 'Non connecte';
+        const buttonText = isAuthenticated ? 'Deconnexion' : 'Connexion';
+
+        if (elements.authStatus) {
+            elements.authStatus.classList.toggle('is-authenticated', isAuthenticated);
+        }
+
+        if (elements.authText) {
+            elements.authText.textContent = statusText;
+        }
+
+        if (elements.authButton) {
+            elements.authButton.textContent = buttonText;
+        }
+
+        if (elements.dropdownAuthButton) {
+            elements.dropdownAuthButton.innerHTML = '<span>' + (isAuthenticated ? '🚪' : '🔐') + '</span>' + buttonText;
+        }
+    }
+
+    async function handleAuthAction() {
+        const isAuthenticated = Boolean(state.currentUser && state.currentUser.uid);
+        const buttons = [elements.authButton, elements.dropdownAuthButton].filter(Boolean);
+        const originalLabels = buttons.map(function (button) {
+            return button.innerHTML;
+        });
+
+        if (elements.optionsDropdown) {
+            elements.optionsDropdown.classList.remove('active');
+        }
+
+        if (elements.optionsToggleButton) {
+            elements.optionsToggleButton.setAttribute('aria-expanded', 'false');
+        }
+
+        buttons.forEach(function (button) {
+            button.disabled = true;
+            button.textContent = isAuthenticated ? 'Deconnexion...' : 'Connexion...';
+        });
+
+        try {
+            if (isAuthenticated) {
+                if (typeof window.signOutFirebase !== 'function') {
+                    throw new Error('Fonction de deconnexion introuvable');
+                }
+                await window.signOutFirebase();
+            } else {
+                if (typeof window.signInWithGoogle !== 'function') {
+                    throw new Error('Fonction de connexion introuvable');
+                }
+                await window.signInWithGoogle();
+            }
+        } catch (error) {
+            console.error(error);
+            showToast(isAuthenticated ? 'Impossible de se deconnecter.' : 'Impossible de se connecter.', 'error');
+        } finally {
+            if (window.firebaseAuth) {
+                state.currentUser = window.firebaseAuth.currentUser || null;
+            }
+            buttons.forEach(function (button, index) {
+                button.disabled = false;
+                button.innerHTML = originalLabels[index];
+            });
+            syncAuthDisplay();
+        }
+    }
 
     function removeAccents(text) {
         if (!text) {
@@ -1162,6 +1338,7 @@
         }
 
         elements.myScoresButton.hidden = !(state.currentUser && state.currentUser.uid);
+        syncAuthDisplay();
     }
 
     function setPlayerNameEditStatus(message, type) {
@@ -1966,6 +2143,7 @@
 
         syncMyScoresButton();
         syncPlayerNameEditingAvailability();
+        syncAuthDisplay();
 
         if (!user || typeof user.getIdTokenResult !== 'function') {
             applyAdminState(false);
@@ -2041,6 +2219,9 @@
     }
 
     async function initialize() {
+        updateDailyGameLink();
+        setupThemeControls();
+        setupOptionsDropdown();
         updateMetricToggleButtons();
 
         try {
@@ -2057,6 +2238,17 @@
         elements.searchInput.addEventListener('input', onSearchInput);
         bindLeaderboardEvents();
         bindModalEvents();
+
+        if (elements.authButton) {
+            elements.authButton.addEventListener('click', handleAuthAction);
+        }
+
+        if (elements.dropdownAuthButton) {
+            elements.dropdownAuthButton.addEventListener('click', handleAuthAction);
+        }
+
+        syncAuthDisplay();
+
         setupAdminHooks();
 
         const requestedGameId = getQueryGameId();

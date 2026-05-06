@@ -14,15 +14,68 @@
 
 <body>
     <header class="scores-header">
-        <div class="scores-header-inner">
-            <a class="scores-logo" href="/">
-                <img src="/assets/images/bonjourarcade-logo.png" alt="BonjourArcade">
+        <div class="scores-header-inner header-flex">
+            <a class="scores-logo" href="/" aria-label="Retour a l'accueil BonjourArcade">
+                <img src="/assets/images/bonjourarcade-logo.png" alt="BonjourArcade" class="header-logo">
             </a>
-            <nav class="scores-nav">
+            <nav class="scores-nav" aria-label="Navigation principale">
                 <a href="/">Accueil</a>
                 <a href="/all/">Tous les jeux</a>
                 <button id="my-scores-button" class="scores-nav-button" type="button" hidden>Mes scores</button>
             </nav>
+            <div class="scores-header-actions">
+                <div id="scores-auth-status" class="scores-auth-status" aria-live="polite">
+                    <span id="scores-auth-dot" class="scores-auth-dot" aria-hidden="true"></span>
+                    <span id="scores-auth-text">Non connecte</span>
+                </div>
+                <button id="scores-auth-button" class="scores-auth-button" type="button">Connexion</button>
+                <div class="theme-toggle-wrapper scores-menu-wrapper" style="position: relative;">
+                    <button id="options-toggle-btn" class="theme-btn" aria-label="Options" aria-haspopup="true" aria-expanded="false" type="button">
+                        <span>⚙️</span>
+                        <span>Menu</span>
+                    </button>
+                    <div id="options-dropdown" class="dropdown-menu">
+                        <a href="/scores" class="dropdown-option">
+                            <span>🏆</span>Scores
+                        </a>
+                        <a href="/all" class="dropdown-option">
+                            <span>🕹️</span>Tous les jeux
+                        </a>
+                        <a href="/daily/" class="dropdown-option" id="daily-game-link">
+                            <span>📅</span>Jeu du jour
+                        </a>
+                        <a href="/randomgame/" class="dropdown-option">
+                            <span>🎲</span>Jeu aleatoire
+                        </a>
+                        <a href="/swipe" class="dropdown-option">
+                            <span>🃏</span>Swipe
+                        </a>
+                        <a href="/screensaver" class="dropdown-option">
+                            <span>🌠</span>Ecran de veille
+                        </a>
+                        <a href="/upcoming" class="dropdown-option">
+                            <span>🔮</span>Bientot en vedette
+                        </a>
+                        <a href="https://ko-fi.com/bonjourarcade" target="_blank" class="dropdown-option dropdown-highlight">
+                            <span>❤️</span>Supporter BonjourArcade
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <button class="theme-option dropdown-option" data-theme="system" type="button">
+                            <span class="theme-icon">🌓</span>Theme : Systeme
+                        </button>
+                        <button class="theme-option dropdown-option" data-theme="light" type="button">
+                            <span class="theme-icon">☀️</span>Theme : Clair
+                        </button>
+                        <button class="theme-option dropdown-option" data-theme="dark" type="button">
+                            <span class="theme-icon">🌙</span>Theme : Sombre
+                        </button>
+                        <div class="dropdown-divider"></div>
+                        <button id="dropdown-auth-button" class="dropdown-option" type="button">
+                            <span>🔐</span>Connexion
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     </header>
 

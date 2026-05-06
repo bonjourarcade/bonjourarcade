@@ -2,36 +2,42 @@
     --bg: #f1f1f1;
     --surface: #ffffff;
     --surface-soft: #f7f7f7;
+    --surface-strong: #ffffff;
     --border: #d9d9d9;
     --text: #1c1c1c;
     --muted: #666666;
     --accent: #0b7a63;
     --accent-strong: #046851;
     --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    --row-hover: #f1f1f1;
 }
 
 body.theme-light {
     --bg: #f1f1f1;
     --surface: #ffffff;
     --surface-soft: #f7f7f7;
+    --surface-strong: #ffffff;
     --border: #d9d9d9;
     --text: #1c1c1c;
     --muted: #666666;
     --accent: #0b7a63;
     --accent-strong: #046851;
     --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    --row-hover: #f1f1f1;
 }
 
 body.theme-dark {
     --bg: #111315;
     --surface: #1a1d20;
     --surface-soft: #22272b;
+    --surface-strong: #202429;
     --border: #353a40;
     --text: #f2f4f5;
     --muted: #a7afb8;
     --accent: #58c2a5;
     --accent-strong: #7ee0c6;
     --shadow: 0 14px 36px rgba(0, 0, 0, 0.34);
+    --row-hover: #23292f;
 }
 
 * {
@@ -310,7 +316,8 @@ body.theme-dark .scores-auth-button:hover {
     border-radius: 12px;
     font-size: 16px;
     padding: 12px 14px;
-    background: #fff;
+    background: var(--surface-strong);
+    color: var(--text);
 }
 
 .search-results {
@@ -418,7 +425,7 @@ body.theme-dark .scores-auth-button:hover {
 }
 
 .latest-score-row:hover {
-    background: #f1f1f1;
+    background: var(--row-hover);
 }
 
 .latest-score-game {
@@ -437,7 +444,7 @@ body.theme-dark .scores-auth-button:hover {
 .latest-score-comment {
     margin: 8px 0 0;
     font-size: 14px;
-    background: #fff;
+    background: var(--surface-strong);
     border: 1px solid var(--border);
     border-radius: 8px;
     padding: 8px;
@@ -482,7 +489,7 @@ body.theme-dark .scores-auth-button:hover {
 
 .medals-table th,
 .player-scores-table th {
-    background: #f7f7f7;
+    background: var(--surface-soft);
 }
 
 .medals-table tbody tr,
@@ -494,7 +501,7 @@ body.theme-dark .scores-auth-button:hover {
 .medals-table tbody tr:hover,
 .player-scores-table tbody tr:hover,
 .leaderboard-table tbody tr:hover {
-    background: #f1f1f1;
+    background: var(--row-hover);
 }
 
 .medal-rank {
@@ -566,7 +573,7 @@ body.player-scores-open {
     min-height: 0;
     border: 1px solid var(--border);
     border-radius: 18px;
-    background: linear-gradient(180deg, #fcfffd 0%, #f5faf7 100%);
+    background: var(--surface);
     box-shadow: 0 28px 80px rgba(17, 24, 22, 0.22);
     overflow: hidden;
     display: flex;
@@ -581,7 +588,7 @@ body.player-scores-open {
     gap: 12px;
     padding: 20px 20px 16px;
     border-bottom: 1px solid rgba(11, 122, 99, 0.14);
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(243, 249, 246, 0.96) 100%);
+    background: var(--surface-soft);
 }
 
 .player-scores-actions {
@@ -610,7 +617,7 @@ body.player-scores-open {
 .player-name-edit-save,
 .player-name-edit-cancel {
     border: 1px solid var(--border);
-    background: #fff;
+    background: var(--surface-strong);
     color: var(--text);
     border-radius: 999px;
     padding: 8px 12px;
@@ -635,13 +642,13 @@ body.player-scores-open {
 .player-name-edit-button:hover,
 .player-name-edit-save:hover,
 .player-name-edit-cancel:hover {
-    background: #f1f1f1;
+    background: var(--row-hover);
 }
 
 .player-name-edit-form {
     padding: 16px 20px 4px;
     border-bottom: 1px solid rgba(11, 122, 99, 0.1);
-    background: rgba(255, 255, 255, 0.72);
+    background: var(--surface-soft);
 }
 
 .player-name-edit-label {
@@ -666,7 +673,7 @@ body.player-scores-open {
     border-radius: 12px;
     padding: 10px 12px;
     font: inherit;
-    background: #fff;
+    background: var(--surface-strong);
     color: var(--text);
 }
 
@@ -702,7 +709,7 @@ body.player-scores-open {
     margin: 16px 0 18px;
     border: 1px solid rgba(11, 122, 99, 0.16);
     border-radius: 14px;
-    background: rgba(255, 255, 255, 0.9);
+    background: var(--surface);
     overflow: hidden;
 }
 
@@ -739,7 +746,7 @@ body.player-scores-open {
 }
 
 .player-pending-table th {
-    background: #f7f7f7;
+    background: var(--surface-soft);
 }
 
 .player-pending-table tbody tr:last-child td {
@@ -877,7 +884,8 @@ body.player-scores-open {
 
 .toggle-button {
     border: 1px solid var(--border);
-    background: #fff;
+    background: var(--surface-strong);
+    color: var(--text);
     border-radius: 999px;
     padding: 8px 14px;
     cursor: pointer;
@@ -920,7 +928,7 @@ body.player-scores-open {
 
 .metric-toggle {
     border: 1px solid var(--border);
-    background: #fff;
+    background: var(--surface-strong);
     border-radius: 999px;
     padding: 7px 12px;
     cursor: pointer;
@@ -992,7 +1000,7 @@ body.player-scores-open {
 }
 
 .leaderboard-table th {
-    background: #f7f7f7;
+    background: var(--surface-soft);
     position: sticky;
     top: 0;
     z-index: 1;
@@ -1044,7 +1052,7 @@ body.player-scores-open {
 .proof-btn {
     border: 1px solid var(--accent);
     color: var(--accent-strong);
-    background: #fff;
+    background: var(--surface-strong);
     border-radius: 8px;
     padding: 5px 9px;
     cursor: pointer;
@@ -1167,7 +1175,7 @@ body.player-scores-open {
 
 .admin-edit-modal-content {
     max-width: min(95vw, 560px);
-    background: #fefefe;
+    background: var(--surface);
     border: 1px solid var(--border);
 }
 
@@ -1196,7 +1204,7 @@ body.player-scores-open {
     padding: 10px 11px;
     font-size: 14px;
     color: var(--text);
-    background: #fff;
+    background: var(--surface-strong);
 }
 
 .admin-edit-textarea {
@@ -1241,7 +1249,7 @@ body.player-scores-open {
 
 .admin-delete-modal-content {
     max-width: min(95vw, 500px);
-    background: #fefefe;
+    background: var(--surface);
     border: 1px solid var(--border);
 }
 
@@ -1286,7 +1294,7 @@ body[data-is-admin='true'] .admin-actions {
 
 .admin-actions button {
     border: 1px solid var(--border);
-    background: #fff;
+    background: var(--surface-strong);
     color: var(--text);
     border-radius: 8px;
     padding: 5px 8px;
@@ -1322,7 +1330,7 @@ body[data-is-admin='true'] .admin-actions {
 .toast-item {
     border-radius: 10px;
     border: 1px solid var(--border);
-    background: #fff;
+    background: var(--surface-strong);
     box-shadow: var(--shadow);
     padding: 10px 12px;
     font-size: 14px;

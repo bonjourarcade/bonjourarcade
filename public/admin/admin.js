@@ -37,6 +37,19 @@ logoutBtn.addEventListener('click', async () => {
     await window.signOutFirebase();
 });
 
+function getCreatedAtTimestamp(score) {
+    if (!score || !score.createdAt) {
+        return 0;
+    }
+
+    if (typeof score.createdAt._seconds === 'number') {
+        return score.createdAt._seconds * 1000;
+    }
+
+    const timestamp = new Date(score.createdAt).getTime();
+    return Number.isNaN(timestamp) ? 0 : timestamp;
+}
+
 async function loadPendingScores() {
     scoresContainer.innerHTML = "<p>Chargement des scores en attente...</p>";
     try {
@@ -47,6 +60,8 @@ async function loadPendingScores() {
             scoresContainer.innerHTML = "<p>Aucun score en attente de validation.</p>";
             return;
         }
+
+        data.submissions.sort((a, b) => getCreatedAtTimestamp(a) - getCreatedAtTimestamp(b));
 
         scoresContainer.innerHTML = "";
         data.submissions.forEach((score) => {

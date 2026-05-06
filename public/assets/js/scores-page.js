@@ -152,6 +152,7 @@
                     localStorage.setItem('theme', selectedTheme);
                 }
                 setTheme(selectedTheme);
+                renderMetricsChart();
             });
         });
 
@@ -160,8 +161,29 @@
         window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function () {
             if (!localStorage.getItem('theme')) {
                 setTheme('system');
+                renderMetricsChart();
             }
         });
+    }
+
+    function getChartTheme() {
+        const isDark = document.body.classList.contains('theme-dark');
+
+        return isDark
+            ? {
+                legend: '#f2f4f5',
+                ticks: '#a7afb8',
+                grid: 'rgba(255, 255, 255, 0.08)',
+                tooltipBackground: '#14171a',
+                tooltipBorder: '#353a40'
+            }
+            : {
+                legend: '#1c1c1c',
+                ticks: '#666666',
+                grid: 'rgba(0, 0, 0, 0.08)',
+                tooltipBackground: '#ffffff',
+                tooltipBorder: '#d9d9d9'
+            };
     }
 
     function setupOptionsDropdown() {
@@ -806,6 +828,7 @@
             });
         }
         const initialBounds = computeYAxisBoundsFromValues(initialVisibleValues);
+        const chartTheme = getChartTheme();
 
         elements.metricsChartCanvas.style.display = 'block';
         setMetricsState('', 'hidden');
@@ -852,9 +875,17 @@
                 },
                 plugins: {
                     legend: {
-                        position: 'top'
+                        position: 'top',
+                        labels: {
+                            color: chartTheme.legend
+                        }
                     },
                     tooltip: {
+                        backgroundColor: chartTheme.tooltipBackground,
+                        titleColor: chartTheme.legend,
+                        bodyColor: chartTheme.legend,
+                        borderColor: chartTheme.tooltipBorder,
+                        borderWidth: 1,
                         callbacks: {
                             title: function (items) {
                                 if (!items || !items.length || !items[0].parsed) {
@@ -877,7 +908,11 @@
                 scales: {
                     x: {
                         type: 'linear',
+                        grid: {
+                            color: chartTheme.grid
+                        },
                         ticks: {
+                            color: chartTheme.ticks,
                             callback: function (value) {
                                 return formatTimelineLabel(value);
                             },
@@ -888,7 +923,11 @@
                         beginAtZero: !initialBounds,
                         min: initialBounds ? initialBounds.min : undefined,
                         max: initialBounds ? initialBounds.max : undefined,
+                        grid: {
+                            color: chartTheme.grid
+                        },
                         ticks: {
+                            color: chartTheme.ticks,
                             callback: function (value) {
                                 return formatScore(value);
                             }

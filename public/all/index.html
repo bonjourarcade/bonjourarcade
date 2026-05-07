@@ -1510,9 +1510,11 @@
                         localStorage.setItem('nouveautesCollapsed', isCollapsed ? 'false' : 'true');
                     });
 
-                    // Check saved state from localStorage
+                    // Keep nouveautés visible when browsing by latest additions,
+                    // even if the section was previously collapsed.
+                    const forceExpandedForLatestSort = sortSelect && sortSelect.value === 'latest';
                     const savedCollapsed = localStorage.getItem('nouveautesCollapsed') === 'true';
-                    if (savedCollapsed) {
+                    if (savedCollapsed && !forceExpandedForLatestSort) {
                         nouveautesHeader.setAttribute('data-collapsed', 'true');
                         nouveautesContainer.style.maxHeight = '0px';
                         nouveautesContainer.style.opacity = '0';

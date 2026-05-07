@@ -228,6 +228,18 @@
       }
     });
 
+    // Key 'c' for directly going to today's daily game
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'c' || event.key === 'C') {
+        // Don't navigate if user is typing in an input or textarea
+        const activeElement = document.activeElement;
+        if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
+          return;
+        }
+        window.location.replace(`/daily?seed=${getTorontoDailySeed()}`);
+      }
+    });
+
     function getTorontoDailySeed() {
       const formatter = new Intl.DateTimeFormat('en-CA', {
         timeZone: 'America/Toronto',

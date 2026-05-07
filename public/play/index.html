@@ -671,6 +671,21 @@
             text-align: center;
         }
 
+        #play-header-clock .clock-separator {
+            display: inline-block;
+            animation: clock-separator-blink 2s steps(1, end) infinite;
+        }
+
+        @keyframes clock-separator-blink {
+            0%, 49.999% {
+                opacity: 1;
+            }
+
+            50%, 100% {
+                opacity: 0;
+            }
+        }
+
         /* Hide clock on mobile to prevent layout conflicts */
         @media (max-width: 768px) {
             #play-header-clock {
@@ -888,9 +903,9 @@
                 <span>⏩</span>
                 <span>FF</span>
             </button>
-            <button id="leaderboard-button" title="Raccourci clavier : !">
+            <button id="leaderboard-button" title="Raccourci clavier : F1">
                 <span>🏆</span>
-                <span>Soumettre (!)</span>
+                <span>Soumettre Score (F1)</span>
             </button>
         </div>
     </header>
@@ -998,7 +1013,7 @@
                 <div id="score-submission-status" style="margin-top:10px; font-size:14px;"></div>
             </div>
 
-            <p id="score-modal-shortcut-hint">Astuce: appuie sur <strong>!</strong> pour ouvrir cette fenêtre.</p>
+            <p id="score-modal-shortcut-hint">Astuce: appuie sur <strong>F1</strong> pour ouvrir cette fenêtre.</p>
         </div>
     </div>
 
@@ -2984,14 +2999,103 @@
             });
         })();
 
-        // Score submission button functionality
-        document.getElementById('leaderboard-button').addEventListener('click', function () {
+        const scoreModalOriginalPlacement = {
+            parent: null,
+            nextSibling: null
+        };
+
+        function restoreScoreSubmissionModalParent() {
+            const modal = document.getElementById('score-submission-modal');
+            if (!modal || !scoreModalOriginalPlacement.parent) {
+                return;
+            }
+
+            const currentParent = modal.parentNode;
+            const originalParent = scoreModalOriginalPlacement.parent;
+            if (currentParent === originalParent) {
+                return;
+            }
+
+            if (scoreModalOriginalPlacement.nextSibling && scoreModalOriginalPlacement.nextSibling.parentNode === originalParent) {
+                originalParent.insertBefore(modal, scoreModalOriginalPlacement.nextSibling);
+            } else {
+                originalParent.appendChild(modal);
+            }
+        }
+
+        function closeScoreSubmissionModal() {
+            const modal = document.getElementById('score-submission-modal');
+            if (!modal) {
+                return;
+            }
+
+            modal.style.display = 'none';
+            restoreScoreSubmissionModalParent();
+        }
+
+        function launchScoreCelebrationConfetti() {
+            if (!window.confetti) {
+                return;
+            }
+
+            const fullscreenElement = document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
+            if (!fullscreenElement || typeof window.confetti.create !== 'function') {
+                window.confetti({
+                    particleCount: 150,
+                    spread: 70,
+                    origin: { y: 0.6 },
+                    zIndex: 10001
+                });
+                return;
+            }
+
+            const confettiCanvas = document.createElement('canvas');
+            confettiCanvas.style.position = 'fixed';
+            confettiCanvas.style.inset = '0';
+            confettiCanvas.style.width = '100%';
+            confettiCanvas.style.height = '100%';
+            confettiCanvas.style.pointerEvents = 'none';
+            confettiCanvas.style.zIndex = '10001';
+            fullscreenElement.appendChild(confettiCanvas);
+
+            const fireFullscreenConfetti = window.confetti.create(confettiCanvas, {
+                resize: true,
+                useWorker: true
+            });
+
+            fireFullscreenConfetti({
+                particleCount: 150,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+
+            setTimeout(() => {
+                if (confettiCanvas.parentNode) {
+                    confettiCanvas.parentNode.removeChild(confettiCanvas);
+                }
+            }, 2500);
+        }
+
+        async function openScoreSubmissionModal() {
             const modal = document.getElementById('score-submission-modal');
             const authSection = document.getElementById('score-auth-section');
             const formSection = document.getElementById('score-form-section');
             const screenshotPreview = document.getElementById('score-screenshot-preview');
             const noScreenshot = document.getElementById('score-no-screenshot');
             const statusDiv = document.getElementById('score-submission-status');
+            const scoreInput = document.getElementById('score-input');
+
+            if (modal && !scoreModalOriginalPlacement.parent) {
+                scoreModalOriginalPlacement.parent = modal.parentNode;
+                scoreModalOriginalPlacement.nextSibling = modal.nextSibling;
+            }
+
+            const fullscreenElement = document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
+            if (modal && fullscreenElement && modal.parentNode !== fullscreenElement) {
+                fullscreenElement.appendChild(modal);
+            } else if (modal && !fullscreenElement) {
+                restoreScoreSubmissionModalParent();
+            }
 
             if (statusDiv) {
                 statusDiv.textContent = "";
@@ -3017,6 +3121,12 @@
 
             if (modal) {
                 modal.style.display = 'flex';
+                setTimeout(() => {
+                    if (scoreInput) {
+                        scoreInput.focus();
+                        scoreInput.select();
+                    }
+                }, 0);
 
                 // Helper to fallback to HTML canvas if WebGL screenshot fails or gives a black image
                 const captureCanvasDirectly = () => {
@@ -3158,20 +3268,31 @@
                     });
                 }
             }
+
+        }
+
+        // Score submission button functionality
+        document.getElementById('leaderboard-button').addEventListener('click', function () {
+            openScoreSubmissionModal();
         });
 
-        // Shortcut for score submission modal: "!" to open, "Escape" to close
+        // Shortcut for score submission modal: F1 to open, Escape to close
         document.addEventListener('keydown', (e) => {
             const modal = document.getElementById('score-submission-modal');
             const isVisible = modal && modal.style.display !== 'none';
 
-            if (e.key === '!' && !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
-                const leaderboardBtn = document.getElementById('leaderboard-button');
-                if (leaderboardBtn) {
-                    leaderboardBtn.click();
-                }
+            if (e.key === 'F1' && !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
+                e.preventDefault();
+                openScoreSubmissionModal();
             } else if (e.key === 'Escape' && isVisible) {
-                modal.style.display = 'none';
+                closeScoreSubmissionModal();
+            }
+        });
+
+        document.addEventListener('fullscreenchange', function () {
+            const modal = document.getElementById('score-submission-modal');
+            if (modal && modal.style.display === 'none' && !document.fullscreenElement) {
+                restoreScoreSubmissionModalParent();
             }
         });
 
@@ -3292,17 +3413,10 @@
                     statusDiv.style.color = "#00C851";
 
                     // Trigger celebratory confetti
-                    if (window.confetti) {
-                        confetti({
-                            particleCount: 150,
-                            spread: 70,
-                            origin: { y: 0.6 },
-                            zIndex: 10001
-                        });
-                    }
+                    launchScoreCelebrationConfetti();
 
                     setTimeout(() => {
-                        document.getElementById('score-submission-modal').style.display = 'none';
+                        closeScoreSubmissionModal();
                         document.getElementById('score-input').value = '';
                         document.getElementById('score-comment-input').value = '';
                         const commentCounter = document.getElementById('score-comment-counter');
@@ -3323,19 +3437,32 @@
         const scoreModalClose = document.getElementById('score-modal-close');
         if (scoreModalClose) {
             scoreModalClose.addEventListener('click', function () {
-                const modal = document.getElementById('score-submission-modal');
-                if (modal) {
-                    modal.style.display = 'none';
-                }
+                closeScoreSubmissionModal();
             });
         }
 
         // Click outside Score modal to close
         const scoreModal = document.getElementById('score-submission-modal');
         if (scoreModal) {
+            const trapModalKeyboardEvent = function (e) {
+                if (!['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
+                    return;
+                }
+
+                if (e.key === 'Escape') {
+                    return;
+                }
+
+                e.stopPropagation();
+            };
+
+            scoreModal.addEventListener('keydown', trapModalKeyboardEvent, true);
+            scoreModal.addEventListener('keyup', trapModalKeyboardEvent, true);
+            scoreModal.addEventListener('keypress', trapModalKeyboardEvent, true);
+
             scoreModal.addEventListener('click', function (e) {
                 if (e.target === this) {
-                    this.style.display = 'none';
+                    closeScoreSubmissionModal();
                 }
             });
         }
@@ -3544,7 +3671,7 @@
                 const now = new Date();
                 const hours = String(now.getHours()).padStart(2, '0');
                 const minutes = String(now.getMinutes()).padStart(2, '0');
-                clockElement.textContent = `${hours}:${minutes}`;
+                clockElement.innerHTML = `${hours}<span class="clock-separator">:</span>${minutes}`;
             }
 
             updateClock();

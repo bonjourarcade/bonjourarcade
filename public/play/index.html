@@ -830,8 +830,135 @@
             transform: rotate(180deg);
         }
 
+        #game-info-overlay {
+            position: fixed !important;
+            top: 62px;
+            left: 0 !important;
+            z-index: 999 !important;
+            display: none;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), top 0.2s ease;
+            pointer-events: none;
+        }
+
+        #game-info-overlay.collapsed {
+            transform: translateX(-100%);
+        }
+
+        #game-info-content {
+            background: rgba(45, 45, 45, 0.95);
+            color: #fff;
+            padding: 10px;
+            border-radius: 0 6px 6px 0;
+            font-size: 14px;
+            font-family: sans-serif;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
+            min-width: 160px;
+            max-width: 220px;
+            line-height: 1.4;
+            pointer-events: auto;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-left: none;
+        }
+
+        #game-info-toggle-handle {
+            position: absolute;
+            left: 100%;
+            top: 0;
+            width: 32px;
+            height: auto;
+            min-height: 120px;
+            background: rgba(45, 45, 45, 0.95);
+            color: #ffd700;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 0 6px 6px 0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-left: none;
+            box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+            pointer-events: auto;
+            padding: 15px 0;
+            transition: background-color 0.2s;
+        }
+
+        #game-info-toggle-handle:hover {
+            background: rgba(30, 30, 30, 0.95);
+        }
+
+        #game-info-toggle-handle .handle-label {
+            writing-mode: vertical-rl;
+            white-space: nowrap;
+            font-size: 13px;
+            font-weight: bold;
+            font-family: sans-serif;
+            user-select: none;
+            margin-top: 10px;
+        }
+
+        #game-info-toggle-handle .icon-arrow {
+            font-size: 18px;
+            transition: transform 0.3s ease;
+        }
+
+        #game-info-overlay.collapsed #game-info-toggle-handle {
+            box-shadow: 4px 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        #game-info-overlay.collapsed #game-info-toggle-handle .icon-arrow {
+            transform: rotate(180deg);
+        }
+
+        .game-info-title {
+            font-weight: bold;
+            font-size: 15px;
+            margin-bottom: 8px;
+            color: #ffd700;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 4px;
+        }
+
+        .game-info-cover {
+            display: block;
+            width: 100%;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: #111;
+        }
+
+        .game-info-name {
+            font-weight: 700;
+            font-size: 14px;
+            line-height: 1.3;
+            margin-bottom: 8px;
+        }
+
+        .game-info-meta {
+            display: grid;
+            grid-template-columns: minmax(0, 72px) minmax(0, 1fr);
+            gap: 6px 8px;
+            font-size: 12px;
+        }
+
+        .game-info-label {
+            color: rgba(255, 255, 255, 0.72);
+            font-weight: 600;
+        }
+
+        .game-info-value {
+            color: #fff;
+            word-break: break-word;
+        }
+
         @media (max-width: 768px) {
             #controls-overlay {
+                display: none !important;
+            }
+
+            #game-info-overlay {
                 display: none !important;
             }
         }
@@ -916,6 +1043,14 @@
         <div id="controls-toggle-handle" title="Afficher/Masquer les contrôles">
             <span class="icon-arrow">◂</span>
             <span class="handle-label">Info contrôles</span>
+        </div>
+    </div>
+
+    <div id="game-info-overlay">
+        <div id="game-info-content"></div>
+        <div id="game-info-toggle-handle" title="Afficher/Masquer les infos du jeu">
+            <span class="icon-arrow">◂</span>
+            <span class="handle-label">Info jeu</span>
         </div>
     </div>
 
@@ -1229,6 +1364,58 @@
             if (metaTag) {
                 metaTag.setAttribute('content', content);
             }
+        }
+
+        function getSystemName(core) {
+            if (!core) return '';
+            const systemMap = {
+                arcade: 'Arcade',
+                mame2003_plus: 'Arcade (MAME)',
+                atari2600: 'Atari 2600',
+                gb: 'Game Boy',
+                gba: 'Game Boy Advance',
+                segaMD: 'Sega Genesis/Mega Drive',
+                segaGG: 'Sega Game Gear',
+                jaguar: 'Atari Jaguar',
+                n64: 'Nintendo 64',
+                nes: 'Nintendo Entertainment System',
+                pce: 'PC Engine/TurboGrafx-16',
+                psx: 'PlayStation',
+                sega32x: 'Sega 32X',
+                segaMS: 'Sega Master System',
+                snes: 'Super Nintendo',
+                vb: 'Virtual Boy',
+                ws: 'WonderSwan',
+                external: 'External Game'
+            };
+            return systemMap[core] || core;
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function updateGameInfoOverlayPosition() {
+            const controlsOverlay = document.getElementById('controls-overlay');
+            const controlsContent = document.getElementById('controls-content');
+            const gameInfoOverlay = document.getElementById('game-info-overlay');
+            const controlsToggleHandle = document.getElementById('controls-toggle-handle');
+            if (!gameInfoOverlay) return;
+
+            let top = 62;
+            if (controlsOverlay && controlsOverlay.style.display !== 'none') {
+                const controlsHeight = controlsOverlay.classList.contains('collapsed') && controlsToggleHandle
+                    ? controlsToggleHandle.offsetHeight
+                    : (controlsContent ? controlsContent.offsetHeight : controlsOverlay.offsetHeight);
+                top += controlsHeight + 12;
+            }
+
+            gameInfoOverlay.style.top = `${top}px`;
         }
 
         // Summarize controls (same logic as main menu/newsletter)
@@ -1800,6 +1987,9 @@
                 const controlsOverlay = document.getElementById('controls-overlay');
                 const controlsContent = document.getElementById('controls-content');
                 const toggleHandle = document.getElementById('controls-toggle-handle');
+                const gameInfoOverlay = document.getElementById('game-info-overlay');
+                const gameInfoContent = document.getElementById('game-info-content');
+                const gameInfoToggleHandle = document.getElementById('game-info-toggle-handle');
 
                 if (controlsOverlay && controlsContent) {
                     if (!isMobileDevice() && selectedGame.controls && Array.isArray(selectedGame.controls) && selectedGame.controls.length > 0) {
@@ -1850,6 +2040,7 @@
                                 controlsOverlay.classList.toggle('collapsed');
                                 const currentlyCollapsed = controlsOverlay.classList.contains('collapsed');
                                 localStorage.setItem('controls_collapsed', currentlyCollapsed);
+                                updateGameInfoOverlayPosition();
                             });
                             toggleHandle.dataset.listenerAdded = 'true';
                         }
@@ -1858,6 +2049,63 @@
 
                     else {
                         controlsOverlay.style.display = 'none';
+                    }
+                }
+
+                if (gameInfoOverlay && gameInfoContent) {
+                    const infoRows = [
+                        { label: 'Systeme', value: getSystemName(selectedGame.core) },
+                        { label: 'Developpeur', value: selectedGame.developer },
+                        { label: 'Annee', value: selectedGame.year },
+                        { label: 'Genre', value: selectedGame.genre }
+                    ].filter((entry) => String(entry.value || '').trim());
+
+                    const hasCover = String(selectedGame.coverArt || '').trim() && selectedGame.coverArt !== '/assets/images/placeholder_thumb.png';
+                    const hasInfoContent = hasCover || infoRows.length > 0 || String(selectedGame.title || '').trim();
+
+                    if (!isMobileDevice() && hasInfoContent) {
+                        let html = '<div class="game-info-title">Jeu en cours</div>';
+
+                        if (hasCover) {
+                            html += `<img class="game-info-cover" src="${escapeHtml(selectedGame.coverArt)}" alt="${escapeHtml(selectedGame.title || gameId)}">`;
+                        }
+
+                        if (String(selectedGame.title || '').trim()) {
+                            html += `<div class="game-info-name">${escapeHtml(selectedGame.title)}</div>`;
+                        }
+
+                        if (infoRows.length > 0) {
+                            html += '<div class="game-info-meta">';
+                            html += infoRows.map((entry) => `
+                                <div class="game-info-label">${escapeHtml(entry.label)}</div>
+                                <div class="game-info-value">${escapeHtml(entry.value)}</div>
+                            `).join('');
+                            html += '</div>';
+                        }
+
+                        gameInfoContent.innerHTML = html;
+                        gameInfoOverlay.style.display = 'block';
+
+                        const isInfoCollapsed = localStorage.getItem('game_info_collapsed') === 'true';
+                        if (isInfoCollapsed) {
+                            gameInfoOverlay.classList.add('collapsed');
+                        } else {
+                            gameInfoOverlay.classList.remove('collapsed');
+                        }
+
+                        if (gameInfoToggleHandle && !gameInfoToggleHandle.dataset.listenerAdded) {
+                            gameInfoToggleHandle.addEventListener('click', () => {
+                                gameInfoOverlay.classList.toggle('collapsed');
+                                const currentlyCollapsed = gameInfoOverlay.classList.contains('collapsed');
+                                localStorage.setItem('game_info_collapsed', currentlyCollapsed);
+                            });
+                            gameInfoToggleHandle.dataset.listenerAdded = 'true';
+                        }
+
+                        updateGameInfoOverlayPosition();
+                        window.addEventListener('resize', updateGameInfoOverlayPosition);
+                    } else {
+                        gameInfoOverlay.style.display = 'none';
                     }
                 }
 

@@ -702,48 +702,6 @@
             cursor: none !important;
         }
 
-        /* Browser warning message styling */
-        #browser-warning {
-            position: fixed !important;
-            top: 50px !important;
-            left: 0 !important;
-            right: 0 !important;
-            transition: top 0.2s;
-            background-color: rgba(255, 193, 7, 0.95) !important;
-            color: #000 !important;
-            padding: 12px 20px !important;
-            text-align: center !important;
-            font-family: sans-serif !important;
-            font-size: 14px !important;
-            z-index: 10000 !important;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
-            display: none !important;
-            flex-direction: row !important;
-            align-items: center !important;
-            justify-content: center !important;
-            gap: 10px !important;
-        }
-
-        #browser-warning.show {
-            display: flex !important;
-        }
-
-        #browser-warning-close {
-            background: rgba(0, 0, 0, 0.2) !important;
-            border: none !important;
-            color: #000 !important;
-            padding: 4px 10px !important;
-            border-radius: 4px !important;
-            cursor: pointer !important;
-            font-size: 16px !important;
-            font-weight: bold !important;
-            margin-left: 10px !important;
-        }
-
-        #browser-warning-close:hover {
-            background: rgba(0, 0, 0, 0.3) !important;
-        }
-
         /* Controls Overlay Sidebar */
         #controls-overlay {
             position: fixed !important;
@@ -1002,13 +960,6 @@
 </head>
 
 <body>
-    <!-- Browser Warning Message -->
-    <div id="browser-warning">
-        <span>⚠️ Les performances peuvent ne pas être optimales sur ce navigateur. Pour une meilleure expérience,
-            utilisez Google Chrome.</span>
-        <button id="browser-warning-close" aria-label="Fermer">×</button>
-    </div>
-
     <!-- Header with logo, clock, and action buttons -->
     <header id="play-header">
         <div id="play-header-left">
@@ -1323,34 +1274,6 @@
                 event.stopPropagation();
                 window.open(submitUrl.toString(), '_blank');
             };
-        }
-
-        // Function to detect if the browser is Chrome
-        function isChromeBrowser() {
-            const userAgent = navigator.userAgent;
-            // Check for Chrome (but not Edge, Opera, or other Chromium-based browsers that identify differently)
-            // Chrome's user agent contains "Chrome" but not "Edg" (Edge) or "OPR" (Opera)
-            return /Chrome/.test(userAgent) && !/Edg|OPR|Opera/.test(userAgent);
-        }
-
-        // Function to show browser warning if not Chrome
-        function checkBrowserAndShowWarning() {
-            if (!isChromeBrowser()) {
-                const warningElement = document.getElementById('browser-warning');
-
-                if (warningElement) {
-                    warningElement.classList.add('show');
-
-                    // Add close button functionality
-                    const closeButton = document.getElementById('browser-warning-close');
-
-                    if (closeButton) {
-                        closeButton.addEventListener('click', () => {
-                            warningElement.classList.remove('show');
-                        });
-                    }
-                }
-            }
         }
 
         /**
@@ -1675,6 +1598,9 @@
                     if (sortedScores.length === 0) {
                         if (!isRefresh) {
                             leaderboardContent.innerHTML = '<div class="leaderboard-loading">Aucun score trouvé</div>';
+                        }
+                        if (!isMobileDevice()) {
+                            leaderboardContainer.style.display = 'flex';
                         }
                         return;
                     }
@@ -2373,7 +2299,6 @@
         function updateHeaderAndGameContainerPositions() {
             const playHeader = document.getElementById('play-header');
             const gameContainer = document.getElementById('game-container');
-            const browserWarning = document.getElementById('browser-warning');
             const banners = document.querySelectorAll('.bonjourarcade-banner');
             const totalBannerHeight = Array.from(banners).reduce((sum, b) => sum + b.offsetHeight, 0);
             const headerHeight = 50;
@@ -2388,11 +2313,6 @@
 
                 gameContainer.style.height = `calc(100% - ${totalOffset}px)`;
             }
-
-            // Update browser warning position (below header, accounting for banners)
-            if (browserWarning) {
-                browserWarning.style.top = (totalBannerHeight + headerHeight) + 'px';
-            }
         }
 
         // --- Start the loading process once the DOM is ready ---
@@ -2403,7 +2323,6 @@
             silentAudio.volume = 0.01; // Very low volume, almost silent
             silentAudio.play().catch(e => console.log('Silent audio play failed:', e));
 
-            checkBrowserAndShowWarning();
             loadSelectedGame();
 
 

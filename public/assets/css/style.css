@@ -933,23 +933,58 @@ body.theme-dark .previous-week-view-all-link:hover {
     box-sizing: border-box;
 }
 
-.recently-played-section h2 {
+.recently-played-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
     margin-top: 0;
     margin-bottom: 15px;
     border-bottom: 2px solid var(--divider-color);
     padding-bottom: 10px;
+}
+
+.recently-played-section h2 {
+    margin: 0;
     font-size: 1.5em;
     text-align: center;
 }
 
-body.theme-light .recently-played-section h2 {
+body.theme-light .recently-played-header {
     border-bottom-color: #9c27b0;
     /* Purple in light mode */
 }
 
-body.theme-dark .recently-played-section h2 {
+body.theme-dark .recently-played-header {
     border-bottom-color: #ba68c8;
     /* Light purple in dark mode */
+}
+
+.clear-recently-played-btn {
+    border: 2px solid currentColor;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--text-color);
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.85rem;
+    font-weight: 700;
+    padding: 6px 12px;
+    transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.clear-recently-played-btn:hover {
+    transform: translateY(-1px);
+}
+
+body.theme-light .clear-recently-played-btn:hover {
+    background: #9c27b0;
+    color: #fff;
+}
+
+body.theme-dark .clear-recently-played-btn:hover {
+    background: #ba68c8;
+    color: #111;
 }
 
 .recently-played-list {

@@ -53,6 +53,14 @@ function saveGameHistory(gameHistory) {
     }
 }
 
+function clearGameHistory() {
+    try {
+        localStorage.removeItem('gameHistory');
+    } catch (error) {
+        console.error('Error clearing game history:', error);
+    }
+}
+
 function addGameToHistory(gameId) {
     if (!gameId) return;
 
@@ -81,11 +89,15 @@ function getHistoryGameIds() {
     return gameHistory.map(entry => entry.gameId);
 }
 
-// Extract game ID from URL (handles both /play?game=ID and /play?game=ID&other=params)
+// Extract game ID from URL (handles /play?game=ID and short /b/ID URLs)
 function extractGameIdFromUrl(url) {
     try {
         const urlObj = new URL(url, window.location.origin);
-        return urlObj.searchParams.get('game');
+        const gameParam = urlObj.searchParams.get('game');
+        if (gameParam) return gameParam;
+
+        const shortMatch = urlObj.pathname.match(/^\/b\/([^/]+)\/?$/);
+        return shortMatch ? decodeURIComponent(shortMatch[1]) : null;
     } catch (error) {
         console.error('Error extracting game ID from URL:', error);
         return null;
@@ -95,7 +107,7 @@ function extractGameIdFromUrl(url) {
 // Auto-track game when page loads (for direct links to /play)
 function trackGameOnPageLoad() {
     // Only track if we're on the play page
-    if (window.location.pathname === '/play' || window.location.pathname === '/play/') {
+    if (window.location.pathname === '/play' || window.location.pathname === '/play/' || window.location.pathname.startsWith('/b/')) {
         const gameId = extractGameIdFromUrl(window.location.href);
         if (gameId) {
             addGameToHistory(gameId);

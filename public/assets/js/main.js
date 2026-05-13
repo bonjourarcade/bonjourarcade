@@ -303,6 +303,7 @@ async function fetchGameData() {
         populatePreviousWeekGames(previousWeekGames, data.games);
 
         // Populate recently played games section
+        window.recentlyPlayedGamesData = data.games;
         populateRecentlyPlayedGames(data.games);
 
         // Use all games for grid and randomizer (no need to combine separate arrays)
@@ -663,8 +664,13 @@ function populateFeaturedGame(game) {
 
     // Add rom-missing class to parent container if needed
     const featuredSection = document.getElementById('game-of-the-week');
-    if (featuredSection && game.romMissing === true) {
-        featuredSection.classList.add('rom-missing-featured'); // Use a distinct class
+    if (featuredSection) {
+        featuredSection.dataset.gameId = game.id;
+        featuredSection._gameData = game;
+
+        if (game.romMissing === true) {
+            featuredSection.classList.add('rom-missing-featured'); // Use a distinct class
+        }
     }
 
     // Helper function to check if a game is new (by flag or by date)
@@ -1533,8 +1539,18 @@ function populatePreviousWeekGames(previousGames, allGames) {
 function populateRecentlyPlayedGames(allGames) {
     const section = document.getElementById('recently-played-section');
     const listContainer = document.getElementById('recently-played-list');
+    const clearButton = document.getElementById('clear-recently-played-btn');
 
     if (!section || !listContainer) return;
+
+    if (clearButton && !clearButton.dataset.bound) {
+        clearButton.addEventListener('click', () => {
+            clearGameHistory();
+            listContainer.innerHTML = '<p>Aucun jeu joué récemment</p>';
+            section.style.display = 'none';
+        });
+        clearButton.dataset.bound = 'true';
+    }
 
     // Load history from sessionStorage
     const historyGameIds = getHistoryGameIds();
@@ -1640,6 +1656,12 @@ function populateRecentlyPlayedGames(allGames) {
         });
     });
 }
+
+window.addEventListener('pageshow', () => {
+    if (window.recentlyPlayedGamesData) {
+        populateRecentlyPlayedGames(window.recentlyPlayedGamesData);
+    }
+});
 
 
 /**
@@ -2207,7 +2229,7 @@ function handleGameClick(element) {
             window.open(targetUrl, '_blank');
         } else {
             // Track game in history before navigating for regular games
-            const gameId = extractGameIdFromUrl(targetUrl);
+            const gameId = extractGameIdFromUrl(targetUrl) || element.dataset.gameId;
             if (gameId) {
                 addGameToHistory(gameId);
             }
@@ -2498,7 +2520,7 @@ function handleGameClick(element) {
                 window.open(targetUrl, '_blank');
             } else {
                 // Track game in history before navigating for regular games
-                const gameId = extractGameIdFromUrl(targetUrl);
+                const gameId = extractGameIdFromUrl(targetUrl) || selectedEl.dataset.gameId;
                 if (gameId) {
                     addGameToHistory(gameId);
                 }

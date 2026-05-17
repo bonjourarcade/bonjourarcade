@@ -1,0 +1,18 @@
+title: Old Towers (NES)
+developer: RetroSouls
+year: 2024
+genre: Action, Puzzle, Platform
+#controls:
+#  - "←↓↑→: Mouvement"
+#  - "Z: "
+#  - "X: "
+#  - "C: "
+#  - "V: "
+
+#to_start: Espace, puis Enter
+#announcement_message: ""
+
+enable_score: true
+hide: yes
+
+added: 2026-05-17

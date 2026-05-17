@@ -1,0 +1,18 @@
+title: Pirates! Gold
+developer: MPS Labs
+year: 1993
+genre: Strategy, Tactics, Pirates, Real-time, Top-down, Action
+#controls:
+#  - "←↓↑→: Mouvement"
+#  - "Z: "
+#  - "X: "
+#  - "C: "
+#  - "V: "
+
+#to_start: Espace, puis Enter
+#announcement_message: ""
+
+enable_score: true
+hide: yes
+
+added: 2026-05-17

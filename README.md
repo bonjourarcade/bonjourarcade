@@ -65,3 +65,4 @@ jeux en vedette est sélectionné automatiquement à l’aide de :
 - **Automatique** : aucune modification manuelle de fichiers nécessaire
  
  
+

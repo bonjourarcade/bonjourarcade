@@ -43,6 +43,7 @@ get_core_from_dir() {
         JAGUAR) echo "jaguar" ;;
         N64)   echo "n64" ;;
         NES)   echo "nes" ;;
+        NDS)   echo "nds" ;;
         PCENGINE) echo "pce" ;;
         PSX) echo "psx" ;;
         S32X) echo "sega32x" ;;
@@ -389,4 +390,3 @@ rm -rf "$TEMP_DIR"
 
 echo -e "${GREEN}✅ Sequential gamelist generation completed successfully!${NC}"
 echo -e "${GREEN}📊 Processed $TOTAL_FILES ROM files and $EXTERNAL_GAMES_COUNT external games${NC}"
-

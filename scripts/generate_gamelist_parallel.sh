@@ -61,6 +61,7 @@ get_core_from_dir() {
         JAGUAR) echo "jaguar" ;;
         N64)   echo "n64" ;;
         NES)   echo "nes" ;;
+        NDS)   echo "nds" ;;
         PCENGINE) echo "pce" ;;
         PSX) echo "psx" ;;
         S32X) echo "sega32x" ;;

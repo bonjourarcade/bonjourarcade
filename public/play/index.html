@@ -2105,6 +2105,10 @@
 
                 console.log("Final merged emulator settings (global + game-specific):");
 
+                if (typeof window.EJS_biosUrl === 'undefined' && window.EJS_biosByCore && typeof window.EJS_biosByCore === 'object') {
+                    window.EJS_biosUrl = window.EJS_biosByCore[window.EJS_core];
+                }
+
                 // Log all EJS_* variables that are set
                 for (const key of Object.keys(window)) {
                     if (key.startsWith('EJS_')) {

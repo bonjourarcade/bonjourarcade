@@ -11,6 +11,9 @@
   "EJS_disableAutoLang": true,
   "EJS_alignStartButton": "bottom",
   "EJS_startOnLoaded": true,
+  "EJS_biosByCore": {
+    "psx": "https://storage.googleapis.com/bonjourarcade/roms/bios/scph5501.bin"
+  },
   "EJS_pathtodata": "/data/",
   "EJS_AdUrl": "/ads",
   "EJS_AdTimer": 4000,

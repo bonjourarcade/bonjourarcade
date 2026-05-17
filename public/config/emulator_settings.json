@@ -12,7 +12,8 @@
   "EJS_alignStartButton": "bottom",
   "EJS_startOnLoaded": true,
   "EJS_biosByCore": {
-    "psx": "https://storage.googleapis.com/bonjourarcade/roms/bios/scph5501.bin"
+    "psx": "https://storage.googleapis.com/bonjourarcade/roms/bios/scph5501.bin",
+    "nds": "https://storage.googleapis.com/bonjourarcade/roms/bios/ndsbios.zip"
   },
   "EJS_pathtodata": "/data/",
   "EJS_AdUrl": "/ads",

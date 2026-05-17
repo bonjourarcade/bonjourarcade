@@ -844,8 +844,8 @@ class EmulatorJS {
                             isoFile = fileName;
                         }
                         if (["cue", "ccd", "toc", "m3u"].includes(ext)) {
-                            if (this.getCore(true) === "psx") {
-                                //always prefer m3u files for psx cores
+                            if (["psx", "segaSaturn"].includes(this.getCore(true))) {
+                                // Always prefer m3u files for multi-disc PSX and Saturn cores.
                                 if (selectedCueExt !== "m3u") {
                                     if (cueFile === null || ext === "m3u") {
                                         cueFile = fileName;

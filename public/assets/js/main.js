@@ -16,6 +16,7 @@ function getSystemName(core) {
         'nes': 'Nintendo Entertainment System',
         'pce': 'PC Engine/TurboGrafx-16',
         'psx': 'PlayStation',
+        'segaSaturn': 'Sega Saturn',
         'sega32x': 'Sega 32X',
         'segaMS': 'Sega Master System',
         'snes': 'Super Nintendo',

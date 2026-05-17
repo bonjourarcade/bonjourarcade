@@ -46,6 +46,7 @@ get_core_from_dir() {
         NDS)   echo "nds" ;;
         PCENGINE) echo "pce" ;;
         PSX) echo "psx" ;;
+        SATURN) echo "segaSaturn" ;;
         S32X) echo "sega32x" ;;
         SMS) echo "segaMS" ;;
         SNES) echo "snes" ;;

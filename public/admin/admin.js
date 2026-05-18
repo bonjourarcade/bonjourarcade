@@ -13,6 +13,10 @@ const adminSection = document.getElementById('admin-section');
 const loginBtn = document.getElementById('admin-login-btn');
 const logoutBtn = document.getElementById('admin-logout-btn');
 const scoresContainer = document.getElementById('scores-container');
+const imageModal = document.getElementById('image-modal');
+const imageModalPreview = document.getElementById('image-modal-preview');
+
+const scoreDrafts = new Map();
 
 window.onFirebaseAuthStateChanged((user) => {
     if (user) {
@@ -35,6 +39,18 @@ loginBtn.addEventListener('click', async () => {
 
 logoutBtn.addEventListener('click', async () => {
     await window.signOutFirebase();
+});
+
+imageModal.addEventListener('click', (event) => {
+    if (event.target === imageModal || event.target === imageModalPreview) {
+        closeImageModal();
+    }
+});
+
+document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && imageModal.classList.contains('is-open')) {
+        closeImageModal();
+    }
 });
 
 function getCreatedAtTimestamp(score) {
@@ -89,7 +105,13 @@ function createScoreElement(score) {
     }
 
     const imgSrc = score.screenshotUrl || score.screenshotDataUrl;
-    const screenshotHtml = imgSrc ? `<img src="${imgSrc}" alt="Screenshot" style="max-width:100%; border-radius:6px; margin-bottom:8px; border:1px solid #444;" onerror="if(this.src !== '${score.screenshotDataUrl || ''}') { this.src='${score.screenshotDataUrl || ''}'; }">` : '<p style="color:#666;">Aucun screenshot.</p>';
+    const fallbackSrc = score.screenshotDataUrl || '';
+    const screenshotHtml = imgSrc
+        ? `<button type="button" class="score-screenshot-button" onclick="openImageModal('${score.id}')" aria-label="Agrandir le screenshot du score ${score.id}">
+                <img src="${imgSrc}" alt="Screenshot" data-full-image="${imgSrc}" data-fallback-image="${fallbackSrc}" onerror="if(this.src !== this.dataset.fallbackImage) { this.src = this.dataset.fallbackImage; this.dataset.fullImage = this.dataset.fallbackImage; }">
+                <span class="score-screenshot-hint">Cliquer pour agrandir</span>
+            </button>`
+        : '<p style="color:#666;">Aucun screenshot.</p>';
     const commentHtml = score.comment ? `<p><strong>Commentaire Original:</strong> ${score.comment}</p>` : '';
     const userDisplay = score.user ? score.user.displayName : score.userId;
     const gameDisplay = score.game ? score.game.title : score.gameId;
@@ -120,62 +142,132 @@ function createScoreElement(score) {
     return div;
 }
 
-window.approveScore = async (scoreId) => {
-    const newGameId = document.getElementById(`edit-game-${scoreId}`).value;
-    const newScore = parseInt(document.getElementById(`edit-score-${scoreId}`).value, 10);
-    const newComment = document.getElementById(`edit-comment-${scoreId}`).value;
-    const notifyWebhooks = document.getElementById(`notify-webhooks-${scoreId}`)?.checked ?? true;
-    const statusDiv = document.getElementById(`status-${scoreId}`);
+function closeImageModal() {
+    imageModal.classList.remove('is-open');
+    imageModalPreview.removeAttribute('src');
+}
 
-    const approveBtn = document.querySelector(`#score-${scoreId} .btn-approve`);
-    approveBtn.disabled = true;
+window.openImageModal = (scoreId) => {
+    const image = document.querySelector(`#score-${scoreId} img[data-full-image]`);
+    if (!image) {
+        return;
+    }
+
+    imageModalPreview.src = image.dataset.fullImage || image.src;
+    imageModal.classList.add('is-open');
+};
+
+function captureScoreDraft(scoreId) {
+    const card = document.getElementById(`score-${scoreId}`);
+    if (!card) {
+        return null;
+    }
+
+    const parent = card.parentElement;
+    if (!parent) {
+        return null;
+    }
+
+    return {
+        scoreId,
+        gameId: document.getElementById(`edit-game-${scoreId}`).value,
+        score: parseInt(document.getElementById(`edit-score-${scoreId}`).value, 10),
+        comment: document.getElementById(`edit-comment-${scoreId}`).value,
+        notifyWebhooks: document.getElementById(`notify-webhooks-${scoreId}`)?.checked ?? true,
+        parent,
+        nextSibling: card.nextSibling,
+        card,
+        statusMessage: '',
+        statusColor: ''
+    };
+}
+
+function removeScoreCard(scoreId) {
+    const card = document.getElementById(`score-${scoreId}`);
+    if (card) {
+        card.remove();
+    }
+}
+
+function restoreScoreCard(draft) {
+    if (!draft || !draft.parent || !draft.card) {
+        return;
+    }
+
+    draft.parent.insertBefore(draft.card, draft.nextSibling);
+    document.getElementById(`edit-game-${draft.scoreId}`).value = draft.gameId;
+    document.getElementById(`edit-score-${draft.scoreId}`).value = Number.isNaN(draft.score) ? '' : draft.score;
+    document.getElementById(`edit-comment-${draft.scoreId}`).value = draft.comment;
+    const notifyCheckbox = document.getElementById(`notify-webhooks-${draft.scoreId}`);
+    if (notifyCheckbox) {
+        notifyCheckbox.checked = draft.notifyWebhooks;
+    }
+
+    const statusDiv = document.getElementById(`status-${draft.scoreId}`);
+    if (statusDiv && draft.statusMessage) {
+        statusDiv.textContent = draft.statusMessage;
+        statusDiv.style.color = draft.statusColor;
+    }
+
+    const approveBtn = document.querySelector(`#score-${draft.scoreId} .btn-approve`);
+    if (approveBtn) {
+        approveBtn.disabled = false;
+    }
+
+    const rejectBtn = document.querySelector(`#score-${draft.scoreId} .btn-reject`);
+    if (rejectBtn) {
+        rejectBtn.disabled = false;
+    }
+}
+
+window.approveScore = async (scoreId) => {
+    const draft = captureScoreDraft(scoreId);
+    if (!draft) {
+        return;
+    }
+
+    scoreDrafts.set(scoreId, draft);
+    removeScoreCard(scoreId);
 
     try {
-        statusDiv.textContent = "Validation en cours...";
-        statusDiv.style.color = "yellow";
-
         await verifyScoreFn({
             scoreId: scoreId,
-            notifyWebhooks: notifyWebhooks,
+            notifyWebhooks: draft.notifyWebhooks,
             override: {
-                gameId: newGameId,
-                score: newScore,
-                comment: newComment || null
+                gameId: draft.gameId,
+                score: draft.score,
+                comment: draft.comment || null
             }
         });
-
-        statusDiv.textContent = "Score validé !";
-        statusDiv.style.color = "#00C851";
-
-        setTimeout(() => document.getElementById(`score-${scoreId}`).remove(), 1000);
+        scoreDrafts.delete(scoreId);
     } catch (e) {
         console.error("Erreur de validation:", e);
-        statusDiv.textContent = "Erreur: " + e.message;
-        statusDiv.style.color = "red";
-        approveBtn.disabled = false;
+        draft.statusMessage = "Erreur: " + e.message;
+        draft.statusColor = "red";
+        restoreScoreCard(draft);
+        scoreDrafts.delete(scoreId);
     }
 };
 
 window.rejectScore = async (scoreId) => {
     if (confirm("Êtes-vous sûr de vouloir supprimer ce score ?")) {
-        const rejectBtn = document.querySelector(`#score-${scoreId} .btn-reject`);
-        const statusDiv = document.getElementById(`status-${scoreId}`);
-        rejectBtn.disabled = true;
+        const draft = captureScoreDraft(scoreId);
+        if (!draft) {
+            return;
+        }
+
+        scoreDrafts.set(scoreId, draft);
+        removeScoreCard(scoreId);
 
         try {
-            statusDiv.textContent = "Suppression en cours...";
-            statusDiv.style.color = "yellow";
-
             await deleteScoreFn({ scoreId: scoreId });
-
-            statusDiv.textContent = "Score supprimé.";
-            statusDiv.style.color = "#00C851";
-            setTimeout(() => document.getElementById(`score-${scoreId}`).remove(), 1000);
+            scoreDrafts.delete(scoreId);
         } catch (e) {
             console.error("Erreur de suppression:", e);
-            statusDiv.textContent = "Erreur: " + e.message;
-            statusDiv.style.color = "red";
-            rejectBtn.disabled = false;
+            draft.statusMessage = "Erreur: " + e.message;
+            draft.statusColor = "red";
+            restoreScoreCard(draft);
+            scoreDrafts.delete(scoreId);
         }
     }
 };

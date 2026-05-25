@@ -1,0 +1,18 @@
+title: Battle Bakraid Unlimited
+developer: Raizing
+year: 1999
+genre: Shooter
+#controls:
+#  - "←↓↑→: Mouvement"
+#  - "Z: "
+#  - "X: "
+#  - "C: "
+#  - "V: "
+
+#to_start: Espace, puis Enter
+#announcement_message: ""
+
+enable_score: true
+hide: yes
+
+added: 2026-05-24

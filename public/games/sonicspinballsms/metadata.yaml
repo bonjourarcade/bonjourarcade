@@ -1,0 +1,18 @@
+title: Sonic Spinball (SMS)
+developer: Sega
+year: 1994
+genre: Pinball
+#controls:
+#  - "←↓↑→: Mouvement"
+#  - "Z: "
+#  - "X: "
+#  - "C: "
+#  - "V: "
+
+#to_start: Espace, puis Enter
+#announcement_message: ""
+
+enable_score: true
+hide: yes
+
+added: 2026-05-24

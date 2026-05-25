@@ -1,0 +1,18 @@
+title: Sonic Labyrinth
+developer: Minato Giken
+year: 1995
+genre: Isometric
+#controls:
+#  - "←↓↑→: Mouvement"
+#  - "Z: "
+#  - "X: "
+#  - "C: "
+#  - "V: "
+
+#to_start: Espace, puis Enter
+#announcement_message: ""
+
+enable_score: true
+hide: yes
+
+added: 2026-05-24

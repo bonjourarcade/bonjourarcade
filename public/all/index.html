@@ -1053,6 +1053,11 @@
             return str.charAt(0).toUpperCase() + str.slice(1);
         }
 
+        function hasRenderableGameId(game) {
+            const gameId = String(game?.id || '').trim();
+            return /[a-z0-9]/i.test(gameId);
+        }
+
         function getDisplayTitle(game) {
             let displayTitle = game.title;
             if (!displayTitle || displayTitle === game.id) {
@@ -2656,7 +2661,9 @@
             .then(res => res.json())
             .then(data => {
                 // Use all games from the simplified structure
-                gamesData = Array.isArray(data.games) ? data.games : [];
+                gamesData = Array.isArray(data.games)
+                    ? data.games.filter(hasRenderableGameId)
+                    : [];
 
                 // Include all games (including those with problems) in /all page
 

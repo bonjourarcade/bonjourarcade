@@ -308,7 +308,7 @@ async function fetchGameData() {
         populateRecentlyPlayedGames(data.games);
 
         // Use all games for grid and randomizer (no need to combine separate arrays)
-        let allGames = data.games;
+        let allGames = data.games.filter(hasRenderableGameId);
 
         // Filter out games with problems for home page search
         let filteredGames = allGames.filter(game => game.problem !== "true");
@@ -1411,6 +1411,11 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+function hasRenderableGameId(game) {
+    const gameId = String(game?.id || '').trim();
+    return /[a-z0-9]/i.test(gameId);
 }
 
 /**

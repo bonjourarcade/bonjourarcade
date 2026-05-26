@@ -1,0 +1,18 @@
+title: Robotron 64
+developer: Player 1
+year: 1998
+genre: Shooter, Action, Platform
+#controls:
+#  - "←↓↑→: Mouvement"
+#  - "Z: "
+#  - "X: "
+#  - "C: "
+#  - "V: "
+
+#to_start: Espace, puis Enter
+#announcement_message: ""
+
+enable_score: true
+hide: yes
+
+added: 2026-05-26

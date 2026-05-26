@@ -2341,6 +2341,7 @@
         // Function to generate shareable URL based on current filters
         function generateShareableUrl() {
             const searchType = document.getElementById('search-type').value;
+            const sortValue = document.getElementById('sort-select').value;
             const urlParams = new URLSearchParams();
 
             if (searchType === 'week') {
@@ -2377,6 +2378,9 @@
 
             // Only return URL if there's a filter to share
             if (urlParams.toString()) {
+                if (sortValue) {
+                    urlParams.set('sort', sortValue);
+                }
                 return window.location.origin + window.location.pathname + '?' + urlParams.toString();
             }
             return null;
@@ -2392,6 +2396,7 @@
                 const urlParams = new URLSearchParams(window.location.search);
                 urlParams.delete('filter');
                 urlParams.delete('value');
+                urlParams.delete('sort');
                 const newUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
                 window.history.replaceState({}, '', newUrl);
             }
@@ -2683,6 +2688,7 @@
                 const urlParams = new URLSearchParams(window.location.search);
                 const filterParam = urlParams.get('filter');
                 const filterValue = urlParams.get('value');
+                const sortParam = urlParams.get('sort');
 
                 if (filterParam) {
                     const searchTypeEl = document.getElementById('search-type');
@@ -2690,6 +2696,12 @@
                     const genreSelect = document.getElementById('genre-select');
                     const developerSelect = document.getElementById('developer-select');
                     const systemSelect = document.getElementById('system-select');
+                    const sortSelect = document.getElementById('sort-select');
+
+                    if (sortParam && Array.from(sortSelect.options).some(option => option.value === sortParam)) {
+                        sortSelect.value = sortParam;
+                        userHasChangedSort = true;
+                    }
 
                     if (filterParam === 'history') {
                         searchTypeEl.value = 'history';

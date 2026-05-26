@@ -56,6 +56,13 @@ get_core_from_dir() {
     esac
 }
 
+is_valid_game_id() {
+    case "$1" in
+        *[A-Za-z0-9]* ) return 0 ;;
+        * ) return 1 ;;
+    esac
+}
+
 # --- Check tools ---
 if ! command -v yq &> /dev/null || ! command -v jq &> /dev/null; then
     echo -e "${RED}Error: 'yq' (pip version) and 'jq' are required.${NC}"
@@ -124,6 +131,14 @@ file_count=0
 # Process each ROM entry (relative path like "NES/Game.nes" or absolute path when scanning)
 while IFS= read -r rom_entry; do
     [ -z "$rom_entry" ] && continue
+
+    # Skip manifest directory markers such as "PSX/" or "SATURN/:"
+    case "$rom_entry" in
+        */|*/:)
+            continue
+            ;;
+    esac
+
     file_count=$((file_count + 1))
 
     # Progress indicator every 50 files
@@ -140,6 +155,10 @@ while IFS= read -r rom_entry; do
         rom_filename=$(basename "$rom_entry")
     fi
     game_id=$(echo "$rom_filename" | sed 's/\.[^.]*$//')
+
+    if [ -z "$rom_filename" ] || ! is_valid_game_id "$game_id"; then
+        continue
+    fi
 
     # Skip non-ROM helper files
     if echo "$rom_filename" | grep -qiE '^(README|upload-files)(\.|$)' ; then

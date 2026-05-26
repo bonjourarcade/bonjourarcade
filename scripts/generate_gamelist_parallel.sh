@@ -74,6 +74,13 @@ get_core_from_dir() {
     esac
 }
 
+is_valid_game_id() {
+    case "$1" in
+        *[A-Za-z0-9]* ) return 0 ;;
+        * ) return 1 ;;
+    esac
+}
+
 # --- Check tools ---
 if ! command -v yq &> /dev/null || ! command -v jq &> /dev/null; then
     echo -e "${RED}Error: 'yq' (pip version) and 'jq' are required.${NC}"
@@ -188,6 +195,13 @@ for i in $(seq 1 $BATCH_WORKERS); do
                 file_count=0
                 while IFS= read -r rom_entry; do
                     [ -z "$rom_entry" ] && continue
+
+                    case "$rom_entry" in
+                        */|*/:)
+                            continue
+                            ;;
+                    esac
+
                     file_count=$((file_count + 1))
                     
                     # Debug output for every 10th file
@@ -207,6 +221,10 @@ for i in $(seq 1 $BATCH_WORKERS); do
                             rom_filename=$(basename "$rom_entry")
                         fi
                         game_id=$(echo "$rom_filename" | sed 's/\.[^.]*$//')
+
+                        if [ -z "$rom_filename" ] || ! is_valid_game_id "$game_id"; then
+                            exit 0
+                        fi
                         
                         # Skip non-ROM helper files (README, upload scripts, and common text/script extensions)
                         if echo "$rom_filename" | grep -qiE '^(README|upload-files)(\.|$)'; then

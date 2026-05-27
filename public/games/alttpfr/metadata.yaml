@@ -3,13 +3,16 @@ developer: Nintendo EAD
 year: 1991
 genre: Action, Adventure
 #controls:
-#  - "←↓↑→: Déplacer"
-#  - "Z: Tirer"
-#  - "X: Bombe"
+  - "←↓↑→: Mouvement"
+  - "Z: Item"
+  - "X: Épée"
+  - "C: Action, ouvrir, etc."
+  - "X: Carte du monde"
+  - "Enter: Inventaire"
 
-#to_start: Select -> Start
+to_start: Enter
 
-announcement_message:
+announcement_message: "Plongez dans le chef-d'œuvre absolu de la Super Nintendo avec l'édition française officielle de The Legend of Zelda: A Link to the Past. Réveillé en pleine nuit de tempête par un appel télépathique de la princesse Zelda, le jeune Link se retrouve embarqué dans une quête légendaire pour sauver le royaume d'Hyrule du sorcier Agahnim et du terrible Ganon. Armé de l'Épée de Légende, voyagez et alternez entre deux dimensions parallèles — le Monde de la Lumière et le Monde des Ténèbres — pour résoudre des énigmes complexes et explorer pas moins de 12 donjons monumentaux. Une aventure fondatrice, entièrement traduite dans la langue de Molière."
 
 hide: yes
 

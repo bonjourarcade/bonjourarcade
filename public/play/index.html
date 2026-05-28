@@ -1298,6 +1298,7 @@
                 gb: 'Game Boy',
                 gba: 'Game Boy Advance',
                 segaMD: 'Sega Genesis/Mega Drive',
+                nds: 'Nintendo DS',
                 segaGG: 'Sega Game Gear',
                 jaguar: 'Atari Jaguar',
                 n64: 'Nintendo 64',
@@ -2115,6 +2116,11 @@
                     if (key.startsWith('EJS_')) {
                         console.log(`${key}=${window[key]}`);
                     }
+                }
+
+                // Keep melonds_touch_mode only on mobile; on desktop, let emulator use its default
+                if (!isMobileDevice() && window.EJS_defaultOptions && window.EJS_defaultOptions.melonds_touch_mode) {
+                    delete window.EJS_defaultOptions.melonds_touch_mode;
                 }
 
                 window.EJS_backgroundImage = `${window.location.protocol}//${window.location.hostname}:${window.location.port}/games/${gameId}/cover.png`; // Set background to game's cover

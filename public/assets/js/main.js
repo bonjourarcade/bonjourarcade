@@ -10,6 +10,7 @@ function getSystemName(core) {
         'gb': 'Game Boy',
         'gba': 'Game Boy Advance',
         'segaMD': 'Sega Genesis/Mega Drive',
+        'nds': 'Nintendo DS',
         'segaGG': 'Sega Game Gear',
         'jaguar': 'Atari Jaguar',
         'n64': 'Nintendo 64',

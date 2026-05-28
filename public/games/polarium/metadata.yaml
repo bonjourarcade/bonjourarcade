@@ -1,7 +1,7 @@
-title: "WarioWare: Touched!"
-developer: Intelligent Systems, Nintendo R&D1
+title: Polarium
+developer: Mitchell Corporation
 year: 2004
-genre: Action
+genre: Puzzle
 #controls:
 #  - "←↓↑→: Mouvement"
 #  - "Z: "
@@ -13,6 +13,5 @@ genre: Action
 #announcement_message: ""
 
 enable_score: true
-hide: yes
 
-added: 2026-05-24
+added: 2026-05-28

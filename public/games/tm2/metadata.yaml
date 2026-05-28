@@ -1,0 +1,17 @@
+title: Twisted Metal 2
+developer: SingleTrac Entertainment Technologies, Sony Interactive Studios America
+year: 1996
+genre: Vehicular combat
+#controls:
+#  - "←↓↑→: Mouvement"
+#  - "Z: "
+#  - "X: "
+#  - "C: "
+#  - "V: "
+
+#to_start: Espace, puis Enter
+#announcement_message: ""
+
+enable_score: true
+
+added: 2026-05-28

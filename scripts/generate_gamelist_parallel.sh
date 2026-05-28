@@ -81,6 +81,24 @@ is_valid_game_id() {
     esac
 }
 
+extract_metadata_fields() {
+    jq -r '[
+        .title // "",
+        .developer // "",
+        .year // "",
+        .genre // "",
+        .recommended // "",
+        .added // "",
+        .hide // "",
+        (.enable_score // true | tostring),
+        .to_start // "",
+        .problem // "",
+        (.controls // null | tojson),
+        (.new // "" | tostring),
+        .announcement_message // ""
+    ] | join("\u001f")' <<< "$1"
+}
+
 # --- Check tools ---
 if ! command -v yq &> /dev/null || ! command -v jq &> /dev/null; then
     echo -e "${RED}Error: 'yq' (pip version) and 'jq' are required.${NC}"
@@ -139,6 +157,8 @@ echo -e "${BLUE}📊 Found $TOTAL_FILES ROM files to process${NC}"
 # Create temporary directory for processing
 TEMP_DIR=$(mktemp -d)
 echo -e "${BLUE}🔧 Created temporary directory: $TEMP_DIR${NC}"
+
+now_epoch=$(date +%s)
 
 # Process ROM files in batches
 echo -e "${BLUE}🚀 Starting batch processing...${NC}"
@@ -213,14 +233,9 @@ for i in $(seq 1 $BATCH_WORKERS); do
                     if ! (
                         # Extract game_id from filename (remove extension)
                         # rom_entry is like "NES/Game.nes" from the manifest
-                        if echo "$rom_entry" | grep -q "/"; then
-                            rom_subdir=$(echo "$rom_entry" | cut -d'/' -f1)
-                            rom_filename=$(echo "$rom_entry" | awk -F'/' '{print $NF}')
-                        else
-                            rom_subdir=$(basename "$(dirname "$rom_entry")")
-                            rom_filename=$(basename "$rom_entry")
-                        fi
-                        game_id=$(echo "$rom_filename" | sed 's/\.[^.]*$//')
+                        rom_subdir=${rom_entry%%/*}
+                        rom_filename=${rom_entry##*/}
+                        game_id=${rom_filename%.*}
 
                         if [ -z "$rom_filename" ] || ! is_valid_game_id "$game_id"; then
                             exit 0
@@ -270,76 +285,20 @@ for i in $(seq 1 $BATCH_WORKERS); do
                         controls_json="null"
 
                         if [ -f "$metadata_file" ]; then
-                            # Try to parse YAML and extract metadata
-                            metadata_json=$(yq '.' "$metadata_file" 2>/dev/null || echo "INVALID_YAML")
-                            if [ "$metadata_json" != "INVALID_YAML" ] && echo "$metadata_json" | jq -e . > /dev/null 2>&1; then
-                                title=$(echo "$metadata_json" | jq -r '.title // ""')
-                                developer=$(echo "$metadata_json" | jq -r '.developer // ""')
-                                year=$(echo "$metadata_json" | jq -r '.year // ""')
-                                genre=$(echo "$metadata_json" | jq -r '.genre // ""')
-                                recommended=$(echo "$metadata_json" | jq -r '.recommended // ""')
-                                added=$(echo "$metadata_json" | jq -r '.added // ""')
-                                hide=$(echo "$metadata_json" | jq -r '.hide // ""')
-                                enable_score=$(echo "$metadata_json" | jq -r '.enable_score // true')
-                                to_start=$(echo "$metadata_json" | jq -r '.to_start // ""')
-                                problem=$(echo "$metadata_json" | jq -r '.problem // ""')
-                                controls_json=$(echo "$metadata_json" | jq -c '.controls // null')
-                                new_flag=$(echo "$metadata_json" | jq -r '.new // empty')
-                                announcement_message=$(echo "$metadata_json" | jq -r '.announcement_message // ""')
-                                
-                                # Check if game is in predictions and should override hide setting
-                                # Check by game_id (not title) since upcoming.yaml uses game_id
-                                if [ -n "$game_id" ]; then
-                                    prediction_result=$(python3 scripts/check_predictions_status.py "$game_id" 2>/dev/null || echo "NOT_IN_PREDICTIONS")
-                                    if [[ "$prediction_result" == SHOW_GAME* ]]; then
-                                        hide="no"
-                                        echo "     🔍 Overriding hide setting for prediction game: $game_id (hide: $hide)" >> "$temp_dir/debug.log"
-                                        
-                                        # Override added date with prediction week date if available
-                                        if [[ "$prediction_result" == *"|"* ]]; then
-                                            prediction_date=$(echo "$prediction_result" | cut -d'|' -f2)
-                                            if [ -n "$prediction_date" ]; then
-                                                added="$prediction_date"
-                                                echo "     📅 Overriding added date for prediction game: $game_id (new date: $added)" >> "$temp_dir/debug.log"
-                                            fi
-                                        fi
-                                    fi
-                                fi
+                            metadata_json=$(yq '.' "$metadata_file" 2>/dev/null || true)
+                            if [ -n "$metadata_json" ] && IFS=$'\x1f' read -r title developer year genre recommended added hide enable_score to_start problem controls_json new_flag announcement_message < <(extract_metadata_fields "$metadata_json"); then
+                                :
                             else
                                 new_flag=""
                             fi
                         else
                             new_flag=""
                         fi
-                        
-                        # Check if game is in predictions and should override hide setting (for games without metadata)
-                        # Check by game_id (not title) since upcoming.yaml uses game_id
-                        if [ -f "$metadata_file" ] && [ -n "$title" ] && [ "$title" != "$game_id" ]; then
-                            # Title was extracted from metadata, already handled above
-                            :
-                        elif [ -n "$game_id" ]; then
-                            # Check if the game_id is in predictions
-                            prediction_result=$(python3 scripts/check_predictions_status.py "$game_id" 2>/dev/null || echo "NOT_IN_PREDICTIONS")
-                            if [[ "$prediction_result" == SHOW_GAME* ]]; then
-                                hide="no"
-                                echo "     🔍 Overriding hide setting for prediction game without metadata: $game_id (hide: $hide)" >> "$temp_dir/debug.log"
-                                
-                                # Override added date with prediction week date if available
-                                if [[ "$prediction_result" == *"|"* ]]; then
-                                    prediction_date=$(echo "$prediction_result" | cut -d'|' -f2)
-                                    if [ -n "$prediction_date" ]; then
-                                        added="$prediction_date"
-                                        echo "     📅 Overriding added date for prediction game without metadata: $game_id (new date: $added)" >> "$temp_dir/debug.log"
-                                    fi
-                                fi
-                            fi
-                        fi
 
                         # Check if the game should be marked as new by date
                         is_new_by_date=""
                         if [ -n "$added" ] && [ "$added" != "DATE_PLACEHOLDER" ]; then
                             added_epoch=$(date -j -f "%Y-%m-%d" "$added" +%s 2>/dev/null || date -d "$added" +%s 2>/dev/null)
-                            now_epoch=$(date +%s)
                             if [ -n "$added_epoch" ]; then
                                 diff_days=$(( (now_epoch - added_epoch) / 86400 ))
                                 # DAYS_NEW is 7 here

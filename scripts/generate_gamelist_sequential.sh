@@ -63,6 +63,24 @@ is_valid_game_id() {
     esac
 }
 
+extract_metadata_fields() {
+    jq -r '[
+        .title // "",
+        .developer // "",
+        .year // "",
+        .genre // "",
+        .recommended // "",
+        .added // "",
+        .hide // "",
+        (.enable_score // true | tostring),
+        .to_start // "",
+        .problem // "",
+        (.controls // null | tojson),
+        (.new // "" | tostring),
+        .announcement_message // ""
+    ] | join("\u001f")' <<< "$1"
+}
+
 # --- Check tools ---
 if ! command -v yq &> /dev/null || ! command -v jq &> /dev/null; then
     echo -e "${RED}Error: 'yq' (pip version) and 'jq' are required.${NC}"
@@ -120,6 +138,8 @@ echo -e "${BLUE}📊 Found $TOTAL_FILES ROM files to process${NC}"
 TEMP_DIR=$(mktemp -d)
 echo -e "${BLUE}🔧 Created temporary directory: $TEMP_DIR${NC}"
 
+now_epoch=$(date +%s)
+
 # Process ROM files sequentially
 echo -e "${BLUE}🚀 Starting sequential processing...${NC}"
 
@@ -147,14 +167,9 @@ while IFS= read -r rom_entry; do
     fi
 
     # Extract game_id from filename (remove extension)
-    if echo "$rom_entry" | grep -q "/"; then
-        rom_subdir=$(echo "$rom_entry" | cut -d'/' -f1)
-        rom_filename=$(echo "$rom_entry" | awk -F'/' '{print $NF}')
-    else
-        rom_subdir=$(basename "$(dirname "$rom_entry")")
-        rom_filename=$(basename "$rom_entry")
-    fi
-    game_id=$(echo "$rom_filename" | sed 's/\.[^.]*$//')
+    rom_subdir=${rom_entry%%/*}
+    rom_filename=${rom_entry##*/}
+    game_id=${rom_filename%.*}
 
     if [ -z "$rom_filename" ] || ! is_valid_game_id "$game_id"; then
         continue
@@ -201,35 +216,9 @@ while IFS= read -r rom_entry; do
     metadata_file="${game_dir}metadata.yaml"
 
     if [ -f "$metadata_file" ]; then
-        metadata_json=$(yq '.' "$metadata_file" 2>/dev/null || echo "INVALID_YAML")
-        if [ "$metadata_json" != "INVALID_YAML" ] && echo "$metadata_json" | jq -e . > /dev/null 2>&1; then
-            title=$(echo "$metadata_json" | jq -r '.title // ""')
-            developer=$(echo "$metadata_json" | jq -r '.developer // ""')
-            year=$(echo "$metadata_json" | jq -r '.year // ""')
-            genre=$(echo "$metadata_json" | jq -r '.genre // ""')
-            recommended=$(echo "$metadata_json" | jq -r '.recommended // ""')
-            added=$(echo "$metadata_json" | jq -r '.added // ""')
-            hide=$(echo "$metadata_json" | jq -r '.hide // ""')
-            enable_score=$(echo "$metadata_json" | jq -r '.enable_score // true')
-            to_start=$(echo "$metadata_json" | jq -r '.to_start // ""')
-            problem=$(echo "$metadata_json" | jq -r '.problem // ""')
-            controls_json=$(echo "$metadata_json" | jq -c '.controls // null')
-            new_flag=$(echo "$metadata_json" | jq -r '.new // empty')
-            announcement_message=$(echo "$metadata_json" | jq -r '.announcement_message // ""')
-        fi
-    fi
-
-    # Check predictions to override hide status or added date
-    if [ -n "$game_id" ]; then
-        prediction_result=$(python3 scripts/check_predictions_status.py "$game_id" 2>/dev/null || echo "NOT_IN_PREDICTIONS")
-        if [[ "$prediction_result" == SHOW_GAME* ]]; then
-            hide="no"
-            if [[ "$prediction_result" == *"|"* ]]; then
-                prediction_date=$(echo "$prediction_result" | cut -d'|' -f2)
-                if [ -n "$prediction_date" ]; then
-                    added="$prediction_date"
-                fi
-            fi
+        metadata_json=$(yq '.' "$metadata_file" 2>/dev/null || true)
+        if [ -n "$metadata_json" ] && IFS=$'\x1f' read -r title developer year genre recommended added hide enable_score to_start problem controls_json new_flag announcement_message < <(extract_metadata_fields "$metadata_json"); then
+            :
         fi
     fi
 
@@ -237,7 +226,6 @@ while IFS= read -r rom_entry; do
     is_new_by_date=""
     if [ -n "$added" ] && [ "$added" != "DATE_PLACEHOLDER" ]; then
         added_epoch=$(date -j -f "%Y-%m-%d" "$added" +%s 2>/dev/null || date -d "$added" +%s 2>/dev/null)
-        now_epoch=$(date +%s)
         if [ -n "$added_epoch" ]; then
             diff_days=$(( (now_epoch - added_epoch) / 86400 ))
             if [ "$diff_days" -lt 7 ]; then

@@ -2,7 +2,7 @@ title: "The Legend of Zelda: A Link to the Past (FR)"
 developer: Nintendo EAD
 year: 1991
 genre: Action, Adventure
-#controls:
+controls:
   - "←↓↑→: Mouvement"
   - "Z: Item"
   - "X: Épée"

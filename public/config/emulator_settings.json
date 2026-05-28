@@ -12,6 +12,7 @@
   "EJS_alignStartButton": "bottom",
   "EJS_startOnLoaded": true,
   "EJS_biosByCore": {
+    "pce": "https://storage.googleapis.com/bonjourarcade/roms/bios/syscard3.pce",
     "psx": "https://storage.googleapis.com/bonjourarcade/roms/bios/scph5501.bin",
     "nds": "https://storage.googleapis.com/bonjourarcade/roms/bios/ndsbios.zip",
     "segaSaturn": "https://storage.googleapis.com/bonjourarcade/roms/bios/saturn_bios.bin"

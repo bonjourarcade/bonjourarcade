@@ -18,11 +18,10 @@
     "nds": "https://storage.googleapis.com/bonjourarcade/roms/bios/ndsbios.zip",
     "segaSaturn": "https://storage.googleapis.com/bonjourarcade/roms/bios/saturn_bios.bin"
   },
-  "EJS_pathtodata": "/data/",
+  "EJS_pathtodata": "https://cdn.emulatorjs.org/stable/data/",
   "EJS_AdUrl": "/ads",
   "EJS_AdTimer": 4000,
   "EJS_AdSize": ["400px", "262px"],
   "EJS_AdMode": 0,
-  "EJS_DEBUG_XX": true,
   "BA_disableSaveStatesForFeaturedGame": false
 }

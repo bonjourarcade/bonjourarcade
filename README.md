@@ -1,7 +1,8 @@
-# BonjourArcade
+# https://bonjourarcade.com
 
 Merci de jouer ! :)
 
+Venez rejoindre notre communauté Discord: https://discord.com/invite/2E48gr5BNJ
 
 # If this little project brought you joy, please support it!
 

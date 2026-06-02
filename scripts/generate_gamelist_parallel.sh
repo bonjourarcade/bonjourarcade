@@ -65,6 +65,7 @@ get_core_from_dir() {
         PCENGINE|PCENGINECD) echo "pce" ;;
         PSX) echo "psx" ;;
         SATURN) echo "segaSaturn" ;;
+        SEGACD) echo "segaCD" ;;
         S32X) echo "sega32x" ;;
         SMS) echo "segaMS" ;;
         SNES) echo "snes" ;;

@@ -1,0 +1,17 @@
+title: Battletoads (JP)
+developer: Rare
+year: 1991
+genre: Beat 'em up, platform
+#controls:
+#  - "←↓↑→: Mouvement"
+#  - "Z: "
+#  - "X: "
+#  - "C: "
+#  - "V: "
+
+#to_start: Espace, puis Enter
+#announcement_message: ""
+
+enable_score: true
+
+added: 2026-06-03

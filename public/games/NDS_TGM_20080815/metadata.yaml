@@ -11,8 +11,8 @@ genre:
 
 #to_start: Espace, puis Enter
 #announcement_message: ""
-#problem: true
+problem: true
 
 enable_score: true
 
-added: DATE_PLACEHOLDER
+added: 2026-06-03

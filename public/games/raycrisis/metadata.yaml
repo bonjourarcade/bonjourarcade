@@ -1,0 +1,17 @@
+title: "RayCrisis: Series Termination"
+developer: Taito
+year: 2000
+genre: Shooter
+#controls:
+#  - "←↓↑→: Mouvement"
+#  - "Z: "
+#  - "X: "
+#  - "C: "
+#  - "V: "
+
+#to_start: Espace, puis Enter
+#announcement_message: ""
+
+enable_score: true
+
+added: 2026-06-03

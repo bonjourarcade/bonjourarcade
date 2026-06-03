@@ -1,0 +1,17 @@
+title: "Eternal Champions: Challenge from the Dark Side"
+developer: SEGA Interactive
+year: 1995
+genre: Fighting
+#controls:
+#  - "←↓↑→: Mouvement"
+#  - "Z: "
+#  - "X: "
+#  - "C: "
+#  - "V: "
+
+#to_start: Espace, puis Enter
+#announcement_message: ""
+
+enable_score: true
+
+added: 2026-06-03

@@ -1,0 +1,17 @@
+title: Snatcher
+developer: Konami
+year: 1994
+genre: Visual Novel
+#controls:
+#  - "←↓↑→: Mouvement"
+#  - "Z: "
+#  - "X: "
+#  - "C: "
+#  - "V: "
+
+#to_start: Espace, puis Enter
+#announcement_message: ""
+
+enable_score: true
+
+added: 2026-06-03

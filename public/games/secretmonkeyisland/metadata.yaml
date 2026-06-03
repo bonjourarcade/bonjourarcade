@@ -1,0 +1,17 @@
+title: The Secret of Monkey Island
+developer: Lucasfilm Games
+year: 1993
+genre: Point and click
+#controls:
+#  - "←↓↑→: Mouvement"
+#  - "Z: "
+#  - "X: "
+#  - "C: "
+#  - "V: "
+
+#to_start: Espace, puis Enter
+#announcement_message: ""
+
+enable_score: true
+
+added: 2026-06-03

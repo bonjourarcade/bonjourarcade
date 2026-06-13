@@ -2,12 +2,14 @@ title: Borench
 developer: Sega
 year: 1990
 genre: Puzzle
-#controls:
-#  - "←↓↑→: Déplacer"
-#  - "Z: Tirer"
-#  - "X: Bombe"
+controls:
+  - "←↓↑→: Déplacer tuile "
+  - "Z: Déposer tuile"
+  - "X: Accélérer bille"
 
-#to_start: Select -> Start
+to_start: Espace -> Enter
+
+announcement_message: "Borench est un jeu de casse-tête où le joueur doit guider une balle roulante jusqu'au but."
 
 hide: yes
 enable_score: true

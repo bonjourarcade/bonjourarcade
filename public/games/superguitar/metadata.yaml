@@ -1,0 +1,18 @@
+title: Super Guitar Hero
+developer: RheoGamer, RDiggoSilva, paulovpl
+year: 2026
+genre: Rhythm
+#controls:
+#  - "←↓↑→: Mouvement"
+#  - "Z: "
+#  - "X: "
+#  - "C: "
+#  - "V: "
+
+#to_start: Espace, puis Enter
+#announcement_message: ""
+#problem: true
+
+enable_score: true
+
+added: 2026-06-24

@@ -1,0 +1,18 @@
+title: "EarthBound: Giygas Strikes Back!"
+developer: PK Hack
+year: 2026
+genre: Role-Playing
+#controls:
+#  - "←↓↑→: Mouvement"
+#  - "Z: "
+#  - "X: "
+#  - "C: "
+#  - "V: "
+
+#to_start: Espace, puis Enter
+#announcement_message: ""
+#problem: true
+
+enable_score: true
+
+added: 2026-06-24

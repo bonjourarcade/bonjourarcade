@@ -1,0 +1,18 @@
+title: "Mother: 25th Anniversary Edition"
+developer: Ape Inc, Nintendo Tokyo R&D Products, DragonDePlatino
+year: 1989, 2014
+genre: Role-Playing
+#controls:
+#  - "←↓↑→: Mouvement"
+#  - "Z: "
+#  - "X: "
+#  - "C: "
+#  - "V: "
+
+#to_start: Espace, puis Enter
+#announcement_message: ""
+#problem: true
+
+enable_score: true
+
+added: 2026-06-24

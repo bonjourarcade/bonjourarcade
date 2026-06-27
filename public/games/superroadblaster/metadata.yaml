@@ -1,0 +1,18 @@
+title: Super Road Blaster
+developer: d4s
+year: 2012
+genre: Interactive movie, vehicular combat
+#controls:
+#  - "←↓↑→: Mouvement"
+#  - "Z: "
+#  - "X: "
+#  - "C: "
+#  - "V: "
+
+#to_start: Espace, puis Enter
+#announcement_message: ""
+#problem: true
+
+enable_score: true
+
+added: 2026-06-26

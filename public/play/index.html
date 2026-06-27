@@ -300,23 +300,59 @@
 
         #leaderboard-submit-qr {
             display: none;
-            align-items: center;
             flex-direction: column;
-            gap: 6px;
             margin: 0 0 10px;
-            padding: 8px;
             border-radius: 8px;
             background: #000;
             border: 1px solid rgba(255, 255, 255, 0.14);
             flex-shrink: 0;
+            overflow: hidden;
         }
 
-        #leaderboard-submit-qr-label {
-            color: rgba(255, 255, 255, 0.76);
+        #leaderboard-qr-toggle-handle {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 8px;
+            cursor: pointer;
             font-size: 10px;
-            letter-spacing: 0.02em;
-            text-align: center;
+            color: rgba(255, 255, 255, 0.6);
             text-transform: uppercase;
+            letter-spacing: 0.03em;
+            user-select: none;
+            transition: color 0.15s, background 0.15s;
+        }
+
+        #leaderboard-qr-toggle-handle:hover {
+            color: #ffd700;
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .qr-toggle-arrow {
+            display: inline-block;
+            transition: transform 0.3s ease;
+            font-size: 8px;
+        }
+
+        #leaderboard-submit-qr.collapsed .qr-toggle-arrow {
+            transform: rotate(-90deg);
+        }
+
+        #leaderboard-submit-qr.collapsed #leaderboard-qr-inner {
+            max-height: 0;
+            opacity: 0;
+            padding: 0;
+            margin: 0;
+        }
+
+        #leaderboard-qr-inner {
+            overflow: hidden;
+            max-height: 130px;
+            transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease, margin 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0 8px 8px;
         }
 
         #leaderboard-submit-qr-code {
@@ -1267,31 +1303,6 @@
             }
         }
 
-        /* QR close button */
-        #leaderboard-submit-qr-close {
-            position: absolute;
-            top: 2px;
-            right: 4px;
-            background: none;
-            border: none;
-            color: rgba(255, 255, 255, 0.35);
-            font-size: 14px;
-            cursor: pointer;
-            padding: 2px 4px;
-            line-height: 1;
-            border-radius: 3px;
-            transition: color 0.15s, background 0.15s;
-        }
-
-        #leaderboard-submit-qr-close:hover {
-            color: #fff;
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        #leaderboard-submit-qr {
-            position: relative;
-        }
-
         #leaderboard-close {
             position: absolute;
             top: 4px;
@@ -1420,9 +1431,13 @@
             <div class="leaderboard-loading">Chargement...</div>
         </div>
         <div id="leaderboard-submit-qr" aria-label="QR code pour soumettre un score depuis un autre appareil">
-            <div id="leaderboard-submit-qr-label">Soumettre via mobile</div>
-            <div id="leaderboard-submit-qr-code"></div>
-            <button id="leaderboard-submit-qr-close" title="Fermer" aria-label="Fermer">×</button>
+            <div id="leaderboard-qr-toggle-handle" title="Afficher/Mascher le QR code">
+                <span class="qr-toggle-arrow">▼</span>
+                <span>Soumettre via mobile</span>
+            </div>
+            <div id="leaderboard-qr-inner">
+                <div id="leaderboard-submit-qr-code"></div>
+            </div>
         </div>
     </div>
     <div id="leaderboard-comment-tooltip" aria-hidden="true"></div>
@@ -1691,7 +1706,7 @@
 
             qrContainer.style.display = 'flex';
             qrContainer.onclick = function (event) {
-                if (event.target.closest('#leaderboard-submit-qr-close')) {
+                if (event.target.closest('#leaderboard-qr-toggle-handle')) {
                     return;
                 }
                 event.stopPropagation();
@@ -4486,14 +4501,14 @@
             }
         });
 
-        // QR close button
+        // QR toggle drawer
         document.addEventListener('DOMContentLoaded', function () {
-            const qrCloseBtn = document.getElementById('leaderboard-submit-qr-close');
-            const qrContainer = document.getElementById('leaderboard-submit-qr');
-            if (qrCloseBtn && qrContainer) {
-                qrCloseBtn.addEventListener('click', function (e) {
+            const qrToggle = document.getElementById('leaderboard-qr-toggle-handle');
+            const qrSection = document.getElementById('leaderboard-submit-qr');
+            if (qrToggle && qrSection) {
+                qrToggle.addEventListener('click', function (e) {
                     e.stopPropagation();
-                    qrContainer.style.display = 'none';
+                    qrSection.classList.toggle('collapsed');
                 });
             }
         });

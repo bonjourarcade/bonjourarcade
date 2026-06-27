@@ -2366,27 +2366,10 @@
                 if (!ratingSection || !ratingBar) return;
 
                 try {
-                    let data;
-                    const isLocalhost = window.location.hostname === 'localhost' ||
-                        window.location.hostname === '127.0.0.1' ||
-                        window.location.hostname.includes('localhost') ||
-                        window.location.hostname.startsWith('192.168.');
-
-                    if (isLocalhost) {
-                        if (typeof window.getGameRatings !== 'function') {
-                            throw new Error('window.getGameRatings not available');
-                        }
-                        data = await window.getGameRatings(gameId);
-                    } else {
-                        const response = await fetch('https://us-central1-alloarcade.cloudfunctions.net/getGameRatings', {
-                            method: 'POST',
-                            headers: { 'content-type': 'application/json' },
-                            body: JSON.stringify({ data: { gameId } })
-                        });
-                        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                        data = await response.json();
-                        data = data.result;
+                    if (typeof window.getGameRatings !== 'function') {
+                        throw new Error('window.getGameRatings not available');
                     }
+                    const data = await window.getGameRatings(gameId);
 
                     if (!data) throw new Error('Invalid rating data');
 

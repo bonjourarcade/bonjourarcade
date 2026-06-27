@@ -1292,6 +1292,27 @@
         #leaderboard-submit-qr {
             position: relative;
         }
+
+        #leaderboard-close {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: rgba(255, 255, 255, 0.08);
+            border: none;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 16px;
+            cursor: pointer;
+            padding: 2px 6px;
+            line-height: 1.2;
+            border-radius: 4px;
+            transition: color 0.15s, background 0.15s;
+            z-index: 1;
+        }
+
+        #leaderboard-close:hover {
+            color: #fff;
+            background: rgba(255, 68, 68, 0.5);
+        }
     </style>
     <script src="../assets/js/analytics.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
@@ -1371,6 +1392,7 @@
 
     <!-- Leaderboard Container -->
     <div id="leaderboard-container">
+        <button id="leaderboard-close" title="Fermer le panneau" aria-label="Fermer">×</button>
         <div id="rating-section">
             <div id="rating-header">
                 <span>Note du jeu</span>
@@ -1635,6 +1657,14 @@
         // Function to detect if the device is mobile
         function isMobileDevice() {
             return /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+
+        function isLeaderboardClosed(gameId) {
+            try {
+                return localStorage.getItem('leaderboard_closed_' + gameId) === '1';
+            } catch (ex) {
+                return false;
+            }
         }
 
         function setupLeaderboardSubmitQrCode(gameId, gameDetails) {
@@ -2010,7 +2040,9 @@
                             leaderboardContent.innerHTML = '<div class="leaderboard-loading">Aucun score trouvé</div>';
                         }
                         if (!isMobileDevice()) {
-                            leaderboardContainer.style.display = 'flex';
+                            if (!isLeaderboardClosed(gameId)) {
+                                leaderboardContainer.style.display = 'flex';
+                            }
                         }
                         return;
                     }
@@ -2078,7 +2110,9 @@
 
                     // Show leaderboard container on desktop, popup on mobile (but not in screensaver mode)
                     if (!isMobileDevice()) {
-                        leaderboardContainer.style.display = 'flex';
+                        if (!isLeaderboardClosed(gameId)) {
+                            leaderboardContainer.style.display = 'flex';
+                        }
                     }
 
                     else {
@@ -2153,7 +2187,9 @@
 
                         // Show leaderboard container even with cached data
                         if (!isMobileDevice()) {
-                            leaderboardContainer.style.display = 'flex';
+                            if (!isLeaderboardClosed(gameId)) {
+                                leaderboardContainer.style.display = 'flex';
+                            }
                         }
                     }
 
@@ -4425,6 +4461,24 @@
                         mobileLoginBtn.textContent = 'Connexion avec Google';
                         mobileLoginBtn.disabled = false;
                     }
+                });
+            }
+        });
+
+        // Leaderboard close button
+        document.addEventListener('DOMContentLoaded', function () {
+            const closeBtn = document.getElementById('leaderboard-close');
+            const container = document.getElementById('leaderboard-container');
+            if (closeBtn && container) {
+                closeBtn.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    const gameId = getCurrentGameId();
+                    if (gameId) {
+                        try {
+                            localStorage.setItem('leaderboard_closed_' + gameId, '1');
+                        } catch (ex) {}
+                    }
+                    container.style.display = 'none';
                 });
             }
         });

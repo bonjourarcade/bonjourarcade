@@ -954,6 +954,344 @@
             transform: scale(1.02);
             border-color: #ffd700 !important;
         }
+
+        /* Rating section in sidebar */
+        #rating-section {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+            padding: 4px 4px 8px;
+            margin-bottom: 4px;
+            flex-shrink: 0;
+        }
+
+        #rating-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 6px;
+        }
+
+        #rating-header span:first-child {
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        #rating-average {
+            color: #ffd700;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        #rating-count {
+            color: rgba(255, 255, 255, 0.45);
+            font-size: 10px;
+        }
+
+        /* Rating bar */
+        #rating-bar-container {
+            margin-bottom: 6px;
+        }
+
+        #rating-bar {
+            display: flex;
+            height: 10px;
+            border-radius: 5px;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .rating-bar-segment {
+            height: 100%;
+            transition: flex 0.4s ease;
+            min-width: 2px;
+            position: relative;
+        }
+
+        .rating-bar-segment:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 1px;
+            bottom: 1px;
+            width: 1px;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        #rating-bar-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 9px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 2px;
+            padding: 0 1px;
+        }
+
+        /* Thumb buttons */
+        #rating-thumbs {
+            display: flex;
+            gap: 3px;
+            justify-content: center;
+        }
+
+        .rating-thumb {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 6px;
+            padding: 4px 2px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            color: rgba(255, 255, 255, 0.5);
+            line-height: 1;
+        }
+
+        .rating-thumb:hover {
+            background: rgba(255, 255, 255, 0.14);
+            border-color: rgba(255, 255, 255, 0.3);
+            color: #fff;
+        }
+
+        .rating-thumb:active {
+            transform: scale(0.92);
+        }
+
+        .rating-thumb.active {
+            border-color: #ffd700;
+            color: #ffd700;
+            background: rgba(255, 215, 0, 0.12);
+            box-shadow: 0 0 6px rgba(255, 215, 0, 0.2);
+        }
+
+        #rating-login-prompt {
+            text-align: center;
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.4);
+            margin-top: 4px;
+            cursor: pointer;
+            display: none;
+        }
+
+        #rating-login-prompt:hover {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Rating button in header */
+        #rating-button {
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 8px 12px !important;
+            border-radius: 8px;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            gap: 6px;
+            font-family: sans-serif;
+            font-size: 12px !important;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: background-color 0.2s;
+            margin: 0 !important;
+            backdrop-filter: blur(10px);
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        #rating-button:hover {
+            background-color: rgba(0, 0, 0, 0.9);
+        }
+
+        #rating-button:active {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Mobile rating popup */
+        #mobile-rating-popup {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 3000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        #mobile-rating-content {
+            background-color: #1a1a1a;
+            border-radius: 12px;
+            padding: 24px 20px 20px;
+            max-width: 320px;
+            width: 100%;
+            position: relative;
+            border: 2px solid #333;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            text-align: center;
+        }
+
+        #mobile-rating-close {
+            position: absolute;
+            top: 10px;
+            right: 12px;
+            background: #ff4444;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        #mobile-rating-content h3 {
+            margin: 0 0 16px;
+            font-size: 18px;
+            color: #ffd700;
+        }
+
+        #mobile-rating-average-display {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        #mobile-rating-average {
+            font-size: 32px;
+            font-weight: bold;
+            color: #ffd700;
+        }
+
+        #mobile-rating-count {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.45);
+        }
+
+        #mobile-rating-bar-container {
+            margin-bottom: 16px;
+        }
+
+        #mobile-rating-bar {
+            display: flex;
+            height: 14px;
+            border-radius: 7px;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        #mobile-rating-bar-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 3px;
+            padding: 0 1px;
+        }
+
+        #mobile-rating-thumbs {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .mobile-rating-thumb {
+            flex: 1;
+            max-width: 60px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 8px;
+            padding: 8px 4px;
+            font-size: 22px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            color: rgba(255, 255, 255, 0.4);
+            line-height: 1;
+        }
+
+        .mobile-rating-thumb:hover {
+            background: rgba(255, 255, 255, 0.14);
+            border-color: rgba(255, 255, 255, 0.3);
+            color: #fff;
+        }
+
+        .mobile-rating-thumb:active {
+            transform: scale(0.92);
+        }
+
+        .mobile-rating-thumb.active {
+            border-color: #ffd700;
+            color: #ffd700;
+            background: rgba(255, 215, 0, 0.12);
+            box-shadow: 0 0 8px rgba(255, 215, 0, 0.25);
+        }
+
+        #mobile-rating-login-prompt {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 12px;
+        }
+
+        #mobile-rating-login-btn {
+            background: #4285F4;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+            width: 100%;
+            display: none;
+        }
+
+        /* Mobile: show rating button in header, adjust layout */
+        @media (max-width: 768px) {
+            #rating-button {
+                display: flex !important;
+                padding: 6px 8px !important;
+                font-size: 11px !important;
+                gap: 4px;
+            }
+
+            #rating-button span:last-child {
+                display: none;
+            }
+        }
+
+        /* QR close button */
+        #leaderboard-submit-qr-close {
+            position: absolute;
+            top: 2px;
+            right: 4px;
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.35);
+            font-size: 14px;
+            cursor: pointer;
+            padding: 2px 4px;
+            line-height: 1;
+            border-radius: 3px;
+            transition: color 0.15s, background 0.15s;
+        }
+
+        #leaderboard-submit-qr-close:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        #leaderboard-submit-qr {
+            position: relative;
+        }
     </style>
     <script src="../assets/js/analytics.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
@@ -984,6 +1322,10 @@
             <button id="leaderboard-button" title="Raccourci clavier : F1">
                 <span>🏆</span>
                 <span>Soumettre Score (F1)</span>
+            </button>
+            <button id="rating-button" title="Noter ce jeu">
+                <span>⭐</span>
+                <span>Noter</span>
             </button>
         </div>
     </header>
@@ -1029,13 +1371,37 @@
 
     <!-- Leaderboard Container -->
     <div id="leaderboard-container">
+        <div id="rating-section">
+            <div id="rating-header">
+                <span>Note du jeu</span>
+                <span id="rating-average">-</span>
+                <span id="rating-count"></span>
+            </div>
+            <div id="rating-bar-container">
+                <div id="rating-bar"></div>
+                <div id="rating-bar-labels">
+                    <span data-rating="-2">-2</span>
+                    <span data-rating="-1">-1</span>
+                    <span data-rating="1">1</span>
+                    <span data-rating="2">2</span>
+                </div>
+            </div>
+            <div id="rating-thumbs">
+                <button class="rating-thumb" data-rating="-2" title="Je n'aime pas du tout">👎👎</button>
+                <button class="rating-thumb" data-rating="-1" title="Je n'aime pas">👎</button>
+                <button class="rating-thumb" data-rating="1" title="J'aime">👍</button>
+                <button class="rating-thumb" data-rating="2" title="J'adore">👍👍</button>
+            </div>
+            <div id="rating-login-prompt">Connecte-toi pour noter</div>
+        </div>
         <h3>🏆 Meilleurs Scores</h3>
+        <div id="leaderboard-content">
+            <div class="leaderboard-loading">Chargement...</div>
+        </div>
         <div id="leaderboard-submit-qr" aria-label="QR code pour soumettre un score depuis un autre appareil">
             <div id="leaderboard-submit-qr-label">Soumettre via mobile</div>
             <div id="leaderboard-submit-qr-code"></div>
-        </div>
-        <div id="leaderboard-content">
-            <div class="leaderboard-loading">Chargement...</div>
+            <button id="leaderboard-submit-qr-close" title="Fermer" aria-label="Fermer">×</button>
         </div>
     </div>
     <div id="leaderboard-comment-tooltip" aria-hidden="true"></div>
@@ -1049,6 +1415,35 @@
                 <div class="leaderboard-loading">Chargement...</div>
             </div>
             <div id="mobile-comment-preview"></div>
+        </div>
+    </div>
+
+    <!-- Mobile Rating Popup -->
+    <div id="mobile-rating-popup">
+        <div id="mobile-rating-content">
+            <button id="mobile-rating-close">×</button>
+            <h3>⭐ Note du jeu</h3>
+            <div id="mobile-rating-average-display">
+                <span id="mobile-rating-average">-</span>
+                <span id="mobile-rating-count"></span>
+            </div>
+            <div id="mobile-rating-bar-container">
+                <div id="mobile-rating-bar"></div>
+                <div id="mobile-rating-bar-labels">
+                    <span data-rating="-2">-2</span>
+                    <span data-rating="-1">-1</span>
+                    <span data-rating="1">1</span>
+                    <span data-rating="2">2</span>
+                </div>
+            </div>
+            <div id="mobile-rating-thumbs">
+                <button class="mobile-rating-thumb" data-rating="-2" title="Je n'aime pas du tout">👎👎</button>
+                <button class="mobile-rating-thumb" data-rating="-1" title="Je n'aime pas">👎</button>
+                <button class="mobile-rating-thumb" data-rating="1" title="J'aime">👍</button>
+                <button class="mobile-rating-thumb" data-rating="2" title="J'adore">👍👍</button>
+            </div>
+            <div id="mobile-rating-login-prompt">Connecte-toi pour noter</div>
+            <button id="mobile-rating-login-btn" style="display:none;">Connexion avec Google</button>
         </div>
     </div>
 
@@ -1253,6 +1648,16 @@
                 return;
             }
 
+            // Check if QR was previously closed for this game
+            if (!gameDetails) {
+                try {
+                    if (localStorage.getItem('qr_closed_' + gameId) === '1') {
+                        qrContainer.style.display = 'none';
+                        return;
+                    }
+                } catch (ex) {}
+            }
+
             const submitUrl = new URL('/submit', window.location.origin);
             submitUrl.searchParams.set('game', gameId);
             if (gameDetails && gameDetails.title) {
@@ -1271,6 +1676,9 @@
 
             qrContainer.style.display = 'flex';
             qrContainer.onclick = function (event) {
+                if (event.target.closest('#leaderboard-submit-qr-close')) {
+                    return;
+                }
                 event.stopPropagation();
                 window.open(submitUrl.toString(), '_blank');
             };
@@ -1839,10 +2247,121 @@
             // Fetch leaderboard data
             fetchLeaderboard(gameId);
 
-            // Set up periodic refresh of leaderboard every 2 minutes
+            // Fetch game ratings
+            window.fetchGameRatings = async function fetchGameRatings(gameId, isRefresh = false) {
+                const ratingSection = document.getElementById('rating-section');
+                const ratingBar = document.getElementById('rating-bar');
+                const ratingAverage = document.getElementById('rating-average');
+                const ratingCount = document.getElementById('rating-count');
+                const loginPrompt = document.getElementById('rating-login-prompt');
+                const mobileRatingBar = document.getElementById('mobile-rating-bar');
+                const mobileRatingAverage = document.getElementById('mobile-rating-average');
+                const mobileRatingCount = document.getElementById('mobile-rating-count');
+
+                if (!ratingSection || !ratingBar) return;
+
+                try {
+                    let data;
+                    const isLocalhost = window.location.hostname === 'localhost' ||
+                        window.location.hostname === '127.0.0.1' ||
+                        window.location.hostname.includes('localhost') ||
+                        window.location.hostname.startsWith('192.168.');
+
+                    if (isLocalhost) {
+                        if (typeof window.getGameRatings !== 'function') {
+                            throw new Error('window.getGameRatings not available');
+                        }
+                        data = await window.getGameRatings(gameId);
+                    } else {
+                        const response = await fetch('https://us-central1-alloarcade.cloudfunctions.net/getGameRatings', {
+                            method: 'POST',
+                            headers: { 'content-type': 'application/json' },
+                            body: JSON.stringify({ data: { gameId } })
+                        });
+                        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                        data = await response.json();
+                        data = data.result;
+                    }
+
+                    if (!data) throw new Error('Invalid rating data');
+
+                    const { average, count, distribution, userRating } = data;
+                    const ratings = [-2, -1, 1, 2];
+                    const total = count || 0;
+                    const avgDisplay = total > 0 ? average.toFixed(1) : '-';
+                    const countDisplay = total > 0 ? `(${total})` : '';
+
+                    function renderBar(barEl) {
+                        barEl.innerHTML = '';
+                        if (total === 0) {
+                            ratings.forEach(r => {
+                                const seg = document.createElement('div');
+                                seg.className = 'rating-bar-segment';
+                                seg.style.flex = '1';
+                                seg.style.background = 'rgba(255,255,255,0.06)';
+                                barEl.appendChild(seg);
+                            });
+                            return;
+                        }
+                        ratings.forEach(r => {
+                            const seg = document.createElement('div');
+                            seg.className = 'rating-bar-segment';
+                            const key = String(r);
+                            const frac = (distribution[key] || 0) / total;
+                            seg.style.flex = String(Math.max(frac, 0.02));
+                            const t = (r + 2) / 4;
+                            const r1 = Math.round(255 * (1 - t));
+                            const g1 = Math.round(255 * t);
+                            seg.style.background = `rgb(${r1}, ${g1}, 60)`;
+                            barEl.appendChild(seg);
+                        });
+                    }
+
+                    renderBar(ratingBar);
+                    if (ratingAverage) ratingAverage.textContent = avgDisplay;
+                    if (ratingCount) ratingCount.textContent = countDisplay;
+
+                    if (mobileRatingBar) renderBar(mobileRatingBar);
+                    if (mobileRatingAverage) mobileRatingAverage.textContent = avgDisplay;
+                    if (mobileRatingCount) mobileRatingCount.textContent = countDisplay;
+
+                    // Update active state on thumb buttons
+                    document.querySelectorAll('.rating-thumb').forEach(btn => {
+                        const r = parseInt(btn.dataset.rating);
+                        btn.classList.toggle('active', r === userRating);
+                    });
+                    document.querySelectorAll('.mobile-rating-thumb').forEach(btn => {
+                        const r = parseInt(btn.dataset.rating);
+                        btn.classList.toggle('active', r === userRating);
+                    });
+
+                    // Show/hide login prompt
+                    const isLoggedIn = window.firebaseAuth && window.firebaseAuth.currentUser;
+                    if (loginPrompt) {
+                        loginPrompt.style.display = isLoggedIn ? 'none' : 'block';
+                    }
+                    const mobileLoginPrompt = document.getElementById('mobile-rating-login-prompt');
+                    if (mobileLoginPrompt) {
+                        mobileLoginPrompt.style.display = isLoggedIn ? 'none' : 'block';
+                    }
+                    const mobileLoginBtn = document.getElementById('mobile-rating-login-btn');
+                    if (mobileLoginBtn) {
+                        mobileLoginBtn.style.display = isLoggedIn ? 'none' : 'block';
+                    }
+
+                } catch (error) {
+                    console.error('Error fetching ratings:', error);
+                }
+            }
+
+            // Fetch ratings on load
+            fetchGameRatings(gameId);
+
+            // Set up periodic refresh of leaderboard and ratings every 2 minutes
             const scoreRefreshInterval = setInterval(() => {
                 console.log('Refreshing leaderboard scores (2-minute interval)');
-                fetchLeaderboard(gameId, true); // Pass isRefresh=true for silent refresh
+                fetchLeaderboard(gameId, true);
+                fetchGameRatings(gameId, true);
             }
 
                 , 120000); // 2 minutes = 120,000 milliseconds
@@ -3796,6 +4315,135 @@
                 desktopLeaderboardContent.addEventListener('mouseleave', hideDesktopCommentTooltip);
                 window.addEventListener('resize', hideDesktopCommentTooltip);
                 window.addEventListener('scroll', hideDesktopCommentTooltip, true);
+            }
+        });
+
+        // Rating thumb click handlers
+        function handleRatingClick(rating, event) {
+            event.stopPropagation();
+            const gameId = getCurrentGameId();
+            if (!gameId) return;
+
+            const isLoggedIn = window.firebaseAuth && window.firebaseAuth.currentUser;
+            if (!isLoggedIn) {
+                // Trigger Google sign-in
+                if (window.signInWithGoogle) {
+                    window.signInWithGoogle().then(() => {
+                        // After login, submit the rating
+                        if (window.rateGame) {
+                            window.rateGame(gameId, rating).then(() => {
+                                const gameId2 = getCurrentGameId();
+                                if (gameId2 && window.fetchGameRatings) {
+                                    window.fetchGameRatings(gameId2);
+                                }
+                            });
+                        }
+                    }).catch(() => {});
+                }
+                return;
+            }
+
+            if (window.rateGame) {
+                window.rateGame(gameId, rating).then(() => {
+                    const gameId2 = getCurrentGameId();
+                    if (gameId2 && window.fetchGameRatings) {
+                        window.fetchGameRatings(gameId2);
+                    }
+                }).catch((err) => {
+                    console.error('Rating error:', err);
+                });
+            }
+        }
+
+        document.querySelectorAll('.rating-thumb').forEach(btn => {
+            btn.addEventListener('click', function (e) {
+                const rating = parseInt(this.dataset.rating);
+                handleRatingClick(rating, e);
+            });
+        });
+
+        document.querySelectorAll('.mobile-rating-thumb').forEach(btn => {
+            btn.addEventListener('click', function (e) {
+                const rating = parseInt(this.dataset.rating);
+                handleRatingClick(rating, e);
+            });
+        });
+
+        // Desktop login prompt click
+        const ratingLoginPrompt = document.getElementById('rating-login-prompt');
+        if (ratingLoginPrompt) {
+            ratingLoginPrompt.addEventListener('click', function (e) {
+                e.stopPropagation();
+                if (window.signInWithGoogle) {
+                    window.signInWithGoogle().catch(() => {});
+                }
+            });
+        }
+
+        // Mobile rating button
+        document.getElementById('rating-button').addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const mobilePopup = document.getElementById('mobile-rating-popup');
+            if (mobilePopup) {
+                mobilePopup.style.display = 'flex';
+            }
+        });
+
+        // Mobile rating popup close
+        document.addEventListener('DOMContentLoaded', function () {
+            const mobilePopup = document.getElementById('mobile-rating-popup');
+            const mobileCloseBtn = document.getElementById('mobile-rating-close');
+            const mobileLoginBtn = document.getElementById('mobile-rating-login-btn');
+
+            if (mobilePopup && mobileCloseBtn) {
+                mobileCloseBtn.addEventListener('click', function () {
+                    mobilePopup.style.display = 'none';
+                });
+
+                mobilePopup.addEventListener('click', function (e) {
+                    mobilePopup.style.display = 'none';
+                });
+
+                const mobileContent = document.getElementById('mobile-rating-content');
+                if (mobileContent) {
+                    mobileContent.addEventListener('click', function (e) {
+                        e.stopPropagation();
+                    });
+                }
+            }
+
+            if (mobileLoginBtn) {
+                mobileLoginBtn.addEventListener('click', async function () {
+                    mobileLoginBtn.textContent = 'Connexion...';
+                    mobileLoginBtn.disabled = true;
+                    try {
+                        await window.signInWithGoogle();
+                    } catch (e) {
+                        console.error('Login error:', e);
+                    } finally {
+                        mobileLoginBtn.textContent = 'Connexion avec Google';
+                        mobileLoginBtn.disabled = false;
+                    }
+                });
+            }
+        });
+
+        // QR close button
+        document.addEventListener('DOMContentLoaded', function () {
+            const qrCloseBtn = document.getElementById('leaderboard-submit-qr-close');
+            const qrContainer = document.getElementById('leaderboard-submit-qr');
+            if (qrCloseBtn && qrContainer) {
+                qrCloseBtn.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    const gameId = getCurrentGameId();
+                    if (gameId) {
+                        try {
+                            localStorage.setItem('qr_closed_' + gameId, '1');
+                        } catch (ex) {}
+                    }
+                    qrContainer.style.display = 'none';
+                });
             }
         });
 

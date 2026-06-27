@@ -136,6 +136,18 @@ window.deleteGameScore = async (scoreId) => {
     return result.data;
 };
 
+window.rateGame = async (gameId, rating) => {
+    const fn = httpsCallable(functions, 'rateGame');
+    const result = await fn({ gameId, rating });
+    return result.data;
+};
+
+window.getGameRatings = async (gameId) => {
+    const fn = httpsCallable(functions, 'getGameRatings');
+    const result = await fn({ gameId });
+    return result.data;
+};
+
 window.updateFirebaseDisplayName = async (displayName) => {
     const nextDisplayName = String(displayName || '').trim();
 

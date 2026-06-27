@@ -298,61 +298,30 @@
             overflow-y: auto;
         }
 
-        #leaderboard-submit-qr {
+        /* QR Drawer - fixed overlay on the right side */
+        #qr-drawer {
+            position: fixed;
+            top: 50px;
+            right: 0;
+            z-index: 1998;
             display: none;
-            flex-direction: column;
-            margin: 0 0 10px;
-            border-radius: 8px;
-            background: #000;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none;
+        }
+
+        #qr-drawer.collapsed {
+            transform: translateX(100%);
+        }
+
+        #qr-drawer-content {
+            background: rgba(0, 0, 0, 0.92);
+            padding: 12px;
+            border-radius: 8px 0 0 8px;
             border: 1px solid rgba(255, 255, 255, 0.14);
-            flex-shrink: 0;
-            overflow: hidden;
-        }
-
-        #leaderboard-qr-toggle-handle {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 8px;
-            cursor: pointer;
-            font-size: 10px;
-            color: rgba(255, 255, 255, 0.6);
-            text-transform: uppercase;
-            letter-spacing: 0.03em;
-            user-select: none;
-            transition: color 0.15s, background 0.15s;
-        }
-
-        #leaderboard-qr-toggle-handle:hover {
-            color: #ffd700;
-            background: rgba(255, 255, 255, 0.06);
-        }
-
-        .qr-toggle-arrow {
-            display: inline-block;
-            transition: transform 0.3s ease;
-            font-size: 8px;
-        }
-
-        #leaderboard-submit-qr.collapsed .qr-toggle-arrow {
-            transform: rotate(-90deg);
-        }
-
-        #leaderboard-submit-qr.collapsed #leaderboard-qr-inner {
-            max-height: 0;
-            opacity: 0;
-            padding: 0;
-            margin: 0;
-        }
-
-        #leaderboard-qr-inner {
-            overflow: hidden;
-            max-height: 130px;
-            transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease, margin 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 0 8px 8px;
+            border-right: none;
+            pointer-events: auto;
+            position: relative;
+            box-shadow: -2px 2px 10px rgba(0, 0, 0, 0.4);
         }
 
         #leaderboard-submit-qr-code {
@@ -367,6 +336,52 @@
         #leaderboard-submit-qr-code img,
         #leaderboard-submit-qr-code canvas {
             display: block;
+        }
+
+        #qr-drawer-toggle-handle {
+            position: absolute;
+            right: 100%;
+            top: 0;
+            width: 28px;
+            height: auto;
+            min-height: 80px;
+            background: rgba(0, 0, 0, 0.92);
+            color: #ffd700;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 6px 0 0 6px;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-right: none;
+            box-shadow: -2px 2px 8px rgba(0, 0, 0, 0.3);
+            pointer-events: auto;
+            padding: 15px 0;
+            transition: background-color 0.2s;
+            user-select: none;
+        }
+
+        #qr-drawer-toggle-handle:hover {
+            background: rgba(20, 20, 20, 0.95);
+        }
+
+        .qr-drawer-label {
+            writing-mode: vertical-rl;
+            white-space: nowrap;
+            font-size: 11px;
+            font-weight: bold;
+            font-family: sans-serif;
+            margin-top: 8px;
+        }
+
+        .qr-drawer-arrow {
+            font-size: 14px;
+            transition: transform 0.3s ease;
+        }
+
+        #qr-drawer.collapsed .qr-drawer-arrow {
+            transform: rotate(180deg);
         }
 
         /* Mobile leaderboard popup styling */
@@ -1486,17 +1501,19 @@
         <div id="leaderboard-content">
             <div class="leaderboard-loading">Chargement...</div>
         </div>
-        <div id="leaderboard-submit-qr" aria-label="QR code pour soumettre un score depuis un autre appareil">
-            <div id="leaderboard-qr-toggle-handle" title="Afficher/Mascher le QR code">
-                <span class="qr-toggle-arrow">▼</span>
-                <span>Soumettre via mobile</span>
-            </div>
-            <div id="leaderboard-qr-inner">
-                <div id="leaderboard-submit-qr-code"></div>
-            </div>
-        </div>
     </div>
     <div id="leaderboard-comment-tooltip" aria-hidden="true"></div>
+
+    <!-- QR Drawer Overlay -->
+    <div id="qr-drawer">
+        <div id="qr-drawer-content">
+            <div id="leaderboard-submit-qr-code"></div>
+        </div>
+        <div id="qr-drawer-toggle-handle" title="Afficher/Mascler le QR code">
+            <span class="qr-drawer-arrow">◀</span>
+            <span class="qr-drawer-label">QR</span>
+        </div>
+    </div>
 
     <!-- Mobile Leaderboard Popup -->
     <div id="mobile-leaderboard-popup">
@@ -1738,9 +1755,9 @@
                 return;
             }
 
-            const qrContainer = document.getElementById('leaderboard-submit-qr');
+            const qrDrawer = document.getElementById('qr-drawer');
             const qrCodeMount = document.getElementById('leaderboard-submit-qr-code');
-            if (!qrContainer || !qrCodeMount) {
+            if (!qrDrawer || !qrCodeMount) {
                 return;
             }
 
@@ -1760,9 +1777,9 @@
                 correctLevel: QRCode.CorrectLevel.H
             });
 
-            qrContainer.style.display = 'flex';
-            qrContainer.onclick = function (event) {
-                if (event.target.closest('#leaderboard-qr-toggle-handle')) {
+            qrDrawer.style.display = 'block';
+            qrDrawer.onclick = function (event) {
+                if (event.target.closest('#qr-drawer-toggle-handle')) {
                     return;
                 }
                 event.stopPropagation();
@@ -2383,9 +2400,9 @@
                     const avgDisplay = total > 0 ? average.toFixed(1) : '-';
                     const countDisplay = total > 0 ? `(${total})` : '';
 
-                    function renderBar(barEl) {
+                    function renderBar(barEl, hasVoted) {
                         barEl.innerHTML = '';
-                        if (total === 0) {
+                        if (total === 0 || !hasVoted) {
                             ratings.forEach(r => {
                                 const seg = document.createElement('div');
                                 seg.className = 'rating-bar-segment';
@@ -2409,11 +2426,12 @@
                         });
                     }
 
-                    renderBar(ratingBar);
+                    const hasVoted = userRating !== null && userRating !== undefined;
+                    renderBar(ratingBar, hasVoted);
                     if (ratingAverage) ratingAverage.textContent = avgDisplay;
                     if (ratingCount) ratingCount.textContent = countDisplay;
 
-                    if (mobileRatingBar) renderBar(mobileRatingBar);
+                    if (mobileRatingBar) renderBar(mobileRatingBar, hasVoted);
                     if (mobileRatingAverage) mobileRatingAverage.textContent = avgDisplay;
                     if (mobileRatingCount) mobileRatingCount.textContent = countDisplay;
 
@@ -4557,14 +4575,14 @@
             }
         });
 
-        // QR toggle drawer
+        // QR drawer toggle
         document.addEventListener('DOMContentLoaded', function () {
-            const qrToggle = document.getElementById('leaderboard-qr-toggle-handle');
-            const qrSection = document.getElementById('leaderboard-submit-qr');
-            if (qrToggle && qrSection) {
+            const qrToggle = document.getElementById('qr-drawer-toggle-handle');
+            const qrDrawer = document.getElementById('qr-drawer');
+            if (qrToggle && qrDrawer) {
                 qrToggle.addEventListener('click', function (e) {
                     e.stopPropagation();
-                    qrSection.classList.toggle('collapsed');
+                    qrDrawer.classList.toggle('collapsed');
                 });
             }
         });

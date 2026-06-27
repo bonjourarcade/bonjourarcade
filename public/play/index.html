@@ -1673,7 +1673,7 @@
                 return;
             }
 
-            const submitUrl = new URL('/submit', window.location.origin);
+            const submitUrl = new URL('/submit', 'https://bonjourarcade.com');
             submitUrl.searchParams.set('game', gameId);
             if (gameDetails && gameDetails.title) {
                 submitUrl.searchParams.set('title', gameDetails.title);

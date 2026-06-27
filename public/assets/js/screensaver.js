@@ -377,10 +377,14 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!screensaverActive) {
                 event.preventDefault(); // Prevent default browser action (like scrolling)
                 startScreensaver();
-                return; // IMPORTANT: Exit here, don't reset idle time for 'é' activation
+                return;
             }
         }
-        // For any other key, or for 'é' when screensaver is already active, reset idle time.
+        if (event.key === 'v' && !window.location.pathname.includes('/play/')) {
+            event.preventDefault();
+            window.location.href = '/screensaver/';
+            return;
+        }
         resetIdleTime();
     });
 

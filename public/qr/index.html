@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BonjourArcade</title>
+  <style>
+    body {
+      margin: 0;
+      background: #333;
+      color: #fff;
+      font-family: sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+  </style>
+  <script>
+    (function() {
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') return;
+      var s = document.createElement('script');
+      s.defer = true;
+      s.src = "https://cloud.umami.is/script.js";
+      s.setAttribute('data-website-id', "660e5f95-7427-4bee-b7a5-4f50fa389e4e");
+      document.head.appendChild(s);
+    })();
+  </script>
+</head>
+<body>
+  <p>Redirection...</p>
+  <script>
+    function trackAndRedirect() {
+      if (window.umami && typeof window.umami.track === 'function') {
+        window.umami.track('ba_qr_scan');
+      }
+      window.location.replace('/');
+    }
+    if (document.readyState === 'complete') {
+      trackAndRedirect();
+    } else {
+      window.addEventListener('load', trackAndRedirect);
+      setTimeout(trackAndRedirect, 3000);
+    }
+  </script>
+</body>
+</html>

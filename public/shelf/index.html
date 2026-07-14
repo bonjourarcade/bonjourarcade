@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bibliothèque - BonjourArcade</title>
+  <link rel="stylesheet" href="../assets/css/shelf.css" />
+  <script src="../assets/js/analytics.js"></script>
+</head>
+<body>
+  <div class="controls-bar">
+    <button id="back-home-btn">← Retour Accueil</button>
+    <button id="theme-toggle" class="theme-toggle">🌙</button>
+
+    <label for="group-select" style="font-size:0.9rem;color:var(--text-color);">Grouper par</label>
+    <select id="group-select">
+      <option value="system">Console</option>
+      <option value="developer">Développeur</option>
+    </select>
+
+    <label for="sort-select" style="font-size:0.9rem;color:var(--text-color);">Trier par</label>
+    <select id="sort-select">
+      <option value="random">Aléatoire</option>
+      <option value="alpha">Alphabétique</option>
+      <option value="year-asc">Année (croissant)</option>
+      <option value="year-desc">Année (décroissant)</option>
+      <option value="latest">Derniers ajouts</option>
+    </select>
+
+    <span class="shelf-stats" id="shelf-stats"></span>
+  </div>
+
+  <div id="shelf-container">
+    <p style="text-align:center;padding:2rem;color:var(--text-color);">Chargement de la bibliothèque...</p>
+  </div>
+
+  <script src="../assets/js/shelf.js"></script>
+</body>
+</html>

@@ -2,6 +2,11 @@ let allRatings = [];
 let allGames = [];
 let gamesMap = {};
 
+function isLocalhost() {
+    const host = window.location.hostname;
+    return host === 'localhost' || host === '127.0.0.1' || host.includes('localhost') || host.startsWith('192.168.');
+}
+
 function initTheme() {
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark') {
@@ -164,7 +169,9 @@ async function loadData() {
     const filterCount = document.getElementById('filter-count');
 
     try {
-        const gamesResp = await fetch('/gamelist.json?cacheBuster=' + Date.now());
+        const cacheBuster = '?v=' + Date.now();
+        const gamelistUrl = isLocalhost() ? '/gamelist.json' + cacheBuster : 'https://storage.googleapis.com/bonjourarcade/gamelist.json' + cacheBuster;
+        const gamesResp = await fetch(gamelistUrl);
         const data = await gamesResp.json();
         allGames = data.games || [];
         gamesMap = {};

@@ -102,7 +102,8 @@ function renderRatingsGrid(ratings) {
         const title = getGameTitle(r.gameId);
         const cover = getGameCover(r.gameId);
         const url = getGameUrl(r.gameId);
-        const avg = r.average.toFixed(2);
+        const dist = r.distribution || {};
+        const sum = (dist['2'] || 0) * 2 + (dist['1'] || 0) * 1 + (dist['-1'] || 0) * -1 + (dist['-2'] || 0) * -2;
         const distHtml = renderDistribution(r.distribution, r.count);
 
         return `
@@ -115,8 +116,8 @@ function renderRatingsGrid(ratings) {
                 </div>
                 <div class="ratings-distribution">${distHtml}</div>
                 <div class="ratings-score">
-                    <span class="ratings-average">${avg}</span>
-                    <span class="ratings-count">/ 2</span>
+                    <span class="ratings-average">${sum > 0 ? '+' : ''}${sum}</span>
+                    <span class="ratings-count"></span>
                 </div>
             </a>
         `;
@@ -164,7 +165,8 @@ async function loadData() {
 
     try {
         const gamesResp = await fetch('/gamelist.json?cacheBuster=' + Date.now());
-        allGames = await gamesResp.json();
+        const data = await gamesResp.json();
+        allGames = data.games || [];
         gamesMap = {};
         allGames.forEach(game => {
             gamesMap[game.id] = game;

@@ -13,7 +13,6 @@ body.theme-dark {
   --text-color: #f4f4f4;
   --card-bg: #23272b;
   --border-color: #444;
-  --shelf-wood: #5a4a3a;
 }
 
 body.theme-light {
@@ -21,7 +20,6 @@ body.theme-light {
   --text-color: #222;
   --card-bg: #fff;
   --border-color: #ddd;
-  --shelf-wood: #826c59;
 }
 
 .controls-bar {
@@ -164,8 +162,7 @@ body.theme-dark .section-color-dot {
   flex-wrap: wrap;
   gap: 5px;
   padding: 12px 10px 8px 10px;
-  background-color: var(--shelf-wood);
-  background-image: url("https://www.transparenttextures.com/patterns/wood-pattern.png");
+  background: #6b5a48 url("https://www.transparenttextures.com/patterns/wood-pattern.png");
   border-radius: 6px;
   min-height: 340px;
   align-items: flex-end;

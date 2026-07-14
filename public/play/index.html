@@ -1067,45 +1067,6 @@
             font-size: 10px;
         }
 
-        /* Rating bar */
-        #rating-bar-container {
-            margin-bottom: 6px;
-        }
-
-        #rating-bar {
-            display: flex;
-            height: 10px;
-            border-radius: 5px;
-            overflow: hidden;
-            background: rgba(255, 255, 255, 0.08);
-        }
-
-        .rating-bar-segment {
-            height: 100%;
-            transition: flex 0.4s ease;
-            min-width: 2px;
-            position: relative;
-        }
-
-        .rating-bar-segment:not(:last-child)::after {
-            content: '';
-            position: absolute;
-            right: 0;
-            top: 1px;
-            bottom: 1px;
-            width: 1px;
-            background: rgba(0, 0, 0, 0.3);
-        }
-
-        #rating-bar-labels {
-            display: flex;
-            justify-content: space-between;
-            font-size: 9px;
-            color: rgba(255, 255, 255, 0.5);
-            margin-top: 2px;
-            padding: 0 1px;
-        }
-
         /* Thumb buttons */
         #rating-thumbs {
             display: flex;
@@ -1281,27 +1242,6 @@
         #mobile-rating-count {
             font-size: 13px;
             color: rgba(255, 255, 255, 0.45);
-        }
-
-        #mobile-rating-bar-container {
-            margin-bottom: 16px;
-        }
-
-        #mobile-rating-bar {
-            display: flex;
-            height: 14px;
-            border-radius: 7px;
-            overflow: hidden;
-            background: rgba(255, 255, 255, 0.08);
-        }
-
-        #mobile-rating-bar-labels {
-            display: flex;
-            justify-content: space-between;
-            font-size: 11px;
-            color: rgba(255, 255, 255, 0.5);
-            margin-top: 3px;
-            padding: 0 1px;
         }
 
         #mobile-rating-thumbs {
@@ -1489,15 +1429,6 @@
                         <span id="rating-average">-</span>
                         <span id="rating-count"></span>
                     </div>
-                    <div id="rating-bar-container">
-                        <div id="rating-bar"></div>
-                        <div id="rating-bar-labels">
-                            <span data-rating="-2">-2</span>
-                            <span data-rating="-1">-1</span>
-                            <span data-rating="1">1</span>
-                            <span data-rating="2">2</span>
-                        </div>
-                    </div>
                     <div id="rating-thumbs">
                         <button class="rating-thumb" data-rating="-2" title="Je n'aime pas du tout">👎👎</button>
                         <button class="rating-thumb" data-rating="-1" title="Je n'aime pas">👎</button>
@@ -1540,15 +1471,6 @@
             <div id="mobile-rating-average-display">
                 <span id="mobile-rating-average">-</span>
                 <span id="mobile-rating-count"></span>
-            </div>
-            <div id="mobile-rating-bar-container">
-                <div id="mobile-rating-bar"></div>
-                <div id="mobile-rating-bar-labels">
-                    <span data-rating="-2">-2</span>
-                    <span data-rating="-1">-1</span>
-                    <span data-rating="1">1</span>
-                    <span data-rating="2">2</span>
-                </div>
             </div>
             <div id="mobile-rating-thumbs">
                 <button class="mobile-rating-thumb" data-rating="-2" title="Je n'aime pas du tout">👎👎</button>
@@ -2355,15 +2277,13 @@
             // Fetch game ratings
             window.fetchGameRatings = async function fetchGameRatings(gameId, isRefresh = false) {
                 const ratingSection = document.getElementById('rating-section');
-                const ratingBar = document.getElementById('rating-bar');
                 const ratingAverage = document.getElementById('rating-average');
                 const ratingCount = document.getElementById('rating-count');
                 const loginPrompt = document.getElementById('rating-login-prompt');
-                const mobileRatingBar = document.getElementById('mobile-rating-bar');
                 const mobileRatingAverage = document.getElementById('mobile-rating-average');
                 const mobileRatingCount = document.getElementById('mobile-rating-count');
 
-                if (!ratingSection || !ratingBar) return;
+                if (!ratingSection) return;
 
                 try {
                     if (typeof window.getGameRatings !== 'function') {
@@ -2373,45 +2293,17 @@
 
                     if (!data) throw new Error('Invalid rating data');
 
-                    const { average, count, distribution, userRating } = data;
-                    const ratings = [-2, -1, 1, 2];
+                    const { count, distribution, userRating } = data;
                     const total = count || 0;
-                    const avgDisplay = total > 0 ? average.toFixed(1) : '-';
+                    const dist = distribution || {};
+                    const sum = (dist['2'] || 0) * 2 + (dist['1'] || 0) * 1 + (dist['-1'] || 0) * -1 + (dist['-2'] || 0) * -2;
+                    const sumDisplay = total > 0 ? (sum > 0 ? '+' : '') + sum : '-';
                     const countDisplay = total > 0 ? `(${total})` : '';
 
-                    function renderBar(barEl, hasVoted) {
-                        barEl.innerHTML = '';
-                        if (total === 0 || !hasVoted) {
-                            ratings.forEach(r => {
-                                const seg = document.createElement('div');
-                                seg.className = 'rating-bar-segment';
-                                seg.style.flex = '1';
-                                seg.style.background = 'rgba(255,255,255,0.06)';
-                                barEl.appendChild(seg);
-                            });
-                            return;
-                        }
-                        ratings.forEach(r => {
-                            const seg = document.createElement('div');
-                            seg.className = 'rating-bar-segment';
-                            const key = String(r);
-                            const frac = (distribution[key] || 0) / total;
-                            seg.style.flex = String(Math.max(frac, 0.02));
-                            const t = (r + 2) / 4;
-                            const r1 = Math.round(255 * (1 - t));
-                            const g1 = Math.round(255 * t);
-                            seg.style.background = `rgb(${r1}, ${g1}, 60)`;
-                            barEl.appendChild(seg);
-                        });
-                    }
-
-                    const hasVoted = userRating !== null && userRating !== undefined;
-                    renderBar(ratingBar, hasVoted);
-                    if (ratingAverage) ratingAverage.textContent = avgDisplay;
+                    if (ratingAverage) ratingAverage.textContent = sumDisplay;
                     if (ratingCount) ratingCount.textContent = countDisplay;
 
-                    if (mobileRatingBar) renderBar(mobileRatingBar, hasVoted);
-                    if (mobileRatingAverage) mobileRatingAverage.textContent = avgDisplay;
+                    if (mobileRatingAverage) mobileRatingAverage.textContent = sumDisplay;
                     if (mobileRatingCount) mobileRatingCount.textContent = countDisplay;
 
                     // Update active state on thumb buttons

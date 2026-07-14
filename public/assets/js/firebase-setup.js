@@ -148,6 +148,18 @@ window.getGameRatings = async (gameId) => {
     return result.data;
 };
 
+window.listGameRatings = async () => {
+    const fn = httpsCallable(functions, 'listGameRatings');
+    const result = await fn({});
+    return result.data;
+};
+
+window.getLatestRatings = async () => {
+    const fn = httpsCallable(functions, 'getLatestRatings');
+    const result = await fn({});
+    return result.data;
+};
+
 window.updateFirebaseDisplayName = async (displayName) => {
     const nextDisplayName = String(displayName || '').trim();
 

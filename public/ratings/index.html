@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ratings - BonjourArcade</title>
+    <meta name="description" content="Classement des jeux par note et derniers ratings sur BonjourArcade.">
+    <link rel="icon" href="../favicon.ico">
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/ratings.css">
+    <script async src="/assets/js/analytics.js"></script>
+</head>
+<body>
+    <header class="ratings-header">
+        <div class="ratings-header-inner">
+            <a class="ratings-logo" href="/" aria-label="Retour a l'accueil BonjourArcade">
+                <img src="/assets/images/bonjourarcade-logo.png" alt="BonjourArcade" class="header-logo">
+            </a>
+            <nav class="ratings-nav" aria-label="Navigation principale">
+                <a href="/">Accueil</a>
+                <a href="/all/">Tous les jeux</a>
+                <a href="/scores/">Scores</a>
+            </nav>
+            <div class="ratings-header-actions">
+                <div class="theme-toggle-wrapper scores-menu-wrapper" style="position: relative;">
+                    <button id="options-toggle-btn" class="theme-btn" aria-label="Options" aria-haspopup="true" aria-expanded="false" type="button">
+                        <span>⚙️</span>
+                        <span>Menu</span>
+                    </button>
+                    <div id="options-dropdown" class="dropdown-menu">
+                        <a href="/scores" class="dropdown-option">
+                            <span>🏆</span>Scores
+                        </a>
+                        <a href="/all" class="dropdown-option">
+                            <span>🕹️</span>Tous les jeux
+                        </a>
+                        <a href="/daily/" class="dropdown-option" id="daily-game-link">
+                            <span>📅</span>Jeu du jour
+                        </a>
+                        <a href="/randomgame/" class="dropdown-option">
+                            <span>🎲</span>Jeu aleatoire
+                        </a>
+                        <a href="/swipe" class="dropdown-option">
+                            <span>🃏</span>Swipe
+                        </a>
+                        <a href="/screensaver" class="dropdown-option">
+                            <span>🌠</span>Ecran de veille
+                        </a>
+                        <a href="/upcoming" class="dropdown-option">
+                            <span>🔮</span>Bientot en vedette
+                        </a>
+                        <a href="https://ko-fi.com/bonjourarcade" target="_blank" class="dropdown-option dropdown-highlight">
+                            <span>❤️</span>Supporter BonjourArcade
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <button class="theme-option dropdown-option" data-theme="system" type="button">
+                            <span class="theme-icon">🌓</span>Theme : Systeme
+                        </button>
+                        <button class="theme-option dropdown-option" data-theme="light" type="button">
+                            <span class="theme-icon">☀️</span>Theme : Clair
+                        </button>
+                        <button class="theme-option dropdown-option" data-theme="dark" type="button">
+                            <span class="theme-icon">🌙</span>Theme : Sombre
+                        </button>
+                    </div>
+                </div>
+                <button id="theme-toggle" class="theme-btn" aria-label="Changer le theme" type="button">
+                    <span id="theme-toggle-icon">🌓</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="ratings-main">
+        <div class="page-hero">
+            <h1>Ratings des jeux</h1>
+            <p>Tous les jeux notes par la communaute, du mieux note au moins bien note.</p>
+        </div>
+
+        <section class="section-card">
+            <h2 class="section-title">Top des jeux notes</h2>
+            <input id="search-input" class="ratings-search" type="search" placeholder="Rechercher un jeu par titre..." autocomplete="off">
+            <div id="filter-count" class="filter-count">Chargement...</div>
+            <div id="ratings-state" class="section-state loading">Chargement des ratings...</div>
+            <div id="ratings-list" class="ratings-grid"></div>
+        </section>
+
+        <section class="section-card">
+            <h2 class="section-title">Derniers ratings</h2>
+            <div id="latest-state" class="section-state loading">Chargement des derniers ratings...</div>
+            <div id="latest-ratings-list" class="latest-ratings-list"></div>
+        </section>
+    </main>
+
+    <script type="module" src="../assets/js/firebase-setup.js"></script>
+    <script src="../assets/js/banner.js"></script>
+    <script src="../assets/js/ratings.js"></script>
+</body>
+</html>

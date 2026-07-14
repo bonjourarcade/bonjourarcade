@@ -54,6 +54,11 @@
   let currentGroupBy = 'system';
   let currentSort = 'random';
 
+  function isLocalhost() {
+    var host = window.location.hostname;
+    return host === 'localhost' || host === '127.0.0.1' || host.includes('localhost') || host.startsWith('192.168.');
+  }
+
   function getSystemName(core) {
     if (!core) return 'Inconnu';
     return SYSTEM_MAP[core] || core;
@@ -166,7 +171,9 @@
       renderShelf();
     });
 
-    fetch('/gamelist.json')
+    var cacheBuster = '?v=' + Date.now();
+    var gamelistUrl = isLocalhost() ? '/gamelist.json' + cacheBuster : 'https://storage.googleapis.com/bonjourarcade/gamelist.json' + cacheBuster;
+    fetch(gamelistUrl)
       .then(function (r) { return r.json(); })
       .then(function (data) {
         allGames = data.games || [];

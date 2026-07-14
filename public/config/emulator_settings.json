@@ -3,6 +3,7 @@
     "mame2003-plus_neogeo_bios": "unibios40",
     "mame2003-plus_skip_disclaimer": "enabled",
     "mame2003-plus_skip_warnings": "enabled",
+    "fceumm_nospritelimit": "enabled",
     "ff-ratio": "8.0",
     "gambatte_gb_colorization": "GBC",
     "melonds_touch_mode": "Touch",

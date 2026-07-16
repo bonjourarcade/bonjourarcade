@@ -1,0 +1,18 @@
+title: The Patchmaker's Workshop
+developer: CowQuack
+year: 2025
+genre: Hack
+#controls:
+#  - "←↓↑→: Mouvement"
+#  - "Z: "
+#  - "X: "
+#  - "C: "
+#  - "V: "
+
+#to_start: Espace, puis Enter
+#announcement_message: ""
+#problem: true
+
+enable_score: true
+
+added: 2026-07-16

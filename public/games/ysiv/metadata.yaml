@@ -1,0 +1,18 @@
+title: "Ys IV: The Dawn of Ys"
+developer: Hudson Soft
+year: 1993
+genre: Action, Role-playing
+#controls:
+#  - "←↓↑→: Mouvement"
+#  - "Z: "
+#  - "X: "
+#  - "C: "
+#  - "V: "
+
+#to_start: Espace, puis Enter
+#announcement_message: ""
+#problem: true
+
+enable_score: true
+
+added: 2026-07-16

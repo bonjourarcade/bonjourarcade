@@ -52,7 +52,9 @@
 
   let allGames = [];
   let currentGroupBy = 'system';
-  let currentSort = 'random';
+  let currentSort = 'alpha';
+  let selectedGame = null;
+  let selectedBookEl = null;
 
   function isLocalhost() {
     var host = window.location.hostname;
@@ -123,7 +125,7 @@
 
   function populateDropdowns() {
     var savedGroup = localStorage.getItem('shelf_group') || 'system';
-    var savedSort = localStorage.getItem('shelf_sort') || 'random';
+    var savedSort = localStorage.getItem('shelf_sort') || 'alpha';
     document.getElementById('group-select').value = savedGroup;
     document.getElementById('sort-select').value = savedSort;
     currentGroupBy = savedGroup;
@@ -171,6 +173,12 @@
       renderShelf();
     });
 
+    document.getElementById('info-overlay').addEventListener('click', closeGameInfo);
+    document.getElementById('info-panel-close').addEventListener('click', closeGameInfo);
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeGameInfo();
+    });
+
     var cacheBuster = '?v=' + Date.now();
     var gamelistUrl = isLocalhost() ? '/gamelist.json' + cacheBuster : 'https://storage.googleapis.com/bonjourarcade/gamelist.json' + cacheBuster;
     fetch(gamelistUrl)
@@ -187,6 +195,7 @@
   });
 
   function renderShelf() {
+    closeGameInfo();
     var container = document.getElementById('shelf-container');
     container.innerHTML = '';
 
@@ -241,7 +250,6 @@
         var title = getDisplayTitle(game);
         var yearDisplay = getGameYear(game) || '';
         var coverUrl = game.coverArt || '';
-        var playUrl = game.pageUrl || '/b/' + game.id;
         var isMobile = window.innerWidth <= 768;
         var spineW = isMobile ? 32 : 40;
         var baseH = isMobile ? 200 : 240;
@@ -293,7 +301,7 @@
         }
 
         book.addEventListener('click', function () {
-          window.location.href = playUrl;
+          openGameInfo(game, book);
         });
 
         book.addEventListener('mouseenter', function () {
@@ -387,5 +395,96 @@
     var div = document.createElement('div');
     div.appendChild(document.createTextNode(str));
     return div.innerHTML;
+  }
+
+  function openGameInfo(game, bookEl) {
+    if (selectedBookEl === bookEl) return;
+    closeGameInfo();
+
+    selectedGame = game;
+    selectedBookEl = bookEl;
+
+    var rect = bookEl.getBoundingClientRect();
+    var vw = window.innerWidth;
+    var vh = window.innerHeight;
+    var panelW = vw <= 768 ? 0 : 380;
+    var targetX = (vw - panelW) / 2;
+    var targetY = vh / 2;
+    var bx = rect.left + rect.width / 2;
+    var by = rect.top + rect.height / 2;
+    var dx = targetX - bx;
+    var dy = targetY - by;
+
+    var transformVal = 'translate3d(' + dx + 'px, ' + dy + 'px, 0px) rotateY(-90deg) scale(1.8)';
+    bookEl.style.transform = transformVal;
+    bookEl.classList.add('selected');
+
+    document.body.style.overflow = 'hidden';
+
+    var title = getDisplayTitle(game);
+    var system = getSystemName(game.core);
+    var developer = game.developer || '';
+    var year = game.year || '';
+    var genre = game.genre || '';
+    var controls = game.controls || [];
+    var toStart = game.to_start || '';
+    var description = game.announcement_message || '';
+    var coverUrl = game.coverArt || '';
+    var playUrl = game.pageUrl || '/b/' + game.id;
+
+    var html = '';
+
+    if (coverUrl) {
+      html += '<img class="info-panel-cover" src="' + coverUrl + '" alt="' + escapeHtml(title) + '" />';
+    }
+
+    html += '<div class="info-panel-title">' + escapeHtml(title) + '</div>';
+
+    if (system) {
+      html += '<div class="info-panel-field"><div class="info-panel-label">Console</div><div class="info-panel-value">' + escapeHtml(system) + '</div></div>';
+    }
+    if (developer) {
+      html += '<div class="info-panel-field"><div class="info-panel-label">Développeur</div><div class="info-panel-value">' + escapeHtml(developer) + '</div></div>';
+    }
+    if (year) {
+      html += '<div class="info-panel-field"><div class="info-panel-label">Année</div><div class="info-panel-value">' + escapeHtml(year) + '</div></div>';
+    }
+    if (genre) {
+      html += '<div class="info-panel-field"><div class="info-panel-label">Genre</div><div class="info-panel-value">' + escapeHtml(genre) + '</div></div>';
+    }
+
+    if (controls.length > 0) {
+      html += '<div class="info-panel-field"><div class="info-panel-label">Contrôles</div><ul class="info-panel-controls">';
+      controls.forEach(function (c) {
+        html += '<li>' + escapeHtml(c) + '</li>';
+      });
+      html += '</ul></div>';
+    }
+
+    if (toStart) {
+      html += '<div class="info-panel-field"><div class="info-panel-label">Démarrer</div><div class="info-panel-value">' + escapeHtml(toStart) + '</div></div>';
+    }
+
+    if (description) {
+      html += '<div class="info-panel-field"><div class="info-panel-label">Annonce</div><div class="info-panel-value info-panel-description">' + escapeHtml(description) + '</div></div>';
+    }
+
+    html += '<a href="' + playUrl + '" class="play-button">▶ Jouer</a>';
+
+    document.getElementById('info-panel-content').innerHTML = html;
+    document.getElementById('info-overlay').classList.add('active');
+    document.getElementById('info-panel').classList.add('active');
+  }
+
+  function closeGameInfo() {
+    if (selectedBookEl) {
+      selectedBookEl.style.transform = '';
+      selectedBookEl.classList.remove('selected', 'hover');
+      selectedBookEl = null;
+    }
+    selectedGame = null;
+    document.body.style.overflow = '';
+    document.getElementById('info-overlay').classList.remove('active');
+    document.getElementById('info-panel').classList.remove('active');
   }
 })();

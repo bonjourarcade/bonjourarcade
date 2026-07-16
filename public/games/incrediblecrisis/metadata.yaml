@@ -1,0 +1,18 @@
+title: Incredible Crisis
+developer: Polygon Magic
+year: 1999
+genre: Action
+#controls:
+#  - "←↓↑→: Mouvement"
+#  - "Z: "
+#  - "X: "
+#  - "C: "
+#  - "V: "
+
+#to_start: Espace, puis Enter
+#announcement_message: ""
+#problem: true
+
+enable_score: true
+
+added: 2026-07-16

@@ -1,0 +1,18 @@
+title: "LSD: Dream Emulator"
+developer: OutSide Directors Company
+year: 1998
+genre: Simulation
+#controls:
+#  - "←↓↑→: Mouvement"
+#  - "Z: "
+#  - "X: "
+#  - "C: "
+#  - "V: "
+
+#to_start: Espace, puis Enter
+#announcement_message: ""
+#problem: true
+
+enable_score: true
+
+added: 2026-07-16

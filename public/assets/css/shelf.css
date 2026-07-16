@@ -416,9 +416,16 @@ body.theme-dark .section-color-dot {
 .book.selected {
   z-index: 55;
   transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
 }
 .book.selected .cover {
   opacity: 1;
+  transform: rotateY(0deg) translateZ(0);
+  transition: opacity 0.3s, transform 0s;
+  pointer-events: auto;
+}
+.book.selected .spine {
+  display: none;
 }
 .book.selected .top {
   display: none;

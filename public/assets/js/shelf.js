@@ -404,18 +404,39 @@
     selectedGame = game;
     selectedBookEl = bookEl;
 
+    var prevTransform = bookEl.style.transform;
+    bookEl.style.transform = 'none';
     var rect = bookEl.getBoundingClientRect();
+    bookEl.style.transform = prevTransform;
     var vw = window.innerWidth;
     var vh = window.innerHeight;
     var panelW = vw <= 768 ? 0 : 380;
     var targetX = (vw - panelW) / 2;
-    var targetY = vh / 2;
-    var bx = rect.left + rect.width / 2;
-    var by = rect.top + rect.height / 2;
-    var dx = targetX - bx;
-    var dy = targetY - by;
+    var targetY = vh * 0.6;
 
-    var transformVal = 'translate3d(' + dx + 'px, ' + dy + 'px, 0px) rotateY(-90deg) scale(1.8)';
+    var coverEl = bookEl.querySelector('.cover');
+    var scale;
+    var cx, cy;
+    if (coverEl) {
+      scale = Math.min(
+        (vh * 0.88) / coverEl.offsetHeight,
+        ((vw - panelW) * 0.9) / coverEl.offsetWidth
+      );
+      var ox = rect.width / 2;
+      var coverCx = coverEl.offsetLeft + coverEl.offsetWidth / 2;
+      var coverCy = coverEl.offsetHeight / 2;
+      var bookOy = rect.height / 2;
+      cx = rect.left + ox + scale * (coverCx - ox);
+      cy = rect.top + coverCy - (bookOy - coverCy) * (scale - 1);
+    } else {
+      cx = rect.left + rect.width / 2;
+      cy = rect.top + rect.height / 2;
+    }
+
+    var dx = targetX - cx;
+    var dy = targetY - cy;
+
+    var transformVal = 'translate3d(' + dx + 'px, ' + dy + 'px, 0px) rotateY(0deg) scale(' + scale + ')';
     bookEl.style.transform = transformVal;
     bookEl.classList.add('selected');
 
@@ -433,10 +454,6 @@
     var playUrl = game.pageUrl || '/b/' + game.id;
 
     var html = '';
-
-    if (coverUrl) {
-      html += '<img class="info-panel-cover" src="' + coverUrl + '" alt="' + escapeHtml(title) + '" />';
-    }
 
     html += '<div class="info-panel-title">' + escapeHtml(title) + '</div>';
 

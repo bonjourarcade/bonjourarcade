@@ -2,12 +2,13 @@ title: Gun.Smoke
 developer: Capcom
 year: 1985
 genre: Shooter
-#controls:
-#  - "←↓↑→: Déplacer"
-#  - "Z: Tirer"
-#  - "X: Bombe"
+controls:
+  - "←↓↑→: Déplacer"
+  - "Z: Tir gauche"
+  - "X: Tir centre"
+  - "C: Tir droit"
 
-#to_start: Select -> Start
+to_start: Espace, puis Enter
 
 announcement_message: "Préparez-vous à vivre l'Ouest sauvage avec Gun.Smoke, un shooter
   emblématique de Capcom sorti en 1985 ! Incarnez un chasseur de primes armé jusqu'aux

@@ -1,0 +1,18 @@
+title: Retro Game Challenge
+developer: indieszero
+year: 2007
+genre: Actio, Racing, Role-Playing
+#controls:
+#  - "←↓↑→: Mouvement"
+#  - "Z: "
+#  - "X: "
+#  - "C: "
+#  - "V: "
+
+#to_start: Espace, puis Enter
+#announcement_message: ""
+#problem: true
+
+enable_score: true
+
+added: 2026-07-18

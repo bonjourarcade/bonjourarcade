@@ -435,9 +435,12 @@
                 statusDiv.textContent = "Soumission en cours...";
                 statusDiv.style.color = "white";
 
+                const tournamentId = urlParams.get('t');
+                const roundIndex = urlParams.get('r') !== null ? parseInt(urlParams.get('r'), 10) : undefined;
+
                 try {
                     if (typeof window.submitGameScore === 'function') {
-                        await window.submitGameScore(gameId, scoreValue, commentValue, photoBase64);
+                        await window.submitGameScore(gameId, scoreValue, commentValue, photoBase64, tournamentId, roundIndex);
                         statusDiv.textContent = "Score soumis avec succès pour la vérification ! Redirection...";
                         statusDiv.style.color = "#00C851";
 

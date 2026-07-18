@@ -1,8 +1,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut, connectAuthEmulator, updateProfile } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { getFunctions, httpsCallable, connectFunctionsEmulator } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-functions.js";
+import { getFirestore, connectFirestoreEmulator, collection, query, where, orderBy, onSnapshot, doc, getDoc, getDocs, addDoc, updateDoc, serverTimestamp, limit } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-// Your web app's Firebase configuration
 const firebaseConfig = {
     apiKey: "AIzaSyAh5PlPLpy8sfB5QxmjWiXaA_Qrtszc2Vg",
     authDomain: "alloarcade.firebaseapp.com",
@@ -13,26 +13,32 @@ const firebaseConfig = {
     measurementId: "G-G55K9S82G7"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const functions = getFunctions(app);
+const db = getFirestore(app);
 
-// Check if we are running locally to use emulators
 const isLocalhost = window.location.hostname === 'localhost' ||
     window.location.hostname === '127.0.0.1' ||
     window.location.hostname.includes('localhost') ||
     window.location.hostname.startsWith('192.168.');
 
 if (isLocalhost) {
-    console.log('Using Firebase Emulators for Auth and Functions');
+    console.log('Using Firebase Emulators');
     connectAuthEmulator(auth, "http://127.0.0.1:9099");
     connectFunctionsEmulator(functions, "127.0.0.1", 5001);
+    connectFirestoreEmulator(db, "127.0.0.1", 8080);
 }
 
-// Global instances
 window.firebaseAuth = auth;
 window.firebaseFunctions = functions;
+window.firebaseDb = db;
+
+window.httpsCallable = httpsCallable;
+window.Firestore = {
+    collection, query, where, orderBy, onSnapshot, doc, getDoc, getDocs,
+    addDoc, updateDoc, serverTimestamp, limit,
+};
 
 window.signInWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
@@ -82,14 +88,16 @@ window.checkFirebaseAdminAccess = async () => {
 };
 
 // Global score submission function
-window.submitGameScore = async (gameId, score, comment, screenshotBase64) => {
+window.submitGameScore = async (gameId, score, comment, screenshotBase64, tournamentId, roundIndex) => {
     const submitScoreFn = httpsCallable(functions, 'submitScore');
     try {
         const result = await submitScoreFn({
             gameId: gameId,
             score: score,
-            comment: comment || undefined, // Send undefined if empty
-            screenshotBase64: screenshotBase64 || undefined
+            comment: comment || undefined,
+            screenshotBase64: screenshotBase64 || undefined,
+            tournamentId: tournamentId || undefined,
+            roundIndex: typeof roundIndex === 'number' ? roundIndex : undefined,
         });
         return result.data;
     } catch (error) {

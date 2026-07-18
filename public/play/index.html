@@ -1342,6 +1342,48 @@
             }
         }
 
+    /* Tournament bar styling */
+    #tournament-bar {
+        position: fixed;
+        top: 50px;
+        left: 0;
+        right: 0;
+        height: 36px;
+        background: rgba(20, 20, 35, 0.92);
+        display: none;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 12px;
+        z-index: 1999;
+        font-family: sans-serif;
+        font-size: 13px;
+        border-bottom: 1px solid #ffd70044;
+        backdrop-filter: blur(6px);
+        gap: 8px;
+    }
+    #tournament-bar .tb-left { display: flex; align-items: center; gap: 8px; min-width: 0; }
+    #tournament-bar .tb-code { color: #ffd700; font-weight: 700; font-size: 12px; white-space: nowrap; }
+    #tournament-bar .tb-leader { display: flex; align-items: center; gap: 4px; color: #ccc; min-width: 0; }
+    #tournament-bar .tb-leader img { width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0; }
+    #tournament-bar .tb-leader .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    #tournament-bar .tb-leader .score { color: #ffd700; font-weight: 700; white-space: nowrap; }
+    #tournament-bar .tb-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    #tournament-bar .tb-timer { font-family: 'Courier New', monospace; font-size: 15px; font-weight: 700; color: #fff; min-width: 40px; text-align: center; transition: color 0.3s; }
+    #tournament-bar .tb-timer.timer-warning { color: #dc3545; animation: pulse-warning 0.5s ease-in-out infinite alternate; }
+    @keyframes pulse-warning { from { text-shadow: 0 0 8px rgba(220,53,69,0.5); } to { text-shadow: 0 0 20px rgba(220,53,69,0.9); } }
+    #tournament-bar.tb-flash { animation: tb-flash-gold 0.6s ease-out; }
+    @keyframes tb-flash-gold { 0% { background: rgba(255,215,0,0.3); } 100% { background: rgba(20,20,35,0.92); } }
+    body.tournament-mode #game-container,
+    body.tournament-mode #leaderboard-container,
+    body.tournament-mode #qr-drawer { top: 86px !important; }
+    body.tournament-mode #controls-overlay,
+    body.tournament-mode #game-info-overlay { top: 98px !important; }
+    #tournament-bar .tb-round { color: #888; font-size: 11px; white-space: nowrap; }
+    #tournament-bar .tb-status { color: #4a9eff; font-size: 11px; }
+    @media (max-width: 768px) {
+        #tournament-bar { height: 32px; font-size: 11px; padding: 0 8px; }
+        #tournament-bar .tb-leader .name { max-width: 80px; }
+    }
     </style>
     <script src="../assets/js/analytics.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
@@ -1379,6 +1421,19 @@
             </button>
         </div>
     </header>
+
+    <!-- Tournament info bar (hidden unless ?t= param is present) -->
+    <div id="tournament-bar">
+      <div class="tb-left">
+        <span class="tb-code" id="tb-code"></span>
+        <span class="tb-round" id="tb-round"></span>
+        <span class="tb-leader" id="tb-leader"></span>
+      </div>
+      <div class="tb-right">
+        <span class="tb-timer" id="tb-timer">--:--</span>
+        <span class="tb-status" id="tb-status"></span>
+      </div>
+    </div>
 
     <!-- Controls Overlay (desktop as sidebar) -->
     <div id="controls-overlay">
@@ -2338,17 +2393,39 @@
             // Fetch ratings on load
             fetchGameRatings(gameId);
 
-            // Set up periodic refresh of leaderboard and ratings every 2 minutes
-            const scoreRefreshInterval = setInterval(() => {
-                console.log('Refreshing leaderboard scores (2-minute interval)');
-                fetchLeaderboard(gameId, true);
+            // Set up real-time leaderboard via onSnapshot on game-scores
+            (function setupLeaderboardRealtime(gameId) {
+                try {
+                    const db = window.firebaseDb;
+                    if (!db || !window.Firestore) {
+                        console.warn('Firestore not available for leaderboard realtime');
+                        return;
+                    }
+                    const { collection, query, where, onSnapshot } = window.Firestore;
+                    const q = query(collection(db, 'game-scores'),
+                        where('game', '==', gameId),
+                        where('verified', '==', true));
+                    let debounceTimer = null;
+                    window._leaderboardUnsub = onSnapshot(q, () => {
+                        if (debounceTimer) clearTimeout(debounceTimer);
+                        debounceTimer = setTimeout(() => {
+                            console.log('Leaderboard realtime update');
+                            fetchLeaderboard(gameId, true);
+                        }, 500);
+                    });
+                } catch (e) {
+                    console.warn('onSnapshot leaderboard failed, falling back to polling:', e);
+                    window.leaderboardRefreshInterval = setInterval(() => {
+                        fetchLeaderboard(gameId, true);
+                    }, 120000);
+                }
+            })(gameId);
+
+            // Set up periodic refresh of ratings every 2 minutes
+            const ratingRefreshInterval = setInterval(() => {
                 fetchGameRatings(gameId, true);
-            }
-
-                , 120000); // 2 minutes = 120,000 milliseconds
-
-            // Store interval ID for cleanup if needed
-            window.leaderboardRefreshInterval = scoreRefreshInterval;
+            }, 120000);
+            window.leaderboardRefreshInterval = ratingRefreshInterval;
 
             try {
                 // Step 2: Fetch the master game list
@@ -2854,6 +2931,10 @@
             if (window.leaderboardRefreshInterval) {
                 clearInterval(window.leaderboardRefreshInterval);
                 window.leaderboardRefreshInterval = null;
+            }
+            if (window._leaderboardUnsub) {
+                window._leaderboardUnsub();
+                window._leaderboardUnsub = null;
             }
         });
 
@@ -3755,6 +3836,13 @@
         }
 
         async function openScoreSubmissionModal() {
+            if (window._eliminated) {
+                const tParams = new URLSearchParams(window.location.search);
+                if (tParams.get('t')) {
+                    showToast('🚫 Tu as été éliminé du tournoi.');
+                    return;
+                }
+            }
             const modal = document.getElementById('score-submission-modal');
             const authSection = document.getElementById('score-auth-section');
             const formSection = document.getElementById('score-form-section');
@@ -4075,6 +4163,17 @@
                 const commentValue = document.getElementById('score-comment-input').value;
                 const screenshotBase64 = sessionStorage.getItem('tempScoreScreenshot');
                 const statusDiv = document.getElementById('score-submission-status');
+                const urlParams = new URLSearchParams(window.location.search);
+                const tournamentId = urlParams.get('t');
+                const roundIndex = urlParams.get('r') !== null ? parseInt(urlParams.get('r'), 10) : undefined;
+
+                if (window._eliminated && tournamentId) {
+                    statusDiv.textContent = "🚫 Tu as été éliminé du tournoi.";
+                    statusDiv.style.color = "#ff6b6b";
+                    scoreSubmitBtn.disabled = false;
+                    scoreSubmitBtn.textContent = 'Soumettre';
+                    return;
+                }
 
                 if (isNaN(scoreValue) || scoreValue < 0) {
                     statusDiv.textContent = "Veuillez entrer un score valide.";
@@ -4086,7 +4185,7 @@
                 scoreSubmitBtn.textContent = 'Envoi...';
 
                 try {
-                    await window.submitGameScore(gameId, scoreValue, commentValue, screenshotBase64);
+                    await window.submitGameScore(gameId, scoreValue, commentValue, screenshotBase64, tournamentId, roundIndex);
                     statusDiv.textContent = "Score soumis avec succès pour revue !";
                     statusDiv.style.color = "#00C851";
 
@@ -4503,7 +4602,181 @@
         document.addEventListener('DOMContentLoaded', () => {
             initClock();
             initMouseAutoHide();
+            initTournamentBar();
         });
+
+        function initTournamentBar() {
+            const tParams = new URLSearchParams(window.location.search);
+            const tId = tParams.get('t');
+            const rStr = tParams.get('r');
+            if (!tId || rStr === null || isNaN(parseInt(rStr, 10))) return;
+
+            const roundNum = parseInt(rStr, 10);
+            const bar = document.getElementById('tournament-bar');
+            if (!bar) return;
+
+            bar.style.display = 'flex';
+            document.body.classList.add('tournament-mode');
+
+            const db = window.firebaseDb;
+            if (!db) { bar.innerHTML = '<span style="color:#dc3545;">Firebase non disponible</span>'; return; }
+
+            const { doc, onSnapshot, collection, query, where, orderBy, getDocs } = window.Firestore;
+
+            let unsubTournament = null;
+            let unsubScores = null;
+            let timerInterval = null;
+            let warningPlayed = false;
+
+            const tournamentRef = doc(db, 'tournaments', tId);
+
+            unsubTournament = onSnapshot(tournamentRef, (snap) => {
+                if (!snap.exists) return;
+                const t = snap.data();
+
+                document.getElementById('tb-code').textContent = `#${t.shareCode}`;
+                document.getElementById('tb-round').textContent =
+                    t.currentRoundIndex >= 0 ? `R${t.currentRoundIndex + 1}/${t.games.length}` : '';
+                document.getElementById('tb-leader').style.display = 'none';
+
+                const timerEl = document.getElementById('tb-timer');
+                const statusEl = document.getElementById('tb-status');
+
+                // Detect round advance → redirect to new game
+                if (t.status === 'active' && !t.breakStartTime && t.currentRoundIndex !== roundNum) {
+                    const newGameId = t.games[t.currentRoundIndex];
+                    if (newGameId) {
+                        const base = window.TournoiUtils ? window.TournoiUtils.getGameUrl(newGameId) : `/b/${newGameId}`;
+                        window.location.href = `${base}?t=${tId}&r=${t.currentRoundIndex}`;
+                        return;
+                    }
+                }
+
+                if (t.status === 'active' && !t.breakStartTime) {
+                    statusEl.textContent = 'En cours';
+                    statusEl.style.color = '#28a745';
+
+                    if (timerInterval) clearInterval(timerInterval);
+                    warningPlayed = false;
+
+                    const updateTimer = () => {
+                        const start = t.roundStartTime?.toMillis ? t.roundStartTime.toMillis() : new Date(t.roundStartTime || 0).getTime();
+                        const elapsed = Math.floor((Date.now() - start) / 1000);
+                        const remaining = Math.max(0, (t.roundDurationSec || 0) - elapsed);
+                        timerEl.textContent = TournoiUtils.formatTimer(remaining);
+
+                        if (remaining <= 60 && remaining > 0) {
+                            timerEl.classList.add('timer-warning');
+                            if (!warningPlayed) { warningPlayed = true; playTbBeep(); }
+                        } else if (remaining <= 0) {
+                            timerEl.classList.add('timer-warning');
+                            if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+                        } else {
+                            timerEl.classList.remove('timer-warning');
+                        }
+                    };
+                    updateTimer();
+                    timerInterval = setInterval(updateTimer, 1000);
+                } else if (t.breakStartTime) {
+                    statusEl.textContent = 'Vérification';
+                    statusEl.style.color = '#ffc107';
+                    timerEl.classList.remove('timer-warning');
+                    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+                    const updateBreakTimer = () => {
+                        const remaining = t.pauseDurationSec > 0
+                            ? TournoiUtils.getRemainingSeconds(t.breakStartTime, t.pauseDurationSec)
+                            : 0;
+                        timerEl.textContent = remaining > 0 ? TournoiUtils.formatTimer(remaining) : '🔒';
+                        timerEl.style.color = remaining > 0 ? '#ffc107' : '#dc3545';
+                    };
+                    updateBreakTimer();
+                    timerInterval = setInterval(updateBreakTimer, 1000);
+                } else {
+                    statusEl.textContent = t.status === 'registration' ? 'Inscription' : 'Terminé';
+                    statusEl.style.color = '#aaa';
+                    timerEl.textContent = '--:--';
+                    timerEl.classList.remove('timer-warning');
+                    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+                }
+            });
+
+            const scoresQuery = query(
+                collection(db, 'tournaments', tId, 'roundScores'),
+                where('roundIndex', '==', roundNum),
+                where('verified', '==', true),
+                orderBy('score', 'desc')
+            );
+            let prevTopUserId = null;
+            unsubScores = onSnapshot(scoresQuery, async (snap) => {
+                const scores = [];
+                snap.forEach(d => scores.push({ id: d.id, ...d.data() }));
+                const leaderEl = document.getElementById('tb-leader');
+                if (scores.length === 0) { leaderEl.style.display = 'none'; prevTopUserId = null; return; }
+
+                const top = scores[0];
+                if (top.userId && top.userId !== prevTopUserId) {
+                    bar.classList.remove('tb-flash');
+                    void bar.offsetWidth;
+                    bar.classList.add('tb-flash');
+                }
+                prevTopUserId = top.userId || null;
+
+                let name = top.displayName || 'Anonyme';
+                let photo = top.photoURL || '';
+                try {
+                    const pSnap = await getDocs(collection(tournamentRef, 'participants'));
+                    pSnap.forEach(d => {
+                        if (d.id === top.userId) {
+                            const pd = d.data();
+                            name = pd.displayName || name;
+                            photo = pd.photoURL || photo;
+                        }
+                    });
+                } catch (e) { /* ignore */ }
+                leaderEl.innerHTML = `<span style="font-size:14px;">👑</span><img src="${photo || '../assets/default-avatar.png'}"><span class="name">${name}</span><span class="score">${top.score.toLocaleString()}</span>`;
+                leaderEl.style.display = 'flex';
+            });
+
+            // Listen for player elimination
+            const auth = window.firebaseAuth;
+            let unsubParticipant = null;
+            if (auth && auth.currentUser) {
+                const uid = auth.currentUser.uid;
+                unsubParticipant = onSnapshot(doc(db, 'tournaments', tId, 'participants', uid), (pSnap) => {
+                    const sEl = document.getElementById('tb-status');
+                    if (pSnap.exists && pSnap.data().eliminated) {
+                        window._eliminated = true;
+                        bar.style.background = 'rgba(180, 30, 30, 0.92)';
+                        bar.style.borderBottom = '1px solid #dc3545';
+                        if (sEl) { sEl.textContent = '🚫 Éliminé(e)'; sEl.style.color = '#ff6b6b'; }
+                    } else if (pSnap.exists && !pSnap.data().eliminated) {
+                        window._eliminated = false;
+                        bar.style.background = '';
+                        bar.style.borderBottom = '';
+                    }
+                });
+            }
+
+            window.addEventListener('beforeunload', () => {
+                if (unsubTournament) unsubTournament();
+                if (unsubScores) unsubScores();
+                if (unsubParticipant) unsubParticipant();
+                if (timerInterval) clearInterval(timerInterval);
+            });
+        }
+
+        function playTbBeep() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain); gain.connect(ctx.destination);
+                osc.frequency.value = 880; osc.type = 'sine';
+                gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
+                osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.8);
+            } catch (e) { /* audio not supported */ }
+        }
 
     </script>
 </body>

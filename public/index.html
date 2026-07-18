@@ -42,6 +42,66 @@
       gap: 20px;
       padding: 20px 0;
     }
+
+    #tournament-banner {
+      display: none;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      border: 1px solid #ffd700;
+      border-radius: 8px;
+      margin: 12px auto;
+      max-width: 900px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+    #tournament-banner:hover {
+      border-color: #fff;
+      box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+    }
+    #tournament-banner a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 16px;
+      text-decoration: none;
+      color: #eee;
+      font-size: 13px;
+    }
+    .tb-left { display: flex; align-items: center; gap: 8px; }
+    .tb-icon { font-size: 24px; }
+    .tb-text { display: flex; flex-direction: column; gap: 1px; }
+    .tb-title { color: #ffd700; font-weight: 700; font-size: 13px; }
+    .tb-meta { display: flex; align-items: center; gap: 6px; color: #888; font-size: 11px; }
+    .tb-sep { color: #555; }
+    .tb-code { color: #4a9eff; }
+    .tb-round { color: #aaa; }
+    .tb-players { color: #aaa; }
+    .tb-center { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; }
+    .tb-game { color: #4a9eff; font-size: 12px; }
+    .tb-leader {
+      display: flex; align-items: center; gap: 4px;
+      color: #ccc; font-size: 12px; min-width: 0; overflow: hidden;
+    }
+    .tb-leader img { width: 18px; height: 18px; border-radius: 50%; }
+    .tb-leader .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .tb-leader .score { color: #ffd700; font-weight: 700; margin-left: 2px; }
+    .tb-right { display: flex; align-items: center; }
+    .tb-timer {
+      font-family: 'Courier New', monospace;
+      font-size: 16px; font-weight: 700;
+      color: #4caf50;
+      min-width: 50px; text-align: center;
+    }
+    .tb-timer.timer-warning { color: #f44336; animation: pulse-warning 0.5s ease-in-out infinite alternate; }
+    .tb-flash { animation: tb-flash-gold 0.6s ease-out; }
+    @keyframes pulse-warning { from { opacity: 1; } to { opacity: 0.5; } }
+    @keyframes tb-flash-gold { 0% { box-shadow: 0 0 0 rgba(255,215,0,0); } 50% { box-shadow: 0 0 20px rgba(255,215,0,0.5); } 100% { box-shadow: 0 0 0 rgba(255,215,0,0); } }
+
+    @media (max-width: 600px) {
+      #tournament-banner a { font-size: 11px; gap: 8px; padding: 8px 12px; }
+      .tb-meta { display: none; }
+      .tb-center { display: none; }
+      .tb-timer { font-size: 14px; min-width: 40px; }
+    }
   </style>
   <script src="assets/js/analytics.js"></script>
 </head>
@@ -111,6 +171,31 @@
       </div>
     </header>
 
+    <div id="tournament-banner">
+      <a id="tb-link" href="#">
+        <div class="tb-left">
+          <span class="tb-icon">🏆</span>
+          <div class="tb-text">
+            <span class="tb-title" id="tb-title">Tournoi en cours</span>
+            <div class="tb-meta">
+              <span class="tb-code" id="tb-code"></span>
+              <span class="tb-sep">·</span>
+              <span class="tb-round" id="tb-round"></span>
+              <span class="tb-sep">·</span>
+              <span class="tb-players" id="tb-players"></span>
+            </div>
+          </div>
+        </div>
+        <div class="tb-center">
+          <span class="tb-game" id="tb-game"></span>
+          <span class="tb-leader" id="tb-leader"></span>
+        </div>
+        <div class="tb-right">
+          <span class="tb-timer" id="tb-timer">--:--</span>
+        </div>
+      </a>
+    </div>
+
     <main class="main-content">
       <div class="left-column">
         <!-- Recently Played Games Section -->
@@ -165,6 +250,7 @@
   <script src="assets/js/utils.js"></script>
   <script src="assets/js/main.js"></script>
   <script type="module" src="assets/js/firebase-setup.js"></script>
+  <script src="tournoi/tournament-utils.js"></script>
 
   <script>
     // Collapsible functionality for recently played games section
@@ -411,6 +497,164 @@
         };
         checkAuth();
       }
+    });
+  </script>
+
+  <script>
+    // Tournament banner logic
+    document.addEventListener('DOMContentLoaded', () => {
+      function initTournamentBanner() {
+        if (!window.TournoiUtils) {
+          setTimeout(initTournamentBanner, 200);
+          return;
+        }
+
+        const banner = document.getElementById('tournament-banner');
+        const link = document.getElementById('tb-link');
+        const titleEl = document.getElementById('tb-title');
+        const codeEl = document.getElementById('tb-code');
+        const roundEl = document.getElementById('tb-round');
+        const playersEl = document.getElementById('tb-players');
+        const gameEl = document.getElementById('tb-game');
+        const leaderEl = document.getElementById('tb-leader');
+        const timerEl = document.getElementById('tb-timer');
+
+        let timerInterval = null;
+        let refreshInterval = null;
+        let gamelist = [];
+        let currentTournament = null;
+
+        async function loadGamelist() {
+          try {
+            const isLocal = ['localhost', '127.0.0.1', '0.0.0.0'].includes(window.location.hostname);
+            const url = isLocal ? '/gamelist.json' : 'https://storage.googleapis.com/bonjourarcade/gamelist.json';
+            const r = await fetch(url + '?v=' + Date.now());
+            const data = await r.json();
+            gamelist = data.games || [];
+          } catch (e) {
+            console.error('Failed to load gamelist:', e);
+          }
+        }
+
+        function getGameName(gameId) {
+          const g = gamelist.find(x => x.id === gameId);
+          return g ? g.title : gameId;
+        }
+
+        async function refreshTournament() {
+          try {
+            const result = await TournoiUtils.callFunction('getActiveTournament', {});
+            if (result && result.success && result.tournament) {
+              currentTournament = result;
+              updateBanner(result);
+            } else {
+              console.log('[Tournament] No active tournament found');
+              currentTournament = null;
+              banner.style.display = 'none';
+              clearTimer();
+            }
+          } catch (e) {
+            currentTournament = null;
+            banner.style.display = 'none';
+            clearTimer();
+          }
+        }
+
+        function updateBanner(data) {
+          const t = data.tournament;
+          link.href = '/tournoi/play/?t=' + t.id;
+
+          titleEl.textContent = t.status === 'registration' ? 'Inscriptions ouvertes' :
+            t.status === 'finished' ? 'Tournoi terminé' : 'Tournoi en cours';
+
+          codeEl.textContent = 'Code : ' + t.shareCode;
+          roundEl.textContent =
+            t.status === 'registration' ? 'En attente de joueurs' :
+            t.status === 'finished' ? 'Terminé' :
+            'Ronde ' + (t.currentRoundIndex + 1) + '/' + (t.games ? t.games.length : '?');
+          playersEl.textContent = (data.participants ? data.participants.length : 0) + ' joueur' + ((data.participants && data.participants.length > 1) ? 's' : '');
+
+          if (t.status === 'active' && t.games && t.games[t.currentRoundIndex]) {
+            gameEl.textContent = '🎮 ' + getGameName(t.games[t.currentRoundIndex]);
+            gameEl.style.display = '';
+          } else {
+            gameEl.textContent = '';
+            gameEl.style.display = 'none';
+          }
+
+          if (t.status === 'active' && !t.breakStartTime) {
+            if (data.roundScores && data.roundScores.length > 0) {
+              const top = data.roundScores[0];
+              leaderEl.innerHTML = '👑 <img src="' + (top.photoURL || '../assets/default-avatar.png') + '" class="avatar"> <span class="name">' + top.displayName + '</span><span class="score">' + (top.score || 0).toLocaleString() + '</span>';
+              leaderEl.style.display = '';
+            } else {
+              leaderEl.style.display = 'none';
+            }
+            startTimer(t);
+          } else if (t.breakStartTime) {
+            leaderEl.innerHTML = '<span class="name" style="color:#ffc107">☕ Vérification</span>';
+            leaderEl.style.display = '';
+            startBreakTimer(t);
+          } else {
+            leaderEl.style.display = 'none';
+            clearTimer();
+            timerEl.textContent = t.status === 'finished' ? 'Terminé' : '--:--';
+          }
+
+          banner.style.display = 'flex';
+          banner.classList.remove('tb-flash');
+          void banner.offsetWidth;
+          banner.classList.add('tb-flash');
+        }
+
+        function getTimestampSeconds(ts) {
+          if (!ts) return 0;
+          if (typeof ts._seconds === 'number') return ts._seconds;
+          if (ts.toMillis) return ts.toMillis() / 1000;
+          const d = new Date(ts).getTime();
+          return isNaN(d) ? 0 : d / 1000;
+        }
+
+        function getRemaining(startTime, durationSec) {
+          const start = getTimestampSeconds(startTime);
+          if (!start) return 0;
+          const elapsed = Math.floor(Date.now() / 1000 - start);
+          return Math.max(0, durationSec - elapsed);
+        }
+
+        function startTimer(t) {
+          clearTimer();
+          const update = () => {
+            const remaining = getRemaining(t.roundStartTime, t.roundDurationSec);
+            timerEl.textContent = TournoiUtils.formatTimer(remaining);
+            timerEl.classList.toggle('timer-warning', remaining <= 60);
+          };
+          update();
+          timerInterval = setInterval(update, 1000);
+        }
+
+        function startBreakTimer(t) {
+          clearTimer();
+          const update = () => {
+            if (!t.pauseDurationSec) { timerEl.textContent = '🔒'; return; }
+            const remaining = getRemaining(t.breakStartTime, t.pauseDurationSec);
+            timerEl.textContent = remaining > 0 ? TournoiUtils.formatTimer(remaining) : '🔒';
+            timerEl.classList.remove('timer-warning');
+          };
+          update();
+          timerInterval = setInterval(update, 1000);
+        }
+
+        function clearTimer() {
+          if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+        }
+
+        loadGamelist();
+        refreshTournament();
+        if (refreshInterval) clearInterval(refreshInterval);
+        refreshInterval = setInterval(refreshTournament, 30000);
+      }
+      initTournamentBanner();
     });
   </script>
 

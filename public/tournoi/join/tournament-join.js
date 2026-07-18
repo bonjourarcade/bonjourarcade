@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     shareCode = shareCode.trim().toUpperCase();
   }
 
-  setupAuth();
+  setupAuth(tournamentId);
 
   $('lookup-code-btn').addEventListener('click', handleCodeSubmit);
   $('code-input').addEventListener('keydown', (e) => {
@@ -48,14 +48,15 @@ function $(id) { return document.getElementById(id); }
 function show(id) { $(id).classList.remove('hidden'); }
 function hide(id) { $(id).classList.add('hidden'); }
 
-function setupAuth() {
+function setupAuth(tournamentId) {
   window.onFirebaseAuthStateChanged(async (user) => {
     currentUser = user;
     if (user) {
       hide('login-state');
-      hide('code-input-state');
       if (shareCode) {
         await findAndShowTournament();
+      } else if (tournamentId) {
+        showError('Tournoi introuvable. Vérifie le lien.');
       } else {
         show('code-input-state');
       }

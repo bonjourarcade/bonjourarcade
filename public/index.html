@@ -504,7 +504,7 @@
     // Tournament banner logic
     document.addEventListener('DOMContentLoaded', () => {
       function initTournamentBanner() {
-        if (!window.TournoiUtils) {
+        if (!window.TournoiUtils || !window.onFirebaseAuthStateChanged) {
           setTimeout(initTournamentBanner, 200);
           return;
         }
@@ -523,6 +523,7 @@
         let refreshInterval = null;
         let gamelist = [];
         let currentTournament = null;
+        let currentUser = null;
 
         async function loadGamelist() {
           try {
@@ -548,7 +549,6 @@
               currentTournament = result;
               updateBanner(result);
             } else {
-              console.log('[Tournament] No active tournament found');
               currentTournament = null;
               banner.style.display = 'none';
               clearTimer();
@@ -562,7 +562,8 @@
 
         function updateBanner(data) {
           const t = data.tournament;
-          link.href = '/tournoi/play/?t=' + t.id;
+          const isParticipant = currentUser && data.participants && data.participants.some(p => p.uid === currentUser.uid);
+          link.href = isParticipant ? '/tournoi/play/?t=' + t.id : '/tournoi/join/?t=' + t.id;
 
           titleEl.textContent = t.status === 'registration' ? 'Inscriptions ouvertes' :
             t.status === 'finished' ? 'Tournoi terminé' : 'Tournoi en cours';
@@ -650,6 +651,12 @@
         }
 
         loadGamelist();
+        if (window.onFirebaseAuthStateChanged) {
+          window.onFirebaseAuthStateChanged((user) => {
+            currentUser = user;
+            if (currentTournament) updateBanner(currentTournament);
+          });
+        }
         refreshTournament();
         if (refreshInterval) clearInterval(refreshInterval);
         refreshInterval = setInterval(refreshTournament, 30000);

@@ -10,13 +10,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   const tournamentId = params.get('t');
 
   if (tournamentId && !shareCode) {
-    try {
-      const tDoc = await getDoc(doc(window.firebaseDb, 'tournaments', tournamentId));
-      if (tDoc.exists()) {
-        shareCode = tDoc.data().shareCode;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        const tDoc = await getDoc(doc(window.firebaseDb, 'tournaments', tournamentId));
+        if (tDoc.exists()) {
+          shareCode = tDoc.data().shareCode;
+          break;
+        }
+      } catch (e) {
+        console.warn(`[Tournament] Resolve attempt ${attempt + 1} failed:`, e.message);
+        if (attempt < 2) await new Promise(r => setTimeout(r, 500));
       }
-    } catch (e) {
-      console.error('Error resolving tournament ID to share code:', e);
     }
   }
 

@@ -114,15 +114,19 @@ $('generate-games-btn').addEventListener('click', () => {
 async function checkActiveTournaments() {
   try {
     const db = window.firebaseDb;
-    const snapshot = await getDocs(query(collection(db, 'tournaments'), where('adminId', '==', currentUser.uid), where('status', 'in', ['registration', 'active']), fsLimit(10)));
+    const snapshot = await getDocs(query(collection(db, 'tournaments'), where('adminId', '==', currentUser.uid)));
     const list = $('active-tournaments-list');
     list.innerHTML = '';
-    if (snapshot.empty) {
+    const active = snapshot.docs.filter(d => {
+      const s = d.data().status;
+      return s === 'registration' || s === 'active';
+    }).slice(0, 10);
+    if (active.length === 0) {
       $('existing-tournaments').style.display = 'none';
       return;
     }
     $('existing-tournaments').style.display = 'block';
-    snapshot.forEach(doc => {
+    active.forEach(doc => {
       const t = doc.data();
       const div = document.createElement('div');
       div.className = 'participant-chip';

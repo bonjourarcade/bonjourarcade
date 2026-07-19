@@ -309,13 +309,29 @@ function setupPendingScoresListener(id, roundIndex) {
         <span>${p.displayName}</span>
         <span style="font-weight:700;">${p.score.toLocaleString()}</span>
         ${screenshot ? `<img src="${screenshot}" class="pending-screenshot-thumb" data-src="${screenshot}">` : ''}
-        <button class="btn-success btn-sm verify-score-btn" data-score-id="${p.gameScoreId}" style="margin-left:auto;">✓</button>
+        <label class="notif-label" title="Notifier sur Discord">
+          <input type="checkbox" class="notif-checkbox" data-score-id="${p.gameScoreId}" checked>
+          <span>🔔</span>
+        </label>
+        <button class="btn-success btn-sm verify-score-btn" data-score-id="${p.gameScoreId}">✓</button>
+        <button class="btn-danger btn-sm reject-score-btn" data-score-id="${p.gameScoreId}">✗</button>
       </div>`;
     }).join('');
 
     document.querySelectorAll('.verify-score-btn').forEach(btn => {
       btn.addEventListener('click', async () => {
-        await verifyPendingScore(btn.dataset.scoreId);
+        const scoreId = btn.dataset.scoreId;
+        const checkbox = document.querySelector(`.notif-checkbox[data-score-id="${scoreId}"]`);
+        const notify = checkbox ? checkbox.checked : false;
+        await verifyPendingScore(scoreId, notify);
+      });
+    });
+
+    document.querySelectorAll('.reject-score-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const scoreId = btn.dataset.scoreId;
+        if (!confirm('Rejeter ce score ? Il sera supprimé définitivement.')) return;
+        await rejectPendingScore(scoreId);
       });
     });
 
@@ -570,14 +586,31 @@ document.getElementById('create-toggle').addEventListener('click', () => {
   icon.textContent = isHidden ? '▶' : '▼';
 });
 
-async function verifyPendingScore(scoreId) {
+async function verifyPendingScore(scoreId, notifyWebhooks = false) {
   if (!scoreId) { showToast('ID de score manquant'); return; }
   try {
     const fn = window.httpsCallable
       ? window.httpsCallable(window.firebaseFunctions, 'verifyScore')
       : (await import('https://www.gstatic.com/firebasejs/11.0.1/firebase-functions.js')).httpsCallable(window.firebaseFunctions, 'verifyScore');
-    await fn({ scoreId, notifyWebhooks: false });
-    showToast('Score vérifié ✓');
+    await fn({ scoreId, notifyWebhooks });
+    showToast(notifyWebhooks ? 'Score vérifié + notification Discord ✓' : 'Score vérifié ✓');
+  } catch (e) {
+    showToast('Erreur: ' + (e.message || e));
+  }
+}
+
+async function rejectPendingScore(scoreId) {
+  if (!scoreId) { showToast('ID de score manquant'); return; }
+  try {
+    if (typeof window.deleteGameScore === 'function') {
+      await window.deleteGameScore(scoreId);
+    } else {
+      const fn = window.httpsCallable
+        ? window.httpsCallable(window.firebaseFunctions, 'deleteScore')
+        : (await import('https://www.gstatic.com/firebasejs/11.0.1/firebase-functions.js')).httpsCallable(window.firebaseFunctions, 'deleteScore');
+      await fn({ scoreId });
+    }
+    showToast('Score rejeté ✗');
   } catch (e) {
     showToast('Erreur: ' + (e.message || e));
   }

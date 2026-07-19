@@ -2788,32 +2788,47 @@
                     hideOnLoad: false // We'll hide it manually when the game is ready
                 });
 
-                // --- Optionally disable save/load for featured game ---
-                if (window.BA_disableSaveStatesForFeaturedGame !== false) {
-                    try {
-                        const currentGameResponse = await fetch('/api/current-game');
+                // --- Disable save/load for featured game or tournament game ---
+                {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const tournamentId = urlParams.get('t');
 
-                        if (currentGameResponse.ok) {
-                            let featuredGameId = await currentGameResponse.text();
-                            featuredGameId = featuredGameId.trim();
+                    if (tournamentId) {
+                        console.log("Tournament game detected. Disabling save/load buttons.");
+                        if (window.EJS_Buttons) {
+                            window.EJS_Buttons.saveState = false;
+                            window.EJS_Buttons.loadState = false;
+                            window.EJS_Buttons.quickSave = false;
+                            window.EJS_Buttons.quickLoad = false;
+                            window.EJS_Buttons.saveSavFiles = false;
+                            window.EJS_Buttons.loadSavFiles = false;
+                        }
+                    } else if (window.BA_disableSaveStatesForFeaturedGame !== false) {
+                        try {
+                            const currentGameResponse = await fetch('/api/current-game');
 
-                            if (featuredGameId === gameId) {
-                                console.log("Featured game detected. Disabling save/load buttons.");
+                            if (currentGameResponse.ok) {
+                                let featuredGameId = await currentGameResponse.text();
+                                featuredGameId = featuredGameId.trim();
 
-                                if (window.EJS_Buttons) {
-                                    window.EJS_Buttons.saveState = false;
-                                    window.EJS_Buttons.loadState = false;
-                                    window.EJS_Buttons.quickSave = false;
-                                    window.EJS_Buttons.quickLoad = false;
-                                    window.EJS_Buttons.saveSavFiles = false;
-                                    window.EJS_Buttons.loadSavFiles = false;
+                                if (featuredGameId === gameId) {
+                                    console.log("Featured game detected. Disabling save/load buttons.");
+
+                                    if (window.EJS_Buttons) {
+                                        window.EJS_Buttons.saveState = false;
+                                        window.EJS_Buttons.loadState = false;
+                                        window.EJS_Buttons.quickSave = false;
+                                        window.EJS_Buttons.quickLoad = false;
+                                        window.EJS_Buttons.saveSavFiles = false;
+                                        window.EJS_Buttons.loadSavFiles = false;
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    catch (error) {
-                        console.warn('Could not fetch current game from API to check featured status:', error);
+                        catch (error) {
+                            console.warn('Could not fetch current game from API to check featured status:', error);
+                        }
                     }
                 }
 

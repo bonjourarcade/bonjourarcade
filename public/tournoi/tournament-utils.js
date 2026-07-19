@@ -29,7 +29,11 @@ const TournoiUtils = {
 
   renderScoreboardHtml(roundScores, participants, currentRoundIndex) {
     const scoresMap = {};
-    roundScores.forEach(rs => { scoresMap[rs.userId] = rs.score; });
+    roundScores.forEach(rs => {
+      if (!scoresMap[rs.userId] || rs.score > scoresMap[rs.userId]) {
+        scoresMap[rs.userId] = rs.score;
+      }
+    });
 
     const ranked = Object.entries(participants)
       .map(([uid, p]) => ({

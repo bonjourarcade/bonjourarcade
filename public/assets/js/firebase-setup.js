@@ -89,20 +89,40 @@ window.checkFirebaseAdminAccess = async () => {
 
 // Global score submission function
 window.submitGameScore = async (gameId, score, comment, screenshotBase64, tournamentId, roundIndex) => {
-    const submitScoreFn = httpsCallable(functions, 'submitScore');
     try {
-        const result = await submitScoreFn({
-            gameId: gameId,
-            score: score,
-            comment: comment || undefined,
-            screenshotBase64: screenshotBase64 || undefined,
-            tournamentId: tournamentId || undefined,
-            roundIndex: typeof roundIndex === 'number' ? roundIndex : undefined,
-        });
-        return result.data;
-    } catch (error) {
-        console.error("Score submission error:", error);
-        throw error;
+        if (auth.currentUser) {
+            await auth.currentUser.getIdToken(true);
+        }
+    } catch (tokenError) {
+        console.warn("Token refresh failed, proceeding anyway:", tokenError);
+    }
+
+    const submitScoreFn = httpsCallable(functions, 'submitScore');
+    const body = {
+        gameId: gameId,
+        score: score,
+        comment: comment || undefined,
+        screenshotBase64: screenshotBase64 || undefined,
+        tournamentId: tournamentId || undefined,
+        roundIndex: typeof roundIndex === 'number' ? roundIndex : undefined,
+    };
+
+    const MAX_RETRIES = 2;
+    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+        try {
+            const result = await submitScoreFn(body);
+            return result.data;
+        } catch (error) {
+            const isRetryable = error && typeof error.code === 'string' &&
+                (error.code === 'functions/internal' || error.code === 'functions/unavailable');
+            if (isRetryable && attempt < MAX_RETRIES - 1) {
+                console.warn(`Score submission attempt ${attempt + 1} failed, retrying...`, error);
+                await new Promise(r => setTimeout(r, 1000 * (attempt + 1)));
+                continue;
+            }
+            console.error("Score submission error:", error);
+            throw error;
+        }
     }
 };
 

@@ -3893,129 +3893,136 @@
                     }
                 }, 0);
 
-                // Helper to fallback to HTML canvas if WebGL screenshot fails or gives a black image
+                // Helper to retry screenshot if the emulator returns a black frame between renders
                 const captureCanvasDirectly = () => {
-                    // Try to use a slight delay and requestAnimationFrame to let any pending draw operations finish
-                    setTimeout(() => {
+                    let attempts = 0;
+                    const MAX_ATTEMPTS = 20;
+                    const statusEl = document.getElementById('score-submission-status');
+
+                    function scheduleCapture() {
                         requestAnimationFrame(() => {
                             const canvas = document.querySelector('#game canvas');
-                            if (canvas) {
-                                try {
-                                    // Create an offscreen canvas with the exact dimensions of the WebGL canvas
-                                    // By using the same width/height, we avoid any devicePixelRatio scaling issues
-                                    // that `glReadPixels` inside RetroArch has on mobile devices.
-                                    const offscreenCanvas = document.createElement("canvas");
-                                    offscreenCanvas.width = canvas.width;
-                                    offscreenCanvas.height = canvas.height;
-                                    const offscreenCtx = offscreenCanvas.getContext("2d", { alpha: false });
+                            if (!canvas) {
+                                sessionStorage.removeItem('tempScoreScreenshot');
+                                screenshotPreview.style.display = 'none';
+                                if (noScreenshot) noScreenshot.style.display = 'block';
+                                return;
+                            }
 
-                                    // Draw the WebGL canvas onto our 2D offscreen canvas
-                                    // Since we injected preserveDrawingBuffer=true earlier, this will work.
-                                    offscreenCtx.drawImage(canvas, 0, 0);
+                            try {
+                                const offscreenCanvas = document.createElement("canvas");
+                                offscreenCanvas.width = canvas.width;
+                                offscreenCanvas.height = canvas.height;
+                                const offscreenCtx = offscreenCanvas.getContext("2d", { alpha: false });
+                                offscreenCtx.drawImage(canvas, 0, 0);
 
-                                    // Function to auto-crop black letterboxing borders
-                                    const autoCropCanvas = (srcCanvas) => {
-                                        const ctx = srcCanvas.getContext('2d');
-                                        const w = srcCanvas.width;
-                                        const h = srcCanvas.height;
-                                        const imageData = ctx.getImageData(0, 0, w, h);
-                                        const data = imageData.data;
-
-                                        let top = -1, bottom = -1, left = -1, right = -1;
-
-                                        // Find top
-                                        outTop: for (let y = 0; y < h; y++) {
-                                            for (let x = 0; x < w; x++) {
-                                                const i = (y * w + x) * 4;
-                                                if (data[i] > 4 || data[i + 1] > 4 || data[i + 2] > 4) {
-                                                    top = y;
-                                                    break outTop;
-                                                }
-                                            }
-                                        }
-
-                                        // If image is virtually entirely black, skip cropping
-                                        if (top === -1) return srcCanvas;
-
-                                        // Find bottom
-                                        outBottom: for (let y = h - 1; y >= 0; y--) {
-                                            for (let x = 0; x < w; x++) {
-                                                const i = (y * w + x) * 4;
-                                                if (data[i] > 4 || data[i + 1] > 4 || data[i + 2] > 4) {
-                                                    bottom = y;
-                                                    break outBottom;
-                                                }
-                                            }
-                                        }
-
-                                        // Find left
-                                        outLeft: for (let x = 0; x < w; x++) {
-                                            for (let y = top; y <= bottom; y++) {
-                                                const i = (y * w + x) * 4;
-                                                if (data[i] > 4 || data[i + 1] > 4 || data[i + 2] > 4) {
-                                                    left = x;
-                                                    break outLeft;
-                                                }
-                                            }
-                                        }
-
-                                        // Find right
-                                        outRight: for (let x = w - 1; x >= 0; x--) {
-                                            for (let y = top; y <= bottom; y++) {
-                                                const i = (y * w + x) * 4;
-                                                if (data[i] > 4 || data[i + 1] > 4 || data[i + 2] > 4) {
-                                                    right = x;
-                                                    break outRight;
-                                                }
-                                            }
-                                        }
-
-                                        const cropW = right - left + 1;
-                                        const cropH = bottom - top + 1;
-
-                                        // Sanity check: don't crop if it's too small or no cropping needed
-                                        if (cropW < 50 || cropH < 50 || (cropW === w && cropH === h)) {
-                                            return srcCanvas;
-                                        }
-
-                                        const croppedCanvas = document.createElement('canvas');
-                                        croppedCanvas.width = cropW;
-                                        croppedCanvas.height = cropH;
-                                        const croppedCtx = croppedCanvas.getContext('2d', { alpha: false });
-                                        croppedCtx.drawImage(srcCanvas, left, top, cropW, cropH, 0, 0, cropW, cropH);
-                                        return croppedCanvas;
-                                    };
-
-                                    const finalCanvas = autoCropCanvas(offscreenCanvas);
-                                    const dataUrl = finalCanvas.toDataURL('image/jpeg', 0.8);
-
-                                    // Now extract base64 data to store for uploading
-                                    const base64Data = dataUrl.split(',')[1];
-                                    sessionStorage.setItem('tempScoreScreenshot', base64Data);
-
-                                    // Update preview UI
-                                    screenshotPreview.src = dataUrl;
-                                    screenshotPreview.style.display = 'block';
-                                    const enlargeHint = document.getElementById('screenshot-enlarge-hint');
-                                    if (enlargeHint) enlargeHint.style.display = 'block';
-                                    if (noScreenshot) noScreenshot.style.display = 'none';
-                                } catch (e) {
-                                    console.error("Canvas screenshot failed:", e);
-                                    sessionStorage.removeItem('tempScoreScreenshot');
-                                    screenshotPreview.style.display = 'none';
-                                    if (noScreenshot) noScreenshot.style.display = 'block';
+                                // Sample pixels to detect all-black frame (between renders)
+                                const imageData = offscreenCtx.getImageData(0, 0, offscreenCanvas.width, offscreenCanvas.height);
+                                const data = imageData.data;
+                                let nonBlackPixels = 0;
+                                for (let i = 0; i < data.length; i += 16) {
+                                    if (data[i] > 4 || data[i + 1] > 4 || data[i + 2] > 4) {
+                                        nonBlackPixels++;
+                                    }
                                 }
-                            } else {
+
+                                if (nonBlackPixels < 3 && attempts < MAX_ATTEMPTS) {
+                                    attempts++;
+                                    if (statusEl) statusEl.textContent = `Capture en cours... (tentative ${attempts})`;
+                                    setTimeout(scheduleCapture, 30 + attempts * 15);
+                                    return;
+                                }
+
+                                // Function to auto-crop black letterboxing borders
+                                const autoCropCanvas = (srcCanvas) => {
+                                    const ctx = srcCanvas.getContext('2d');
+                                    const w = srcCanvas.width;
+                                    const h = srcCanvas.height;
+                                    const imgData = ctx.getImageData(0, 0, w, h);
+                                    const px = imgData.data;
+
+                                    let top = -1, bottom = -1, left = -1, right = -1;
+
+                                    outTop: for (let y = 0; y < h; y++) {
+                                        for (let x = 0; x < w; x++) {
+                                            const i = (y * w + x) * 4;
+                                            if (px[i] > 4 || px[i + 1] > 4 || px[i + 2] > 4) {
+                                                top = y;
+                                                break outTop;
+                                            }
+                                        }
+                                    }
+
+                                    if (top === -1) return srcCanvas;
+
+                                    outBottom: for (let y = h - 1; y >= 0; y--) {
+                                        for (let x = 0; x < w; x++) {
+                                            const i = (y * w + x) * 4;
+                                            if (px[i] > 4 || px[i + 1] > 4 || px[i + 2] > 4) {
+                                                bottom = y;
+                                                break outBottom;
+                                            }
+                                        }
+                                    }
+
+                                    outLeft: for (let x = 0; x < w; x++) {
+                                        for (let y = top; y <= bottom; y++) {
+                                            const i = (y * w + x) * 4;
+                                            if (px[i] > 4 || px[i + 1] > 4 || px[i + 2] > 4) {
+                                                left = x;
+                                                break outLeft;
+                                            }
+                                        }
+                                    }
+
+                                    outRight: for (let x = w - 1; x >= 0; x--) {
+                                        for (let y = top; y <= bottom; y++) {
+                                            const i = (y * w + x) * 4;
+                                            if (px[i] > 4 || px[i + 1] > 4 || px[i + 2] > 4) {
+                                                right = x;
+                                                break outRight;
+                                            }
+                                        }
+                                    }
+
+                                    const cropW = right - left + 1;
+                                    const cropH = bottom - top + 1;
+
+                                    if (cropW < 50 || cropH < 50 || (cropW === w && cropH === h)) {
+                                        return srcCanvas;
+                                    }
+
+                                    const croppedCanvas = document.createElement('canvas');
+                                    croppedCanvas.width = cropW;
+                                    croppedCanvas.height = cropH;
+                                    const croppedCtx = croppedCanvas.getContext('2d', { alpha: false });
+                                    croppedCtx.drawImage(srcCanvas, left, top, cropW, cropH, 0, 0, cropW, cropH);
+                                    return croppedCanvas;
+                                };
+
+                                const finalCanvas = autoCropCanvas(offscreenCanvas);
+                                const dataUrl = finalCanvas.toDataURL('image/jpeg', 0.8);
+                                const base64Data = dataUrl.split(',')[1];
+                                sessionStorage.setItem('tempScoreScreenshot', base64Data);
+
+                                screenshotPreview.src = dataUrl;
+                                screenshotPreview.style.display = 'block';
+                                const enlargeHint = document.getElementById('screenshot-enlarge-hint');
+                                if (enlargeHint) enlargeHint.style.display = 'block';
+                                if (noScreenshot) noScreenshot.style.display = 'none';
+                                if (statusEl) statusEl.textContent = '';
+                            } catch (e) {
+                                console.error("Canvas screenshot failed:", e);
                                 sessionStorage.removeItem('tempScoreScreenshot');
                                 screenshotPreview.style.display = 'none';
                                 if (noScreenshot) noScreenshot.style.display = 'block';
                             }
                         });
-                    }, 50);
+                    }
+
+                    setTimeout(scheduleCapture, 50);
                 };
 
-                // Always use the direct canvas approach. The native EmulatorJS approach has bugs
-                // with glReadPixels on mobile devices with high DPR (resulting in 1/3 filled screens or black screens)
                 captureCanvasDirectly();
 
                 // Check auth status

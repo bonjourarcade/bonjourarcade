@@ -645,10 +645,7 @@
                 const sortedScores = Array.from(playerBestScores.values())
                     .sort((a, b) => b.score - a.score)
 
-                return {
-                    scores: sortedScores,
-                    oldestPlayerId: oldestScore ? oldestScore.userId : null
-                };
+                return { scores: sortedScores };
             } catch (error) {
                 console.error('Error fetching leaderboard for', gameId, ':', error);
                 return null;
@@ -703,12 +700,11 @@
                     return;
                 }
 
-                const { scores, oldestPlayerId } = result;
+                const { scores } = result;
 
                 let leaderboardHTML = '<div class="leaderboard-title">🏆 Top scores</div>';
                 scores.forEach((score, index) => {
                     const rankEmoji = index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉';
-                    const isOldestPlayer = oldestPlayerId && score.userId === oldestPlayerId;
                     const safePlayerName = escapeHtml(score.player || 'Joueur inconnu');
                     const safeComment = score.comment ? score.comment.substring(0, 100) : '';
                     const commentAttr = safeComment ? ` data-comment="${escapeHtml(safeComment)}"` : '';
@@ -718,7 +714,7 @@
                         <div class="leaderboard-entry"${commentAttr}>
                             <span class="leaderboard-rank">${index < 3 ? rankEmoji : (index + 1) + '.'}</span>
                             <span class="leaderboard-player">${safePlayerName}${commentIndicator}</span>
-                            <span class="leaderboard-score">${isOldestPlayer ? '🍪 ' : ''}${score.score.toLocaleString()}</span>
+                            <span class="leaderboard-score">${score.score.toLocaleString()}</span>
                         </div>
                     `;
                 });

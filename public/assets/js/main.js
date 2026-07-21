@@ -1102,20 +1102,6 @@ async function fetchFeaturedGameLeaderboard(gameId, isRefresh = false) {
             throw new Error('Invalid response format');
         }
 
-        // Find the oldest score (first submitted) among all scores
-        let oldestScore = null;
-        let oldestTimestamp = Infinity;
-
-        data.result.scores.forEach(score => {
-            if (score.date && score.date._seconds) {
-                const timestamp = score.date._seconds;
-                if (timestamp < oldestTimestamp) {
-                    oldestTimestamp = timestamp;
-                    oldestScore = score;
-                }
-            }
-        });
-
         // Get best score for each unique player
         const playerBestScores = new Map();
 
@@ -1160,10 +1146,6 @@ async function fetchFeaturedGameLeaderboard(gameId, isRefresh = false) {
             return;
         }
 
-        // Identify if the oldest score's player is in the top 10
-        const oldestPlayerId = oldestScore ? oldestScore.userId : null;
-        const isOldestInTop10 = oldestPlayerId && sortedScores.some(score => score.userId === oldestPlayerId);
-
         // Helper function to get initial from player name
         function getPlayerInitial(playerName) {
             if (!playerName) return '?';
@@ -1200,8 +1182,7 @@ async function fetchFeaturedGameLeaderboard(gameId, isRefresh = false) {
                     const currentScore = currentEntries[i]?.querySelector('.featured-leaderboard-score')?.textContent?.replace(/\s/g, '');
 
                     const score = sortedScores[i];
-                    const isOldestPlayer = isOldestInTop10 && score.userId === oldestPlayerId;
-                    const newScoreText = `${isOldestPlayer ? '🍪 ' : ''}${score.score.toLocaleString()}`;
+                    const newScoreText = `${score.score.toLocaleString()}`;
 
                     const newPlayer = score.player;
                     const normalizedNewScore = newScoreText.replace(/\s/g, '');
@@ -1231,9 +1212,6 @@ async function fetchFeaturedGameLeaderboard(gameId, isRefresh = false) {
             const initial = getPlayerInitial(score.player);
             const avatarColor = getAvatarColor(score.player);
 
-            // Check if this is the player with the oldest score
-            const isOldestPlayer = isOldestInTop10 && score.userId === oldestPlayerId;
-
             // Avatar content: use photoURL if available, otherwise fallback to initial
             const avatarContent = score.playerPhotoUrl
                 ? `<img src="${escapeHtml(score.playerPhotoUrl)}" alt="Avatar de ${playerName}" loading="lazy" referrerpolicy="no-referrer">`
@@ -1260,7 +1238,7 @@ async function fetchFeaturedGameLeaderboard(gameId, isRefresh = false) {
                     <div class="featured-leaderboard-rank">${rankText}</div>
                     <div class="featured-leaderboard-avatar" style="background-color: ${score.playerPhotoUrl ? 'transparent' : avatarColor}">${avatarContent}</div>
                     ${playerMarkup}
-                    <div class="featured-leaderboard-score">${isOldestPlayer ? '🍪 ' : ''}${score.score.toLocaleString()}</div>
+                    <div class="featured-leaderboard-score">${score.score.toLocaleString()}</div>
                     ${mobileComment}
                 </div>
             `;

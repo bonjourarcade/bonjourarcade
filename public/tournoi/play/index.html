@@ -86,6 +86,11 @@
     .info-line { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #2a2a4a; font-size: 0.9rem; }
     .info-line .label { color: #888; }
     .info-line .value { color: #e0e0e0; }
+    .entry .entry-meta { display: inline-flex; gap: 4px; margin-left: 4px; flex-shrink: 0; }
+    .entry .entry-meta span { font-size: 0.9rem; cursor: default; line-height: 1; }
+    .entry .entry-meta .meta-screenshot { cursor: pointer; }
+    #screenshot-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 3000; cursor: pointer; }
+    #screenshot-modal img { max-width: 90vw; max-height: 90vh; border-radius: 8px; }
   </style>
 </head>
 <body>
@@ -187,6 +192,9 @@
     </div>
   </div>
 
+  <div id="screenshot-modal">
+    <img id="screenshot-modal-img" src="">
+  </div>
   <script type="module" src="../../assets/js/firebase-setup.js"></script>
   <script type="module" src="../tournament-utils.js"></script>
   <script type="module" src="tournament-play.js"></script>

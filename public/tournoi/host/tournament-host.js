@@ -364,6 +364,7 @@ function renderParticipants(participants) {
 function renderScoreboard(roundScores) {
   const html = TournoiUtils.renderScoreboardHtml(roundScores, currentParticipants, lastRoundIndex);
   $('scoreboard-entries').innerHTML = html;
+  TournoiUtils.enrichScoreboardEntries('scoreboard-entries');
 }
 
 async function renderResults(id) {

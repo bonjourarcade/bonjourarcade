@@ -356,10 +356,10 @@ function renderScoreboard(roundScores, currentRoundIndex, cutoffs) {
     snap.forEach(d => { participants[d.id] = d.data(); });
 
     const cutoff = cutoffs ? cutoffs[currentRoundIndex] : 0;
-    const scoresMap = {};
+    const bestEntry = {};
     roundScores.forEach(rs => {
-      if (!scoresMap[rs.userId] || rs.score > scoresMap[rs.userId]) {
-        scoresMap[rs.userId] = rs.score;
+      if (!bestEntry[rs.userId] || rs.score > bestEntry[rs.userId].score) {
+        bestEntry[rs.userId] = { score: rs.score, gameScoreId: rs.gameScoreId };
       }
     });
 
@@ -368,7 +368,8 @@ function renderScoreboard(roundScores, currentRoundIndex, cutoffs) {
         uid,
         name: p.displayName,
         photoURL: p.photoURL,
-        score: scoresMap[uid] || 0,
+        score: bestEntry[uid]?.score || 0,
+        gameScoreId: bestEntry[uid]?.gameScoreId || null,
         eliminated: p.eliminated,
       }))
       .sort((a, b) => b.score - a.score);
@@ -383,7 +384,8 @@ function renderScoreboard(roundScores, currentRoundIndex, cutoffs) {
         const isDanger = currentRoundIndex > 0 && cutoff > 0 && i >= cutoff;
         const statusClass = isDanger ? 'danger' : 'safe';
         const avatar = p.photoURL || '../assets/default-avatar.png';
-        html += `<div class="entry ${statusClass} ${isMe ? 'me' : ''}">
+        const gsAttr = p.gameScoreId ? ` data-game-score-id="${p.gameScoreId}"` : '';
+        html += `<div class="entry ${statusClass} ${isMe ? 'me' : ''}"${gsAttr}>
           <span class="rank">${i + 1}.</span>
           <img src="${avatar}" class="avatar">
           <span class="name">${p.name}${isMe ? '<span class="my-badge">MOI</span>' : ''}</span>
@@ -397,7 +399,8 @@ function renderScoreboard(roundScores, currentRoundIndex, cutoffs) {
       eliminated.forEach((p, i) => {
         const isMe = p.uid === myUid;
         const avatar = p.photoURL || '../assets/default-avatar.png';
-        html += `<div class="entry eliminated ${isMe ? 'me' : ''}">
+        const gsAttr = p.gameScoreId ? ` data-game-score-id="${p.gameScoreId}"` : '';
+        html += `<div class="entry eliminated ${isMe ? 'me' : ''}"${gsAttr}>
           <span class="rank">${active.length + i + 1}.</span>
           <img src="${avatar}" class="avatar">
           <span class="name">${p.name}${isMe ? '<span class="my-badge">MOI</span>' : ''}</span>
@@ -408,6 +411,7 @@ function renderScoreboard(roundScores, currentRoundIndex, cutoffs) {
 
     if (!html) html = '<div style="color:#aaa;text-align:center;padding:20px;">Aucun score pour cette ronde</div>';
     $('scoreboard-entries').innerHTML = html;
+    TournoiUtils.enrichScoreboardEntries('scoreboard-entries');
 
     const leader = active.find(p => p.score > 0);
     if (leader) {

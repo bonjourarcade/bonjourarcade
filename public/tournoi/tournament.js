@@ -848,12 +848,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     statusClass = tournamentState.overrides[p.name];
                     isOverridden = true;
                 } else {
-                    // Determine status based on round rank. This applies during both round and break.
-                    // First round is warmup, everyone is safe.
-                    if (roundIndex === 0) {
-                        statusClass = 'safe';
-                    } else if (nextCutoff > 0) {
-                        // In subsequent rounds, compare rank (i) to the cutoff.
+                    if (nextCutoff > 0) {
                         statusClass = i < nextCutoff ? 'safe' : 'danger';
                     }
                 }
@@ -976,8 +971,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 const Y = tournamentState.initialPlayerCount;
                 const X = tournamentState.games.length;
                 for (let i = 0; i < X; i++) {
-                    const playersAfter = Math.max(1, Math.ceil(Y * (X - i) / X));
-                    tournamentState.cutoffs[i] = playersAfter;
+                    const remaining = i === 0 ? Y : tournamentState.cutoffs[i - 1];
+                    if (i < X - 1) {
+                        const roundsLeft = X - i;
+                        if (remaining <= roundsLeft) {
+                            tournamentState.cutoffs[i] = remaining;
+                        } else {
+                            const minFinal = i === X - 2 && remaining > 3 ? 3 : 1;
+                            const playersAfter = Math.min(remaining, Math.max(minFinal, Math.ceil(remaining * (roundsLeft - 1) / roundsLeft)));
+                            tournamentState.cutoffs[i] = playersAfter;
+                        }
+                    } else {
+                        tournamentState.cutoffs[i] = 0;
+                    }
                 }
             }
         }
@@ -1087,14 +1093,11 @@ document.addEventListener('DOMContentLoaded', () => {
         roundTitleEl.textContent = `Ronde ${roundIndex + 1}`;
         renderGamePresentation(gameId);
 
-        if (roundIndex === tournamentState.games.length - 1) { // Final round
+        if (roundIndex === tournamentState.games.length - 1) {
             roundSubtitleEl.textContent = "Finale";
-        } else if (roundIndex > 0) {
-            // Use the current round's cutoff, which is already set in startNextRound()
+        } else {
             const playersToQualify = tournamentState.currentCutoff;
             roundSubtitleEl.textContent = `Top ${playersToQualify} se qualifient`;
-        } else {
-            roundSubtitleEl.textContent = "Échauffement";
         }
 
         renderScoreboard();
@@ -1159,11 +1162,8 @@ document.addEventListener('DOMContentLoaded', () => {
             activePlayersSorted.forEach((player, index) => {
                 let shouldEliminate = false;
                 if (tournamentState.overrides && tournamentState.overrides[player.name]) {
-                    // Manual override is the ultimate truth
                     shouldEliminate = (tournamentState.overrides[player.name] === 'danger');
-                } else if (roundIndex > 0) {
-                    // Default rank-based elimination (skipping warmup which is roundIndex 0)
-                    // The index is 0-based, cutoff is 1-based number of players
+                } else {
                     shouldEliminate = (index >= cutoff);
                 }
 
@@ -1413,7 +1413,7 @@ document.addEventListener('DOMContentLoaded', () => {
             roundTitleEl.textContent = `Ronde ${roundIndex + 1}`;
             renderGamePresentation(gameId);
 
-            roundSubtitleEl.textContent = roundIndex === 0 ? "Échauffement" : `Top ${tournamentState.currentCutoff} se qualifient`;
+            roundSubtitleEl.textContent = roundIndex === tournamentState.games.length - 1 ? "Finale" : `Top ${tournamentState.currentCutoff} se qualifient`;
             renderScoreboard();
             startScoreFetching();
             startTimer(tournamentState.remainingTime, onTick, endRound);

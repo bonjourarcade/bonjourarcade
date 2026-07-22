@@ -381,7 +381,7 @@ function renderScoreboard(roundScores, currentRoundIndex, cutoffs) {
     if (active.length > 0) {
       active.forEach((p, i) => {
         const isMe = p.uid === myUid;
-        const isDanger = currentRoundIndex > 0 && cutoff > 0 && i >= cutoff;
+        const isDanger = cutoff > 0 && i >= cutoff;
         const statusClass = isDanger ? 'danger' : 'safe';
         const avatar = p.photoURL || '../assets/default-avatar.png';
         const gsAttr = p.gameScoreId ? ` data-game-score-id="${p.gameScoreId}"` : '';

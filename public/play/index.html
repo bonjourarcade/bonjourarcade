@@ -2233,6 +2233,81 @@
                 }
             }
 
+            // Render leaderboard directly from snapshot data (no HTTP call)
+            function renderLeaderboardFromScores(scores, gameId) {
+                const leaderboardContent = document.getElementById('leaderboard-content');
+                const leaderboardContainer = document.getElementById('leaderboard-container');
+                if (!leaderboardContent) return;
+
+                // Deduplicate: keep best score per player (userId)
+                const playerBest = new Map();
+                scores.forEach(s => {
+                    const uid = s.userId || s.id;
+                    const existing = playerBest.get(uid);
+                    if (!existing || s.score > existing.score) {
+                        playerBest.set(uid, {
+                            player: s.player || s.displayName || 'Anonyme',
+                            score: s.score,
+                            comment: s.comment || ''
+                        });
+                    }
+                });
+
+                const sorted = Array.from(playerBest.values())
+                    .sort((a, b) => b.score - a.score)
+                    .slice(0, 10);
+
+                if (sorted.length === 0) {
+                    leaderboardContent.innerHTML = '<div class="leaderboard-loading">Aucun score trouvé</div>';
+                    return;
+                }
+
+                // Build HTML the same way fetchLeaderboard does
+                let html = '';
+                sorted.forEach((entry, index) => {
+                    const rank = index + 1;
+                    const rankEmoji = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `${rank}.`;
+                    const safeComment = entry.comment ? entry.comment.substring(0, 100) : '';
+                    const commentAttr = safeComment ? ` data-comment="${escapeHtml(safeComment)}"` : '';
+                    const commentIndicator = safeComment ? ' <span class="comment-indicator" aria-label="Commentaire disponible">💬</span>' : '';
+                    html += `<div class="leaderboard-entry"${commentAttr}><div class="leaderboard-rank">${rankEmoji}</div><div class="leaderboard-player">${entry.player}${commentIndicator}</div><div class="leaderboard-score">${entry.score.toLocaleString()}</div></div>`;
+                });
+
+                leaderboardContent.innerHTML = html;
+
+                // Also update mobile leaderboard
+                const mobileContent = document.getElementById('mobile-leaderboard-content-data');
+                if (mobileContent) {
+                    let mobileHtml = '';
+                    sorted.forEach((entry, index) => {
+                        const rank = index + 1;
+                        const rankEmoji = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `${rank}.`;
+                        const safeComment = entry.comment ? entry.comment.substring(0, 100) : '';
+                        const commentAttr = safeComment ? ` data-comment="${escapeHtml(safeComment)}"` : '';
+                        const commentIndicator = safeComment ? ' <span class="comment-indicator" aria-label="Commentaire disponible">💬</span>' : '';
+                        mobileHtml += `<div class="mobile-leaderboard-entry"${commentAttr}><div class="mobile-leaderboard-rank">${rankEmoji}</div><div class="mobile-leaderboard-player">${entry.player}${commentIndicator}</div><div class="mobile-leaderboard-score">${entry.score.toLocaleString()}</div></div>`;
+                    });
+                    mobileContent.innerHTML = mobileHtml;
+                }
+
+                // Define leaderboard URL for click handlers
+                const leaderboardUrl = `/scores/${gameId}`;
+
+                // Add click handler to desktop leaderboard container (only once)
+                if (leaderboardContainer && !leaderboardContainer.dataset.clickHandlerAdded) {
+                    leaderboardContainer.addEventListener('click', () => {
+                        window.open(leaderboardUrl, '_blank');
+                    });
+                    leaderboardContainer.dataset.clickHandlerAdded = 'true';
+                }
+
+                // Show drawer on desktop
+                if (!isMobileDevice()) {
+                    const drawer = document.getElementById('qr-drawer');
+                    if (drawer) drawer.classList.remove('collapsed');
+                }
+            }
+
             // Mock data generator function
             function generateMockScores(gameId) {
                 const mockPlayers = [{
@@ -2388,17 +2463,26 @@
                         console.warn('Firestore not available for leaderboard realtime');
                         return;
                     }
-                    const { collection, query, where, onSnapshot } = window.Firestore;
+                    const { collection, query, where, orderBy, onSnapshot } = window.Firestore;
+                    // We use orderBy so Firestore sends them pre-sorted, but we still need to deduplicate
+                    // by userId (keep best score per player) on the client side.
                     const q = query(collection(db, 'game-scores'),
                         where('game', '==', gameId),
-                        where('verified', '==', true));
+                        where('verified', '==', true),
+                        orderBy('score', 'desc'));
                     let debounceTimer = null;
-                    window._leaderboardUnsub = onSnapshot(q, () => {
+                    window._leaderboardUnsub = onSnapshot(q, (snap) => {
                         if (debounceTimer) clearTimeout(debounceTimer);
                         debounceTimer = setTimeout(() => {
-                            console.log('Leaderboard realtime update');
+                            const scores = [];
+                            snap.forEach(d => scores.push({ id: d.id, ...d.data() }));
+                            renderLeaderboardFromScores(scores, gameId);
+                        }, 300);
+                    }, (err) => {
+                        console.warn('onSnapshot leaderboard error, falling back to polling:', err);
+                        window.leaderboardRefreshInterval = setInterval(() => {
                             fetchLeaderboard(gameId, true);
-                        }, 500);
+                        }, 120000);
                     });
                 } catch (e) {
                     console.warn('onSnapshot leaderboard failed, falling back to polling:', e);

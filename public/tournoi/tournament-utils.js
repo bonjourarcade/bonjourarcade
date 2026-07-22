@@ -27,7 +27,7 @@ const TournoiUtils = {
     return `/b/${gameId}`;
   },
 
-  renderScoreboardHtml(roundScores, participants, currentRoundIndex) {
+  renderScoreboardHtml(roundScores, participants, currentRoundIndex, cutoffs, totalRounds) {
     const bestEntryMap = {};
     roundScores.forEach(rs => {
       if (!bestEntryMap[rs.userId] || rs.score > bestEntryMap[rs.userId].score) {
@@ -51,17 +51,38 @@ const TournoiUtils = {
       return '<div style="color:#aaa;text-align:center;padding:20px;">Aucun score pour cette ronde</div>';
     }
 
+    const cutoff = (cutoffs && typeof cutoffs[currentRoundIndex] === 'number') ? cutoffs[currentRoundIndex] : null;
+    const isLastRound = totalRounds && currentRoundIndex >= totalRounds - 1;
+
     const active = ranked.filter(p => !p.eliminated);
     const eliminated = ranked.filter(p => p.eliminated);
 
     let html = '';
+
+    if (cutoff && active.length > cutoff) {
+      html += `<div style="color:#aaa;font-size:0.85rem;text-align:center;margin-bottom:8px;">Seuil de qualification : Top ${cutoff} — ⚠️ ${active.length - cutoff} joueur(s) en danger</div>`;
+    }
+
     active.forEach((p, i) => {
+      const rank = i + 1;
+      let statusClass = 'safe';
+
+      if (isLastRound && rank <= 3) {
+        const medalClasses = ['gold', 'silver', 'bronze'];
+        statusClass = medalClasses[rank - 1];
+      } else if (cutoff && rank > cutoff) {
+        statusClass = 'danger';
+      }
+
       const avatar = p.photoURL || '../assets/default-avatar.png';
       const gsAttr = p.gameScoreId ? ` data-game-score-id="${p.gameScoreId}"` : '';
-      html += `<div class="entry safe"${gsAttr}>
-        <span class="rank">${i + 1}.</span>
+      const medalEmoji = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : '';
+      html += `<div class="entry ${statusClass}"${gsAttr}>
+        <span class="rank">${rank}.</span>
         <img src="${avatar}" class="avatar">
         <span class="name">${p.name}</span>
+        ${!isLastRound && cutoff && rank > cutoff ? '<span class="entry-label at-risk">⚠️ En danger</span>' : ''}
+        ${isLastRound && rank <= 3 ? `<span class="entry-label medal">${medalEmoji}</span>` : ''}
         <span class="score">${p.score.toLocaleString()}</span>
       </div>`;
     });

@@ -47,8 +47,14 @@
     .eliminated-title { color: #dc3545; }
     .entry { display: flex; align-items: center; padding: 8px 12px; border-radius: 6px; margin-bottom: 4px; background: #12121f; gap: 10px; }
     .entry.safe { border-left: 3px solid #28a745; }
-    .entry.danger { border-left: 3px solid #ffc107; }
+    .entry.danger { border-left: 3px solid #ffc107; background: rgba(255, 193, 7, 0.06); }
+    .entry.gold { border-left: 3px solid #ffd700; background: rgba(255, 215, 0, 0.1); }
+    .entry.silver { border-left: 3px solid #c0c0c0; background: rgba(192, 192, 192, 0.08); }
+    .entry.bronze { border-left: 3px solid #cd7f32; background: rgba(205, 127, 50, 0.08); }
     .entry.eliminated { opacity: 0.5; border-left: 3px solid #dc3545; }
+    .entry .entry-label { font-size: 0.75rem; margin-right: 6px; flex-shrink: 0; }
+    .entry .entry-label.at-risk { color: #ffc107; font-weight: 600; }
+    .entry .entry-label.medal { font-size: 1rem; }
     .entry .rank { width: 30px; color: #888; font-weight: 700; }
     .entry .avatar { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; }
     .entry .name { flex: 1; }

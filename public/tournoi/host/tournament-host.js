@@ -171,7 +171,9 @@ function loadDashboard(id) {
 }
 
 let lastRoundIndex = -1;
+let tournamentData = null;
 function renderTournament(t, id) {
+  tournamentData = t;
   $('display-sharecode').textContent = t.shareCode;
 
   const shareUrl = `${window.location.origin}/tournoi/join/?c=${t.shareCode}`;
@@ -362,7 +364,9 @@ function renderParticipants(participants) {
 }
 
 function renderScoreboard(roundScores) {
-  const html = TournoiUtils.renderScoreboardHtml(roundScores, currentParticipants, lastRoundIndex);
+  const cutoffs = tournamentData?.cutoffs || null;
+  const totalRounds = tournamentData?.games?.length || 0;
+  const html = TournoiUtils.renderScoreboardHtml(roundScores, currentParticipants, lastRoundIndex, cutoffs, totalRounds);
   $('scoreboard-entries').innerHTML = html;
   TournoiUtils.enrichScoreboardEntries('scoreboard-entries');
 }

@@ -2,18 +2,6 @@
 <html lang="en">
 
 <head>
-    <!-- Patch WebGL to preserve drawing buffer so screenshots work (must run before EmulatorJS) -->
-    <script>
-        (function () {
-            var origGetContext = HTMLCanvasElement.prototype.getContext;
-            HTMLCanvasElement.prototype.getContext = function (contextType, attrs) {
-                if (contextType === 'webgl' || contextType === 'webgl2' || contextType === 'experimental-webgl') {
-                    attrs = Object.assign({ preserveDrawingBuffer: true }, attrs || {});
-                }
-                return origGetContext.call(this, contextType, attrs);
-            };
-        })();
-    </script>
     <meta charset="UTF-8">
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -3909,18 +3897,52 @@
                 }, 0);
 
                 // Helper to retry screenshot if the emulator returns a black frame between renders
-                const captureCanvasDirectly = () => {
+                const captureCanvasDirectly = async () => {
                     let attempts = 0;
                     const MAX_ATTEMPTS = 20;
                     const statusEl = document.getElementById('score-submission-status');
 
+                    function showScreenshot(dataUrl) {
+                        const base64Data = dataUrl.split(',')[1];
+                        sessionStorage.setItem('tempScoreScreenshot', base64Data);
+                        screenshotPreview.src = dataUrl;
+                        screenshotPreview.style.display = 'block';
+                        const enlargeHint = document.getElementById('screenshot-enlarge-hint');
+                        if (enlargeHint) enlargeHint.style.display = 'block';
+                        if (noScreenshot) noScreenshot.style.display = 'none';
+                        if (statusEl) statusEl.textContent = '';
+                    }
+
+                    function showNoScreenshot() {
+                        sessionStorage.removeItem('tempScoreScreenshot');
+                        screenshotPreview.style.display = 'none';
+                        if (noScreenshot) noScreenshot.style.display = 'block';
+                    }
+
+                    async function tryEmulatorScreenshot() {
+                        if (!window.EJS_emulator || typeof window.EJS_emulator.takeScreenshot !== 'function') {
+                            showNoScreenshot();
+                            return;
+                        }
+                        try {
+                            const result = await window.EJS_emulator.takeScreenshot('retroarch', 'jpeg', 1);
+                            const dataUrl = await new Promise((resolve) => {
+                                const reader = new FileReader();
+                                reader.onload = () => resolve(reader.result);
+                                reader.readAsDataURL(result.blob);
+                            });
+                            showScreenshot(dataUrl);
+                        } catch (e) {
+                            console.error("Emulator screenshot failed:", e);
+                            showNoScreenshot();
+                        }
+                    }
+
                     function scheduleCapture() {
-                        requestAnimationFrame(() => {
+                        requestAnimationFrame(async () => {
                             const canvas = document.querySelector('#game canvas');
                             if (!canvas) {
-                                sessionStorage.removeItem('tempScoreScreenshot');
-                                screenshotPreview.style.display = 'none';
-                                if (noScreenshot) noScreenshot.style.display = 'block';
+                                showNoScreenshot();
                                 return;
                             }
 
@@ -3931,7 +3953,6 @@
                                 const offscreenCtx = offscreenCanvas.getContext("2d", { alpha: false });
                                 offscreenCtx.drawImage(canvas, 0, 0);
 
-                                // Sample pixels to detect all-black frame (between renders)
                                 const imageData = offscreenCtx.getImageData(0, 0, offscreenCanvas.width, offscreenCanvas.height);
                                 const data = imageData.data;
                                 let nonBlackPixels = 0;
@@ -3948,7 +3969,11 @@
                                     return;
                                 }
 
-                                // Function to auto-crop black letterboxing borders
+                                if (nonBlackPixels < 3) {
+                                    await tryEmulatorScreenshot();
+                                    return;
+                                }
+
                                 const autoCropCanvas = (srcCanvas) => {
                                     const ctx = srcCanvas.getContext('2d');
                                     const w = srcCanvas.width;
@@ -4017,20 +4042,10 @@
 
                                 const finalCanvas = autoCropCanvas(offscreenCanvas);
                                 const dataUrl = finalCanvas.toDataURL('image/jpeg', 0.8);
-                                const base64Data = dataUrl.split(',')[1];
-                                sessionStorage.setItem('tempScoreScreenshot', base64Data);
-
-                                screenshotPreview.src = dataUrl;
-                                screenshotPreview.style.display = 'block';
-                                const enlargeHint = document.getElementById('screenshot-enlarge-hint');
-                                if (enlargeHint) enlargeHint.style.display = 'block';
-                                if (noScreenshot) noScreenshot.style.display = 'none';
-                                if (statusEl) statusEl.textContent = '';
+                                showScreenshot(dataUrl);
                             } catch (e) {
-                                console.error("Canvas screenshot failed:", e);
-                                sessionStorage.removeItem('tempScoreScreenshot');
-                                screenshotPreview.style.display = 'none';
-                                if (noScreenshot) noScreenshot.style.display = 'block';
+                                console.error("Canvas screenshot failed, trying emulator fallback:", e);
+                                await tryEmulatorScreenshot();
                             }
                         });
                     }

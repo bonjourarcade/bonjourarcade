@@ -93,7 +93,8 @@
     .entry .entry-meta { display: inline-flex; gap: 4px; margin-left: 4px; flex-shrink: 0; }
     .entry .entry-meta span { font-size: 0.9rem; cursor: default; line-height: 1; }
     .entry .entry-meta .meta-screenshot { cursor: pointer; }
-    .entry .score { font-weight: 700; color: var(--entry-text); }
+    .entry .score { font-weight: 700; color: var(--entry-text); cursor: default; }
+    .entry .score.has-comment { cursor: help; border-bottom: 1px dashed var(--muted); }
 
     .participant-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; }
     .participant-chip { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--surface-alt); border-radius: 8px; font-size: 0.9rem; }

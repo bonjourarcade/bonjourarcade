@@ -283,24 +283,6 @@ function renderParticipantsInfo(participants, me) {
   const count = Object.keys(participants).length;
   $('play-participant-count').textContent = `${count}`;
 
-  if (me && !me.eliminated) {
-    show('my-score-card');
-    const myScore = me.scores?.length > 0 ? Math.max(...me.scores.filter(s => s > 0)) : 0;
-    $('my-score').textContent = myScore > 0 ? myScore.toLocaleString() : 'Pas encore de score';
-    const badge = $('my-status-badge');
-    if (myScore > 0) {
-      badge.textContent = '✅ Score soumis';
-      badge.className = 'status-badge done';
-    } else {
-      badge.textContent = '⏳ En attente';
-      badge.className = 'status-badge waiting';
-    }
-  } else if (me?.eliminated) {
-    hide('my-score-card');
-  } else {
-    hide('my-score-card');
-  }
-
   const ranked = Object.entries(participants)
     .map(([uid, p]) => ({
       uid,
@@ -390,6 +372,7 @@ function renderScoreboard(roundScores, currentRoundIndex, totalRounds) {
           <span class="rank">${i + 1}.</span>
           <img src="${avatar}" class="avatar">
           <span class="name">${p.name}${isMe ? '<span class="my-badge">MOI</span>' : ''}</span>
+          ${isDanger ? '<span class="entry-label at-risk">⚠️ En danger</span>' : ''}
           <span class="score">${p.score.toLocaleString()}</span>
         </div>`;
       });
@@ -413,16 +396,6 @@ function renderScoreboard(roundScores, currentRoundIndex, totalRounds) {
     if (!html) html = '<div style="color:#aaa;text-align:center;padding:20px;">Aucun score pour cette ronde</div>';
     $('scoreboard-entries').innerHTML = html;
     TournoiUtils.enrichScoreboardEntries('scoreboard-entries');
-
-    const leader = active.find(p => p.score > 0);
-    if (leader) {
-      show('round-leader');
-      $('leader-name').textContent = leader.name || 'Inconnu';
-      $('leader-score').textContent = leader.score.toLocaleString();
-      $('leader-avatar').src = leader.photoURL || '../assets/default-avatar.png';
-    } else {
-      hide('round-leader');
-    }
   });
 }
 

@@ -152,6 +152,12 @@ const TournoiUtils = {
         badge.textContent = '💬';
         badge.title = data.comment;
         metaSpan.appendChild(badge);
+
+        const scoreEl = entry.querySelector('.score');
+        if (scoreEl) {
+          scoreEl.title = data.comment;
+          scoreEl.classList.add('has-comment');
+        }
       }
 
       if (data.screenshotUrl) {

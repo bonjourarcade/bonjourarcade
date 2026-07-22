@@ -21,6 +21,15 @@
             --radius: 14px;
         }
 
+        body.theme-light {
+            --bg: #f5f5f7;
+            --surface: #ffffff;
+            --surface2: #eeeeee;
+            --border: rgba(0, 0, 0, 0.12);
+            --text: #1d1d1f;
+            --muted: #6e6e7a;
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
@@ -209,7 +218,11 @@
                 onerror="this.style.display='none'">
             <h1>🏆 Sélection Tournoi</h1>
         </a>
-        <div class="header-meta" id="header-meta"></div>
+        <div style="display:flex;align-items:center;gap:12px;">
+            <div class="header-meta" id="header-meta"></div>
+            <button class="theme-btn" id="theme-btn" title="Changer le thème"
+                style="background:none;border:1px solid var(--border);font-size:1.1rem;cursor:pointer;padding:4px 8px;border-radius:8px;color:var(--text);">🌙</button>
+        </div>
     </header>
 
     <main>
@@ -327,6 +340,25 @@
         }
 
         init();
+
+        function applyTheme(theme) {
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const effective = theme === 'system' ? (prefersDark ? 'dark' : 'light') : theme;
+            document.body.classList.toggle('theme-light', effective === 'light');
+            document.getElementById('theme-btn').textContent = effective === 'dark' ? '🌙' : '☀️';
+        }
+        const saved = localStorage.getItem('theme') || 'dark';
+        applyTheme(saved);
+        document.getElementById('theme-btn').addEventListener('click', () => {
+            const current = localStorage.getItem('theme') || 'dark';
+            const next = current === 'dark' ? 'light' : (current === 'light' ? 'system' : 'dark');
+            localStorage.setItem('theme', next);
+            applyTheme(next);
+        });
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+            const theme = localStorage.getItem('theme') || 'dark';
+            if (theme === 'system') applyTheme('system');
+        });
     </script>
 </body>
 

@@ -6,9 +6,49 @@
   <title>Tournoi - BonjourArcade</title>
   <link rel="icon" href="../../assets/favicon.ico" type="image/x-icon">
   <style>
-    body { background: #0a0a0f; color: #e0e0e0; font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; margin: 0; }
+    :root {
+      --bg: #0a0a0f;
+      --text: #e0e0e0;
+      --surface: #1a1a2e;
+      --surface-alt: #12121f;
+      --border: #2a2a4a;
+      --muted: #aaa;
+      --muted-strong: #888;
+      --round-banner-bg: #12121f;
+      --entry-bg: #12121f;
+      --entry-text: #fff;
+      --me-bg: #1a2a3a;
+      --highlight-row: #1a2a3a;
+      --my-score-bg: linear-gradient(135deg, #1a2a1a, #0a1a0a);
+      --modal-overlay: rgba(0,0,0,0.9);
+      --btn-secondary-bg: #2a2a4a;
+      --btn-secondary-text: #e0e0e0;
+      --table-border: #2a2a4a;
+      --timer-color: #fff;
+    }
+    body.theme-light {
+      --bg: #f0f2f5;
+      --text: #222;
+      --surface: #fff;
+      --surface-alt: #f8f9fa;
+      --border: #ddd;
+      --muted: #666;
+      --muted-strong: #888;
+      --round-banner-bg: #f0f0f0;
+      --entry-bg: #f8f9fa;
+      --entry-text: #222;
+      --me-bg: #e8f0fe;
+      --highlight-row: #e8f0fe;
+      --my-score-bg: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+      --modal-overlay: rgba(0,0,0,0.5);
+      --btn-secondary-bg: #e0e0e0;
+      --btn-secondary-text: #333;
+      --table-border: #ddd;
+      --timer-color: #333;
+    }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; margin: 0; }
     .container { max-width: 700px; margin: 0 auto; padding: 20px; }
-    .card { background: #1a1a2e; border-radius: 12px; padding: 24px; margin-bottom: 20px; border: 1px solid #2a2a4a; }
+    .card { background: var(--surface); border-radius: 12px; padding: 24px; margin-bottom: 20px; border: 1px solid var(--border); }
     .card-center { text-align: center; }
     h1 { color: #ffd700; font-size: 1.4rem; margin: 0 0 16px 0; }
     h2 { color: #ffd700; font-size: 1.1rem; margin: 0 0 12px 0; }
@@ -16,7 +56,7 @@
     button { padding: 10px 24px; border: none; border-radius: 8px; font-size: 1rem; cursor: pointer; font-weight: 600; transition: all 0.2s; }
     .btn-primary { background: #ffd700; color: #1a1a2e; }
     .btn-primary:hover { background: #ffe44d; }
-    .btn-secondary { background: #2a2a4a; color: #e0e0e0; }
+    .btn-secondary { background: var(--btn-secondary-bg); color: var(--btn-secondary-text); }
     .btn-google { background: white; color: #333; display: inline-flex; align-items: center; gap: 8px; }
     .btn-google:hover { background: #f0f0f0; }
 
@@ -25,17 +65,17 @@
 
     .hidden { display: none !important; }
 
-    .round-banner { text-align: center; padding: 20px; background: #12121f; border-radius: 12px; margin: 16px 0; }
+    .round-banner { text-align: center; padding: 20px; background: var(--round-banner-bg); border-radius: 12px; margin: 16px 0; }
     .round-banner .round-title { font-size: 1.5rem; color: #ffd700; }
-    .round-banner .timer { font-size: 2.5rem; font-weight: 700; color: #fff; font-family: 'Courier New', monospace; margin: 8px 0; transition: color 0.3s; }
+    .round-banner .timer { font-size: 2.5rem; font-weight: 700; color: var(--timer-color); font-family: 'Courier New', monospace; margin: 8px 0; transition: color 0.3s; }
     .round-banner .timer.timer-warning { color: #dc3545; animation: pulse-warning 0.5s ease-in-out infinite alternate; }
     @keyframes pulse-warning { from { text-shadow: 0 0 8px rgba(220,53,69,0.5); } to { text-shadow: 0 0 20px rgba(220,53,69,0.9); } }
     .round-banner .game-link { display: block; margin-top: 12px; }
     .round-banner .game-link a { color: #4a9eff; font-size: 1.1rem; text-decoration: none; }
     .round-banner .game-link a:hover { text-decoration: underline; }
 
-    .my-score-card { background: linear-gradient(135deg, #1a2a1a, #0a1a0a); border: 1px solid #28a745; border-radius: 12px; padding: 16px; text-align: center; margin: 16px 0; }
-    .my-score-card .label { color: #aaa; font-size: 0.85rem; }
+    .my-score-card { background: var(--my-score-bg); border: 1px solid #28a745; border-radius: 12px; padding: 16px; text-align: center; margin: 16px 0; }
+    .my-score-card .label { color: var(--muted); font-size: 0.85rem; }
     .my-score-card .score-value { font-size: 2rem; font-weight: 700; color: #28a745; }
     .my-score-card .status-badge { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 0.8rem; font-weight: 600; }
     .status-badge.waiting { background: #ffc107; color: #1a1a2e; }
@@ -46,20 +86,20 @@
 
     .section-title { color: #ffd700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; margin: 16px 0 8px; }
     .eliminated-title { color: #dc3545; }
-    .entry { display: flex; align-items: center; padding: 8px 12px; border-radius: 6px; margin-bottom: 4px; background: #12121f; gap: 10px; }
-    .entry.safe { border-left: 3px solid #28a745; }
-    .entry.danger { border-left: 3px solid #ffc107; }
-    .entry.eliminated { opacity: 0.5; border-left: 3px solid #dc3545; }
-    .entry.me { background: #1a2a3a; }
-    .entry .rank { width: 30px; color: #888; font-weight: 700; }
+    .entry { display: flex; align-items: center; padding: 8px 12px; border-radius: 6px; margin-bottom: 4px; background: var(--entry-bg); gap: 10px; }
+    .entry.safe { border-left: 3px solid #28a745; background: rgba(40, 167, 69, 0.06); }
+    .entry.danger { border-left: 3px solid #ffc107; background: rgba(255, 193, 7, 0.08); }
+    .entry.eliminated { border-left: 3px solid #dc3545; background: rgba(220, 53, 69, 0.15); }
+    .entry.me { background: var(--me-bg); }
+    .entry .rank { width: 30px; color: var(--muted-strong); font-weight: 700; }
     .entry .avatar { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; }
     .entry .name { flex: 1; }
-    .entry .score { font-weight: 700; color: #fff; }
+    .entry .score { font-weight: 700; color: var(--entry-text); }
     .entry .my-badge { background: #4a9eff; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; margin-left: 8px; }
 
     .break-info { text-align: center; padding: 20px; }
     .break-info h2 { color: #ffc107; }
-    .break-info p { color: #aaa; }
+    .break-info p { color: var(--muted); }
 
     .finished-info { text-align: center; padding: 20px; }
 
@@ -68,7 +108,7 @@
     .podium-place .rank-num { font-size: 1.5rem; font-weight: 700; }
     .podium-place img { width: 48px; height: 48px; border-radius: 50%; border: 3px solid; margin-bottom: 8px; }
     .podium-place .name { font-weight: 600; font-size: 0.9rem; }
-    .podium-place .score { color: #aaa; font-size: 0.8rem; }
+    .podium-place .score { color: var(--muted); font-size: 0.8rem; }
     .podium-1 { color: #ffd700; } .podium-1 img { border-color: #ffd700; }
     .podium-2 { color: #c0c0c0; } .podium-2 img { border-color: #c0c0c0; }
     .podium-3 { color: #cd7f32; } .podium-3 img { border-color: #cd7f32; }
@@ -77,20 +117,29 @@
     .podium-place.podium-3 { transform: translateY(0); }
 
     .cumul-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
-    .cumul-table th, .cumul-table td { padding: 6px 10px; text-align: left; border-bottom: 1px solid #2a2a4a; }
+    .cumul-table th, .cumul-table td { padding: 6px 10px; text-align: left; border-bottom: 1px solid var(--table-border); }
     .cumul-table th { color: #ffd700; font-size: 0.8rem; text-transform: uppercase; }
     .cumul-table .eliminated-row { opacity: 0.5; }
-    .cumul-table .highlight-row { background: #1a2a3a; }
+    .cumul-table .highlight-row { background: var(--highlight-row); }
     .avatar-sm { width: 24px; height: 24px; border-radius: 50%; vertical-align: middle; }
 
-    .info-line { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #2a2a4a; font-size: 0.9rem; }
-    .info-line .label { color: #888; }
-    .info-line .value { color: #e0e0e0; }
+    .info-line { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+    .info-line .label { color: var(--muted-strong); }
+    .info-line .value { color: var(--text); }
     .entry .entry-meta { display: inline-flex; gap: 4px; margin-left: 4px; flex-shrink: 0; }
     .entry .entry-meta span { font-size: 0.9rem; cursor: default; line-height: 1; }
     .entry .entry-meta .meta-screenshot { cursor: pointer; }
-    #screenshot-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 3000; cursor: pointer; }
+    #screenshot-modal { position: fixed; inset: 0; background: var(--modal-overlay); display: none; align-items: center; justify-content: center; z-index: 3000; cursor: pointer; }
     #screenshot-modal img { max-width: 90vw; max-height: 90vh; border-radius: 8px; }
+
+    .theme-btn { background: none; border: none; font-size: 1.2rem; cursor: pointer; padding: 4px 8px; border-radius: 6px; transition: background 0.2s; color: var(--text); }
+    .theme-btn:hover { background: rgba(255,255,255,0.1); }
+    .theme-dropdown { position: absolute; top: 100%; right: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 4px; display: none; z-index: 100; min-width: 130px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+    .theme-dropdown.open { display: block; }
+    .theme-option { display: block; width: 100%; padding: 8px 14px; background: none; border: none; border-radius: 6px; font-size: 0.85rem; cursor: pointer; text-align: left; color: var(--text); font-weight: 400; }
+    .theme-option:hover { background: rgba(255,255,255,0.06); }
+    .theme-option.active { color: #ffd700; font-weight: 600; }
+    .theme-toggle-wrapper { position: relative; }
   </style>
 </head>
 <body>
@@ -105,6 +154,14 @@
         <h1>🎮 Tournoi</h1>
         <div class="flex">
           <span id="user-info" style="color:#aaa;font-size:0.9rem;"></span>
+          <div class="theme-toggle-wrapper">
+            <button class="theme-btn" id="theme-btn" title="Changer le thème">🌙</button>
+            <div class="theme-dropdown" id="theme-dropdown">
+              <button class="theme-option" data-theme="system">🖥️ Système</button>
+              <button class="theme-option" data-theme="light">☀️ Clair</button>
+              <button class="theme-option" data-theme="dark">🌙 Sombre</button>
+            </div>
+          </div>
           <button id="logout-btn" class="btn-secondary" style="padding:6px 12px;font-size:0.85rem;">Quitter</button>
         </div>
       </div>
@@ -198,5 +255,32 @@
   <script type="module" src="../../assets/js/firebase-setup.js"></script>
   <script type="module" src="../tournament-utils.js"></script>
   <script type="module" src="tournament-play.js"></script>
+  <script>
+    function applyTheme(theme) {
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const effective = theme === 'system' ? (prefersDark ? 'dark' : 'light') : theme;
+      document.body.classList.toggle('theme-light', effective === 'light');
+      document.getElementById('theme-btn').textContent = effective === 'dark' ? '🌙' : '☀️';
+      document.querySelectorAll('.theme-option').forEach(o => o.classList.toggle('active', o.dataset.theme === theme));
+    }
+    const saved = localStorage.getItem('theme') || 'dark';
+    applyTheme(saved);
+    document.getElementById('theme-btn').addEventListener('click', () =>
+      document.getElementById('theme-dropdown').classList.toggle('open'));
+    document.querySelectorAll('.theme-option').forEach(o => o.addEventListener('click', () => {
+      const theme = o.dataset.theme;
+      localStorage.setItem('theme', theme);
+      applyTheme(theme);
+      document.getElementById('theme-dropdown').classList.remove('open');
+    }));
+    document.addEventListener('click', e => {
+      const w = document.querySelector('.theme-toggle-wrapper');
+      if (!w.contains(e.target)) document.getElementById('theme-dropdown').classList.remove('open');
+    });
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+      const theme = localStorage.getItem('theme') || 'dark';
+      if (theme === 'system') applyTheme('system');
+    });
+  </script>
 </body>
 </html>

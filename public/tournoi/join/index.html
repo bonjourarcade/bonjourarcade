@@ -6,10 +6,12 @@
   <title>Rejoindre un tournoi - BonjourArcade</title>
   <link rel="icon" href="../../assets/favicon.ico" type="image/x-icon">
   <style>
-    body { background: #0a0a0f; color: #e0e0e0; font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; display: flex; align-items: center; justify-content: center; margin: 0; }
-    .card { background: #1a1a2e; border-radius: 16px; padding: 40px; max-width: 420px; width: 90%; border: 1px solid #2a2a4a; text-align: center; }
+    :root { --bg: #0a0a0f; --text: #e0e0e0; --surface: #1a1a2e; --border: #2a2a4a; --muted: #aaa; --muted-strong: #888; --input-bg: #12121f; }
+    body.theme-light { --bg: #f0f2f5; --text: #222; --surface: #fff; --border: #ddd; --muted: #666; --muted-strong: #888; --input-bg: #f8f9fa; }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; display: flex; align-items: center; justify-content: center; margin: 0; }
+    .card { background: var(--surface); border-radius: 16px; padding: 40px; max-width: 420px; width: 90%; border: 1px solid var(--border); text-align: center; }
     h1 { color: #ffd700; font-size: 1.4rem; margin: 0 0 8px; }
-    p { color: #aaa; margin: 8px 0 16px; }
+    p { color: var(--muted); margin: 8px 0 16px; }
     button { padding: 12px 32px; border: none; border-radius: 8px; font-size: 1rem; cursor: pointer; font-weight: 600; transition: all 0.2s; width: 100%; }
     .btn-primary { background: #ffd700; color: #1a1a2e; }
     .btn-primary:hover { background: #ffe44d; }
@@ -18,14 +20,17 @@
     .hidden { display: none !important; }
     .spinner { display: inline-block; width: 20px; height: 20px; border: 2px solid #ffd700; border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .info-line { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #2a2a4a; font-size: 0.9rem; }
-    .info-line .label { color: #888; }
-    .info-line .value { color: #e0e0e0; font-weight: 600; }
+    .info-line { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+    .info-line .label { color: var(--muted-strong); }
+    .info-line .value { color: var(--text); font-weight: 600; }
     .error { color: #dc3545; margin-top: 8px; font-size: 0.9rem; }
     .success { color: #28a745; margin-top: 8px; font-size: 0.9rem; }
+    .theme-btn { position: fixed; top: 16px; right: 16px; background: none; border: 1px solid var(--border); font-size: 1.2rem; cursor: pointer; padding: 6px 10px; border-radius: 8px; color: var(--text); z-index: 10; }
+    .theme-btn:hover { background: rgba(255,255,255,0.06); }
   </style>
 </head>
 <body>
+  <button class="theme-btn" id="theme-btn">🌙</button>
   <div class="card">
     <div id="loading-state">
       <div class="spinner"></div>
@@ -72,5 +77,25 @@
 
   <script type="module" src="../../assets/js/firebase-setup.js"></script>
   <script type="module" src="tournament-join.js"></script>
+  <script>
+    function applyTheme(theme) {
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const effective = theme === 'system' ? (prefersDark ? 'dark' : 'light') : theme;
+      document.body.classList.toggle('theme-light', effective === 'light');
+      document.getElementById('theme-btn').textContent = effective === 'dark' ? '🌙' : '☀️';
+    }
+    const saved = localStorage.getItem('theme') || 'dark';
+    applyTheme(saved);
+    document.getElementById('theme-btn').addEventListener('click', () => {
+      const current = localStorage.getItem('theme') || 'dark';
+      const next = current === 'dark' ? 'light' : (current === 'light' ? 'system' : 'dark');
+      localStorage.setItem('theme', next);
+      applyTheme(next);
+    });
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+      const theme = localStorage.getItem('theme') || 'dark';
+      if (theme === 'system') applyTheme('system');
+    });
+  </script>
 </body>
 </html>

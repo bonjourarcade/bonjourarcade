@@ -5,21 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tournoi BonjourArcade</title>
     <style>
-        body { background: #0a0a0f; color: #e0e0e0; font-family: 'Segoe UI', system-ui, sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
-        .card { background: #1a1a2e; border-radius: 16px; padding: 40px; max-width: 480px; width: 90%; border: 1px solid #2a2a4a; text-align: center; }
+        :root { --bg: #0a0a0f; --text: #e0e0e0; --surface: #1a1a2e; --border: #2a2a4a; --muted: #aaa; --muted-strong: #666; }
+        body.theme-light { --bg: #f0f2f5; --text: #222; --surface: #fff; --border: #ddd; --muted: #666; --muted-strong: #999; }
+        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+        .card { background: var(--surface); border-radius: 16px; padding: 40px; max-width: 480px; width: 90%; border: 1px solid var(--border); text-align: center; }
         h1 { color: #ffd700; font-size: 1.6rem; margin: 0 0 8px; }
-        p { color: #aaa; margin: 8px 0 24px; line-height: 1.5; }
+        p { color: var(--muted); margin: 8px 0 24px; line-height: 1.5; }
         .links { display: flex; flex-direction: column; gap: 12px; }
         .links a { display: block; padding: 14px 24px; border-radius: 10px; text-decoration: none; font-weight: 600; transition: all 0.2s; }
         .links a.primary { background: #ffd700; color: #1a1a2e; }
         .links a.primary:hover { background: #ffe44d; }
         .links a.secondary { background: #2a2a4a; color: #e0e0e0; }
         .links a.secondary:hover { background: #3a3a5a; }
-        .small { font-size: 0.85rem; color: #666; margin-top: 24px; }
+        .small { font-size: 0.85rem; color: var(--muted-strong); margin-top: 24px; }
+        .theme-btn { position: fixed; top: 16px; right: 16px; background: none; border: 1px solid var(--border); font-size: 1.2rem; cursor: pointer; padding: 6px 10px; border-radius: 8px; color: var(--text); z-index: 10; }
+        .theme-btn:hover { background: rgba(255,255,255,0.06); }
     </style>
 </head>
 <body>
-    <div class="card">
+    <button class="theme-btn" id="theme-btn">🌙</button>
+  <div class="card">
         <h1>🎮 Tournois BonjourArcade</h1>
         <p>Bienvenue sur la plateforme de tournois. Connecte-toi comme admin pour organiser ou rejoins un tournoi existant avec un code.</p>
         <div class="links">
@@ -28,5 +33,25 @@
         </div>
         <div class="small">Le code de partage t'est fourni par l'organisateur du tournoi.</div>
     </div>
+    <script>
+        function applyTheme(theme) {
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const effective = theme === 'system' ? (prefersDark ? 'dark' : 'light') : theme;
+            document.body.classList.toggle('theme-light', effective === 'light');
+            document.getElementById('theme-btn').textContent = effective === 'dark' ? '🌙' : '☀️';
+        }
+        const saved = localStorage.getItem('theme') || 'dark';
+        applyTheme(saved);
+        document.getElementById('theme-btn').addEventListener('click', () => {
+            const current = localStorage.getItem('theme') || 'dark';
+            const next = current === 'dark' ? 'light' : (current === 'light' ? 'system' : 'dark');
+            localStorage.setItem('theme', next);
+            applyTheme(next);
+        });
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+            const theme = localStorage.getItem('theme') || 'dark';
+            if (theme === 'system') applyTheme('system');
+        });
+    </script>
 </body>
 </html>

@@ -2338,7 +2338,7 @@
             updateShareableUrl();
         });
 
-        // Function to generate shareable URL based on current filters
+        // Function to generate shareable URL based on current filters and sort
         function generateShareableUrl() {
             const searchType = document.getElementById('search-type').value;
             const sortValue = document.getElementById('sort-select').value;
@@ -2376,11 +2376,11 @@
                 }
             }
 
-            // Only return URL if there's a filter to share
+            if (sortValue) {
+                urlParams.set('sort', sortValue);
+            }
+
             if (urlParams.toString()) {
-                if (sortValue) {
-                    urlParams.set('sort', sortValue);
-                }
                 return window.location.origin + window.location.pathname + '?' + urlParams.toString();
             }
             return null;
@@ -2742,6 +2742,16 @@
                 } else {
                     // Apply saved filters from previous visit
                     applySavedFilters();
+                    // Apply sort from URL if present (even without a filter)
+                    if (sortParam) {
+                        const sortSelect = document.getElementById('sort-select');
+                        if (Array.from(sortSelect.options).some(option => option.value === sortParam)) {
+                            sortSelect.value = sortParam;
+                            userHasChangedSort = true;
+                            renderGames(filteredGamesData.length > 0 ? filteredGamesData : gamesData);
+                            saveFiltersState();
+                        }
+                    }
                 }
             })
             .catch(err => {

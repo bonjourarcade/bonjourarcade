@@ -93,8 +93,30 @@
     .entry .entry-meta { display: inline-flex; gap: 4px; margin-left: 4px; flex-shrink: 0; }
     .entry .entry-meta span { font-size: 0.9rem; cursor: default; line-height: 1; }
     .entry .entry-meta .meta-screenshot { cursor: pointer; }
-    .entry .score { font-weight: 700; color: var(--entry-text); cursor: default; }
-    .entry .score.has-comment { cursor: help; border-bottom: 1px dashed var(--muted); }
+    .entry .score { font-weight: 700; color: var(--entry-text); cursor: default; position: relative; }
+    .entry .score.has-comment { cursor: help; }
+    .entry .score.has-comment::after {
+      content: attr(data-comment);
+      position: absolute;
+      bottom: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: #222;
+      color: #fff;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 400;
+      white-space: nowrap;
+      max-width: 300px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      pointer-events: none;
+      opacity: 0;
+      z-index: 20;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    .entry .score.has-comment:hover::after { opacity: 1; }
 
     .participant-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; }
     .participant-chip { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--surface-alt); border-radius: 8px; font-size: 0.9rem; }

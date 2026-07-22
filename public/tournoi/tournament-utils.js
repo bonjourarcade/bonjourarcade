@@ -155,7 +155,7 @@ const TournoiUtils = {
 
         const scoreEl = entry.querySelector('.score');
         if (scoreEl) {
-          scoreEl.title = data.comment;
+          scoreEl.dataset.comment = data.comment;
           scoreEl.classList.add('has-comment');
         }
       }

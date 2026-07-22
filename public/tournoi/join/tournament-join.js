@@ -4,25 +4,10 @@ let currentUser = null;
 let shareCode = null;
 let tournamentData = null;
 
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
   const params = new URLSearchParams(window.location.search);
   shareCode = params.get('c') || params.get('code');
   const tournamentId = params.get('t');
-
-  if (tournamentId && !shareCode) {
-    for (let attempt = 0; attempt < 3; attempt++) {
-      try {
-        const tDoc = await getDoc(doc(window.firebaseDb, 'tournaments', tournamentId));
-        if (tDoc.exists()) {
-          shareCode = tDoc.data().shareCode;
-          break;
-        }
-      } catch (e) {
-        console.warn(`[Tournament] Resolve attempt ${attempt + 1} failed:`, e.message);
-        if (attempt < 2) await new Promise(r => setTimeout(r, 500));
-      }
-    }
-  }
 
   if (shareCode) {
     shareCode = shareCode.trim().toUpperCase();
@@ -60,6 +45,19 @@ function setupAuth(tournamentId) {
       if (shareCode) {
         await findAndShowTournament();
       } else if (tournamentId) {
+        try {
+          const tDoc = await getDoc(doc(window.firebaseDb, 'tournaments', tournamentId));
+          if (tDoc.exists()) {
+            shareCode = tDoc.data().shareCode;
+            if (shareCode) {
+              shareCode = shareCode.trim().toUpperCase();
+              await findAndShowTournament();
+              return;
+            }
+          }
+        } catch (e) {
+          console.warn('Could not resolve tournament:', e.message);
+        }
         showError('Tournoi introuvable. Vérifie le lien.');
       } else {
         show('code-input-state');

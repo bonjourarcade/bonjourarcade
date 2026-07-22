@@ -88,8 +88,30 @@
     .entry .rank { width: 30px; color: var(--muted-strong); font-weight: 700; }
     .entry .avatar { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; }
     .entry .name { flex: 1; }
-    .entry .score { font-weight: 700; color: var(--entry-text); cursor: default; }
-    .entry .score.has-comment { cursor: help; border-bottom: 1px dashed var(--muted); }
+    .entry .score { font-weight: 700; color: var(--entry-text); cursor: default; position: relative; }
+    .entry .score.has-comment { cursor: help; }
+    .entry .score.has-comment::after {
+      content: attr(data-comment);
+      position: absolute;
+      bottom: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: #222;
+      color: #fff;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 400;
+      white-space: nowrap;
+      max-width: 300px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      pointer-events: none;
+      opacity: 0;
+      z-index: 20;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    .entry .score.has-comment:hover::after { opacity: 1; }
     .entry .entry-label { font-size: 0.75rem; margin-right: 6px; flex-shrink: 0; }
     .entry .entry-label.at-risk { color: #ffc107; font-weight: 600; }
     .entry .my-badge { background: #4a9eff; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; margin-left: 8px; }

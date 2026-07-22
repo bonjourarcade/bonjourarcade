@@ -23,6 +23,15 @@ const TournoiUtils = {
     return result.data;
   },
 
+  computeRoundCutoff(remainingPlayers, currentRound, totalRounds) {
+    if (!totalRounds || currentRound >= totalRounds - 1) return null;
+    const roundsLeft = totalRounds - currentRound;
+    if (remainingPlayers <= roundsLeft) return remainingPlayers;
+    const isPenultimate = currentRound === totalRounds - 2;
+    const minFinal = isPenultimate && remainingPlayers > 3 ? 3 : 1;
+    return Math.min(remainingPlayers, Math.max(minFinal, Math.ceil(remainingPlayers * (roundsLeft - 1) / roundsLeft)));
+  },
+
   getGameUrl(gameId) {
     return `/b/${gameId}`;
   },
@@ -51,11 +60,13 @@ const TournoiUtils = {
       return '<div style="color:#aaa;text-align:center;padding:20px;">Aucun score pour cette ronde</div>';
     }
 
-    const cutoff = (cutoffs && typeof cutoffs[currentRoundIndex] === 'number') ? cutoffs[currentRoundIndex] : null;
     const isLastRound = totalRounds && currentRoundIndex >= totalRounds - 1;
-
     const active = ranked.filter(p => !p.eliminated);
     const eliminated = ranked.filter(p => p.eliminated);
+
+    const storedCutoff = (cutoffs && typeof cutoffs[currentRoundIndex] === 'number') ? cutoffs[currentRoundIndex] : null;
+    const computedCutoff = TournoiUtils.computeRoundCutoff(active.length, currentRoundIndex, totalRounds);
+    const cutoff = computedCutoff !== null ? computedCutoff : storedCutoff;
 
     let html = '';
 

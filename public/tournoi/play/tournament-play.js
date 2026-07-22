@@ -345,17 +345,18 @@ function setupRoundScoresListener(t) {
   unsubscribeRoundScores = onSnapshot(q, (snap) => {
     const scores = [];
     snap.forEach(d => scores.push({ id: d.id, ...d.data() }));
-    renderScoreboard(scores, round, t.cutoffs);
+    renderScoreboard(scores, round, t.games?.length);
   });
 }
 
-function renderScoreboard(roundScores, currentRoundIndex, cutoffs) {
+function renderScoreboard(roundScores, currentRoundIndex, totalRounds) {
   const tournamentRef = doc(window.firebaseDb, 'tournaments', tournamentId);
   getDocs(collection(tournamentRef, 'participants')).then(snap => {
     const participants = {};
     snap.forEach(d => { participants[d.id] = d.data(); });
 
-    const cutoff = cutoffs ? cutoffs[currentRoundIndex] : 0;
+    const activeCount = Object.values(participants).filter(p => !p.eliminated).length;
+    const cutoff = TournoiUtils.computeRoundCutoff(activeCount, currentRoundIndex, totalRounds) || 0;
     const bestEntry = {};
     roundScores.forEach(rs => {
       if (!bestEntry[rs.userId] || rs.score > bestEntry[rs.userId].score) {

@@ -150,7 +150,7 @@ const TournoiUtils = {
         const badge = document.createElement('span');
         badge.className = 'meta-comment';
         badge.textContent = '💬';
-        badge.title = data.comment;
+        badge.dataset.comment = data.comment;
         metaSpan.appendChild(badge);
 
         const scoreEl = entry.querySelector('.score');

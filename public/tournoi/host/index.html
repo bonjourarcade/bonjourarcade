@@ -93,6 +93,29 @@
     .entry .entry-meta { display: inline-flex; gap: 4px; margin-left: 4px; flex-shrink: 0; }
     .entry .entry-meta span { font-size: 0.9rem; cursor: default; line-height: 1; }
     .entry .entry-meta .meta-screenshot { cursor: pointer; }
+    .entry .entry-meta .meta-comment { position: relative; cursor: help; }
+    .entry .entry-meta .meta-comment::after {
+      content: attr(data-comment);
+      position: absolute;
+      bottom: calc(100% + 6px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: #222;
+      color: #fff;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 400;
+      white-space: nowrap;
+      max-width: 280px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      pointer-events: none;
+      opacity: 0;
+      z-index: 20;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    .entry .entry-meta .meta-comment:hover::after { opacity: 1; }
     .entry .score { font-weight: 700; color: var(--entry-text); cursor: default; position: relative; }
     .entry .score.has-comment { cursor: help; }
     .entry .score.has-comment::after {

@@ -224,10 +224,48 @@ function listenToTournament(initialData) {
   });
 }
 
+function renderFormatInfo(t) {
+  const formatCard = $('format-card');
+  const formatContent = $('format-content');
+
+  if (!t.games || t.games.length === 0) {
+    formatCard.classList.add('hidden');
+    return;
+  }
+
+  const totalRounds = t.games.length;
+  const durationMin = t.roundDurationSec ? Math.round(t.roundDurationSec / 60) : null;
+  const cutoffs = t.cutoffs || [];
+
+  let html = '';
+
+  html += `<div style="font-size:0.95rem;font-weight:600;margin-bottom:8px;">${totalRounds} round${totalRounds > 1 ? 's' : ''}${durationMin ? ' · ' + durationMin + ' min chacun' : ''}</div>`;
+
+  if (cutoffs.length > 0) {
+    for (let i = 0; i < totalRounds; i++) {
+      const isLast = i === totalRounds - 1;
+      const qualif = i < cutoffs.length && cutoffs[i] !== undefined && cutoffs[i] !== null;
+      html += `<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:0.9rem;border-bottom:1px solid var(--border);">
+        <span style="color:var(--muted-strong);">Round ${i + 1}</span>
+        <span>${isLast ? '🏆 Le meilleur score gagne' : qualif ? '✔️ Top ' + cutoffs[i] + ' qualifiés' : ''}</span>
+      </div>`;
+    }
+  }
+
+  html += `<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font-size:0.9rem;color:var(--muted);line-height:1.6;">
+    ⚔️ À chaque round, les joueurs avec les plus faibles scores sont éliminés.<br>
+    🏆 Le gagnant est le dernier survivant avec le score cumulatif le plus élevé.
+  </div>`;
+
+  formatContent.innerHTML = html;
+  formatCard.classList.remove('hidden');
+}
+
 function renderTournament(t) {
   $('play-participant-count').textContent = '...';
   $('play-round-info').textContent = t.currentRoundIndex >= 0 ? `Ronde ${t.currentRoundIndex + 1}/${t.games.length}` : 'Pas commencé';
   $('play-status').textContent = t.status === 'registration' ? 'Inscription' : t.status === 'active' ? 'En cours' : 'Terminé';
+  renderFormatInfo(t);
 
   if (t.status === 'registration') {
     hide('eliminated-phase');

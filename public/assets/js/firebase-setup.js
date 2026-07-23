@@ -1,7 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut, connectAuthEmulator, updateProfile } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { getFunctions, httpsCallable, connectFunctionsEmulator } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-functions.js";
-import { getFirestore, connectFirestoreEmulator, collection, query, where, orderBy, onSnapshot, doc, getDoc, getDocs, addDoc, updateDoc, serverTimestamp, limit } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+import { getFirestore, connectFirestoreEmulator, collection, query, where, orderBy, onSnapshot, doc, getDoc, getDocs, addDoc, updateDoc, setDoc, serverTimestamp, limit } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyAh5PlPLpy8sfB5QxmjWiXaA_Qrtszc2Vg",

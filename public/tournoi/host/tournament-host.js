@@ -163,33 +163,40 @@ function loadDashboard(id) {
     renderTournament(snap.data(), snap.id);
   });
 
-  unsubscribeParticipants = onSnapshot(collection(tournamentRef, 'participants'), async (snap) => {
+  unsubscribeParticipants = onSnapshot(collection(tournamentRef, 'participants'), (snap) => {
     const participants = {};
     const newUids = [];
     snap.forEach(d => {
       participants[d.id] = d.data();
       if (!(d.id in displayNameCache)) newUids.push(d.id);
     });
-    if (newUids.length > 0) {
-      try {
-        const profiles = await Promise.all(
-          newUids.map(uid => TournoiUtils.callFunction('getPublicProfile', {userId: uid}).catch(() => null))
-        );
-        profiles.forEach(p => {
-          if (p && p.displayName) {
-            displayNameCache[p.uid] = p.displayName;
-          }
-        });
-      } catch (e) {
-        console.error('Error fetching profiles:', e);
-      }
-    }
     for (const uid of Object.keys(participants)) {
       if (displayNameCache[uid]) {
         participants[uid].displayName = displayNameCache[uid];
       }
     }
     renderParticipants(participants);
+    if (newUids.length > 0) {
+      Promise.all(newUids.map(uid =>
+        TournoiUtils.callFunction('getPublicProfile', {userId: uid}).catch(() => null)
+      )).then(profiles => {
+        let changed = false;
+        profiles.forEach(p => {
+          if (p && p.displayName && displayNameCache[p.uid] !== p.displayName) {
+            displayNameCache[p.uid] = p.displayName;
+            changed = true;
+          }
+        });
+        if (changed) {
+          const updated = {};
+          Object.keys(currentParticipants).forEach(uid => {
+            updated[uid] = {...currentParticipants[uid]};
+            if (displayNameCache[uid]) updated[uid].displayName = displayNameCache[uid];
+          });
+          renderParticipants(updated);
+        }
+      }).catch(e => console.error('Error fetching profiles:', e));
+    }
   });
 }
 

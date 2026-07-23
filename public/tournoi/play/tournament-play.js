@@ -172,7 +172,7 @@ function listenToTournament(initialData) {
     renderTournament(snap.data());
   });
 
-  unsubscribeParticipants = onSnapshot(collection(tournamentRef, 'participants'), async (snap) => {
+  unsubscribeParticipants = onSnapshot(collection(tournamentRef, 'participants'), (snap) => {
     let me = null;
     const participants = {};
     const newUids = [];
@@ -184,26 +184,34 @@ function listenToTournament(initialData) {
       }
       if (!(d.id in displayNameCache)) newUids.push(d.id);
     });
-    if (newUids.length > 0) {
-      try {
-        const profiles = await Promise.all(
-          newUids.map(uid => TournoiUtils.callFunction('getPublicProfile', {userId: uid}).catch(() => null))
-        );
-        profiles.forEach(p => {
-          if (p && p.displayName) {
-            displayNameCache[p.uid] = p.displayName;
-          }
-        });
-      } catch (e) {
-        console.error('Error fetching profiles:', e);
-      }
-    }
     for (const uid of Object.keys(participants)) {
       if (displayNameCache[uid]) {
         participants[uid].displayName = displayNameCache[uid];
       }
     }
     renderParticipantsInfo(participants, me);
+    if (newUids.length > 0) {
+      Promise.all(newUids.map(uid =>
+        TournoiUtils.callFunction('getPublicProfile', {userId: uid}).catch(() => null)
+      )).then(profiles => {
+        let changed = false;
+        profiles.forEach(p => {
+          if (p && p.displayName && displayNameCache[p.uid] !== p.displayName) {
+            displayNameCache[p.uid] = p.displayName;
+            changed = true;
+          }
+        });
+        if (changed) {
+          for (const uid of Object.keys(participants)) {
+            if (displayNameCache[uid]) {
+              participants[uid].displayName = displayNameCache[uid];
+              if (uid === myUid && me) me.displayName = displayNameCache[uid];
+            }
+          }
+          renderParticipantsInfo(participants, me);
+        }
+      }).catch(e => console.error('Error fetching profiles:', e));
+    }
   });
 }
 

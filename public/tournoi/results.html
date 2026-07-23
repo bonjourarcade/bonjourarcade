@@ -10,6 +10,7 @@
 </head>
 <body>
     <a href="/" style="position:fixed;top:16px;left:16px;font-size:0.85rem;cursor:pointer;padding:8px 12px;border-radius:8px;z-index:100;text-decoration:none;background:rgba(0,0,0,0.6);color:#fff;border:1px solid rgba(255,255,255,0.2);font-weight:600;">🏠 Accueil</a>
+    <button id="results-theme-btn" style="position:fixed;top:16px;right:16px;background:rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.2);font-size:1.2rem;cursor:pointer;padding:6px 10px;border-radius:8px;color:#fff;z-index:100;">🌙</button>
     <div id="results-container">
         <!-- Section 1: Intro - "Résultats" -->
         <section id="intro-section" class="results-section black-bg">
@@ -71,5 +72,26 @@
     </div>
 
     <script src="results.js"></script>
+    <script>
+        function applyTheme(theme) {
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const effective = theme === 'system' ? (prefersDark ? 'dark' : 'light') : theme;
+            document.body.classList.toggle('theme-light', effective === 'light');
+            const btn = document.getElementById('results-theme-btn');
+            if (btn) btn.textContent = effective === 'dark' ? '🌙' : '☀️';
+        }
+        const saved = localStorage.getItem('theme') || 'system';
+        applyTheme(saved);
+        document.getElementById('results-theme-btn').addEventListener('click', () => {
+            const current = localStorage.getItem('theme') || 'system';
+            const next = current === 'dark' ? 'light' : (current === 'light' ? 'system' : 'dark');
+            localStorage.setItem('theme', next);
+            applyTheme(next);
+        });
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+            const theme = localStorage.getItem('theme') || 'system';
+            if (theme === 'system') applyTheme('system');
+        });
+    </script>
 </body>
 </html>

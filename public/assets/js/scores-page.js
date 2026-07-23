@@ -1248,14 +1248,14 @@
         }).join('');
     }
 
-    function updatePlayerScoresSummary(playerKey, playerScores, pendingScores) {
+    function updatePlayerScoresSummary(playerKey, playerScores, pendingScores, displayName) {
         const approvedGameCount = new Set(playerScores.map(function (score) {
             return score.gameId;
         })).size;
         const fallbackName = state.currentUser && state.currentUser.uid === playerKey
             ? (state.currentUser.displayName || 'Anonymous')
             : 'Anonymous';
-        const playerName = (playerScores[0] && playerScores[0].playerName) || fallbackName;
+        const playerName = displayName || (playerScores[0] && playerScores[0].playerName) || fallbackName;
         const subtitleParts = [];
 
         elements.playerScoresTitle.textContent = 'Tous les scores de ' + playerName;
@@ -1448,7 +1448,9 @@
         state.selectedPlayerKey = playerKey;
         updatePlayerQueryParam(playerKey);
         syncPlayerNameEditingAvailability();
-        updatePlayerScoresSummary(playerKey, playerScores, []);
+
+        elements.playerScoresTitle.textContent = 'Chargement du joueur...';
+        elements.playerScoresSubtitle.textContent = '';
         elements.playerScoresBody.innerHTML = renderApprovedPlayerScoresRows(playerScores);
 
         if (isOwnProfile) {
@@ -1461,6 +1463,18 @@
 
         setPlayerScoresVisibility(true);
         syncPlayerScoresScrollPosition();
+
+        let displayName = null;
+        if (!isOwnProfile && playerKey && !playerKey.startsWith('name:')) {
+            try {
+                const profile = await window.getPublicProfile(playerKey);
+                displayName = profile && profile.displayName;
+            } catch (e) {
+                /* profile not found */
+            }
+        }
+
+        updatePlayerScoresSummary(playerKey, playerScores, [], displayName);
 
         if (!isOwnProfile) {
             return;

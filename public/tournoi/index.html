@@ -44,16 +44,16 @@
             document.body.classList.toggle('theme-light', effective === 'light');
             document.getElementById('theme-btn').textContent = effective === 'dark' ? '🌙' : '☀️';
         }
-        const saved = localStorage.getItem('theme') || 'dark';
+        const saved = localStorage.getItem('theme') || 'system';
         applyTheme(saved);
         document.getElementById('theme-btn').addEventListener('click', () => {
-            const current = localStorage.getItem('theme') || 'dark';
+            const current = localStorage.getItem('theme') || 'system';
             const next = current === 'dark' ? 'light' : (current === 'light' ? 'system' : 'dark');
             localStorage.setItem('theme', next);
             applyTheme(next);
         });
         window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-            const theme = localStorage.getItem('theme') || 'dark';
+            const theme = localStorage.getItem('theme') || 'system';
             if (theme === 'system') applyTheme('system');
         });
     </script>

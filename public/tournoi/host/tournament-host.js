@@ -328,16 +328,42 @@ function renderParticipants(participants) {
   const count = Object.keys(participants).length;
   $('participant-count').textContent = `${count} participant${count > 1 ? 's' : ''}`;
 
-  $('participant-list-setup').innerHTML =
+  const gridHtml = () =>
     '<div class="participant-grid">' +
     Object.entries(participants).map(([uid, p]) =>
-      `<div class="participant-chip">
+      `<div class="participant-chip ${p.eliminated ? 'eliminated-chip' : ''}">
         <img src="${p.photoURL || '../assets/default-avatar.png'}" alt="">
         <span>${p.displayName}</span>
         ${p.eliminated ? '<span class="elim-badge">Éliminé</span>' : ''}
+        <button class="btn-sm ${p.eliminated ? 'btn-warning' : 'btn-danger'}" style="margin-left:4px;padding:2px 6px;font-size:11px;"
+          data-uid="${uid}" data-action="${p.eliminated ? 'reinstate' : 'eliminate'}"
+          title="${p.eliminated ? 'Réintégrer' : 'Éliminer'}">${p.eliminated ? '🔄' : '⚔️'}</button>
       </div>`
     ).join('') +
     '</div>';
+
+  const html = gridHtml();
+  $('participant-list-setup').innerHTML = html;
+  $('participant-list-active').innerHTML = html;
+
+  document.querySelectorAll('#participant-list-setup [data-action], #participant-list-active [data-action]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const uid = btn.dataset.uid;
+      const action = btn.dataset.action;
+      btn.disabled = true;
+      try {
+        const fn = window.httpsCallable
+          ? window.httpsCallable(window.firebaseFunctions, action === 'eliminate' ? 'eliminateParticipant' : 'reinstateParticipant')
+          : (await import('https://www.gstatic.com/firebasejs/11.0.1/firebase-functions.js')).httpsCallable(window.firebaseFunctions, action === 'eliminate' ? 'eliminateParticipant' : 'reinstateParticipant');
+        await fn({ tournamentId, userId: uid });
+        showToast(action === 'eliminate' ? 'Participant éliminé ⚔️' : 'Participant réintégré 🔄');
+      } catch (e) {
+        showToast('Erreur: ' + (e.message || e));
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  });
 }
 
 function renderScoreboard(roundScores) {

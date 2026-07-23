@@ -84,13 +84,12 @@ $('create-tournament-btn').addEventListener('click', async () => {
     if (gameIds.length === 0) { throw new Error('Entre au moins un ID de jeu.'); }
     const durUnits = { minutes: 60, heures: 3600, jours: 86400 };
     const roundDurationSec = parseFloat($('round-duration').value) * durUnits[$('round-duration-unit').value];
-    const pauseDurationSec = parseFloat($('pause-duration').value) * durUnits[$('pause-duration-unit').value];
     const shareCode = $('share-code').value.trim().toUpperCase() || undefined;
 
     const fn = window.httpsCallable
       ? window.httpsCallable(window.firebaseFunctions, 'createTournament')
       : (await import('https://www.gstatic.com/firebasejs/11.0.1/firebase-functions.js')).httpsCallable(window.firebaseFunctions, 'createTournament');
-    const result = (await fn({ gameIds, roundDurationSec, pauseDurationSec, shareCode })).data;
+    const result = (await fn({ gameIds, roundDurationSec, pauseDurationSec: 0, shareCode })).data;
     tournamentId = result.tournamentId;
     window.history.replaceState({}, '', `?t=${tournamentId}`);
     hide('setup-view');
@@ -198,31 +197,10 @@ function renderTournament(t, id) {
 
     $('round-title').textContent = `Ronde ${round + 1} / ${total}`;
 
-    const isBreak = t.breakStartTime !== null;
-
-    if (isBreak) {
-      $('round-subtitle').textContent = 'Pause — vérification des scores';
-      $('round-subtitle').style.color = '#ffc107';
-      if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
-      const updateBreakTimer = () => {
-        const remaining = t.pauseDurationSec > 0
-          ? TournoiUtils.getRemainingSeconds(t.breakStartTime, t.pauseDurationSec)
-          : 0;
-        $('timer').textContent = remaining > 0 ? TournoiUtils.formatTimer(remaining) : '🔒';
-        $('timer').style.color = remaining > 0 ? '#ffc107' : '#dc3545';
-      };
-      updateBreakTimer();
-      timerInterval = setInterval(updateBreakTimer, 1000);
-      show('next-round-btn');
-      $('end-round-btn').classList.add('hidden');
-      $('next-round-btn').textContent = round >= total - 1 ? 'Finaliser' : 'Ronde suivante';
-    } else {
-      hide('next-round-btn');
-      if (lastRoundIndex !== round) {
-        lastRoundIndex = round;
-      }
-      startRoundTimer(t);
+    if (lastRoundIndex !== round) {
+      lastRoundIndex = round;
     }
+    startRoundTimer(t);
 
     if (gameId) {
       const g = gamelist.find(g => g.id === gameId);
@@ -238,7 +216,6 @@ function renderTournament(t, id) {
       $('game-link').innerHTML = `<a href="${TournoiUtils.getGameUrl(gameId)}?t=${id}&r=${round}" target="_blank">${TournoiUtils.getGameUrl(gameId)}?t=${id}&r=${round}</a>`;
 
       $('end-round-btn').classList.remove('hidden');
-      if (isBreak) { $('end-round-btn').classList.add('hidden'); }
     } else {
       $('game-card').classList.add('hidden');
       $('end-round-btn').classList.add('hidden');

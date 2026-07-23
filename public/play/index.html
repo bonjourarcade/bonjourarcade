@@ -4762,7 +4762,7 @@
                 const statusEl = document.getElementById('tb-status');
 
                 // Detect round advance → redirect to new game
-                if (t.status === 'active' && !t.breakStartTime && t.currentRoundIndex !== roundNum) {
+                if (t.status === 'active' && t.currentRoundIndex !== roundNum) {
                     const newGameId = t.games[t.currentRoundIndex];
                     if (newGameId) {
                         const base = window.TournoiUtils ? window.TournoiUtils.getGameUrl(newGameId) : `/b/${newGameId}`;
@@ -4771,7 +4771,7 @@
                     }
                 }
 
-                if (t.status === 'active' && !t.breakStartTime) {
+                if (t.status === 'active') {
                     statusEl.textContent = 'En cours';
                     statusEl.style.color = '#28a745';
 
@@ -4796,20 +4796,6 @@
                     };
                     updateTimer();
                     timerInterval = setInterval(updateTimer, 1000);
-                } else if (t.breakStartTime) {
-                    statusEl.textContent = 'Vérification';
-                    statusEl.style.color = '#ffc107';
-                    timerEl.classList.remove('timer-warning');
-                    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
-                    const updateBreakTimer = () => {
-                        const remaining = t.pauseDurationSec > 0
-                            ? TournoiUtils.getRemainingSeconds(t.breakStartTime, t.pauseDurationSec)
-                            : 0;
-                        timerEl.textContent = remaining > 0 ? TournoiUtils.formatTimer(remaining) : '🔒';
-                        timerEl.style.color = remaining > 0 ? '#ffc107' : '#dc3545';
-                    };
-                    updateBreakTimer();
-                    timerInterval = setInterval(updateBreakTimer, 1000);
                 } else {
                     statusEl.textContent = t.status === 'registration' ? 'Inscription' : 'Terminé';
                     statusEl.style.color = '#aaa';

@@ -600,7 +600,7 @@
             gameEl.style.display = 'none';
           }
 
-          if (t.status === 'active' && !t.breakStartTime) {
+          if (t.status === 'active') {
             if (data.roundScores && data.roundScores.length > 0) {
               const top = data.roundScores[0];
               leaderEl.innerHTML = '👑 <img src="' + (top.photoURL || '../assets/default-avatar.png') + '" class="avatar"> <span class="name">' + top.displayName + '</span><span class="score">' + (top.score || 0).toLocaleString() + '</span>';
@@ -609,10 +609,6 @@
               leaderEl.style.display = 'none';
             }
             startTimer(t);
-          } else if (t.breakStartTime) {
-            leaderEl.innerHTML = '<span class="name" style="color:#ffc107">☕ Vérification</span>';
-            leaderEl.style.display = '';
-            startBreakTimer(t);
           } else {
             leaderEl.style.display = 'none';
             clearTimer();
@@ -646,18 +642,6 @@
             const remaining = getRemaining(t.roundStartTime, t.roundDurationSec);
             timerEl.textContent = TournoiUtils.formatTimer(remaining);
             timerEl.classList.toggle('timer-warning', remaining <= 60);
-          };
-          update();
-          timerInterval = setInterval(update, 1000);
-        }
-
-        function startBreakTimer(t) {
-          clearTimer();
-          const update = () => {
-            if (!t.pauseDurationSec) { timerEl.textContent = '🔒'; return; }
-            const remaining = getRemaining(t.breakStartTime, t.pauseDurationSec);
-            timerEl.textContent = remaining > 0 ? TournoiUtils.formatTimer(remaining) : '🔒';
-            timerEl.classList.remove('timer-warning');
           };
           update();
           timerInterval = setInterval(update, 1000);

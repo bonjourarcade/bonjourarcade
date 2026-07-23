@@ -117,7 +117,7 @@ async function checkParticipation() {
       show('join-phase');
 
       const isJoinable = t.status === 'registration' ||
-        (t.status === 'active' && t.currentRoundIndex === 0 && !t.breakStartTime);
+        (t.status === 'active' && t.currentRoundIndex === 0);
 
       $('join-tournament-name').textContent = `Tournoi #${t.shareCode}`;
       const pCount = (await getDocs(collection(tournamentRef, 'participants'))).size;
@@ -192,43 +192,22 @@ function renderTournament(t) {
   $('play-status').textContent = t.status === 'registration' ? 'Inscription' : t.status === 'active' ? 'En cours' : 'Terminé';
 
   if (t.status === 'registration') {
-    hide('round-phase');
     hide('break-phase');
     hide('eliminated-phase');
     show('waiting-phase');
   } else if (t.status === 'active') {
     hide('waiting-phase');
+    hide('break-phase');
     hide('eliminated-phase');
 
     const round = t.currentRoundIndex;
     const gameId = t.games[round];
-    const isBreak = t.breakStartTime !== null;
 
     if (myParticipantData?.eliminated) {
-      hide('round-phase');
-      hide('break-phase');
       show('eliminated-phase');
       $('eliminated-round').textContent = (myParticipantData.eliminatedRound || 0) + 1;
-    } else if (isBreak) {
-      hide('round-phase');
-      show('break-phase');
-      if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
-      $('round-title').textContent = `Ronde ${round + 1} / ${t.games.length} — Pause`;
-      const isLastRound = round >= t.games.length - 1;
-      $('view-final-results-btn').classList.toggle('hidden', !isLastRound);
-      const updateBreakTimer = () => {
-        const remaining = t.pauseDurationSec > 0
-          ? TournoiUtils.getRemainingSeconds(t.breakStartTime, t.pauseDurationSec)
-          : 0;
-        const formatted = remaining > 0 ? TournoiUtils.formatTimer(remaining) : '🔒 Scores fermés';
-        $('timer').textContent = formatted;
-        $('timer').classList.remove('timer-warning');
-        $('break-timer').textContent = formatted;
-      };
-      updateBreakTimer();
-      timerInterval = setInterval(updateBreakTimer, 1000);
+      clearInterval(timerInterval); timerInterval = null;
     } else {
-      hide('break-phase');
       show('round-phase');
 
       $('round-title').textContent = `Ronde ${round + 1} / ${t.games.length}`;

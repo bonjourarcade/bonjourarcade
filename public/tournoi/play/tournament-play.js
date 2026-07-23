@@ -201,9 +201,15 @@ function listenToTournament(initialData) {
       )).then(profiles => {
         let changed = false;
         profiles.forEach(p => {
-          if (p && p.displayName && displayNameCache[p.uid] !== p.displayName) {
-            displayNameCache[p.uid] = p.displayName;
-            changed = true;
+          if (p) {
+            if (p.displayName && displayNameCache[p.uid] !== p.displayName) {
+              displayNameCache[p.uid] = p.displayName;
+              changed = true;
+            }
+            if (p.photoURL && participants[p.uid]?.photoURL !== p.photoURL) {
+              participants[p.uid].photoURL = p.photoURL;
+              changed = true;
+            }
           }
         });
         if (changed) {
@@ -542,6 +548,23 @@ async function buildResultsFromFirestore(id) {
       if (roundB !== roundA) return roundB - roundA;
       return b.totalScore - a.totalScore;
     });
+
+    // Resolve photoURL for each participant via getPublicProfile
+    try {
+      const profiles = await Promise.all(
+        participants.map(p =>
+          TournoiUtils.callFunction('getPublicProfile', {userId: p.uid})
+            .then(prof => ({ uid: p.uid, photoURL: prof.photoURL }))
+            .catch(() => null)
+        )
+      );
+      profiles.forEach(prof => {
+        if (prof?.photoURL) {
+          const p = participants.find(pp => pp.uid === prof.uid);
+          if (p) p.photoURL = prof.photoURL;
+        }
+      });
+    } catch (e) { /* non-critical */ }
 
     const podiumPlayers = participants.slice(0, 3).map(p => ({
       name: p.name,

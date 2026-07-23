@@ -182,9 +182,14 @@ function loadDashboard(id) {
       )).then(profiles => {
         let changed = false;
         profiles.forEach(p => {
-          if (p && p.displayName && displayNameCache[p.uid] !== p.displayName) {
-            displayNameCache[p.uid] = p.displayName;
-            changed = true;
+          if (p) {
+            if (p.displayName && displayNameCache[p.uid] !== p.displayName) {
+              displayNameCache[p.uid] = p.displayName;
+              changed = true;
+            }
+            if (p.photoURL && currentParticipants[p.uid]?.photoURL !== p.photoURL) {
+              changed = true;
+            }
           }
         });
         if (changed) {
@@ -192,6 +197,8 @@ function loadDashboard(id) {
           Object.keys(currentParticipants).forEach(uid => {
             updated[uid] = {...currentParticipants[uid]};
             if (displayNameCache[uid]) updated[uid].displayName = displayNameCache[uid];
+            const profile = profiles.find(p => p?.uid === uid);
+            if (profile?.photoURL) updated[uid].photoURL = profile.photoURL;
           });
           renderParticipants(updated);
         }

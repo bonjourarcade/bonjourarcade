@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil - BonjourArcade</title>
+    <meta name="description" content="Profil joueur BonjourArcade.">
+    <link rel="icon" href="../favicon.ico">
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/profil.css">
+    <script async src="/assets/js/analytics.js"></script>
+</head>
+
+<body>
+    <header class="scores-header">
+        <div class="scores-header-inner header-flex">
+            <a class="scores-logo" href="/" aria-label="Retour a l'accueil BonjourArcade">
+                <img src="/assets/images/bonjourarcade-logo.png" alt="BonjourArcade" class="header-logo">
+            </a>
+            <nav class="scores-nav" aria-label="Navigation principale">
+                <a href="/">Accueil</a>
+                <a href="/all/">Tous les jeux</a>
+                <a href="/scores">Scores</a>
+            </nav>
+            <div class="scores-header-actions">
+                <div id="profil-auth-status" class="scores-auth-status" aria-live="polite">
+                    <span id="profil-auth-dot" class="scores-auth-dot" aria-hidden="true"></span>
+                    <span id="profil-auth-text">Non connecte</span>
+                </div>
+                <button id="profil-auth-button" class="scores-auth-button" type="button">Connexion</button>
+                <div class="theme-toggle-wrapper scores-menu-wrapper" style="position: relative;">
+                    <button id="options-toggle-btn" class="theme-btn" aria-label="Options" aria-haspopup="true" aria-expanded="false" type="button">
+                        <span>⚙️</span>
+                        <span>Menu</span>
+                    </button>
+                    <div id="options-dropdown" class="dropdown-menu">
+                        <a href="/scores" class="dropdown-option">
+                            <span>🏆</span>Scores
+                        </a>
+                        <a href="/all" class="dropdown-option">
+                            <span>🕹️</span>Tous les jeux
+                        </a>
+                        <a href="/daily/" class="dropdown-option" id="daily-game-link">
+                            <span>📅</span>Jeu du jour
+                        </a>
+                        <a href="/randomgame/" class="dropdown-option">
+                            <span>🎲</span>Jeu aleatoire
+                        </a>
+                        <a href="/swipe" class="dropdown-option">
+                            <span>🃏</span>Swipe
+                        </a>
+                        <a href="/screensaver" class="dropdown-option">
+                            <span>🌠</span>Ecran de veille
+                        </a>
+                        <a href="/ratings" class="dropdown-option">
+                            <span>⭐</span>Ratings
+                        </a>
+                        <a href="/upcoming" class="dropdown-option">
+                            <span>🔮</span>Bientot en vedette
+                        </a>
+                        <a href="https://ko-fi.com/bonjourarcade" target="_blank" class="dropdown-option dropdown-highlight">
+                            <span>❤️</span>Supporter BonjourArcade
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <button class="theme-option dropdown-option" data-theme="system" type="button">
+                            <span class="theme-icon">🌓</span>Theme : Systeme
+                        </button>
+                        <button class="theme-option dropdown-option" data-theme="light" type="button">
+                            <span class="theme-icon">☀️</span>Theme : Clair
+                        </button>
+                        <button class="theme-option dropdown-option" data-theme="dark" type="button">
+                            <span class="theme-icon">🌙</span>Theme : Sombre
+                        </button>
+                        <div class="dropdown-divider"></div>
+                        <button id="dropdown-auth-button" class="dropdown-option" type="button">
+                            <span>🔐</span>Connexion
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="profil-main">
+        <div id="profil-loading" class="profil-state loading">Chargement du profil...</div>
+        <div id="profil-error" class="profil-state error" style="display:none;"></div>
+        <div id="profil-content" style="display:none;">
+            <div class="profil-card">
+                <div class="profil-header">
+                    <div class="profil-avatar-wrap">
+                        <div class="profil-avatar">
+                            <img id="profil-avatar-img" src="" alt="Avatar" style="display:none;">
+                            <span id="profil-avatar-fallback" class="profil-avatar-fallback">👤</span>
+                        </div>
+                        <div id="profil-avatar-actions" class="profil-avatar-actions" style="display:none;">
+                            <label for="profil-avatar-upload" class="profil-avatar-btn" title="Changer l'avatar">
+                                <span>📷</span>
+                                <input id="profil-avatar-upload" type="file" accept="image/jpeg,image/png,image/webp" style="display:none;">
+                            </label>
+                            <button id="profil-avatar-reset" class="profil-avatar-btn" type="button" title="Revenir a l'avatar SSO">
+                                <span>↩️</span>
+                            </button>
+                            <button id="profil-avatar-delete" class="profil-avatar-btn" type="button" title="Supprimer l'avatar">
+                                <span>🗑️</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="profil-info">
+                        <h1 id="profil-display-name" class="profil-name"></h1>
+                        <p id="profil-member-since" class="profil-meta"></p>
+                        <div id="profil-edit-name" class="profil-edit-name" style="display:none;">
+                            <form id="profil-name-form">
+                                <input id="profil-name-input" class="profil-name-input" type="text" maxlength="40" autocomplete="nickname">
+                                <button id="profil-name-save" class="profil-name-save" type="submit">Enregistrer</button>
+                                <button id="profil-name-cancel" class="profil-name-cancel" type="button">Annuler</button>
+                            </form>
+                            <p id="profil-name-status" class="profil-name-status" aria-live="polite"></p>
+                        </div>
+                        <button id="profil-edit-toggle" class="profil-edit-toggle" type="button">Modifier le profil</button>
+                        <button id="profil-logout" class="profil-logout" type="button" style="display:none;">Deconnexion</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="profil-scores-card">
+                <h2 class="profil-section-title">Meilleurs scores</h2>
+                <div id="profil-scores-loading" class="section-state loading">Chargement des scores...</div>
+                <div id="profil-scores-empty" class="section-state empty" style="display:none;">Aucun score pour le moment</div>
+                <div class="profil-scores-table-wrap">
+                    <table class="profil-scores-table" id="profil-scores-table" style="display:none;">
+                        <thead>
+                            <tr>
+                                <th>Rang</th>
+                                <th>Jeu</th>
+                                <th>Score</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="profil-scores-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script type="module" src="../assets/js/firebase-setup.js"></script>
+    <script src="../assets/js/profil-page.js"></script>
+</body>
+
+</html>

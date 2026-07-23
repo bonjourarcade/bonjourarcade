@@ -188,6 +188,18 @@ window.getLatestRatings = async () => {
     return result.data;
 };
 
+window.getPublicProfile = async (userId) => {
+    const fn = httpsCallable(functions, 'getPublicProfile');
+    const result = await fn({ userId });
+    return result.data;
+};
+
+window.getUserScores = async (userId) => {
+    const fn = httpsCallable(functions, 'getUserScores');
+    const result = await fn({ userId });
+    return result.data;
+};
+
 window.updateFirebaseDisplayName = async (displayName) => {
     const nextDisplayName = String(displayName || '').trim();
 

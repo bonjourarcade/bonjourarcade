@@ -22,6 +22,7 @@
                 <a href="/">Accueil</a>
                 <a href="/all/">Tous les jeux</a>
                 <button id="my-scores-button" class="scores-nav-button" type="button" hidden>Mes scores</button>
+                <a id="profil-link" class="scores-nav-button" href="/profil/" hidden>Profil</a>
             </nav>
             <div class="scores-header-actions">
                 <div id="scores-auth-status" class="scores-auth-status" aria-live="polite">
@@ -37,6 +38,9 @@
                     <div id="options-dropdown" class="dropdown-menu">
                         <a href="/scores" class="dropdown-option">
                             <span>🏆</span>Scores
+                        </a>
+                        <a href="/profil/" class="dropdown-option" id="dropdown-profil-link" hidden>
+                            <span>👤</span>Profil
                         </a>
                         <a href="/all" class="dropdown-option">
                             <span>🕹️</span>Tous les jeux

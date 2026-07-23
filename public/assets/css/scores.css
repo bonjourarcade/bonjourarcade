@@ -134,6 +134,9 @@ body.theme-dark .scores-nav a.is-active {
     font-weight: 600;
     cursor: pointer;
     white-space: nowrap;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
 }
 
 .scores-nav-button:hover {

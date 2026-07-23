@@ -439,9 +439,10 @@
     }
 
     function renderPlayerAnchor(score, label) {
-        const anchorLabel = escapeHtml(label || ('Voir tous les scores de ' + (score.playerName || 'Anonymous')));
+        const anchorLabel = escapeHtml(label || ('Voir le profil de ' + (score.playerName || 'Anonymous')));
+        const href = score.userId ? '/profil/' + encodeURIComponent(score.userId) : buildPlayerScoresUrl(getPlayerKey(score));
         return [
-            '<a class="player-link player-link-anchor" href="', buildPlayerScoresUrl(getPlayerKey(score)), '" aria-label="', anchorLabel, '">',
+            '<a class="player-link player-link-anchor" href="', href, '" aria-label="', anchorLabel, '">',
             renderPlayerCell(score),
             '</a>'
         ].join('');
@@ -1376,7 +1377,19 @@
             return;
         }
 
-        elements.myScoresButton.hidden = !(state.currentUser && state.currentUser.uid);
+        const isLoggedIn = Boolean(state.currentUser && state.currentUser.uid);
+        elements.myScoresButton.hidden = !isLoggedIn;
+
+        const profilLink = document.getElementById('profil-link');
+        if (profilLink) {
+            profilLink.hidden = !isLoggedIn;
+        }
+
+        const dropdownProfilLink = document.getElementById('dropdown-profil-link');
+        if (dropdownProfilLink) {
+            dropdownProfilLink.hidden = !isLoggedIn;
+        }
+
         syncAuthDisplay();
     }
 

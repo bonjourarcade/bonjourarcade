@@ -162,6 +162,9 @@
             <button class="theme-option dropdown-option" data-theme="dark">
               <span class="theme-icon">🌙</span>Thème : Sombre
             </button>
+            <button id="login-btn" class="dropdown-option">
+              <span>🔐</span>Se connecter
+            </button>
             <div class="dropdown-divider" id="auth-divider" style="display: none;"></div>
             <button id="logout-btn" class="dropdown-option" style="display: none; color: #ff4444;">
               <span>🚪</span>Se déconnecter
@@ -465,38 +468,52 @@
   </script>
 
   <script>
-    // Firebase Auth State Listener for Logout Button
+    // Firebase Auth State Listener for Login/Logout Buttons
     document.addEventListener('DOMContentLoaded', () => {
+      const loginBtn = document.getElementById('login-btn');
       const logoutBtn = document.getElementById('logout-btn');
       const authDivider = document.getElementById('auth-divider');
+
+      if (loginBtn) {
+        loginBtn.addEventListener('click', async () => {
+          if (typeof window.signInWithGoogle === 'function') {
+            try {
+              await window.signInWithGoogle();
+              location.reload();
+            } catch (e) {
+              console.error('Login error:', e);
+            }
+          }
+        });
+      }
 
       if (logoutBtn) {
         logoutBtn.addEventListener('click', async () => {
           if (typeof window.signOutFirebase === 'function') {
             await window.signOutFirebase();
-            location.reload(); // Reload to refresh UI state
+            location.reload();
           }
         });
-
-        // Use the global listener exposed by firebase-setup.js
-        const checkAuth = () => {
-          if (typeof window.onFirebaseAuthStateChanged === 'function') {
-            window.onFirebaseAuthStateChanged((user) => {
-              if (user) {
-                logoutBtn.style.display = 'flex';
-                if (authDivider) authDivider.style.display = 'block';
-              } else {
-                logoutBtn.style.display = 'none';
-                if (authDivider) authDivider.style.display = 'none';
-              }
-            });
-          } else {
-            // If not loaded yet, retry shortly
-            setTimeout(checkAuth, 100);
-          }
-        };
-        checkAuth();
       }
+
+      const checkAuth = () => {
+        if (typeof window.onFirebaseAuthStateChanged === 'function') {
+          window.onFirebaseAuthStateChanged((user) => {
+            if (user) {
+              if (loginBtn) loginBtn.style.display = 'none';
+              if (logoutBtn) logoutBtn.style.display = 'flex';
+              if (authDivider) authDivider.style.display = 'block';
+            } else {
+              if (loginBtn) loginBtn.style.display = 'flex';
+              if (logoutBtn) logoutBtn.style.display = 'none';
+              if (authDivider) authDivider.style.display = 'none';
+            }
+          });
+        } else {
+          setTimeout(checkAuth, 100);
+        }
+      };
+      checkAuth();
     });
   </script>
 

@@ -2904,6 +2904,32 @@
                     }
                 }
 
+                // --- Auto-detect tournament if linked from play page ---
+                if (!tournamentId) {
+                    try {
+                        const result = await TournoiUtils.callFunction('getUserActiveTournament');
+                        if (result && result.tournament && result.tournament.status === 'active') {
+                            const t = result.tournament;
+                            const round = t.currentRoundIndex;
+                            if (round >= 0 && t.games && t.games[round] === gameId) {
+                                window._autoTournamentId = result.tournamentId;
+                                window._autoRoundIndex = round;
+                                window._eliminated = result.me?.eliminated || false;
+                                if (window.EJS_Buttons) {
+                                    window.EJS_Buttons.saveState = false;
+                                    window.EJS_Buttons.loadState = false;
+                                    window.EJS_Buttons.quickSave = false;
+                                    window.EJS_Buttons.quickLoad = false;
+                                    window.EJS_Buttons.saveSavFiles = false;
+                                    window.EJS_Buttons.loadSavFiles = false;
+                                }
+                            }
+                        }
+                    } catch (e) {
+                        console.warn('Tournament auto-detect failed:', e);
+                    }
+                }
+
                 // Step 10: Load the main EmulatorJS engine (loader.js)
                 // This now happens sequentially after successfully fetching/setting up everything else
                 if (window.EJS_pathtodata) {
@@ -4284,8 +4310,8 @@
                 const screenshotBase64 = sessionStorage.getItem('tempScoreScreenshot');
                 const statusDiv = document.getElementById('score-submission-status');
                 const urlParams = new URLSearchParams(window.location.search);
-                const tournamentId = urlParams.get('t');
-                const roundIndex = urlParams.get('r') !== null ? parseInt(urlParams.get('r'), 10) : undefined;
+                const tournamentId = urlParams.get('t') || window._autoTournamentId || null;
+                const roundIndex = urlParams.get('r') !== null ? parseInt(urlParams.get('r'), 10) : window._autoRoundIndex;
 
                 if (window._eliminated && tournamentId) {
                     statusDiv.textContent = "🚫 Tu as été éliminé du tournoi.";

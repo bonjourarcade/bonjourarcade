@@ -256,6 +256,25 @@ function renderTournament(t) {
         $('game-cover').style.display = 'none';
       }
 
+      const upcomingGameIds = t.games.slice(round + 1);
+      const upcomingContainer = $('upcoming-games');
+      if (upcomingGameIds.length > 0) {
+        upcomingContainer.classList.remove('hidden');
+        upcomingContainer.innerHTML = upcomingGameIds.map((gid, i) => {
+          const g = gamelist.find(gg => gg.id === gid);
+          const title = g ? g.title : gid;
+          const label = `Ronde ${round + i + 2}`;
+          return `<div class="upcoming-game">
+            <div class="upcoming-img-wrap">
+              <img src="/games/${gid}/cover.png" alt="" loading="lazy" draggable="false" onerror="this.style.display='none'">
+              <div class="upcoming-label">${label}</div>
+            </div>
+          </div>`;
+        }).join('');
+      } else {
+        upcomingContainer.classList.add('hidden');
+      }
+
       if (timerInterval) clearInterval(timerInterval);
       let warningPlayed = false;
       const updateTimer = () => {

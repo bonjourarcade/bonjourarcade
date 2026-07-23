@@ -2902,31 +2902,38 @@
                             console.warn('Could not fetch current game from API to check featured status:', error);
                         }
                     }
-                }
 
-                // --- Auto-detect tournament if linked from play page ---
-                if (!tournamentId) {
-                    try {
-                        const result = await TournoiUtils.callFunction('getUserActiveTournament');
-                        if (result && result.tournament && result.tournament.status === 'active') {
-                            const t = result.tournament;
-                            const round = t.currentRoundIndex;
-                            if (round >= 0 && t.games && t.games[round] === gameId) {
-                                window._autoTournamentId = result.tournamentId;
-                                window._autoRoundIndex = round;
-                                window._eliminated = result.me?.eliminated || false;
-                                if (window.EJS_Buttons) {
-                                    window.EJS_Buttons.saveState = false;
-                                    window.EJS_Buttons.loadState = false;
-                                    window.EJS_Buttons.quickSave = false;
-                                    window.EJS_Buttons.quickLoad = false;
-                                    window.EJS_Buttons.saveSavFiles = false;
-                                    window.EJS_Buttons.loadSavFiles = false;
+                    if (!tournamentId) {
+                        try {
+                            const result = await TournoiUtils.callFunction('getUserActiveTournaments');
+                            if (result && Array.isArray(result.tournaments)) {
+                                const matches = result.tournaments.filter(t =>
+                                    t.status === 'active' &&
+                                    t.currentRoundIndex >= 0 &&
+                                    t.games &&
+                                    t.games[t.currentRoundIndex] === gameId
+                                );
+                                if (matches.length === 1) {
+                                    const t = matches[0];
+                                    window.location.href = `/b/${gameId}?t=${t.id}&r=${t.currentRoundIndex}`;
+                                    return;
+                                } else if (matches.length > 1) {
+                                    const choice = prompt(
+                                        'Vous participez à plusieurs tournois sur ce jeu. Entrez le code du tournoi auquel vous voulez jouer :\n' +
+                                        matches.map(t => `  #${t.shareCode}`).join('\n')
+                                    );
+                                    if (choice) {
+                                        const found = matches.find(t => String(t.shareCode) === choice);
+                                        if (found) {
+                                            window.location.href = `/b/${gameId}?t=${found.id}&r=${found.currentRoundIndex}`;
+                                            return;
+                                        }
+                                    }
                                 }
                             }
+                        } catch (e) {
+                            console.warn('Tournament auto-detect failed:', e);
                         }
-                    } catch (e) {
-                        console.warn('Tournament auto-detect failed:', e);
                     }
                 }
 

@@ -29,55 +29,7 @@
                     <span id="profil-auth-text">Non connecte</span>
                 </div>
                 <button id="profil-auth-button" class="scores-auth-button" type="button">Connexion</button>
-                <div class="theme-toggle-wrapper scores-menu-wrapper" style="position: relative;">
-                    <button id="options-toggle-btn" class="theme-btn" aria-label="Options" aria-haspopup="true" aria-expanded="false" type="button">
-                        <span>⚙️</span>
-                        <span>Menu</span>
-                    </button>
-                    <div id="options-dropdown" class="dropdown-menu">
-                        <a href="/scores" class="dropdown-option">
-                            <span>🏆</span>Scores
-                        </a>
-                        <a href="/all" class="dropdown-option">
-                            <span>🕹️</span>Tous les jeux
-                        </a>
-                        <a href="/daily/" class="dropdown-option" id="daily-game-link">
-                            <span>📅</span>Jeu du jour
-                        </a>
-                        <a href="/randomgame/" class="dropdown-option">
-                            <span>🎲</span>Jeu aleatoire
-                        </a>
-                        <a href="/swipe" class="dropdown-option">
-                            <span>🃏</span>Swipe
-                        </a>
-                        <a href="/screensaver" class="dropdown-option">
-                            <span>🌠</span>Ecran de veille
-                        </a>
-                        <a href="/ratings" class="dropdown-option">
-                            <span>⭐</span>Ratings
-                        </a>
-                        <a href="/upcoming" class="dropdown-option">
-                            <span>🔮</span>Bientot en vedette
-                        </a>
-                        <a href="https://ko-fi.com/bonjourarcade" target="_blank" class="dropdown-option dropdown-highlight">
-                            <span>❤️</span>Supporter BonjourArcade
-                        </a>
-                        <div class="dropdown-divider"></div>
-                        <button class="theme-option dropdown-option" data-theme="system" type="button">
-                            <span class="theme-icon">🌓</span>Theme : Systeme
-                        </button>
-                        <button class="theme-option dropdown-option" data-theme="light" type="button">
-                            <span class="theme-icon">☀️</span>Theme : Clair
-                        </button>
-                        <button class="theme-option dropdown-option" data-theme="dark" type="button">
-                            <span class="theme-icon">🌙</span>Theme : Sombre
-                        </button>
-                        <div class="dropdown-divider"></div>
-                        <button id="dropdown-auth-button" class="dropdown-option" type="button">
-                            <span>🔐</span>Connexion
-                        </button>
-                    </div>
-                </div>
+                <div class="theme-toggle-wrapper scores-menu-wrapper" style="position: relative;" id="dropdown-root" data-preset="profil"></div>
             </div>
         </div>
     </header>
@@ -135,6 +87,7 @@
                                 <th>Jeu</th>
                                 <th>Score</th>
                                 <th>Date</th>
+                                <th>Preuve</th>
                             </tr>
                         </thead>
                         <tbody id="profil-scores-body"></tbody>
@@ -144,7 +97,122 @@
         </div>
     </main>
 
+    <div id="proof-modal" class="proof-modal" role="dialog" aria-modal="true" aria-label="Preuve du score">
+        <div class="proof-modal-content">
+            <button id="proof-modal-close" class="proof-modal-close" type="button" aria-label="Fermer">×</button>
+            <div id="proof-modal-loader" class="proof-modal-loader" role="status" aria-live="polite">
+                <span class="proof-modal-spinner" aria-hidden="true"></span>
+                <span class="proof-modal-loader-text">Chargement de la preuve...</span>
+            </div>
+            <img id="proof-modal-image" src="" alt="Image de preuve">
+        </div>
+    </div>
+
+    <style>
+        .proof-btn {
+            border: 1px solid var(--accent);
+            color: var(--accent-strong);
+            background: var(--surface-strong);
+            border-radius: 8px;
+            padding: 5px 9px;
+            cursor: pointer;
+        }
+        .proof-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.78);
+            z-index: 140;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+        .proof-modal-content {
+            max-width: min(95vw, 1000px);
+            max-height: 90vh;
+            background: #111;
+            border-radius: 12px;
+            border: 1px solid #2f2f2f;
+            padding: 12px;
+            position: relative;
+        }
+        #proof-modal.is-loading .proof-modal-content,
+        #proof-modal.is-error .proof-modal-content {
+            width: min(92vw, 980px);
+            min-height: min(72vh, 640px);
+        }
+        @media (max-width: 680px) {
+            #proof-modal.is-loading .proof-modal-content,
+            #proof-modal.is-error .proof-modal-content {
+                width: min(94vw, 520px);
+                min-height: min(56vh, 460px);
+            }
+        }
+        #proof-modal .proof-modal-loader {
+            position: absolute;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 12px;
+            color: #f1f1f1;
+            background: rgba(8, 8, 8, 0.68);
+            border-radius: 12px;
+            z-index: 1;
+        }
+        #proof-modal.is-loading .proof-modal-loader,
+        #proof-modal.is-error .proof-modal-loader {
+            display: flex;
+        }
+        #proof-modal .proof-modal-spinner {
+            width: 34px;
+            height: 34px;
+            border-radius: 999px;
+            border: 3px solid rgba(255, 255, 255, 0.32);
+            border-top-color: #ffffff;
+            animation: proof-modal-spin 0.8s linear infinite;
+        }
+        #proof-modal .proof-modal-loader-text {
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 0.01em;
+        }
+        #proof-modal.is-error .proof-modal-spinner {
+            display: none;
+        }
+        .proof-modal-content img {
+            display: block;
+            max-width: 100%;
+            max-height: calc(90vh - 40px);
+            border-radius: 8px;
+            margin: 0 auto;
+            opacity: 1;
+            transition: opacity 0.2s ease;
+        }
+        #proof-modal.is-loading .proof-modal-content img,
+        #proof-modal.is-error .proof-modal-content img {
+            opacity: 0;
+        }
+        .proof-modal-close {
+            position: absolute;
+            right: 6px;
+            top: 6px;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 999px;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.25);
+            color: #fff;
+            font-size: 18px;
+        }
+        @keyframes proof-modal-spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
     <script type="module" src="../assets/js/firebase-setup.js"></script>
+    <script src="../assets/js/dropdown.js"></script>
     <script src="../assets/js/profil-page.js"></script>
 </body>
 

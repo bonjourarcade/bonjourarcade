@@ -33,9 +33,6 @@
         authStatus: document.getElementById('scores-auth-status'),
         authText: document.getElementById('scores-auth-text'),
         authButton: document.getElementById('scores-auth-button'),
-        dropdownAuthButton: document.getElementById('dropdown-auth-button'),
-        optionsToggleButton: document.getElementById('options-toggle-btn'),
-        optionsDropdown: document.getElementById('options-dropdown'),
         catalogView: document.getElementById('catalog-view'),
         gameView: document.getElementById('game-view'),
         searchInput: document.getElementById('game-search-input'),
@@ -122,50 +119,6 @@
         }
     }
 
-    function getSystemTheme() {
-        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'theme-dark' : 'theme-light';
-    }
-
-    function setTheme(theme) {
-        const selectedTheme = theme || 'system';
-        const classToAdd = selectedTheme === 'system'
-            ? getSystemTheme()
-            : (selectedTheme === 'dark' ? 'theme-dark' : 'theme-light');
-
-        document.body.classList.remove('theme-light', 'theme-dark');
-        document.documentElement.classList.remove('theme-light', 'theme-dark');
-        document.body.classList.add(classToAdd);
-        document.documentElement.classList.add(classToAdd);
-
-        document.querySelectorAll('.theme-option').forEach(function (button) {
-            button.style.background = button.dataset.theme === selectedTheme ? '#444' : 'none';
-        });
-    }
-
-    function setupThemeControls() {
-        document.querySelectorAll('.theme-option').forEach(function (button) {
-            button.addEventListener('click', function () {
-                const selectedTheme = button.dataset.theme;
-                if (selectedTheme === 'system') {
-                    localStorage.removeItem('theme');
-                } else {
-                    localStorage.setItem('theme', selectedTheme);
-                }
-                setTheme(selectedTheme);
-                renderMetricsChart();
-            });
-        });
-
-        setTheme(localStorage.getItem('theme') || 'system');
-
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function () {
-            if (!localStorage.getItem('theme')) {
-                setTheme('system');
-                renderMetricsChart();
-            }
-        });
-    }
-
     function getChartTheme() {
         const isDark = document.body.classList.contains('theme-dark');
 
@@ -184,33 +137,6 @@
                 tooltipBackground: '#ffffff',
                 tooltipBorder: '#d9d9d9'
             };
-    }
-
-    function setupOptionsDropdown() {
-        if (!elements.optionsToggleButton || !elements.optionsDropdown) {
-            return;
-        }
-
-        elements.optionsToggleButton.addEventListener('click', function (event) {
-            event.stopPropagation();
-            const isOpen = elements.optionsDropdown.classList.toggle('active');
-            elements.optionsToggleButton.setAttribute('aria-expanded', String(isOpen));
-        });
-
-        document.addEventListener('click', function (event) {
-            if (!elements.optionsDropdown.classList.contains('active')) {
-                return;
-            }
-
-            if (!elements.optionsToggleButton.contains(event.target) && !elements.optionsDropdown.contains(event.target)) {
-                elements.optionsDropdown.classList.remove('active');
-                elements.optionsToggleButton.setAttribute('aria-expanded', 'false');
-            }
-        });
-
-        elements.optionsDropdown.addEventListener('click', function (event) {
-            event.stopPropagation();
-        });
     }
 
     function getUserDisplayLabel(user) {
@@ -238,31 +164,19 @@
         if (elements.authButton) {
             elements.authButton.textContent = buttonText;
         }
-
-        if (elements.dropdownAuthButton) {
-            elements.dropdownAuthButton.innerHTML = '<span>' + (isAuthenticated ? '🚪' : '🔐') + '</span>' + buttonText;
-        }
     }
 
     async function handleAuthAction() {
         const isAuthenticated = Boolean(state.currentUser && state.currentUser.uid);
-        const buttons = [elements.authButton, elements.dropdownAuthButton].filter(Boolean);
-        const originalLabels = buttons.map(function (button) {
-            return button.innerHTML;
-        });
 
-        if (elements.optionsDropdown) {
-            elements.optionsDropdown.classList.remove('active');
+        if (typeof window.__dropdownClose === 'function') {
+            window.__dropdownClose();
         }
 
-        if (elements.optionsToggleButton) {
-            elements.optionsToggleButton.setAttribute('aria-expanded', 'false');
+        if (elements.authButton) {
+            elements.authButton.disabled = true;
+            elements.authButton.textContent = isAuthenticated ? 'Deconnexion...' : 'Connexion...';
         }
-
-        buttons.forEach(function (button) {
-            button.disabled = true;
-            button.textContent = isAuthenticated ? 'Deconnexion...' : 'Connexion...';
-        });
 
         try {
             if (isAuthenticated) {
@@ -283,10 +197,9 @@
             if (window.firebaseAuth) {
                 state.currentUser = window.firebaseAuth.currentUser || null;
             }
-            buttons.forEach(function (button, index) {
-                button.disabled = false;
-                button.innerHTML = originalLabels[index];
-            });
+            if (elements.authButton) {
+                elements.authButton.disabled = false;
+            }
             syncAuthDisplay();
         }
     }
@@ -2272,9 +2185,13 @@
 
     async function initialize() {
         updateDailyGameLink();
-        setupThemeControls();
-        setupOptionsDropdown();
         updateMetricToggleButtons();
+
+        window.__dropdownOnThemeChange = function () {
+            renderMetricsChart();
+        };
+
+        window.__dropdownHandleAuthToggle = handleAuthAction;
 
         try {
             state.games = await window.BonjourArcadeScoresService.getGameList();
@@ -2293,10 +2210,6 @@
 
         if (elements.authButton) {
             elements.authButton.addEventListener('click', handleAuthAction);
-        }
-
-        if (elements.dropdownAuthButton) {
-            elements.dropdownAuthButton.addEventListener('click', handleAuthAction);
         }
 
         syncAuthDisplay();

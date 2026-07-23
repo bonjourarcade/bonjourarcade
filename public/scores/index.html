@@ -30,58 +30,7 @@
                     <span id="scores-auth-text">Non connecte</span>
                 </div>
                 <button id="scores-auth-button" class="scores-auth-button" type="button">Connexion</button>
-                <div class="theme-toggle-wrapper scores-menu-wrapper" style="position: relative;">
-                    <button id="options-toggle-btn" class="theme-btn" aria-label="Options" aria-haspopup="true" aria-expanded="false" type="button">
-                        <span>⚙️</span>
-                        <span>Menu</span>
-                    </button>
-                    <div id="options-dropdown" class="dropdown-menu">
-                        <a href="/scores" class="dropdown-option">
-                            <span>🏆</span>Scores
-                        </a>
-                        <a href="/profil/" class="dropdown-option" id="dropdown-profil-link" hidden>
-                            <span>👤</span>Profil
-                        </a>
-                        <a href="/all" class="dropdown-option">
-                            <span>🕹️</span>Tous les jeux
-                        </a>
-                        <a href="/daily/" class="dropdown-option" id="daily-game-link">
-                            <span>📅</span>Jeu du jour
-                        </a>
-                        <a href="/randomgame/" class="dropdown-option">
-                            <span>🎲</span>Jeu aleatoire
-                        </a>
-                        <a href="/swipe" class="dropdown-option">
-                            <span>🃏</span>Swipe
-                        </a>
-                        <a href="/screensaver" class="dropdown-option">
-                            <span>🌠</span>Ecran de veille
-                        </a>
-                        <a href="/ratings" class="dropdown-option">
-                            <span>⭐</span>Ratings
-                        </a>
-                        <a href="/upcoming" class="dropdown-option">
-                            <span>🔮</span>Bientot en vedette
-                        </a>
-                        <a href="https://ko-fi.com/bonjourarcade" target="_blank" class="dropdown-option dropdown-highlight">
-                            <span>❤️</span>Supporter BonjourArcade
-                        </a>
-                        <div class="dropdown-divider"></div>
-                        <button class="theme-option dropdown-option" data-theme="system" type="button">
-                            <span class="theme-icon">🌓</span>Theme : Systeme
-                        </button>
-                        <button class="theme-option dropdown-option" data-theme="light" type="button">
-                            <span class="theme-icon">☀️</span>Theme : Clair
-                        </button>
-                        <button class="theme-option dropdown-option" data-theme="dark" type="button">
-                            <span class="theme-icon">🌙</span>Theme : Sombre
-                        </button>
-                        <div class="dropdown-divider"></div>
-                        <button id="dropdown-auth-button" class="dropdown-option" type="button">
-                            <span>🔐</span>Connexion
-                        </button>
-                    </div>
-                </div>
+                <div class="theme-toggle-wrapper scores-menu-wrapper" style="position: relative;" id="dropdown-root" data-preset="scores"></div>
             </div>
         </div>
     </header>
@@ -284,6 +233,7 @@
     </div>
 
     <script type="module" src="../assets/js/firebase-setup.js"></script>
+    <script src="../assets/js/dropdown.js"></script>
     <script src="../assets/js/scores-service.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
     <script src="../assets/js/scores-page.js"></script>

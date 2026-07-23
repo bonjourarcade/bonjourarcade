@@ -27,9 +27,11 @@
         authStatus: document.getElementById('profil-auth-status'),
         authText: document.getElementById('profil-auth-text'),
         authButton: document.getElementById('profil-auth-button'),
-        dropdownAuthButton: document.getElementById('dropdown-auth-button'),
-        optionsToggleButton: document.getElementById('options-toggle-btn'),
-        optionsDropdown: document.getElementById('options-dropdown'),
+        proofModal: document.getElementById('proof-modal'),
+        proofModalImage: document.getElementById('proof-modal-image'),
+        proofModalLoader: document.getElementById('proof-modal-loader'),
+        proofModalLoaderText: document.querySelector('#proof-modal-loader .proof-modal-loader-text'),
+        proofModalClose: document.getElementById('proof-modal-close'),
     };
 
     let currentUser = null;
@@ -110,6 +112,10 @@
         }
     }
 
+    function getScoreScreenshotUrl(s) {
+        return s.screenshotUrl || s.imageUrl || s.screenshotDataUrl || null;
+    }
+
     async function loadScores(userId) {
         elements.scoresLoading.style.display = 'block';
         elements.scoresEmpty.style.display = 'none';
@@ -127,10 +133,14 @@
 
             elements.scoresTable.style.display = 'table';
 
-            scores.sort((a, b) => b.score - a.score);
+            scores.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
             elements.scoresBody.innerHTML = scores.map(s => {
                 const rankClass = s.rank <= 3 ? 'rank-' + s.rank : '';
+                const proofUrl = getScoreScreenshotUrl(s);
+                const proofBtn = proofUrl
+                    ? '<button class="proof-btn" type="button" data-proof-url="' + escHtml(proofUrl) + '">Voir</button>'
+                    : '';
                 return '<tr>' +
                     '<td class="profil-score-rank ' + rankClass + '">#' + s.rank + '</td>' +
                     '<td>' +
@@ -141,6 +151,7 @@
                     '</td>' +
                     '<td class="profil-score-value">' + formatScore(s.score) + '</td>' +
                     '<td class="profil-score-date">' + formatDate(s.createdAt) + '</td>' +
+                    '<td class="profil-score-proof">' + proofBtn + '</td>' +
                 '</tr>';
             }).join('');
         } catch (err) {
@@ -148,6 +159,53 @@
             elements.scoresLoading.textContent = 'Erreur lors du chargement des scores.';
         }
     }
+
+    function openProofModal(url) {
+        if (!url) return;
+        elements.proofModal.classList.remove('is-error');
+        elements.proofModal.classList.add('is-loading');
+        if (elements.proofModalLoaderText) {
+            elements.proofModalLoaderText.textContent = 'Chargement de la preuve...';
+        }
+        elements.proofModalImage.removeAttribute('src');
+        elements.proofModalImage.src = url;
+        elements.proofModal.style.display = 'flex';
+    }
+
+    function closeProofModal() {
+        elements.proofModal.style.display = 'none';
+        elements.proofModal.classList.remove('is-loading', 'is-error');
+        elements.proofModalImage.src = '';
+    }
+
+    elements.scoresBody.addEventListener('click', function (event) {
+        var proofButton = event.target.closest('[data-proof-url]');
+        if (proofButton) {
+            openProofModal(proofButton.getAttribute('data-proof-url'));
+            return;
+        }
+    });
+
+    if (elements.proofModalClose) {
+        elements.proofModalClose.addEventListener('click', closeProofModal);
+    }
+    elements.proofModal.addEventListener('click', function (event) {
+        if (event.target === elements.proofModal) {
+            closeProofModal();
+        }
+    });
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape' && elements.proofModal.style.display === 'flex') {
+            closeProofModal();
+        }
+    });
+    elements.proofModalImage.addEventListener('load', function () {
+        elements.proofModal.classList.remove('is-loading', 'is-error');
+    });
+    elements.proofModalImage.addEventListener('error', function () {
+        elements.proofModal.classList.remove('is-loading');
+        elements.proofModal.classList.add('is-error');
+    });
 
     function escHtml(str) {
         const div = document.createElement('div');
@@ -160,11 +218,9 @@
         if (user) {
             elements.authText.textContent = user.displayName || 'Connecte';
             elements.authButton.textContent = 'Deconnexion';
-            elements.dropdownAuthButton.innerHTML = '<span>🔐</span>Deconnexion';
         } else {
             elements.authText.textContent = 'Non connecte';
             elements.authButton.textContent = 'Connexion';
-            elements.dropdownAuthButton.innerHTML = '<span>🔐</span>Connexion';
         }
 
         const userId = getUserIdFromUrl();
@@ -196,18 +252,6 @@
     setupAuth(0);
 
     elements.authButton.addEventListener('click', async function () {
-        if (currentUser) {
-            await window.signOutFirebase();
-        } else {
-            try {
-                await window.signInWithGoogle();
-            } catch (e) {
-                console.error('Login error:', e);
-            }
-        }
-    });
-
-    elements.dropdownAuthButton.addEventListener('click', async function () {
         if (currentUser) {
             await window.signOutFirebase();
         } else {
@@ -351,20 +395,20 @@
         if (profile) profile.photoURL = null;
     });
 
-    // Options dropdown toggle (from scores page)
-    if (elements.optionsToggleButton && elements.optionsDropdown) {
-        document.addEventListener('click', function (e) {
-            const isToggle = elements.optionsToggleButton.contains(e.target);
-            const isDropdown = elements.optionsDropdown.contains(e.target);
-            if (isToggle) {
-                const isOpen = elements.optionsDropdown.style.display === 'block';
-                elements.optionsDropdown.style.display = isOpen ? 'none' : 'block';
-                elements.optionsToggleButton.setAttribute('aria-expanded', !isOpen);
-            } else if (!isDropdown) {
-                elements.optionsDropdown.style.display = 'none';
-                elements.optionsToggleButton.setAttribute('aria-expanded', 'false');
+    window.__dropdownHandleAuthToggle = async function () {
+        if (currentUser) {
+            await window.signOutFirebase();
+        } else {
+            try {
+                await window.signInWithGoogle();
+            } catch (e) {
+                console.error('Login error:', e);
             }
-        });
-    }
+        }
+    };
+
+    window.__dropdownOnAuth = function (user) {
+        updateAuthUI(user);
+    };
 
     })();

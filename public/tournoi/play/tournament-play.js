@@ -342,6 +342,11 @@ function renderScoreboard(roundScores, currentRoundIndex, totalRounds) {
   getDocs(collection(tournamentRef, 'participants')).then(snap => {
     const participants = {};
     snap.forEach(d => { participants[d.id] = d.data(); });
+    for (const uid of Object.keys(participants)) {
+      if (displayNameCache[uid]) {
+        participants[uid].displayName = displayNameCache[uid];
+      }
+    }
 
     const activeCount = Object.values(participants).filter(p => !p.eliminated).length;
     const cutoff = TournoiUtils.computeRoundCutoff(activeCount, currentRoundIndex, totalRounds) || 0;

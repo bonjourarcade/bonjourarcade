@@ -300,8 +300,10 @@
             const ext = file.name.split('.').pop() || 'png';
             const timestamp = Date.now();
             const storagePath = `avatars/${currentUser.uid}/${timestamp}.${ext}`;
-            const { ref, uploadBytes, getDownloadURL } = window.FirebaseStorage;
-            const storageRef = ref(window.firebaseStorage, storagePath);
+            const { getStorage, ref, uploadBytes, getDownloadURL } = await import('https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js');
+            const app = window.firebaseApp;
+            const storage = getStorage(app);
+            const storageRef = ref(storage, storagePath);
 
             const uploadLabel = document.querySelector('.profil-avatar-btn[for="profil-avatar-upload"]');
             if (uploadLabel) uploadLabel.style.opacity = '0.5';

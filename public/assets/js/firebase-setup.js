@@ -2,7 +2,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebas
 import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut, connectAuthEmulator, updateProfile } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { getFunctions, httpsCallable, connectFunctionsEmulator } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-functions.js";
 import { getFirestore, connectFirestoreEmulator, collection, query, where, orderBy, onSnapshot, doc, getDoc, getDocs, addDoc, updateDoc, setDoc, serverTimestamp, limit } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyAh5PlPLpy8sfB5QxmjWiXaA_Qrtszc2Vg",
@@ -15,10 +14,10 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+window.firebaseApp = app;
 const auth = getAuth(app);
 const functions = getFunctions(app);
 const db = getFirestore(app);
-const storage = getStorage(app);
 
 const isLocalhost = window.location.hostname === 'localhost' ||
     window.location.hostname === '127.0.0.1' ||
@@ -35,12 +34,8 @@ if (isLocalhost) {
 window.firebaseAuth = auth;
 window.firebaseFunctions = functions;
 window.firebaseDb = db;
-window.firebaseStorage = storage;
 
 window.httpsCallable = httpsCallable;
-window.FirebaseStorage = {
-    ref, uploadBytes, getDownloadURL, deleteObject,
-};
 window.Firestore = {
     collection, query, where, orderBy, onSnapshot, doc, getDoc, getDocs,
     addDoc, updateDoc, setDoc, serverTimestamp, limit,

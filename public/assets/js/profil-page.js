@@ -37,6 +37,8 @@
     let profileUserId = null;
 
     function getUserIdFromUrl() {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('uid')) return params.get('uid');
         const path = window.location.pathname.replace(/\/$/, '');
         const parts = path.split('/profil/');
         return parts.length > 1 && parts[1] ? parts[1] : null;
@@ -289,23 +291,95 @@
         };
         reader.readAsDataURL(file);
 
-        // TODO: upload to Firebase Storage and save to user-preferences
-        // For now, show a placeholder message
-        console.log('Avatar upload not yet implemented');
-        alert('L\'upload d\'avatar sera bientot disponible !');
+        if (!currentUser) {
+            alert('Connecte-toi d\'abord.');
+            return;
+        }
+
+        try {
+            const ext = file.name.split('.').pop() || 'png';
+            const timestamp = Date.now();
+            const storagePath = `avatars/${currentUser.uid}/${timestamp}.${ext}`;
+            const { ref, uploadBytes, getDownloadURL } = window.FirebaseStorage;
+            const storageRef = ref(window.firebaseStorage, storagePath);
+
+            const uploadLabel = document.querySelector('.profil-avatar-btn[for="profil-avatar-upload"]');
+            if (uploadLabel) uploadLabel.style.opacity = '0.5';
+
+            await uploadBytes(storageRef, file);
+            const downloadUrl = await getDownloadURL(storageRef);
+
+            const { doc, setDoc, serverTimestamp } = window.Firestore;
+            const avatarData = {
+                avatar: {
+                    type: 'custom',
+                    url: downloadUrl,
+                    lastUpdated: new Date().toISOString(),
+                },
+                updatedAt: serverTimestamp(),
+            };
+            await setDoc(doc(window.firebaseDb, 'users-preferences', currentUser.uid), avatarData, { merge: true });
+            try { await setDoc(doc(window.firebaseDb, 'user-preferences', currentUser.uid), avatarData, { merge: true }); } catch (e) { /* secondary collection */ }
+
+            if (uploadLabel) uploadLabel.style.opacity = '1';
+
+            if (profile) profile.photoURL = downloadUrl;
+            if (currentUser) currentUser.photoURL = downloadUrl;
+
+            console.log('Avatar uploaded successfully:', downloadUrl);
+        } catch (err) {
+            console.error('Avatar upload error:', err);
+            alert('Erreur lors de l\'upload: ' + (err.message || err));
+            const uploadLabel = document.querySelector('.profil-avatar-btn[for="profil-avatar-upload"]');
+            if (uploadLabel) uploadLabel.style.opacity = '1';
+        }
     });
 
     elements.avatarReset.addEventListener('click', async function () {
-        if (!currentUser || !currentUser.photoURL) return;
-        elements.avatarImg.src = currentUser.photoURL;
-        elements.avatarImg.style.display = 'block';
-        elements.avatarFallback.style.display = 'none';
-        if (profile) profile.photoURL = currentUser.photoURL;
+        if (!currentUser) return;
+        const ssoUrl = currentUser.photoURL;
+        if (ssoUrl) {
+            elements.avatarImg.src = ssoUrl;
+            elements.avatarImg.style.display = 'block';
+            elements.avatarFallback.style.display = 'none';
+        }
+        try {
+            const { doc, setDoc, serverTimestamp } = window.Firestore;
+            const resetAvatarData = {
+                avatar: {
+                    type: 'sso',
+                    url: ssoUrl || '',
+                    lastUpdated: new Date().toISOString(),
+                },
+                updatedAt: serverTimestamp(),
+            };
+            await setDoc(doc(window.firebaseDb, 'users-preferences', currentUser.uid), resetAvatarData, { merge: true });
+            try { await setDoc(doc(window.firebaseDb, 'user-preferences', currentUser.uid), resetAvatarData, { merge: true }); } catch (e) { /* secondary collection */ }
+        } catch (e) {
+            console.error('Error saving avatar reset:', e);
+        }
+        if (profile) profile.photoURL = ssoUrl;
     });
 
     elements.avatarDelete.addEventListener('click', async function () {
         elements.avatarImg.style.display = 'none';
         elements.avatarFallback.style.display = 'block';
+        if (!currentUser) return;
+        try {
+            const { doc, setDoc, serverTimestamp } = window.Firestore;
+            const deleteAvatarData = {
+                avatar: {
+                    type: 'default',
+                    url: '',
+                    lastUpdated: new Date().toISOString(),
+                },
+                updatedAt: serverTimestamp(),
+            };
+            await setDoc(doc(window.firebaseDb, 'users-preferences', currentUser.uid), deleteAvatarData, { merge: true });
+            try { await setDoc(doc(window.firebaseDb, 'user-preferences', currentUser.uid), deleteAvatarData, { merge: true }); } catch (e) { /* secondary collection */ }
+        } catch (e) {
+            console.error('Error saving avatar delete:', e);
+        }
         if (profile) profile.photoURL = null;
     });
 

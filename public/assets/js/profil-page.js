@@ -6,7 +6,8 @@
         avatarImg: document.getElementById('profil-avatar-img'),
         avatarFallback: document.getElementById('profil-avatar-fallback'),
         avatarActions: document.getElementById('profil-avatar-actions'),
-        avatarUpload: document.getElementById('profil-avatar-upload'),
+        avatarUrlInput: document.getElementById('profil-avatar-url'),
+        avatarSetUrl: document.getElementById('profil-avatar-set-url'),
         avatarReset: document.getElementById('profil-avatar-reset'),
         avatarDelete: document.getElementById('profil-avatar-delete'),
         displayName: document.getElementById('profil-display-name'),
@@ -267,74 +268,39 @@
         window.location.href = '/';
     });
 
-    // Avatar upload
-    elements.avatarUpload.addEventListener('change', async function () {
-        const file = elements.avatarUpload.files[0];
-        if (!file) return;
+    // Avatar URL
+    elements.avatarSetUrl.addEventListener('click', async function () {
+        const url = elements.avatarUrlInput.value.trim();
+        if (!url) return;
+        if (!currentUser) { alert('Connecte-toi d\'abord.'); return; }
 
-        const allowed = ['image/jpeg', 'image/png', 'image/webp'];
-        if (!allowed.includes(file.type)) {
-            alert('Format non supporte. Utilise JPEG, PNG ou WebP.');
-            return;
-        }
-
-        if (file.size > 2 * 1024 * 1024) {
-            alert('Fichier trop volumineux. Maximum 2 Mo.');
-            return;
-        }
-
-        const reader = new FileReader();
-        reader.onload = function (e) {
-            elements.avatarImg.src = e.target.result;
-            elements.avatarImg.style.display = 'block';
-            elements.avatarFallback.style.display = 'none';
-        };
-        reader.readAsDataURL(file);
-
-        if (!currentUser) {
-            alert('Connecte-toi d\'abord.');
-            return;
-        }
+        elements.avatarImg.src = url;
+        elements.avatarImg.style.display = 'block';
+        elements.avatarFallback.style.display = 'none';
 
         try {
-            const ext = file.name.split('.').pop() || 'png';
-            const timestamp = Date.now();
-            const storagePath = `avatars/${currentUser.uid}/${timestamp}.${ext}`;
-            const { getStorage, ref, uploadBytes, getDownloadURL } = await import('https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js');
-            const app = window.firebaseApp;
-            const storage = getStorage(app);
-            const storageRef = ref(storage, storagePath);
-
-            const uploadLabel = document.querySelector('.profil-avatar-btn[for="profil-avatar-upload"]');
-            if (uploadLabel) uploadLabel.style.opacity = '0.5';
-
-            await uploadBytes(storageRef, file);
-            const downloadUrl = await getDownloadURL(storageRef);
-
             const { doc, setDoc, serverTimestamp } = window.Firestore;
             const avatarData = {
                 avatar: {
                     type: 'custom',
-                    url: downloadUrl,
+                    url: url,
                     lastUpdated: new Date().toISOString(),
                 },
                 updatedAt: serverTimestamp(),
             };
             await setDoc(doc(window.firebaseDb, 'users-preferences', currentUser.uid), avatarData, { merge: true });
             try { await setDoc(doc(window.firebaseDb, 'user-preferences', currentUser.uid), avatarData, { merge: true }); } catch (e) { /* secondary collection */ }
-
-            if (uploadLabel) uploadLabel.style.opacity = '1';
-
-            if (profile) profile.photoURL = downloadUrl;
-            if (currentUser) currentUser.photoURL = downloadUrl;
-
-            console.log('Avatar uploaded successfully:', downloadUrl);
+            if (profile) profile.photoURL = url;
+            elements.avatarUrlInput.value = '';
+            console.log('Avatar URL saved:', url);
         } catch (err) {
-            console.error('Avatar upload error:', err);
-            alert('Erreur lors de l\'upload: ' + (err.message || err));
-            const uploadLabel = document.querySelector('.profil-avatar-btn[for="profil-avatar-upload"]');
-            if (uploadLabel) uploadLabel.style.opacity = '1';
+            console.error('Error saving avatar URL:', err);
+            alert('Erreur: ' + (err.message || err));
         }
+    });
+
+    elements.avatarUrlInput.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') elements.avatarSetUrl.click();
     });
 
     elements.avatarReset.addEventListener('click', async function () {

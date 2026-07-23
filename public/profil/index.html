@@ -94,10 +94,10 @@
                             <span id="profil-avatar-fallback" class="profil-avatar-fallback">👤</span>
                         </div>
                         <div id="profil-avatar-actions" class="profil-avatar-actions" style="display:none;">
-                            <label for="profil-avatar-upload" class="profil-avatar-btn" title="Changer l'avatar">
-                                <span>📷</span>
-                                <input id="profil-avatar-upload" type="file" accept="image/jpeg,image/png,image/webp" style="display:none;">
-                            </label>
+                            <input id="profil-avatar-url" type="text" placeholder="URL de l'image (https://...)" style="flex:1;min-width:160px;padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:0.8rem;">
+                            <button id="profil-avatar-set-url" class="profil-avatar-btn" type="button" title="Utiliser cette URL" style="border-radius:6px;width:auto;padding:0 12px;">
+                                <span>✅</span>
+                            </button>
                             <button id="profil-avatar-reset" class="profil-avatar-btn" type="button" title="Revenir a l'avatar SSO">
                                 <span>↩️</span>
                             </button>

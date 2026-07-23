@@ -39,6 +39,21 @@
     let isOwnProfile = false;
     let profileUserId = null;
 
+    // Simple toast helper
+    function showToast(message, type) {
+        let stack = document.querySelector('.profil-toast-stack');
+        if (!stack) {
+            stack = document.createElement('div');
+            stack.className = 'profil-toast-stack';
+            document.body.appendChild(stack);
+        }
+        const item = document.createElement('div');
+        item.className = 'profil-toast-item is-' + (type || 'info');
+        item.textContent = message;
+        stack.appendChild(item);
+        setTimeout(function () { item.remove(); }, 3000);
+    }
+
     function getUserIdFromUrl() {
         const params = new URLSearchParams(window.location.search);
         if (params.get('uid')) return params.get('uid');
@@ -336,10 +351,11 @@
             try { await setDoc(doc(window.firebaseDb, 'user-preferences', currentUser.uid), avatarData, { merge: true }); } catch (e) { /* secondary collection */ }
             if (profile) profile.photoURL = url;
             elements.avatarUrlInput.value = '';
+            showToast('Avatar mis à jour avec succès !', 'success');
             console.log('Avatar URL saved:', url);
         } catch (err) {
+            showToast('Erreur: ' + (err.message || err), 'error');
             console.error('Error saving avatar URL:', err);
-            alert('Erreur: ' + (err.message || err));
         }
     });
 
@@ -367,7 +383,9 @@
             };
             await setDoc(doc(window.firebaseDb, 'users-preferences', currentUser.uid), resetAvatarData, { merge: true });
             try { await setDoc(doc(window.firebaseDb, 'user-preferences', currentUser.uid), resetAvatarData, { merge: true }); } catch (e) { /* secondary collection */ }
+            showToast('Avatar réinitialisé avec succès !', 'success');
         } catch (e) {
+            showToast('Erreur lors de la réinitialisation', 'error');
             console.error('Error saving avatar reset:', e);
         }
         if (profile) profile.photoURL = ssoUrl;
@@ -389,7 +407,9 @@
             };
             await setDoc(doc(window.firebaseDb, 'users-preferences', currentUser.uid), deleteAvatarData, { merge: true });
             try { await setDoc(doc(window.firebaseDb, 'user-preferences', currentUser.uid), deleteAvatarData, { merge: true }); } catch (e) { /* secondary collection */ }
+            showToast('Avatar supprimé avec succès !', 'success');
         } catch (e) {
+            showToast('Erreur lors de la suppression', 'error');
             console.error('Error saving avatar delete:', e);
         }
         if (profile) profile.photoURL = null;

@@ -348,11 +348,21 @@
       const userAvatarEl = document.getElementById('user-avatar');
       const checkAuth = () => {
         if (typeof window.onFirebaseAuthStateChanged === 'function') {
-          window.onFirebaseAuthStateChanged((user) => {
+          window.onFirebaseAuthStateChanged(async (user) => {
             if (userIndicator) {
               if (user) {
                 userNameEl.textContent = user.displayName || 'Anonyme';
-                userAvatarEl.src = user.photoURL || 'assets/default-avatar.png';
+                // Try to get the resolved photoURL from preferences
+                if (window.getPublicProfile) {
+                  try {
+                    const profile = await window.getPublicProfile(user.uid);
+                    userAvatarEl.src = profile.photoURL || 'assets/default-avatar.png';
+                  } catch {
+                    userAvatarEl.src = user.photoURL || 'assets/default-avatar.png';
+                  }
+                } else {
+                  userAvatarEl.src = user.photoURL || 'assets/default-avatar.png';
+                }
                 userIndicator.style.display = 'flex';
               } else {
                 userIndicator.style.display = 'none';

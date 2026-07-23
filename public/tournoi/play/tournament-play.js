@@ -289,6 +289,7 @@ function renderParticipantsInfo(participants, me) {
       name: p.displayName,
       photoURL: p.photoURL,
       totalScore: (p.scores || []).reduce((s, v) => s + v, 0),
+      hasUnverified: (p.scores || []).some((s, i) => s > 0 && !(p.scoresVerified || [])[i]),
       eliminated: p.eliminated,
       eliminatedRound: p.eliminatedRound,
     }))
@@ -306,7 +307,7 @@ function renderParticipantsInfo(participants, me) {
       <td>${i + 1}</td>
       <td><img src="${p.photoURL || '../assets/default-avatar.png'}" class="avatar-sm"></td>
       <td>${p.name}${isMe ? ' ⬅️' : ''}</td>
-      <td>${p.totalScore.toLocaleString()}</td>
+      <td>${p.totalScore.toLocaleString()}${p.hasUnverified ? ' <span class="pending-badge" title="Certains scores sont en attente de validation">⏳</span>' : ''}</td>
     </tr>`;
   });
   html += '</tbody></table>';
@@ -322,7 +323,6 @@ function setupRoundScoresListener(t) {
   const db = window.firebaseDb;
   const q = query(collection(db, 'tournaments', tournamentId, 'roundScores'),
     where('roundIndex', '==', round),
-    where('verified', '==', true),
     orderBy('score', 'desc'));
   unsubscribeRoundScores = onSnapshot(q, (snap) => {
     const scores = [];
@@ -341,8 +341,9 @@ function renderScoreboard(roundScores, currentRoundIndex, totalRounds) {
     const cutoff = TournoiUtils.computeRoundCutoff(activeCount, currentRoundIndex, totalRounds) || 0;
     const bestEntry = {};
     roundScores.forEach(rs => {
-      if (!bestEntry[rs.userId] || rs.score > bestEntry[rs.userId].score) {
-        bestEntry[rs.userId] = { score: rs.score, gameScoreId: rs.gameScoreId };
+      const prev = bestEntry[rs.userId];
+      if (!prev || rs.score > prev.score || (rs.score === prev.score && rs.verified && !prev.verified)) {
+        bestEntry[rs.userId] = { score: rs.score, gameScoreId: rs.gameScoreId, verified: rs.verified };
       }
     });
 
@@ -353,6 +354,7 @@ function renderScoreboard(roundScores, currentRoundIndex, totalRounds) {
         photoURL: p.photoURL,
         score: bestEntry[uid]?.score || 0,
         gameScoreId: bestEntry[uid]?.gameScoreId || null,
+        verified: bestEntry[uid]?.verified || false,
         eliminated: p.eliminated,
       }))
       .sort((a, b) => b.score - a.score);
@@ -368,12 +370,13 @@ function renderScoreboard(roundScores, currentRoundIndex, totalRounds) {
         const statusClass = isDanger ? 'danger' : 'safe';
         const avatar = p.photoURL || '../assets/default-avatar.png';
         const gsAttr = p.gameScoreId ? ` data-game-score-id="${p.gameScoreId}"` : '';
+        const pendingBadge = !p.verified && p.score > 0 ? ' <span class="pending-badge" title="En attente de validation">⏳</span>' : '';
         html += `<div class="entry ${statusClass} ${isMe ? 'me' : ''}"${gsAttr}>
           <span class="rank">${i + 1}.</span>
           <img src="${avatar}" class="avatar">
           <span class="name">${p.name}${isMe ? '<span class="my-badge">MOI</span>' : ''}</span>
           ${isDanger ? '<span class="entry-label at-risk">⚠️ En danger</span>' : ''}
-          <span class="score">${p.score.toLocaleString()}</span>
+          <span class="score">${p.score.toLocaleString()}${pendingBadge}</span>
         </div>`;
       });
     }
@@ -384,11 +387,12 @@ function renderScoreboard(roundScores, currentRoundIndex, totalRounds) {
         const isMe = p.uid === myUid;
         const avatar = p.photoURL || '../assets/default-avatar.png';
         const gsAttr = p.gameScoreId ? ` data-game-score-id="${p.gameScoreId}"` : '';
+        const pendingBadge = !p.verified && p.score > 0 ? ' <span class="pending-badge" title="En attente de validation">⏳</span>' : '';
         html += `<div class="entry eliminated ${isMe ? 'me' : ''}"${gsAttr}>
           <span class="rank">${active.length + i + 1}.</span>
           <img src="${avatar}" class="avatar">
           <span class="name">${p.name}${isMe ? '<span class="my-badge">MOI</span>' : ''}</span>
-          <span class="score">${p.score.toLocaleString()}</span>
+          <span class="score">${p.score.toLocaleString()}${pendingBadge}</span>
         </div>`;
       });
     }
@@ -441,11 +445,13 @@ async function buildResultsFromFirestore(id) {
     pSnap.forEach(d => {
       const pd = d.data();
       const totalScore = (pd.scores || []).reduce((s, v) => s + v, 0);
+      const hasUnverified = (pd.scores || []).some((s, i) => s > 0 && !(pd.scoresVerified || [])[i]);
       participants.push({
         uid: d.id,
         name: pd.displayName || 'Anonyme',
         photoURL: pd.photoURL || '',
         totalScore,
+        hasUnverified,
         scores: pd.scores || [],
         eliminated: pd.eliminated || false,
         eliminatedRound: pd.eliminatedRound,
@@ -471,6 +477,7 @@ async function buildResultsFromFirestore(id) {
         name: p.name,
         photoURL: p.photoURL,
         totalScore: p.totalScore,
+        hasUnverified: p.hasUnverified,
         eliminated: p.eliminated,
       })),
     };
@@ -509,15 +516,15 @@ function renderFinishedResults(results) {
     html += '<div style="margin-top:20px;">';
     html += '<div class="section-title">Classement final</div>';
     html += '<table class="cumul-table"><thead><tr><th>#</th><th></th><th>Joueur</th><th>Total</th></tr></thead><tbody>';
-    results.cumulativeScoresTable.forEach((p, i) => {
-      const isMe = p.name === (currentUser?.displayName || '');
-      html += `<tr class="${p.eliminated ? 'eliminated-row' : ''} ${isMe ? 'highlight-row' : ''}">
-        <td>${i + 1}</td>
-        <td><img src="${p.photoURL || '../assets/default-avatar.png'}" class="avatar-sm"></td>
-        <td>${p.name}</td>
-        <td>${p.totalScore.toLocaleString()}</td>
-      </tr>`;
-    });
+      results.cumulativeScoresTable.forEach((p, i) => {
+        const isMe = p.name === (currentUser?.displayName || '');
+        html += `<tr class="${p.eliminated ? 'eliminated-row' : ''} ${isMe ? 'highlight-row' : ''}">
+          <td>${i + 1}</td>
+          <td><img src="${p.photoURL || '../assets/default-avatar.png'}" class="avatar-sm"></td>
+          <td>${p.name}</td>
+          <td>${p.totalScore.toLocaleString()}${p.hasUnverified ? ' <span class="pending-badge" title="Certains scores sont en attente de validation">⏳</span>' : ''}</td>
+        </tr>`;
+      });
     html += '</tbody></table></div>';
   }
 

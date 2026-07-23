@@ -197,9 +197,12 @@
     .theme-option:hover { background: rgba(255,255,255,0.06); }
     .theme-option.active { color: #ffd700; font-weight: 600; }
     .theme-toggle-wrapper { position: relative; }
+    .home-btn { position: fixed; top: 16px; left: 16px; font-size: 0.85rem; cursor: pointer; padding: 6px 10px; border-radius: 8px; z-index: 10; text-decoration: none; display: flex; align-items: center; gap: 6px; background: var(--btn-secondary-bg); color: var(--btn-secondary-text); border: none; font-weight: 600; }
+    .home-btn:hover { background: #3a3a5a; }
   </style>
 </head>
 <body>
+  <a href="/" class="home-btn">🏠 Accueil</a>
   <div class="container">
     <div id="auth-section" class="card" style="text-align:center;">
       <h1>🎮 Host Tournoi</h1>

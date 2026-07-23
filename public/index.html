@@ -20,6 +20,7 @@
   <meta property="twitter:description" content="Chargement...">
   <meta property="twitter:image" content="">
 
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
   <link rel="stylesheet" href="assets/css/style.css">
   <style>
     .footer-emoji-link {
@@ -95,6 +96,16 @@
     .tb-flash { animation: tb-flash-gold 0.6s ease-out; }
     @keyframes pulse-warning { from { opacity: 1; } to { opacity: 0.5; } }
     @keyframes tb-flash-gold { 0% { box-shadow: 0 0 0 rgba(255,215,0,0); } 50% { box-shadow: 0 0 20px rgba(255,215,0,0.5); } 100% { box-shadow: 0 0 0 rgba(255,215,0,0); } }
+    #user-indicator { display: none; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--text-color); white-space: nowrap; }
+    #user-indicator img { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; }
+    #user-indicator .bonjour-text { opacity: 0.8; }
+    #user-indicator .user-name { font-weight: 600; }
+    .submenu-toggle { cursor: pointer; display: flex; align-items: center; justify-content: space-between; }
+    .submenu-toggle .arrow { transition: transform 0.2s; font-size: 0.7rem; }
+    .submenu-toggle.open .arrow { transform: rotate(180deg); }
+    .submenu { display: none; flex-direction: column; padding-left: 16px; }
+    .submenu.open { display: flex; }
+    .submenu .dropdown-option { font-size: 0.85rem; padding: 8px 16px; }
 
     @media (max-width: 600px) {
       #tournament-banner a { font-size: 11px; gap: 8px; padding: 8px 12px; }
@@ -118,59 +129,12 @@
           <input type="text" id="game-id-input" placeholder="Recherche">
           <!-- <button id="launch-game-btn">Lancer</button> -->
         </div>
-        <div class="theme-toggle-wrapper" style="position: relative;">
-          <button id="options-toggle-btn" class="theme-btn" aria-label="Options" type="button">
-            <span>⚙️</span>
-            <span>Menu</span>
-          </button>
-          <div id="options-dropdown" class="dropdown-menu">
-            <a href="/scores" class="dropdown-option">
-              <span>🏆</span>Scores
-            </a>
-            <a href="/all" class="dropdown-option">
-              <span>🕹️</span>Tous les jeux
-            </a>
-            <a href="/daily/" class="dropdown-option" id="daily-game-link">
-              <span>📅</span>Jeu du jour
-            </a>
-            <a href="/randomgame/" class="dropdown-option">
-              <span>🎲</span>Jeu aléatoire
-            </a>
-            <a href="/swipe" class="dropdown-option">
-              <span>🃏</span>Swipe
-            </a>
-            <a href="/screensaver" class="dropdown-option">
-              <span>🌠</span>Écran de veille
-            </a>
-            <!--a href="/all/?filter=history" class="dropdown-option">
-              <span>📜</span>Historique
-            </a-->
-            <a href="/upcoming" class="dropdown-option">
-              <span>🔮</span>Bientôt en vedette
-            </a>
-            <a href="https://ko-fi.com/bonjourarcade" target="_blank" class="dropdown-option dropdown-highlight">
-              <span>❤️</span>Supporter BonjourArcade
-            </a>
-            <!-- Sub-menu or direct options for Theme -->
-            <div class="dropdown-divider"></div>
-            <button class="theme-option dropdown-option" data-theme="system">
-              <span class="theme-icon">🌓</span>Thème : Système
-            </button>
-            <button class="theme-option dropdown-option" data-theme="light">
-              <span class="theme-icon">☀️</span>Thème : Clair
-            </button>
-            <button class="theme-option dropdown-option" data-theme="dark">
-              <span class="theme-icon">🌙</span>Thème : Sombre
-            </button>
-            <button id="login-btn" class="dropdown-option">
-              <span>🔐</span>Se connecter
-            </button>
-            <div class="dropdown-divider" id="auth-divider" style="display: none;"></div>
-            <button id="logout-btn" class="dropdown-option" style="display: none; color: #ff4444;">
-              <span>🚪</span>Se déconnecter
-            </button>
-          </div>
+        <div id="user-indicator">
+          <span class="bonjour-text">Bonjour</span>
+          <span class="user-name" id="user-display-name"></span>
+          <img id="user-avatar" src="" alt="Avatar">
         </div>
+        <div class="theme-toggle-wrapper" style="position: relative;" id="dropdown-root"></div>
       </div>
     </header>
 
@@ -254,6 +218,7 @@
   <script src="assets/js/main.js"></script>
   <script type="module" src="assets/js/firebase-setup.js"></script>
   <script src="tournoi/tournament-utils.js"></script>
+  <script src="assets/js/dropdown.js"></script>
 
   <script>
     // Collapsible functionality for recently played games section
@@ -299,11 +264,9 @@
     // Key 'z' for directly going to /all (but not when typing in search)
     document.addEventListener('keydown', (event) => {
       if (event.key === 'z') {
-        // Don't navigate if user is typing in the search input
-        const activeElement = document.activeElement;
-        if (activeElement && activeElement.id === 'game-id-input') {
-          return;
-        }
+        // Don't navigate if user is typing in an input or textarea
+        const activeTag = document.activeElement?.tagName;
+        if (activeTag === 'INPUT' || activeTag === 'TEXTAREA') return;
         window.location.replace("/all");
       }
     });
@@ -347,97 +310,7 @@
       return `${year}${month}${day}`;
     }
 
-    document.addEventListener('DOMContentLoaded', function () {
-      const dailyGameLink = document.getElementById('daily-game-link');
-      if (dailyGameLink) {
-        dailyGameLink.href = `/daily?seed=${getTorontoDailySeed()}`;
-      }
-    });
 
-    // Theme toggling logic
-    function setTheme(theme) {
-      document.body.classList.remove('theme-light', 'theme-dark');
-      let classToAdd;
-      if (theme === 'system') {
-        classToAdd = getSystemTheme();
-      } else if (theme === 'dark') {
-        classToAdd = 'theme-dark';
-      } else {
-        classToAdd = 'theme-light';
-      }
-      document.body.classList.add(classToAdd);
-
-      // Highlight current in dropdown
-      document.querySelectorAll('.theme-option').forEach(btn => {
-        btn.style.background = (btn.dataset.theme === theme) ? '#444' : 'none';
-      });
-
-      // Update Options button style for dark/light
-      const optionsBtn = document.getElementById('options-toggle-btn');
-      if (optionsBtn) {
-        if (classToAdd === 'theme-dark') {
-          optionsBtn.style.background = '#222';
-          optionsBtn.style.color = '#fff';
-          optionsBtn.style.border = '2px solid rgba(255,255,255,0.2)';
-        } else {
-          optionsBtn.style.background = '#fff';
-          optionsBtn.style.color = '#111';
-          optionsBtn.style.border = '2px solid #ccc';
-        }
-      }
-    }
-
-    function getSystemTheme() {
-      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'theme-dark' : 'theme-light';
-    }
-
-    // Dropdown logic for Options
-    const optionsBtn = document.getElementById('options-toggle-btn');
-    const optionsDropdown = document.getElementById('options-dropdown');
-
-    if (optionsBtn && optionsDropdown) {
-      optionsBtn.addEventListener('click', function (e) {
-        e.stopPropagation();
-        optionsDropdown.classList.toggle('active');
-      });
-
-      // Close dropdown when clicking outside
-      document.addEventListener('click', function (e) {
-        if (optionsDropdown.classList.contains('active')) {
-          if (!optionsBtn.contains(e.target) && !optionsDropdown.contains(e.target)) {
-            optionsDropdown.classList.remove('active');
-          }
-        }
-      });
-
-      // Prevent closing when clicking inside
-      optionsDropdown.addEventListener('click', (e) => e.stopPropagation());
-    }
-
-    document.querySelectorAll('.theme-option').forEach(btn => {
-      btn.addEventListener('click', function () {
-        const selected = btn.dataset.theme;
-        if (selected === 'system') {
-          localStorage.removeItem('theme');
-        } else {
-          localStorage.setItem('theme', selected);
-        }
-        setTheme(selected);
-        // Don't auto-close menu on theme change to allow user to see the result
-      });
-    });
-
-    // On load: use localStorage or system preference
-    const savedTheme = localStorage.getItem('theme');
-    const initialTheme = savedTheme || 'system';
-    setTheme(initialTheme);
-
-    // Listen for system theme changes
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
-      if (!localStorage.getItem('theme')) {
-        setTheme('system');
-      }
-    });
   </script>
   <script>
     // --- Auto-refresh every 3 hours, and auto-restart screensaver if it was active before refresh ---
@@ -468,45 +341,22 @@
   </script>
 
   <script>
-    // Firebase Auth State Listener for Login/Logout Buttons
+    // User indicator (avatar + name) in header
     document.addEventListener('DOMContentLoaded', () => {
-      const loginBtn = document.getElementById('login-btn');
-      const logoutBtn = document.getElementById('logout-btn');
-      const authDivider = document.getElementById('auth-divider');
-
-      if (loginBtn) {
-        loginBtn.addEventListener('click', async () => {
-          if (typeof window.signInWithGoogle === 'function') {
-            try {
-              await window.signInWithGoogle();
-              location.reload();
-            } catch (e) {
-              console.error('Login error:', e);
-            }
-          }
-        });
-      }
-
-      if (logoutBtn) {
-        logoutBtn.addEventListener('click', async () => {
-          if (typeof window.signOutFirebase === 'function') {
-            await window.signOutFirebase();
-            location.reload();
-          }
-        });
-      }
-
+      const userIndicator = document.getElementById('user-indicator');
+      const userNameEl = document.getElementById('user-display-name');
+      const userAvatarEl = document.getElementById('user-avatar');
       const checkAuth = () => {
         if (typeof window.onFirebaseAuthStateChanged === 'function') {
           window.onFirebaseAuthStateChanged((user) => {
-            if (user) {
-              if (loginBtn) loginBtn.style.display = 'none';
-              if (logoutBtn) logoutBtn.style.display = 'flex';
-              if (authDivider) authDivider.style.display = 'block';
-            } else {
-              if (loginBtn) loginBtn.style.display = 'flex';
-              if (logoutBtn) logoutBtn.style.display = 'none';
-              if (authDivider) authDivider.style.display = 'none';
+            if (userIndicator) {
+              if (user) {
+                userNameEl.textContent = user.displayName || 'Anonyme';
+                userAvatarEl.src = user.photoURL || 'assets/default-avatar.png';
+                userIndicator.style.display = 'flex';
+              } else {
+                userIndicator.style.display = 'none';
+              }
             }
           });
         } else {

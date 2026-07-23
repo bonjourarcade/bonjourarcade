@@ -27,9 +27,12 @@
     .success { color: #28a745; margin-top: 8px; font-size: 0.9rem; }
     .theme-btn { position: fixed; top: 16px; right: 16px; background: none; border: 1px solid var(--border); font-size: 1.2rem; cursor: pointer; padding: 6px 10px; border-radius: 8px; color: var(--text); z-index: 10; }
     .theme-btn:hover { background: rgba(255,255,255,0.06); }
+    .home-btn { position: fixed; top: 16px; left: 16px; font-size: 0.85rem; cursor: pointer; padding: 6px 10px; border-radius: 8px; z-index: 10; text-decoration: none; display: flex; align-items: center; gap: 6px; background: var(--surface); color: var(--text); border: 1px solid var(--border); font-weight: 600; }
+    .home-btn:hover { background: rgba(255,255,255,0.06); }
   </style>
 </head>
 <body>
+  <a href="/" class="home-btn">🏠 Accueil</a>
   <button class="theme-btn" id="theme-btn">🌙</button>
   <div class="card">
     <div id="loading-state">

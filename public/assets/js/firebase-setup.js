@@ -201,6 +201,18 @@ window.getUserScores = async (userId) => {
     return result.data;
 };
 
+window.getPendingScoresCount = async () => {
+  const fn = httpsCallable(functions, 'getPendingScoresCount');
+  const result = await fn({});
+  return result.data.count;
+};
+
+window.getSubmissionQueue = async (status = 'pending', limit = 20, lastDoc = null) => {
+  const fn = httpsCallable(functions, 'getSubmissionQueue');
+  const result = await fn({ status, limit, lastDoc });
+  return result.data;
+};
+
 window.updateFirebaseDisplayName = async (displayName) => {
     const nextDisplayName = String(displayName || '').trim();
 

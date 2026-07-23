@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tournoi BonjourArcade</title>
+    <link rel="icon" href="../favicon.ico" type="image/x-icon">
     <style>
         :root { --bg: #0a0a0f; --text: #e0e0e0; --surface: #1a1a2e; --border: #2a2a4a; --muted: #aaa; --muted-strong: #666; }
         body.theme-light { --bg: #f0f2f5; --text: #222; --surface: #fff; --border: #ddd; --muted: #666; --muted-strong: #999; }
@@ -20,9 +21,12 @@
         .small { font-size: 0.85rem; color: var(--muted-strong); margin-top: 24px; }
         .theme-btn { position: fixed; top: 16px; right: 16px; background: none; border: 1px solid var(--border); font-size: 1.2rem; cursor: pointer; padding: 6px 10px; border-radius: 8px; color: var(--text); z-index: 10; }
         .theme-btn:hover { background: rgba(255,255,255,0.06); }
+        .home-btn { position: fixed; top: 16px; left: 16px; background: none; border: 1px solid var(--border); font-size: 1.2rem; cursor: pointer; padding: 6px 10px; border-radius: 8px; color: var(--text); z-index: 10; text-decoration: none; display: flex; align-items: center; gap: 6px; }
+        .home-btn:hover { background: rgba(255,255,255,0.06); }
     </style>
 </head>
 <body>
+    <a href="/" class="home-btn">🏠 Accueil</a>
     <button class="theme-btn" id="theme-btn">🌙</button>
   <div class="card">
         <h1>🎮 Tournois BonjourArcade</h1>

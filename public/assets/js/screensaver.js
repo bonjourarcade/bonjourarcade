@@ -373,6 +373,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Key 'é' for immediate screensaver activation, and general key presses for deactivation
     document.addEventListener('keydown', (event) => {
+        // Don't trigger shortcuts when typing in an input or textarea
+        const activeTag = document.activeElement?.tagName;
+        if (activeTag === 'INPUT' || activeTag === 'TEXTAREA') return;
         if (event.key === 'é') {
             if (!screensaverActive) {
                 event.preventDefault(); // Prevent default browser action (like scrolling)

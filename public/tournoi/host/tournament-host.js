@@ -202,6 +202,8 @@ function loadDashboard(id) {
 
 let lastRoundIndex = -1;
 let tournamentData = null;
+let currentUpcomingOrder = null;
+let currentGamesArray = null;
 function renderTournament(t, id) {
   tournamentData = t;
   $('display-sharecode').textContent = t.shareCode;
@@ -253,23 +255,9 @@ function renderTournament(t, id) {
     }
 
     const upcomingGameIds = t.games.slice(round + 1);
-    const upcomingContainer = $('upcoming-games');
-    if (upcomingGameIds.length > 0) {
-      upcomingContainer.classList.remove('hidden');
-      upcomingContainer.innerHTML = upcomingGameIds.map((gid, i) => {
-        const g = gamelist.find(g => g.id === gid);
-        const title = g ? g.title : gid;
-        const label = `Ronde ${round + i + 2}`;
-        return `<div class="upcoming-game">
-          <div class="upcoming-img-wrap">
-            <img src="/games/${gid}/cover.png" alt="${title}" loading="lazy" onerror="this.style.display='none'">
-            <div class="upcoming-label">${label}</div>
-          </div>
-          <div class="upcoming-title" title="${title}">${title}</div>
-        </div>`;
-      }).join('');
-    } else {
-      upcomingContainer.classList.add('hidden');
+    if (!currentUpcomingOrder || JSON.stringify(currentUpcomingOrder) !== JSON.stringify(upcomingGameIds)) {
+      currentUpcomingOrder = [...upcomingGameIds];
+      renderUpcomingGames(t.games, round);
     }
 
     setupRoundScoresListener(id, round);
@@ -281,6 +269,89 @@ function renderTournament(t, id) {
     lastRoundIndex = -1;
     renderResults(id);
   }
+}
+
+function renderUpcomingGames(games, round) {
+  currentGamesArray = games;
+  renderUpcomingHtml(games, round);
+  ensureSaveOrderBtn();
+}
+
+function ensureSaveOrderBtn() {
+  if ($('save-order-btn')) return;
+  const container = $('upcoming-games');
+  const saveBtn = document.createElement('button');
+  saveBtn.id = 'save-order-btn';
+  saveBtn.className = 'btn btn-sm btn-primary';
+  saveBtn.textContent = "Enregistrer l'ordre";
+  saveBtn.addEventListener('click', async () => {
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Enregistrement...';
+    try {
+      const fn = window.httpsCallable
+        ? window.httpsCallable(window.firebaseFunctions, 'reorderRounds')
+        : (await import('https://www.gstatic.com/firebasejs/11.0.1/firebase-functions.js')).httpsCallable(window.firebaseFunctions, 'reorderRounds');
+      await fn({ tournamentId, games: currentGamesArray });
+      showToast('Ordre enregistré ✓');
+      saveBtn.textContent = "Enregistrer l'ordre";
+    } catch (e) {
+      showToast('Erreur: ' + (e.message || e));
+    } finally {
+      saveBtn.disabled = false;
+      saveBtn.textContent = "Enregistrer l'ordre";
+    }
+  });
+  container.parentNode.insertBefore(saveBtn, container.nextSibling);
+}
+
+function renderUpcomingHtml(games, round) {
+  const container = $('upcoming-games');
+  const upcomingIds = games.slice(round + 1);
+  if (upcomingIds.length === 0) { container.classList.add('hidden'); return; }
+  container.classList.remove('hidden');
+  container.innerHTML = upcomingIds.map((gid, i) => {
+    const g = gamelist.find(g => g.id === gid);
+    const title = g ? g.title : gid;
+    const label = `Ronde ${round + i + 2}`;
+    return `<div class="upcoming-game" draggable="true" data-index="${i}" data-game="${gid}">
+      <div class="upcoming-img-wrap">
+        <img src="/games/${gid}/cover.png" alt="${title}" loading="lazy" onerror="this.style.display='none'">
+        <div class="upcoming-label">${label}</div>
+      </div>
+      <div class="upcoming-title" title="${title}">${title}</div>
+    </div>`;
+  }).join('');
+
+  let dragIndex = null;
+  container.querySelectorAll('.upcoming-game').forEach(el => {
+    el.addEventListener('dragstart', (e) => {
+      dragIndex = parseInt(el.dataset.index, 10);
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    el.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+    });
+    el.addEventListener('drop', (e) => {
+      e.preventDefault();
+      const toIndex = parseInt(el.dataset.index, 10);
+      if (dragIndex === null || dragIndex === toIndex) return;
+      const order = [...currentUpcomingOrder];
+      const [moved] = order.splice(dragIndex, 1);
+      order.splice(toIndex, 0, moved);
+      currentUpcomingOrder = order;
+      dragIndex = null;
+      if (!currentGamesArray) return;
+      const newGames = [...currentGamesArray];
+      for (let i = 0; i < order.length; i++) {
+        newGames[round + 1 + i] = order[i];
+      }
+      currentGamesArray = newGames;
+      renderUpcomingHtml(currentGamesArray, round);
+      showToast('Ordre modifié — clique sur "Enregistrer l\'ordre" pour sauvegarder');
+    });
+    el.addEventListener('dragend', () => { dragIndex = null; });
+  });
 }
 
 function startRoundTimer(t) {

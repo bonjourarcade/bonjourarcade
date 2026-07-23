@@ -5,6 +5,10 @@ let tournamentId = null;
 let myUid = null;
 let displayNameCache = {};
 let myParticipantData = null;
+let currentParticipants = {};
+let currentRoundScores = [];
+let currentRoundIndex = -1;
+let currentTotalRounds = 0;
 let isInTournament = false;
 let unsubscribeTournament = null;
 let unsubscribeParticipants = null;
@@ -189,6 +193,7 @@ function listenToTournament(initialData) {
         participants[uid].displayName = displayNameCache[uid];
       }
     }
+    currentParticipants = participants;
     renderParticipantsInfo(participants, me);
     if (newUids.length > 0) {
       Promise.all(newUids.map(uid =>
@@ -208,7 +213,11 @@ function listenToTournament(initialData) {
               if (uid === myUid && me) me.displayName = displayNameCache[uid];
             }
           }
+          currentParticipants = participants;
           renderParticipantsInfo(participants, me);
+          if (currentRoundScores.length > 0) {
+            renderScoreboard(currentRoundScores, currentRoundIndex, currentTotalRounds);
+          }
         }
       }).catch(e => console.error('Error fetching profiles:', e));
     }
@@ -345,6 +354,9 @@ function setupRoundScoresListener(t) {
   const round = t.currentRoundIndex;
   if (round < 0) return;
 
+  currentRoundIndex = round;
+  currentTotalRounds = t.games?.length || 0;
+
   const db = window.firebaseDb;
   const q = query(collection(db, 'tournaments', tournamentId, 'roundScores'),
     where('roundIndex', '==', round),
@@ -352,85 +364,83 @@ function setupRoundScoresListener(t) {
   unsubscribeRoundScores = onSnapshot(q, (snap) => {
     const scores = [];
     snap.forEach(d => scores.push({ id: d.id, ...d.data() }));
-    renderScoreboard(scores, round, t.games?.length);
+    currentRoundScores = scores;
+    renderScoreboard(scores, round, currentTotalRounds);
   });
 }
 
 function renderScoreboard(roundScores, currentRoundIndex, totalRounds) {
-  const tournamentRef = doc(window.firebaseDb, 'tournaments', tournamentId);
-  getDocs(collection(tournamentRef, 'participants')).then(snap => {
-    const participants = {};
-    snap.forEach(d => { participants[d.id] = d.data(); });
-    for (const uid of Object.keys(participants)) {
-      if (displayNameCache[uid]) {
-        participants[uid].displayName = displayNameCache[uid];
-      }
+  const participants = {};
+  for (const uid of Object.keys(currentParticipants)) {
+    participants[uid] = { ...currentParticipants[uid] };
+    if (displayNameCache[uid]) {
+      participants[uid].displayName = displayNameCache[uid];
     }
+  }
 
-    const activeCount = Object.values(participants).filter(p => !p.eliminated).length;
-    const cutoff = TournoiUtils.computeRoundCutoff(activeCount, currentRoundIndex, totalRounds) || 0;
-    const bestEntry = {};
-    roundScores.forEach(rs => {
-      const prev = bestEntry[rs.userId];
-      if (!prev || rs.score > prev.score || (rs.score === prev.score && rs.verified && !prev.verified)) {
-        bestEntry[rs.userId] = { score: rs.score, gameScoreId: rs.gameScoreId, verified: rs.verified };
-      }
-    });
-
-    const ranked = Object.entries(participants)
-      .map(([uid, p]) => ({
-        uid,
-        name: p.displayName,
-        photoURL: p.photoURL,
-        score: bestEntry[uid]?.score || 0,
-        gameScoreId: bestEntry[uid]?.gameScoreId || null,
-        verified: bestEntry[uid]?.verified || false,
-        eliminated: p.eliminated,
-      }))
-      .sort((a, b) => b.score - a.score);
-
-    const active = ranked.filter(p => !p.eliminated);
-    const eliminated = ranked.filter(p => p.eliminated);
-
-    let html = '';
-    if (active.length > 0) {
-      active.forEach((p, i) => {
-        const isMe = p.uid === myUid;
-        const isDanger = cutoff > 0 && i >= cutoff;
-        const statusClass = isDanger ? 'danger' : 'safe';
-        const avatar = p.photoURL || '../assets/default-avatar.png';
-        const gsAttr = p.gameScoreId ? ` data-game-score-id="${p.gameScoreId}"` : '';
-        const pendingBadge = !p.verified && p.score > 0 ? ' <span class="pending-badge" title="En attente de validation">⏳</span>' : '';
-        html += `<div class="entry ${statusClass} ${isMe ? 'me' : ''}"${gsAttr}>
-          <span class="rank">${i + 1}.</span>
-          <img src="${avatar}" class="avatar">
-          <span class="name"><a href="/profil/?uid=${p.uid}" style="color:inherit;text-decoration:none;">${p.name}</a>${isMe ? '<span class="my-badge">MOI</span>' : ''}</span>
-          ${isDanger ? '<span class="entry-label at-risk">⚠️ En danger</span>' : ''}
-          <span class="score">${p.score.toLocaleString()}${pendingBadge}</span>
-        </div>`;
-      });
+  const activeCount = Object.values(participants).filter(p => !p.eliminated).length;
+  const cutoff = TournoiUtils.computeRoundCutoff(activeCount, currentRoundIndex, totalRounds) || 0;
+  const bestEntry = {};
+  roundScores.forEach(rs => {
+    const prev = bestEntry[rs.userId];
+    if (!prev || rs.score > prev.score || (rs.score === prev.score && rs.verified && !prev.verified)) {
+      bestEntry[rs.userId] = { score: rs.score, gameScoreId: rs.gameScoreId, verified: rs.verified };
     }
-
-    if (eliminated.length > 0) {
-      html += '<div class="section-title eliminated-title">Éliminés</div>';
-      eliminated.forEach((p, i) => {
-        const isMe = p.uid === myUid;
-        const avatar = p.photoURL || '../assets/default-avatar.png';
-        const gsAttr = p.gameScoreId ? ` data-game-score-id="${p.gameScoreId}"` : '';
-        const pendingBadge = !p.verified && p.score > 0 ? ' <span class="pending-badge" title="En attente de validation">⏳</span>' : '';
-        html += `<div class="entry eliminated ${isMe ? 'me' : ''}"${gsAttr}>
-          <span class="rank">${active.length + i + 1}.</span>
-          <img src="${avatar}" class="avatar">
-          <span class="name"><a href="/profil/?uid=${p.uid}" style="color:inherit;text-decoration:none;">${p.name}</a>${isMe ? '<span class="my-badge">MOI</span>' : ''}</span>
-          <span class="score">${p.score.toLocaleString()}${pendingBadge}</span>
-        </div>`;
-      });
-    }
-
-    if (!html) html = '<div style="color:#aaa;text-align:center;padding:20px;">Aucun score pour cette ronde</div>';
-    $('scoreboard-entries').innerHTML = html;
-    TournoiUtils.enrichScoreboardEntries('scoreboard-entries');
   });
+
+  const ranked = Object.entries(participants)
+    .map(([uid, p]) => ({
+      uid,
+      name: p.displayName,
+      photoURL: p.photoURL,
+      score: bestEntry[uid]?.score || 0,
+      gameScoreId: bestEntry[uid]?.gameScoreId || null,
+      verified: bestEntry[uid]?.verified || false,
+      eliminated: p.eliminated,
+    }))
+    .sort((a, b) => b.score - a.score);
+
+  const active = ranked.filter(p => !p.eliminated);
+  const eliminated = ranked.filter(p => p.eliminated);
+
+  let html = '';
+  if (active.length > 0) {
+    active.forEach((p, i) => {
+      const isMe = p.uid === myUid;
+      const isDanger = cutoff > 0 && i >= cutoff;
+      const statusClass = isDanger ? 'danger' : 'safe';
+      const avatar = p.photoURL || '../assets/default-avatar.png';
+      const gsAttr = p.gameScoreId ? ` data-game-score-id="${p.gameScoreId}"` : '';
+      const pendingBadge = !p.verified && p.score > 0 ? ' <span class="pending-badge" title="En attente de validation">⏳</span>' : '';
+      html += `<div class="entry ${statusClass} ${isMe ? 'me' : ''}"${gsAttr}>
+        <span class="rank">${i + 1}.</span>
+        <img src="${avatar}" class="avatar">
+        <span class="name"><a href="/profil/?uid=${p.uid}" style="color:inherit;text-decoration:none;">${p.name}</a>${isMe ? '<span class="my-badge">MOI</span>' : ''}</span>
+        ${isDanger ? '<span class="entry-label at-risk">⚠️ En danger</span>' : ''}
+        <span class="score">${p.score.toLocaleString()}${pendingBadge}</span>
+      </div>`;
+    });
+  }
+
+  if (eliminated.length > 0) {
+    html += '<div class="section-title eliminated-title">Éliminés</div>';
+    eliminated.forEach((p, i) => {
+      const isMe = p.uid === myUid;
+      const avatar = p.photoURL || '../assets/default-avatar.png';
+      const gsAttr = p.gameScoreId ? ` data-game-score-id="${p.gameScoreId}"` : '';
+      const pendingBadge = !p.verified && p.score > 0 ? ' <span class="pending-badge" title="En attente de validation">⏳</span>' : '';
+      html += `<div class="entry eliminated ${isMe ? 'me' : ''}"${gsAttr}>
+        <span class="rank">${active.length + i + 1}.</span>
+        <img src="${avatar}" class="avatar">
+        <span class="name"><a href="/profil/?uid=${p.uid}" style="color:inherit;text-decoration:none;">${p.name}</a>${isMe ? '<span class="my-badge">MOI</span>' : ''}</span>
+        <span class="score">${p.score.toLocaleString()}${pendingBadge}</span>
+      </div>`;
+    });
+  }
+
+  if (!html) html = '<div style="color:#aaa;text-align:center;padding:20px;">Aucun score pour cette ronde</div>';
+  $('scoreboard-entries').innerHTML = html;
+  TournoiUtils.enrichScoreboardEntries('scoreboard-entries');
 }
 
 async function showFinished(id) {

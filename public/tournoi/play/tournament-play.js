@@ -83,7 +83,6 @@ $('logout-btn').addEventListener('click', () => {
 });
 
 $('join-btn').addEventListener('click', joinTournament);
-$('view-final-results-btn').addEventListener('click', () => showFinished(tournamentId));
 
 async function checkParticipation() {
   try {
@@ -192,12 +191,10 @@ function renderTournament(t) {
   $('play-status').textContent = t.status === 'registration' ? 'Inscription' : t.status === 'active' ? 'En cours' : 'Terminé';
 
   if (t.status === 'registration') {
-    hide('break-phase');
     hide('eliminated-phase');
     show('waiting-phase');
   } else if (t.status === 'active') {
     hide('waiting-phase');
-    hide('break-phase');
     hide('eliminated-phase');
 
     const round = t.currentRoundIndex;

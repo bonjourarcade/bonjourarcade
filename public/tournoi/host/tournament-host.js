@@ -162,9 +162,26 @@ function loadDashboard(id) {
     renderTournament(snap.data(), snap.id);
   });
 
-  unsubscribeParticipants = onSnapshot(collection(tournamentRef, 'participants'), (snap) => {
+  unsubscribeParticipants = onSnapshot(collection(tournamentRef, 'participants'), async (snap) => {
     const participants = {};
     snap.forEach(d => { participants[d.id] = d.data(); });
+    const uids = Object.keys(participants);
+    if (uids.length > 0) {
+      try {
+        const db = window.firebaseDb;
+        const { doc, getDoc } = window.Firestore;
+        const profileSnaps = await Promise.all(
+          uids.map(uid => getDoc(doc(db, 'user-public-profiles', uid)).catch(() => null))
+        );
+        profileSnaps.forEach(snap => {
+          if (snap && snap.exists && snap.data().displayName) {
+            participants[snap.id].displayName = snap.data().displayName;
+          }
+        });
+      } catch (e) {
+        console.error('Error fetching profiles:', e);
+      }
+    }
     renderParticipants(participants);
   });
 }
@@ -219,6 +236,26 @@ function renderTournament(t, id) {
     } else {
       $('game-card').classList.add('hidden');
       $('end-round-btn').classList.add('hidden');
+    }
+
+    const upcomingGameIds = t.games.slice(round + 1);
+    const upcomingContainer = $('upcoming-games');
+    if (upcomingGameIds.length > 0) {
+      upcomingContainer.classList.remove('hidden');
+      upcomingContainer.innerHTML = upcomingGameIds.map((gid, i) => {
+        const g = gamelist.find(g => g.id === gid);
+        const title = g ? g.title : gid;
+        const label = `Ronde ${round + i + 2}`;
+        return `<div class="upcoming-game">
+          <div class="upcoming-img-wrap">
+            <img src="/games/${gid}/cover.png" alt="${title}" loading="lazy" onerror="this.style.display='none'">
+            <div class="upcoming-label">${label}</div>
+          </div>
+          <div class="upcoming-title" title="${title}">${title}</div>
+        </div>`;
+      }).join('');
+    } else {
+      upcomingContainer.classList.add('hidden');
     }
 
     setupRoundScoresListener(id, round);
@@ -285,7 +322,7 @@ function setupPendingScoresListener(id, roundIndex) {
       const screenshot = p.screenshotUrl || fallbackMap[p.gameScoreId];
       return `<div class="pending-score">
         <img src="${p.photoURL || '../assets/default-avatar.png'}" style="width:24px;height:24px;border-radius:50%;">
-        <span>${p.displayName}</span>
+        <span><a href="/profil/${p.userId}" style="color:inherit;text-decoration:none;">${p.displayName}</a></span>
         <span style="font-weight:700;">${p.score.toLocaleString()}</span>
         ${screenshot ? `<img src="${screenshot}" class="pending-screenshot-thumb" data-src="${screenshot}">` : ''}
         <label class="notif-label" title="Notifier sur Discord">
@@ -333,7 +370,7 @@ function renderParticipants(participants) {
     Object.entries(participants).map(([uid, p]) =>
       `<div class="participant-chip ${p.eliminated ? 'eliminated-chip' : ''}">
         <img src="${p.photoURL || '../assets/default-avatar.png'}" alt="">
-        <span>${p.displayName}</span>
+        <span><a href="/profil/${uid}" style="color:inherit;text-decoration:none;">${p.displayName}</a></span>
         ${p.eliminated ? '<span class="elim-badge">Éliminé</span>' : ''}
         <button class="btn-sm ${p.eliminated ? 'btn-warning' : 'btn-danger'}" style="margin-left:4px;padding:2px 6px;font-size:11px;"
           data-uid="${uid}" data-action="${p.eliminated ? 'reinstate' : 'eliminate'}"
@@ -407,10 +444,11 @@ async function renderResults(id) {
       const p = results.podiumPlayers[idx];
       if (!p) continue;
       const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : '🥉';
+      const nameLink = p.uid ? `<a href="/profil/${p.uid}" style="color:inherit;text-decoration:none;">${p.name}</a>` : p.name;
       html += `<div class="podium-place podium-${idx + 1}">
         <div class="rank-num">${medal}</div>
         <img src="${p.photoURL || '../assets/default-avatar.png'}" alt="">
-        <div class="name">${p.name}</div>
+        <div class="name">${nameLink}</div>
         <div class="score">${p.score.toLocaleString()} pts</div>
       </div>`;
     }
@@ -419,7 +457,7 @@ async function renderResults(id) {
 
   if (results.overallChampion) {
     html += `<p style="text-align:center;color:#ffd700;font-size:1.2rem;">
-      🏆 Champion cumulatif: <strong>${results.overallChampion.name}</strong>
+      🏆 Champion cumulatif: <strong>${results.overallChampion.uid ? `<a href="/profil/${results.overallChampion.uid}" style="color:inherit;text-decoration:none;">${results.overallChampion.name}</a>` : results.overallChampion.name}</strong>
       (${results.overallChampion.totalScore.toLocaleString()} pts)
     </p>`;
   }
@@ -428,10 +466,11 @@ async function renderResults(id) {
     html += '<div class="section-title">Classement cumulatif</div>';
     html += '<table class="cumul-table"><thead><tr><th>#</th><th></th><th>Joueur</th><th>Total</th></tr></thead><tbody>';
     results.cumulativeScoresTable.forEach((p, i) => {
+      const nameLink = p.uid ? `<a href="/profil/${p.uid}" style="color:inherit;text-decoration:none;">${p.name}</a>` : p.name;
       html += `<tr class="${p.eliminated ? 'eliminated-row' : ''}">
         <td>${i + 1}</td>
         <td><img src="${p.photoURL || '../assets/default-avatar.png'}" class="avatar-sm"></td>
-        <td>${p.name}</td>
+        <td>${nameLink}</td>
         <td>${p.totalScore.toLocaleString()}</td>
       </tr>`;
     });
@@ -460,6 +499,7 @@ function buildResultsFromParticipants(participants) {
     });
 
     const podiumPlayers = list.slice(0, 3).map(p => ({
+      uid: p.uid,
       name: p.name,
       photoURL: p.photoURL,
       score: p.totalScore,
@@ -469,8 +509,9 @@ function buildResultsFromParticipants(participants) {
 
     return {
       podiumPlayers,
-      overallChampion: champion ? { name: champion.name, totalScore: champion.totalScore } : null,
+      overallChampion: champion ? { uid: champion.uid, name: champion.name, totalScore: champion.totalScore } : null,
       cumulativeScoresTable: list.map(p => ({
+        uid: p.uid,
         name: p.name,
         photoURL: p.photoURL,
         totalScore: p.totalScore,

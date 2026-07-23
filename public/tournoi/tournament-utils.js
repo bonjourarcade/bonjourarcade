@@ -91,7 +91,7 @@ const TournoiUtils = {
       html += `<div class="entry ${statusClass}"${gsAttr}>
         <span class="rank">${rank}.</span>
         <img src="${avatar}" class="avatar">
-        <span class="name">${p.name}</span>
+        <span class="name"><a href="/profil/${p.uid}" style="color:inherit;text-decoration:none;">${p.name}</a></span>
         ${!isLastRound && cutoff && rank > cutoff ? '<span class="entry-label at-risk">⚠️ En danger</span>' : ''}
         ${isLastRound && rank <= 3 ? `<span class="entry-label medal">${medalEmoji}</span>` : ''}
         <span class="score">${p.score.toLocaleString()}</span>
@@ -106,7 +106,7 @@ const TournoiUtils = {
         html += `<div class="entry eliminated"${gsAttr}>
           <span class="rank">${active.length + i + 1}.</span>
           <img src="${avatar}" class="avatar">
-          <span class="name">${p.name}</span>
+          <span class="name"><a href="/profil/${p.uid}" style="color:inherit;text-decoration:none;">${p.name}</a></span>
           <span class="score">${p.score.toLocaleString()}</span>
         </div>`;
       });

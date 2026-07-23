@@ -37,7 +37,7 @@ window.firebaseDb = db;
 window.httpsCallable = httpsCallable;
 window.Firestore = {
     collection, query, where, orderBy, onSnapshot, doc, getDoc, getDocs,
-    addDoc, updateDoc, serverTimestamp, limit,
+    addDoc, updateDoc, setDoc, serverTimestamp, limit,
 };
 
 window.signInWithGoogle = async () => {
@@ -213,6 +213,12 @@ window.updateFirebaseDisplayName = async (displayName) => {
 
     await updateProfile(auth.currentUser, {
         displayName: nextDisplayName
+    });
+
+    await setDoc(doc(db, 'user-public-profiles', auth.currentUser.uid), {
+        displayName: nextDisplayName,
+        photoURL: auth.currentUser.photoURL || '',
+        updatedAt: serverTimestamp(),
     });
 
     await auth.currentUser.reload();

@@ -171,7 +171,7 @@ function listenToTournament(initialData) {
     renderTournament(snap.data());
   });
 
-  unsubscribeParticipants = onSnapshot(collection(tournamentRef, 'participants'), (snap) => {
+  unsubscribeParticipants = onSnapshot(collection(tournamentRef, 'participants'), async (snap) => {
     let me = null;
     const participants = {};
     snap.forEach(d => {
@@ -181,6 +181,23 @@ function listenToTournament(initialData) {
         myParticipantData = d.data();
       }
     });
+    const uids = Object.keys(participants);
+    if (uids.length > 0) {
+      try {
+        const db = window.firebaseDb;
+        const { doc, getDoc } = window.Firestore;
+        const profileSnaps = await Promise.all(
+          uids.map(uid => getDoc(doc(db, 'user-public-profiles', uid)).catch(() => null))
+        );
+        profileSnaps.forEach(snap => {
+          if (snap && snap.exists && snap.data().displayName) {
+            participants[snap.id].displayName = snap.data().displayName;
+          }
+        });
+      } catch (e) {
+        console.error('Error fetching profiles:', e);
+      }
+    }
     renderParticipantsInfo(participants, me);
   });
 }
@@ -282,7 +299,7 @@ function renderParticipantsInfo(participants, me) {
     html += `<tr class="${p.eliminated ? 'eliminated-row' : ''} ${isMe ? 'highlight-row' : ''}">
       <td>${i + 1}</td>
       <td><img src="${p.photoURL || '../assets/default-avatar.png'}" class="avatar-sm"></td>
-      <td>${p.name}${isMe ? ' ⬅️' : ''}</td>
+      <td><a href="/profil/${p.uid}" style="color:inherit;text-decoration:none;">${p.name}</a>${isMe ? ' ⬅️' : ''}</td>
       <td>${p.totalScore.toLocaleString()}${p.hasUnverified ? ' <span class="pending-badge" title="Certains scores sont en attente de validation">⏳</span>' : ''}</td>
     </tr>`;
   });
@@ -350,7 +367,7 @@ function renderScoreboard(roundScores, currentRoundIndex, totalRounds) {
         html += `<div class="entry ${statusClass} ${isMe ? 'me' : ''}"${gsAttr}>
           <span class="rank">${i + 1}.</span>
           <img src="${avatar}" class="avatar">
-          <span class="name">${p.name}${isMe ? '<span class="my-badge">MOI</span>' : ''}</span>
+          <span class="name"><a href="/profil/${p.uid}" style="color:inherit;text-decoration:none;">${p.name}</a>${isMe ? '<span class="my-badge">MOI</span>' : ''}</span>
           ${isDanger ? '<span class="entry-label at-risk">⚠️ En danger</span>' : ''}
           <span class="score">${p.score.toLocaleString()}${pendingBadge}</span>
         </div>`;
@@ -367,7 +384,7 @@ function renderScoreboard(roundScores, currentRoundIndex, totalRounds) {
         html += `<div class="entry eliminated ${isMe ? 'me' : ''}"${gsAttr}>
           <span class="rank">${active.length + i + 1}.</span>
           <img src="${avatar}" class="avatar">
-          <span class="name">${p.name}${isMe ? '<span class="my-badge">MOI</span>' : ''}</span>
+          <span class="name"><a href="/profil/${p.uid}" style="color:inherit;text-decoration:none;">${p.name}</a>${isMe ? '<span class="my-badge">MOI</span>' : ''}</span>
           <span class="score">${p.score.toLocaleString()}${pendingBadge}</span>
         </div>`;
       });

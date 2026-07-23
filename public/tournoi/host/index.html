@@ -73,6 +73,13 @@
     .game-card .game-title { font-size: 1.2rem; color: #ffd700; }
     .game-card .game-link { color: #4a9eff; font-size: 0.85rem; word-break: break-all; }
 
+    .upcoming-games { display: flex; gap: 16px; margin: 20px 0; overflow-x: auto; padding-bottom: 8px; justify-content: center; flex-wrap: wrap; }
+    .upcoming-game { flex: 0 0 100px; text-align: center; position: relative; }
+    .upcoming-game .upcoming-img-wrap { position: relative; width: 100px; height: 100px; border-radius: 10px; overflow: hidden; margin: 0 auto 6px; }
+    .upcoming-game .upcoming-img-wrap img { width: 100%; height: 100%; object-fit: cover; filter: blur(8px); -webkit-filter: blur(8px); transform: scale(1.1); }
+    .upcoming-game .upcoming-img-wrap .upcoming-label { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #ffd700; font-size: 0.7rem; font-weight: 700; text-shadow: 0 1px 4px rgba(0,0,0,0.8); pointer-events: none; }
+    .upcoming-game .upcoming-title { font-size: 0.7rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
     .controls-bar { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin: 16px 0; }
 
     .section-title { color: #ffd700; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; margin: 16px 0 8px; }
@@ -289,6 +296,8 @@
             <div class="game-title" id="game-title"></div>
             <div class="game-link" id="game-link"></div>
           </div>
+
+          <div id="upcoming-games" class="upcoming-games hidden"></div>
 
           <div class="controls-bar" id="controls-bar">
             <button id="end-round-btn" class="btn-secondary btn-sm hidden">Terminer la ronde</button>

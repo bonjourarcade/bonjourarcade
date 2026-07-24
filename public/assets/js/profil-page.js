@@ -10,6 +10,9 @@
         avatarSetUrl: document.getElementById('profil-avatar-set-url'),
         avatarReset: document.getElementById('profil-avatar-reset'),
         avatarDelete: document.getElementById('profil-avatar-delete'),
+        cover: document.querySelector('.profil-cover'),
+        bannerPicker: document.getElementById('profil-banner-picker'),
+        bannerReset: document.getElementById('profil-banner-reset'),
         displayName: document.getElementById('profil-display-name'),
         memberSince: document.getElementById('profil-member-since'),
         editName: document.getElementById('profil-edit-name'),
@@ -24,6 +27,9 @@
         scoresEmpty: document.getElementById('profil-scores-empty'),
         scoresTable: document.getElementById('profil-scores-table'),
         scoresBody: document.getElementById('profil-scores-body'),
+        statGames: document.getElementById('profil-stat-games'),
+        statScores: document.getElementById('profil-stat-scores'),
+        statTop: document.getElementById('profil-stat-top'),
         authStatus: document.getElementById('profil-auth-status'),
         authText: document.getElementById('profil-auth-text'),
         authButton: document.getElementById('profil-auth-button'),
@@ -32,12 +38,15 @@
         proofModalLoader: document.getElementById('proof-modal-loader'),
         proofModalLoaderText: document.querySelector('#proof-modal-loader .proof-modal-loader-text'),
         proofModalClose: document.getElementById('proof-modal-close'),
+        editFooter: document.getElementById('profil-edit-footer'),
     };
 
     let currentUser = null;
     let profile = null;
     let isOwnProfile = false;
     let profileUserId = null;
+    let pending = { avatar: null, banner: null };
+    let originals = { avatarUrl: null, bannerColor: null };
 
     // Simple toast helper
     function showToast(message, type) {
@@ -75,6 +84,76 @@
         return Number(n).toLocaleString('en-US');
     }
 
+    function darkenHex(hex, amount) {
+      var c = parseInt(hex.replace('#', ''), 16);
+      var r = Math.max(0, (c >> 16) - amount);
+      var g = Math.max(0, ((c >> 8) & 0xff) - amount);
+      var b = Math.max(0, (c & 0xff) - amount);
+      return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+    }
+
+    function applyBannerColor(hex) {
+      if (!elements.cover) return;
+      if (!hex) {
+        elements.cover.style.background = '';
+        return;
+      }
+      var darkened = darkenHex(hex, 35);
+      elements.cover.style.background = 'linear-gradient(135deg, ' + hex + ', ' + darkened + ')';
+    }
+
+    function setupBannerPicker() {
+      if (!elements.bannerPicker || !elements.bannerReset) return;
+
+      elements.bannerPicker.addEventListener('input', function () {
+        applyBannerColor(elements.bannerPicker.value);
+      });
+
+      elements.bannerPicker.addEventListener('change', function () {
+        pending.banner = elements.bannerPicker.value;
+      });
+
+      elements.bannerReset.addEventListener('click', function () {
+        elements.bannerPicker.value = '#0b7a63';
+        applyBannerColor(null);
+        pending.banner = '';
+      });
+    }
+
+    async function loadBannerColor(userId) {
+      try {
+        var db = window.firebaseDb;
+        var docRef = window.Firestore.doc(db, 'users-preferences', userId);
+        var docSnap = await window.Firestore.getDoc(docRef);
+        if (docSnap.exists()) {
+          var data = docSnap.data();
+          if (data.banner && data.banner.color) {
+            if (elements.bannerPicker) elements.bannerPicker.value = data.banner.color;
+            applyBannerColor(data.banner.color);
+            return data.banner.color;
+          }
+        }
+      } catch (e) {
+        console.warn('Error loading banner color:', e);
+      }
+      applyBannerColor(null);
+      return null;
+    }
+
+    async function saveBannerColor(color) {
+      if (!currentUser) return;
+      var { doc, setDoc, serverTimestamp } = window.Firestore;
+      var bannerData = {
+        banner: {
+          color: color || '',
+          lastUpdated: new Date().toISOString(),
+        },
+        updatedAt: serverTimestamp(),
+      };
+      await setDoc(doc(window.firebaseDb, 'users-preferences', currentUser.uid), bannerData, { merge: true });
+      try { await setDoc(doc(window.firebaseDb, 'user-preferences', currentUser.uid), bannerData, { merge: true }); } catch (e) { }
+    }
+
     function showError(msg) {
         elements.loading.style.display = 'none';
         elements.error.textContent = msg;
@@ -104,7 +183,7 @@
             }
 
             if (isOwnProfile) {
-                elements.avatarActions.style.display = 'flex';
+                elements.avatarActions.style.display = 'none';
                 elements.editToggle.style.display = 'inline-block';
                 elements.logout.style.display = 'inline-block';
             } else {
@@ -116,6 +195,9 @@
             elements.loading.style.display = 'none';
             elements.content.style.display = 'block';
 
+            loadBannerColor(userId).then(function () {
+              if (isOwnProfile) setupBannerPicker();
+            });
             loadScores(userId);
         } catch (err) {
             console.error('Error loading profile:', err);
@@ -143,10 +225,19 @@
 
             if (!scores || scores.length === 0) {
                 elements.scoresEmpty.style.display = 'block';
+                if (elements.statGames) elements.statGames.textContent = '0';
+                if (elements.statScores) elements.statScores.textContent = '0';
+                if (elements.statTop) elements.statTop.textContent = '0';
                 return;
             }
 
             elements.scoresTable.style.display = 'table';
+
+            const uniqueGames = new Set(scores.map(s => s.gameTitle).filter(Boolean));
+            const top1Count = scores.filter(s => s.rank === 1).length;
+            if (elements.statGames) elements.statGames.textContent = uniqueGames.size;
+            if (elements.statScores) elements.statScores.textContent = scores.length;
+            if (elements.statTop) elements.statTop.textContent = top1Count;
 
             scores.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
@@ -278,48 +369,145 @@
         }
     });
 
+    function saveOriginals() {
+      originals.avatarUrl = profile ? profile.photoURL : null;
+      originals.bannerColor = elements.bannerPicker ? elements.bannerPicker.value : null;
+      pending.avatar = null;
+      pending.banner = null;
+    }
+
+    function revertOriginals() {
+      if (originals.avatarUrl) {
+        elements.avatarImg.src = originals.avatarUrl;
+        elements.avatarImg.style.display = 'block';
+        elements.avatarFallback.style.display = 'none';
+      } else {
+        elements.avatarImg.style.display = 'none';
+        elements.avatarFallback.style.display = 'block';
+      }
+      applyBannerColor(originals.bannerColor);
+      if (elements.bannerPicker) elements.bannerPicker.value = originals.bannerColor || '#0b7a63';
+      pending.avatar = null;
+      pending.banner = null;
+    }
+
     // Edit toggle
     elements.editToggle.addEventListener('click', function () {
         elements.editName.style.display = 'block';
+        elements.avatarActions.style.display = 'flex';
+        if (elements.editFooter) elements.editFooter.style.display = 'flex';
         elements.nameInput.value = (profile && profile.displayName) || '';
         elements.nameInput.focus();
         elements.editToggle.style.display = 'none';
         elements.nameStatus.textContent = '';
+        if (isOwnProfile) saveOriginals();
     });
 
     elements.nameCancel.addEventListener('click', function () {
+        revertOriginals();
         elements.editName.style.display = 'none';
+        elements.avatarActions.style.display = 'none';
+        if (elements.editFooter) elements.editFooter.style.display = 'none';
         elements.editToggle.style.display = 'inline-block';
         elements.nameStatus.textContent = '';
     });
 
-    elements.nameForm.addEventListener('submit', async function (e) {
-        e.preventDefault();
-        const newName = elements.nameInput.value.trim();
+    function savePendingChanges() {
+      var promises = [];
+
+      if (pending.avatar !== null) {
+        var avatarPromise = saveAvatarChanges(pending.avatar);
+        promises.push(avatarPromise);
+      }
+
+      if (pending.banner !== null) {
+        var bannerPromise = saveBannerColor(pending.banner);
+        promises.push(bannerPromise);
+      }
+
+      return Promise.all(promises);
+    }
+
+    async function saveAvatarChanges(avatarState) {
+      if (!currentUser) return;
+      try {
+        var { doc, setDoc, serverTimestamp } = window.Firestore;
+        if (avatarState === 'sso') {
+          var ssoUrl = currentUser.photoURL || '';
+          await setDoc(doc(window.firebaseDb, 'users-preferences', currentUser.uid), {
+            avatar: { type: 'sso', url: ssoUrl, lastUpdated: new Date().toISOString() },
+            updatedAt: serverTimestamp(),
+          }, { merge: true });
+          try { await setDoc(doc(window.firebaseDb, 'user-preferences', currentUser.uid), {
+            avatar: { type: 'sso', url: ssoUrl, lastUpdated: new Date().toISOString() },
+            updatedAt: serverTimestamp(),
+          }, { merge: true }); } catch (e) { }
+          if (profile) profile.photoURL = ssoUrl;
+        } else if (avatarState === 'default') {
+          await setDoc(doc(window.firebaseDb, 'users-preferences', currentUser.uid), {
+            avatar: { type: 'default', url: '', lastUpdated: new Date().toISOString() },
+            updatedAt: serverTimestamp(),
+          }, { merge: true });
+          try { await setDoc(doc(window.firebaseDb, 'user-preferences', currentUser.uid), {
+            avatar: { type: 'default', url: '', lastUpdated: new Date().toISOString() },
+            updatedAt: serverTimestamp(),
+          }, { merge: true }); } catch (e) { }
+          if (profile) profile.photoURL = null;
+        } else if (avatarState) {
+          await setDoc(doc(window.firebaseDb, 'users-preferences', currentUser.uid), {
+            avatar: { type: 'custom', url: avatarState, lastUpdated: new Date().toISOString() },
+            updatedAt: serverTimestamp(),
+          }, { merge: true });
+          try { await setDoc(doc(window.firebaseDb, 'user-preferences', currentUser.uid), {
+            avatar: { type: 'custom', url: avatarState, lastUpdated: new Date().toISOString() },
+            updatedAt: serverTimestamp(),
+          }, { merge: true }); } catch (e) { }
+          if (profile) profile.photoURL = avatarState;
+        }
+      } catch (e) {
+        console.error('Error saving avatar:', e);
+        throw e;
+      }
+    }
+
+    function handleSave() {
+        var newName = elements.nameInput.value.trim();
         if (!newName) return;
 
         elements.nameSave.disabled = true;
         elements.nameSave.textContent = '...';
         elements.nameStatus.className = 'profil-name-status';
 
-        try {
-            await window.updateFirebaseDisplayName(newName);
-            elements.nameStatus.textContent = 'Nom mis a jour !';
-            elements.nameStatus.className = 'profil-name-status success';
+        window.updateFirebaseDisplayName(newName).then(function () {
             if (profile) profile.displayName = newName;
             elements.displayName.textContent = newName;
+            return savePendingChanges();
+        }).then(function () {
+            elements.nameStatus.textContent = 'Profil mis à jour !';
+            elements.nameStatus.className = 'profil-name-status success';
+            pending.avatar = null;
+            pending.banner = null;
             setTimeout(function () {
                 elements.editName.style.display = 'none';
+                elements.avatarActions.style.display = 'none';
+                if (elements.editFooter) elements.editFooter.style.display = 'none';
                 elements.editToggle.style.display = 'inline-block';
             }, 1200);
-        } catch (err) {
+        }).catch(function (err) {
             elements.nameStatus.textContent = 'Erreur : ' + (err.message || 'echec de la mise a jour');
             elements.nameStatus.className = 'profil-name-status error';
-        } finally {
+        }).finally(function () {
             elements.nameSave.disabled = false;
             elements.nameSave.textContent = 'Enregistrer';
-        }
+        });
+    }
+
+    elements.nameForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        handleSave();
     });
+
+    elements.nameSave.addEventListener('click', handleSave);
 
     // Logout
     elements.logout.addEventListener('click', async function () {
@@ -328,91 +516,37 @@
     });
 
     // Avatar URL
-    elements.avatarSetUrl.addEventListener('click', async function () {
-        const url = elements.avatarUrlInput.value.trim();
+    elements.avatarSetUrl.addEventListener('click', function () {
+        var url = elements.avatarUrlInput.value.trim();
         if (!url) return;
-        if (!currentUser) { alert('Connecte-toi d\'abord.'); return; }
-
         elements.avatarImg.src = url;
         elements.avatarImg.style.display = 'block';
         elements.avatarFallback.style.display = 'none';
-
-        try {
-            const { doc, setDoc, serverTimestamp } = window.Firestore;
-            const avatarData = {
-                avatar: {
-                    type: 'custom',
-                    url: url,
-                    lastUpdated: new Date().toISOString(),
-                },
-                updatedAt: serverTimestamp(),
-            };
-            await setDoc(doc(window.firebaseDb, 'users-preferences', currentUser.uid), avatarData, { merge: true });
-            try { await setDoc(doc(window.firebaseDb, 'user-preferences', currentUser.uid), avatarData, { merge: true }); } catch (e) { /* secondary collection */ }
-            if (profile) profile.photoURL = url;
-            elements.avatarUrlInput.value = '';
-            showToast('Avatar mis à jour avec succès !', 'success');
-            console.log('Avatar URL saved:', url);
-        } catch (err) {
-            showToast('Erreur: ' + (err.message || err), 'error');
-            console.error('Error saving avatar URL:', err);
-        }
+        pending.avatar = url;
+        elements.avatarUrlInput.value = '';
     });
 
     elements.avatarUrlInput.addEventListener('keydown', function (e) {
         if (e.key === 'Enter') elements.avatarSetUrl.click();
     });
 
-    elements.avatarReset.addEventListener('click', async function () {
-        if (!currentUser) return;
-        const ssoUrl = currentUser.photoURL;
+    elements.avatarReset.addEventListener('click', function () {
+        var ssoUrl = currentUser ? currentUser.photoURL : null;
         if (ssoUrl) {
             elements.avatarImg.src = ssoUrl;
             elements.avatarImg.style.display = 'block';
             elements.avatarFallback.style.display = 'none';
+        } else {
+            elements.avatarImg.style.display = 'none';
+            elements.avatarFallback.style.display = 'block';
         }
-        try {
-            const { doc, setDoc, serverTimestamp } = window.Firestore;
-            const resetAvatarData = {
-                avatar: {
-                    type: 'sso',
-                    url: ssoUrl || '',
-                    lastUpdated: new Date().toISOString(),
-                },
-                updatedAt: serverTimestamp(),
-            };
-            await setDoc(doc(window.firebaseDb, 'users-preferences', currentUser.uid), resetAvatarData, { merge: true });
-            try { await setDoc(doc(window.firebaseDb, 'user-preferences', currentUser.uid), resetAvatarData, { merge: true }); } catch (e) { /* secondary collection */ }
-            showToast('Avatar réinitialisé avec succès !', 'success');
-        } catch (e) {
-            showToast('Erreur lors de la réinitialisation', 'error');
-            console.error('Error saving avatar reset:', e);
-        }
-        if (profile) profile.photoURL = ssoUrl;
+        pending.avatar = 'sso';
     });
 
-    elements.avatarDelete.addEventListener('click', async function () {
+    elements.avatarDelete.addEventListener('click', function () {
         elements.avatarImg.style.display = 'none';
         elements.avatarFallback.style.display = 'block';
-        if (!currentUser) return;
-        try {
-            const { doc, setDoc, serverTimestamp } = window.Firestore;
-            const deleteAvatarData = {
-                avatar: {
-                    type: 'default',
-                    url: '',
-                    lastUpdated: new Date().toISOString(),
-                },
-                updatedAt: serverTimestamp(),
-            };
-            await setDoc(doc(window.firebaseDb, 'users-preferences', currentUser.uid), deleteAvatarData, { merge: true });
-            try { await setDoc(doc(window.firebaseDb, 'user-preferences', currentUser.uid), deleteAvatarData, { merge: true }); } catch (e) { /* secondary collection */ }
-            showToast('Avatar supprimé avec succès !', 'success');
-        } catch (e) {
-            showToast('Erreur lors de la suppression', 'error');
-            console.error('Error saving avatar delete:', e);
-        }
-        if (profile) profile.photoURL = null;
+        pending.avatar = 'default';
     });
 
     window.__dropdownHandleAuthToggle = async function () {

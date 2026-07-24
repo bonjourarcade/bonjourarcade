@@ -26,6 +26,7 @@
           { type: 'link', href: '/all', icon: '🕹️', label: 'Tous les jeux' },
           { type: 'link', href: '/upcoming', icon: '🔮', label: 'Bientôt en vedette' },
         ]},
+        { type: 'link', href: '/ratings', icon: '⭐', label: 'Ratings' },
         { type: 'link', href: '/screensaver', icon: '🌠', label: 'Écran de veille' },
         { type: 'link', href: 'https://ko-fi.com/bonjourarcade', icon: '❤️', label: 'Supporter BonjourArcade', highlight: true, target: '_blank' },
         { type: 'divider' },
@@ -278,6 +279,21 @@
     let lastAdminCheck = 0;
     let lastAdminResult = false;
 
+    function updateExternalBadge(show, count) {
+      var badge = document.getElementById('admin-notif-badge');
+      var logo = document.querySelector('.header-logo');
+      var countEl = document.getElementById('admin-notif-count');
+      if (!badge || !logo) return;
+      if (show && count > 0) {
+        logo.style.display = 'none';
+        badge.style.display = 'inline-flex';
+        if (countEl) countEl.textContent = count;
+      } else {
+        logo.style.display = '';
+        badge.style.display = 'none';
+      }
+    }
+
     async function checkAdminAndPending() {
       if (!window.firebaseAuth || !window.checkFirebaseAdminAccess) return;
       const now = Date.now();
@@ -294,11 +310,13 @@
               const count = await window.getPendingScoresCount();
               adminReviewBadge.textContent = count > 0 ? count : '';
               adminReviewBadge.style.display = count > 0 ? 'inline' : 'none';
+              updateExternalBadge(isAdmin, count);
             }
-          } catch (e) { adminReviewBadge.style.display = 'none'; }
+          } catch (e) { adminReviewBadge.style.display = 'none'; updateExternalBadge(false); }
         } else {
           if (adminReviewLink) adminReviewLink.style.display = 'none';
           if (adminReviewSection) adminReviewSection.style.display = 'none';
+          updateExternalBadge(false);
         }
       } catch (e) {}
     }

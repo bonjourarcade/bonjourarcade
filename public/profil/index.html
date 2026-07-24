@@ -13,23 +13,19 @@
 </head>
 
 <body>
-    <header class="scores-header">
-        <div class="scores-header-inner header-flex">
-            <a class="scores-logo" href="/" aria-label="Retour a l'accueil BonjourArcade">
-                <img src="/assets/images/bonjourarcade-logo.png" alt="BonjourArcade" class="header-logo">
+    <header class="profil-header">
+        <div class="profil-header-inner">
+            <a class="profil-header-logo" href="/" aria-label="Retour a l'accueil BonjourArcade">
+                <img src="/assets/images/bonjourarcade-logo.png" alt="BonjourArcade">
             </a>
-            <nav class="scores-nav" aria-label="Navigation principale">
-                <a href="/">Accueil</a>
-                <a href="/all/">Tous les jeux</a>
-                <a href="/scores">Scores</a>
-            </nav>
-            <div class="scores-header-actions">
-                <div id="profil-auth-status" class="scores-auth-status" aria-live="polite">
-                    <span id="profil-auth-dot" class="scores-auth-dot" aria-hidden="true"></span>
+
+            <div class="profil-header-actions">
+                <div id="profil-auth-status" class="profil-auth-status" aria-live="polite">
+                    <span id="profil-auth-dot" class="profil-auth-dot" aria-hidden="true"></span>
                     <span id="profil-auth-text">Non connecte</span>
                 </div>
-                <button id="profil-auth-button" class="scores-auth-button" type="button">Connexion</button>
-                <div class="theme-toggle-wrapper scores-menu-wrapper" style="position: relative;" id="dropdown-root" data-preset="profil"></div>
+                <button id="profil-auth-button" class="profil-auth-button" type="button">Connexion</button>
+                <div class="theme-toggle-wrapper" style="position: relative;" id="dropdown-root" data-preset="profil"></div>
             </div>
         </div>
     </header>
@@ -39,44 +35,90 @@
         <div id="profil-error" class="profil-state error" style="display:none;"></div>
         <div id="profil-content" style="display:none;">
             <div class="profil-card">
-                <div class="profil-header">
+                <div class="profil-cover"></div>
+                <div class="profil-card-body">
                     <div class="profil-avatar-wrap">
                         <div class="profil-avatar">
                             <img id="profil-avatar-img" src="" alt="Avatar" style="display:none;">
                             <span id="profil-avatar-fallback" class="profil-avatar-fallback">👤</span>
-                        </div>
-                        <div id="profil-avatar-actions" class="profil-avatar-actions" style="display:none;">
-                            <input id="profil-avatar-url" type="text" placeholder="URL de l'image (https://...)" style="flex:1;min-width:160px;padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:0.8rem;">
-                            <button id="profil-avatar-set-url" class="profil-avatar-btn" type="button" title="Utiliser cette URL" style="border-radius:6px;width:auto;padding:0 12px;">
-                                <span>✅</span>
-                            </button>
-                            <button id="profil-avatar-reset" class="profil-avatar-btn" type="button" title="Revenir a l'avatar SSO">
-                                <span>↩️</span>
-                            </button>
-                            <button id="profil-avatar-delete" class="profil-avatar-btn" type="button" title="Supprimer l'avatar">
-                                <span>🗑️</span>
-                            </button>
+                            <div class="profil-avatar-edit-hint">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                            </div>
                         </div>
                     </div>
                     <div class="profil-info">
                         <h1 id="profil-display-name" class="profil-name"></h1>
                         <p id="profil-member-since" class="profil-meta"></p>
+                        <div class="profil-actions-row">
+                            <button id="profil-edit-toggle" class="profil-edit-toggle" type="button">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                                Modifier
+                            </button>
+                            <button id="profil-logout" class="profil-logout" type="button" style="display:none;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                                Déconnexion
+                            </button>
+                        </div>
                         <div id="profil-edit-name" class="profil-edit-name" style="display:none;">
                             <form id="profil-name-form">
                                 <input id="profil-name-input" class="profil-name-input" type="text" maxlength="40" autocomplete="nickname">
-                                <button id="profil-name-save" class="profil-name-save" type="submit">Enregistrer</button>
-                                <button id="profil-name-cancel" class="profil-name-cancel" type="button">Annuler</button>
+                                <button type="submit" hidden></button>
                             </form>
                             <p id="profil-name-status" class="profil-name-status" aria-live="polite"></p>
                         </div>
-                        <button id="profil-edit-toggle" class="profil-edit-toggle" type="button">Modifier le profil</button>
-                        <button id="profil-logout" class="profil-logout" type="button" style="display:none;">Deconnexion</button>
+                    </div>
+                </div>
+                <div id="profil-avatar-actions" class="profil-avatar-actions" style="display:none;">
+                    <input id="profil-avatar-url" type="text" placeholder="URL de l'image (https://...)" class="profil-avatar-url-input">
+                    <div class="profil-avatar-actions-btns">
+                        <button id="profil-avatar-set-url" class="profil-avatar-btn" type="button" title="Utiliser cette URL">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        </button>
+                        <button id="profil-avatar-reset" class="profil-avatar-btn" type="button" title="Revenir a l'avatar SSO">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+                        </button>
+                        <button id="profil-avatar-delete" class="profil-avatar-btn profil-avatar-btn--danger" type="button" title="Supprimer l'avatar">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                        </button>
+                    </div>
+                    <div class="profil-banner-row">
+                        <label class="profil-banner-label">
+                            <span class="profil-banner-label-text">Bannière</span>
+                            <input type="color" id="profil-banner-picker" class="profil-banner-picker" value="#0b7a63">
+                        </label>
+                        <button id="profil-banner-reset" class="profil-avatar-btn" type="button" title="Réinitialiser la bannière">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+                        </button>
+                    </div>
+                    <div id="profil-edit-footer" class="profil-edit-footer" style="display:none;">
+                        <button id="profil-name-save" class="profil-name-save" type="button">Enregistrer</button>
+                        <button id="profil-name-cancel" class="profil-name-cancel" type="button">Annuler</button>
                     </div>
                 </div>
             </div>
 
+            <div class="profil-stats" id="profil-stats">
+                <div class="profil-stat-card">
+                    <span class="profil-stat-icon">🎮</span>
+                    <span class="profil-stat-value" id="profil-stat-games">—</span>
+                    <span class="profil-stat-label">Jeux joués</span>
+                </div>
+                <div class="profil-stat-card">
+                    <span class="profil-stat-icon">🏆</span>
+                    <span class="profil-stat-value" id="profil-stat-scores">—</span>
+                    <span class="profil-stat-label">Scores</span>
+                </div>
+                <div class="profil-stat-card">
+                    <span class="profil-stat-icon">👑</span>
+                    <span class="profil-stat-value" id="profil-stat-top">—</span>
+                    <span class="profil-stat-label">Top 1</span>
+                </div>
+            </div>
+
             <div class="profil-scores-card">
-                <h2 class="profil-section-title">Meilleurs scores</h2>
+                <div class="profil-scores-card-header">
+                    <h2 class="profil-section-title">Meilleurs scores</h2>
+                </div>
                 <div id="profil-scores-loading" class="section-state loading">Chargement des scores...</div>
                 <div id="profil-scores-empty" class="section-state empty" style="display:none;">Aucun score pour le moment</div>
                 <div class="profil-scores-table-wrap">

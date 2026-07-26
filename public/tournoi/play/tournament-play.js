@@ -199,6 +199,9 @@ function listenToTournament(initialData) {
     }
     currentParticipants = participants;
     renderParticipantsInfo(participants, me);
+    if (currentRoundScores.length > 0) {
+      renderScoreboard(currentRoundScores, currentRoundIndex, currentTotalRounds);
+    }
     if (newUids.length > 0) {
       Promise.all(newUids.map(uid =>
         TournoiUtils.callFunction('getPublicProfile', {userId: uid}).catch(() => null)

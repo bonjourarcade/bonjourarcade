@@ -1,4 +1,4 @@
-const { collection, query, where, orderBy, onSnapshot, doc, getDoc, getDocs, serverTimestamp, limit: fsLimit } = window.Firestore;
+const { collection, query, where, onSnapshot, doc, getDoc, getDocs, serverTimestamp, limit: fsLimit } = window.Firestore;
 
 let currentUser = null;
 let tournamentId = null;
@@ -407,14 +407,14 @@ function setupRoundScoresListener(t) {
 
   const db = window.firebaseDb;
   const q = query(collection(db, 'tournaments', tournamentId, 'roundScores'),
-    where('roundIndex', '==', round),
-    orderBy('score', 'desc'));
+    where('roundIndex', '==', round));
   unsubscribeRoundScores = onSnapshot(q, (snap) => {
     const scores = [];
     snap.forEach(d => scores.push({ id: d.id, ...d.data() }));
+    scores.sort((a, b) => b.score - a.score);
     currentRoundScores = scores;
     renderScoreboard(scores, round, currentTotalRounds);
-  });
+  }, (err) => console.error('roundScores snapshot error:', err));
 }
 
 function renderScoreboard(roundScores, currentRoundIndex, totalRounds) {

@@ -437,6 +437,13 @@ function renderScoreboard(roundScores, currentRoundIndex, totalRounds) {
     if (!prev || rs.score > prev.score || (rs.score === prev.score && rs.verified && !prev.verified)) {
       bestEntry[rs.userId] = { score: rs.score, gameScoreId: rs.gameScoreId, verified: rs.verified };
     }
+    if (!participants[rs.userId]) {
+      participants[rs.userId] = {
+        displayName: rs.displayName || 'Anonyme',
+        photoURL: rs.photoURL || '',
+        eliminated: false,
+      };
+    }
   });
 
   const ranked = Object.entries(participants)

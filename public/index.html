@@ -44,58 +44,6 @@
       padding: 20px 0;
     }
 
-    #tournament-banner {
-      display: none;
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-      border: 1px solid #ffd700;
-      border-radius: 8px;
-      margin: 12px auto;
-      max-width: 900px;
-      overflow: hidden;
-      transition: all 0.3s ease;
-    }
-    #tournament-banner:hover {
-      border-color: #fff;
-      box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
-    }
-    #tournament-banner a {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 10px 16px;
-      text-decoration: none;
-      color: #eee;
-      font-size: 13px;
-    }
-    .tb-left { display: flex; align-items: center; gap: 8px; }
-    .tb-icon { font-size: 24px; }
-    .tb-text { display: flex; flex-direction: column; gap: 1px; }
-    .tb-title { color: #ffd700; font-weight: 700; font-size: 13px; }
-    .tb-meta { display: flex; align-items: center; gap: 6px; color: #888; font-size: 11px; }
-    .tb-sep { color: #555; }
-    .tb-code { color: #4a9eff; }
-    .tb-round { color: #aaa; }
-    .tb-players { color: #aaa; }
-    .tb-center { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; }
-    .tb-game { color: #4a9eff; font-size: 12px; }
-    .tb-leader {
-      display: flex; align-items: center; gap: 4px;
-      color: #ccc; font-size: 12px; min-width: 0; overflow: hidden;
-    }
-    .tb-leader img { width: 18px; height: 18px; border-radius: 50%; }
-    .tb-leader .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .tb-leader .score { color: #ffd700; font-weight: 700; margin-left: 2px; }
-    .tb-right { display: flex; align-items: center; }
-    .tb-timer {
-      font-family: 'Courier New', monospace;
-      font-size: 16px; font-weight: 700;
-      color: #4caf50;
-      min-width: 50px; text-align: center;
-    }
-    .tb-timer.timer-warning { color: #f44336; animation: pulse-warning 0.5s ease-in-out infinite alternate; }
-    .tb-flash { animation: tb-flash-gold 0.6s ease-out; }
-    @keyframes pulse-warning { from { opacity: 1; } to { opacity: 0.5; } }
-    @keyframes tb-flash-gold { 0% { box-shadow: 0 0 0 rgba(255,215,0,0); } 50% { box-shadow: 0 0 20px rgba(255,215,0,0.5); } 100% { box-shadow: 0 0 0 rgba(255,215,0,0); } }
     #user-indicator { display: none; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--text-color); white-space: nowrap; cursor: pointer; }
     #user-indicator img { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; }
     #user-indicator .bonjour-text { opacity: 0.8; }
@@ -112,11 +60,9 @@
     .submenu.open { display: flex; }
     .submenu .dropdown-option { font-size: 0.85rem; padding: 8px 16px; }
 
+    #tournament-list-hp a { transition: border-color 0.2s; }
     @media (max-width: 600px) {
-      #tournament-banner a { font-size: 11px; gap: 8px; padding: 8px 12px; }
-      .tb-meta { display: none; }
-      .tb-center { display: none; }
-      .tb-timer { font-size: 14px; min-width: 40px; }
+      #tournament-list-hp a { font-size: 12px; }
     }
   </style>
   <script src="assets/js/analytics.js"></script>
@@ -149,29 +95,12 @@
       </div>
     </header>
 
-    <div id="tournament-banner">
-      <a id="tb-link" href="#">
-        <div class="tb-left">
-          <span class="tb-icon">🏆</span>
-          <div class="tb-text">
-            <span class="tb-title" id="tb-title">Tournoi en cours</span>
-            <div class="tb-meta">
-              <span class="tb-code" id="tb-code"></span>
-              <span class="tb-sep">·</span>
-              <span class="tb-round" id="tb-round"></span>
-              <span class="tb-sep">·</span>
-              <span class="tb-players" id="tb-players"></span>
-            </div>
-          </div>
-        </div>
-        <div class="tb-center">
-          <span class="tb-game" id="tb-game"></span>
-          <span class="tb-leader" id="tb-leader"></span>
-        </div>
-        <div class="tb-right">
-          <span class="tb-timer" id="tb-timer">--:--</span>
-        </div>
-      </a>
+    <div id="tournament-section" style="display:none;margin:12px auto;max-width:900px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;padding:0 4px;">
+        <span style="color:#ffd700;font-weight:700;font-size:0.9rem;">🏆 Tournois publics</span>
+        <a href="/tournoi/" style="color:#4a9eff;font-size:0.8rem;text-decoration:none;">Voir tout →</a>
+      </div>
+      <div id="tournament-list-hp"></div>
     </div>
 
     <main class="main-content">
@@ -394,29 +323,16 @@
   </script>
 
   <script>
-    // Tournament banner logic
+    // Public tournaments list
     document.addEventListener('DOMContentLoaded', () => {
-      function initTournamentBanner() {
+      function initTournamentList() {
         if (!window.TournoiUtils || !window.onFirebaseAuthStateChanged) {
-          setTimeout(initTournamentBanner, 200);
+          setTimeout(initTournamentList, 200);
           return;
         }
 
-        const banner = document.getElementById('tournament-banner');
-        const link = document.getElementById('tb-link');
-        const titleEl = document.getElementById('tb-title');
-        const codeEl = document.getElementById('tb-code');
-        const roundEl = document.getElementById('tb-round');
-        const playersEl = document.getElementById('tb-players');
-        const gameEl = document.getElementById('tb-game');
-        const leaderEl = document.getElementById('tb-leader');
-        const timerEl = document.getElementById('tb-timer');
-
-        let timerInterval = null;
-        let refreshInterval = null;
-        let gamelist = [];
-        let currentTournament = null;
-        let currentUser = null;
+        const section = document.getElementById('tournament-section');
+        const container = document.getElementById('tournament-list-hp');
 
         async function loadGamelist() {
           try {
@@ -424,121 +340,51 @@
             const url = isLocal ? '/gamelist.json' : 'https://storage.googleapis.com/bonjourarcade/gamelist.json';
             const r = await fetch(url + '?v=' + Date.now());
             const data = await r.json();
-            gamelist = data.games || [];
-          } catch (e) {
-            console.error('Failed to load gamelist:', e);
-          }
+            return data.games || [];
+          } catch (e) { return []; }
         }
 
-        function getGameName(gameId) {
+        function getGameName(gameId, gamelist) {
           const g = gamelist.find(x => x.id === gameId);
           return g ? g.title : gameId;
         }
 
-        async function refreshTournament() {
+        let gamelist = [];
+        let refreshInterval = null;
+
+        async function refreshTournaments() {
           try {
-            const result = await TournoiUtils.callFunction('getActiveTournament', {});
-            if (result && result.success && result.tournament) {
-              currentTournament = result;
-              updateBanner(result);
-            } else {
-              currentTournament = null;
-              banner.style.display = 'none';
-              clearTimer();
+            const result = await TournoiUtils.callFunction('getPublicTournaments', {});
+            const tournaments = (result && result.success && result.tournaments) ? result.tournaments : [];
+            if (tournaments.length === 0) {
+              section.style.display = 'none';
+              return;
             }
+            section.style.display = 'block';
+            container.innerHTML = tournaments.map(t => {
+              const roundInfo = t.status === 'active'
+                ? `· Ronde ${(t.currentRoundIndex || 0) + 1}/${t.games?.length || '?'}`
+                : '· Inscriptions ouvertes';
+              const tagColor = t.status === 'active' ? '#28a745' : '#ffc107';
+              const tagLabel = t.status === 'active' ? 'En cours' : 'Inscription';
+              return `<a href="/tournoi/play/?t=${t.id}" style="display:flex;align-items:center;gap:10px;padding:8px 14px;background:linear-gradient(135deg,#1a1a2e 0%,#16213e 100%);border:1px solid #333;border-radius:8px;text-decoration:none;color:#eee;font-size:13px;margin-bottom:4px;transition:border-color 0.2s;" onmouseover="this.style.borderColor='#ffd700'" onmouseout="this.style.borderColor='#333'">
+                <span style="font-size:18px;">🏆</span>
+                <span style="flex:1;font-weight:600;color:#ffd700;">${t.name}</span>
+                <span style="font-size:11px;padding:2px 6px;border-radius:4px;background:${tagColor};color:${tagColor === '#ffc107' ? '#1a1a2e' : 'white'};font-weight:600;white-space:nowrap;">${tagLabel}</span>
+                <span style="color:#888;font-size:11px;white-space:nowrap;">${roundInfo}</span>
+              </a>`;
+            }).join('');
           } catch (e) {
-            currentTournament = null;
-            banner.style.display = 'none';
-            clearTimer();
+            section.style.display = 'none';
           }
         }
 
-        function updateBanner(data) {
-          const t = data.tournament;
-          const isParticipant = currentUser && data.participants && data.participants.some(p => p.uid === currentUser.uid);
-          link.href = isParticipant ? '/tournoi/play/?t=' + t.id : '/tournoi/join/?t=' + t.id;
-
-          titleEl.textContent = t.status === 'registration' ? 'Inscriptions ouvertes' :
-            t.status === 'finished' ? 'Tournoi terminé' : 'Tournoi en cours';
-
-          codeEl.textContent = 'Code : ' + t.shareCode;
-          roundEl.textContent =
-            t.status === 'registration' ? 'En attente de joueurs' :
-            t.status === 'finished' ? 'Terminé' :
-            'Ronde ' + (t.currentRoundIndex + 1) + '/' + (t.games ? t.games.length : '?');
-          playersEl.textContent = (data.participants ? data.participants.length : 0) + ' joueur' + ((data.participants && data.participants.length > 1) ? 's' : '');
-
-          if (t.status === 'active' && t.games && t.games[t.currentRoundIndex]) {
-            gameEl.textContent = '🎮 ' + getGameName(t.games[t.currentRoundIndex]);
-            gameEl.style.display = '';
-          } else {
-            gameEl.textContent = '';
-            gameEl.style.display = 'none';
-          }
-
-          if (t.status === 'active') {
-            if (data.roundScores && data.roundScores.length > 0) {
-              const top = data.roundScores[0];
-              leaderEl.innerHTML = '👑 <img src="' + (top.photoURL || '../assets/default-avatar.png') + '" class="avatar"> <span class="name">' + top.displayName + '</span><span class="score">' + (top.score || 0).toLocaleString() + '</span>';
-              leaderEl.style.display = '';
-            } else {
-              leaderEl.style.display = 'none';
-            }
-            startTimer(t);
-          } else {
-            leaderEl.style.display = 'none';
-            clearTimer();
-            timerEl.textContent = t.status === 'finished' ? 'Terminé' : '--:--';
-          }
-
-          banner.style.display = 'flex';
-          banner.classList.remove('tb-flash');
-          void banner.offsetWidth;
-          banner.classList.add('tb-flash');
-        }
-
-        function getTimestampSeconds(ts) {
-          if (!ts) return 0;
-          if (typeof ts._seconds === 'number') return ts._seconds;
-          if (ts.toMillis) return ts.toMillis() / 1000;
-          const d = new Date(ts).getTime();
-          return isNaN(d) ? 0 : d / 1000;
-        }
-
-        function getRemaining(startTime, durationSec) {
-          const start = getTimestampSeconds(startTime);
-          if (!start) return 0;
-          const elapsed = Math.floor(Date.now() / 1000 - start);
-          return Math.max(0, durationSec - elapsed);
-        }
-
-        function startTimer(t) {
-          clearTimer();
-          const update = () => {
-            const remaining = getRemaining(t.roundStartTime, t.roundDurationSec);
-            timerEl.textContent = TournoiUtils.formatTimer(remaining);
-            timerEl.classList.toggle('timer-warning', remaining <= 60);
-          };
-          update();
-          timerInterval = setInterval(update, 1000);
-        }
-
-        function clearTimer() {
-          if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
-        }
-
-        loadGamelist();
-        if (window.onFirebaseAuthStateChanged) {
-          window.onFirebaseAuthStateChanged((user) => {
-            currentUser = user;
-            if (currentTournament) updateBanner(currentTournament);
-          });
-        }
-        refreshTournament();
+        loadGamelist().then(list => { gamelist = list; });
+        refreshTournaments();
         if (refreshInterval) clearInterval(refreshInterval);
-        refreshInterval = setInterval(refreshTournament, 30000);
+        refreshInterval = setInterval(refreshTournaments, 30000);
       }
-      initTournamentBanner();
+      initTournamentList();
     });
   </script>
 

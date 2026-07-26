@@ -42,23 +42,10 @@ function setupAuth(tournamentId) {
     currentUser = user;
     if (user) {
       hide('login-state');
-      if (shareCode) {
+      if (tournamentId) {
+        window.location.href = `/tournoi/play/?t=${tournamentId}`;
+      } else if (shareCode) {
         await findAndShowTournament();
-      } else if (tournamentId) {
-        try {
-          const tDoc = await getDoc(doc(window.firebaseDb, 'tournaments', tournamentId));
-          if (tDoc.exists()) {
-            shareCode = tDoc.data().shareCode;
-            if (shareCode) {
-              shareCode = shareCode.trim().toUpperCase();
-              await findAndShowTournament();
-              return;
-            }
-          }
-        } catch (e) {
-          console.warn('Could not resolve tournament:', e.message);
-        }
-        showError('Tournoi introuvable. Vérifie le lien.');
       } else {
         show('code-input-state');
       }

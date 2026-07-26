@@ -235,6 +235,20 @@
             <span id="create-toggle-icon" style="color:#888;font-size:1.2rem;">▼</span>
           </div>
           <div id="create-form">
+            <label>Nom du tournoi (optionnel)</label>
+            <input type="text" id="tournament-name" placeholder="Ex: Tournoi d'été 2026" maxlength="100">
+
+            <label style="display:flex;align-items:center;gap:10px;margin:12px 0;cursor:pointer;">
+              <input type="checkbox" id="is-public" style="width:auto;margin:0;">
+              <span><strong>Tournoi public</strong> — visible sur la page d'accueil et joignable sans code</span>
+            </label>
+
+            <div id="private-code-section">
+              <label>Code d'invitation secret (optionnel, 3-20 caractères)</label>
+              <input type="text" id="share-code" placeholder="Laisser vide pour génération automatique" maxlength="20">
+              <div style="font-size:0.85rem;color:var(--muted);margin:-12px 0 16px;">Nécessaire pour rejoindre ce tournoi privé</div>
+            </div>
+
             <label>IDs des jeux (un par ligne)</label>
             <textarea id="game-ids" placeholder="1943&#10;sf2&#10;pacman"></textarea>
             <div class="flex">
@@ -250,9 +264,21 @@
                 <option value="jours">jours</option>
               </select>
             </div>
-            <label>Code de partage (optionnel, 4-20 caractères)</label>
-            <input type="text" id="share-code" placeholder="Laisser vide pour génération automatique" maxlength="20">
-            <button id="create-tournament-btn" class="btn-primary" style="width:100%;">Créer le tournoi</button>
+
+            <details style="margin-top:8px;">
+              <summary style="cursor:pointer;color:var(--muted);font-size:0.85rem;">⚙️ Options avancées</summary>
+              <div style="margin-top:8px;">
+                <label>Détruire automatiquement après</label>
+                <div class="flex">
+                  <input type="number" id="auto-destroy-days" value="" min="1" style="flex:1;" placeholder="Laisser vide = jamais">
+                  <span style="color:var(--muted);white-space:nowrap;">jours après la fin</span>
+                </div>
+                <div class="flex" style="margin-top:4px;">
+                  <button id="create-tournament-btn" class="btn-primary" style="flex:1;">Créer le tournoi</button>
+                </div>
+              </div>
+            </details>
+
             <div id="create-error" class="hidden" style="color:#dc3545;margin-top:8px;"></div>
           </div>
         </div>
@@ -266,9 +292,14 @@
         <div id="dashboard-view" class="hidden">
           <div class="flex-between">
             <div>
-              <strong style="color:#ffd700;">Code:</strong> <span id="display-sharecode" style="font-family:monospace;font-size:1.2rem;"></span>
-              <span style="color:#aaa;margin-left:8px;">|</span>
-              <span id="display-status" style="color:#aaa;"></span>
+              <strong id="display-name" style="color:#ffd700;font-size:1.2rem;"></strong>
+              <span id="display-type-badge" style="font-size:0.75rem;padding:2px 6px;border-radius:4px;margin-left:6px;"></span>
+              <div style="margin-top:4px;">
+                <span style="color:#aaa;font-size:0.9rem;">Code:</span>
+                <span id="display-sharecode" style="font-family:monospace;font-size:1rem;color:var(--text);"></span>
+                <span style="color:#aaa;margin-left:8px;">|</span>
+                <span id="display-status" style="color:#aaa;font-size:0.9rem;"></span>
+              </div>
             </div>
             <div class="flex">
               <span id="participant-count" style="color:#aaa;font-size:0.9rem;"></span>

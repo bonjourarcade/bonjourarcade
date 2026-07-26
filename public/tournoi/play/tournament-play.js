@@ -100,6 +100,7 @@ async function checkParticipation() {
     }
 
     const t = tournamentSnap.data();
+    $('tournament-title').textContent = t.name || `🎮 Tournoi`;
     $('play-sharecode').textContent = t.shareCode;
 
     if (t.status === 'finished') {

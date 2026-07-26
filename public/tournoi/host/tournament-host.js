@@ -74,6 +74,15 @@ function setupAuth() {
   });
 }
 
+document.getElementById('is-public').addEventListener('change', function () {
+  const section = document.getElementById('private-code-section');
+  section.style.opacity = this.checked ? '0.3' : '1';
+  const inputs = section.querySelectorAll('input');
+  if (this.checked) {
+    inputs.forEach(i => i.removeAttribute('required'));
+  }
+});
+
 let isCreating = false;
 $('create-tournament-btn').addEventListener('click', async () => {
   if (isCreating) return;
@@ -85,12 +94,16 @@ $('create-tournament-btn').addEventListener('click', async () => {
     if (gameIds.length === 0) { throw new Error('Entre au moins un ID de jeu.'); }
     const durUnits = { minutes: 60, heures: 3600, jours: 86400 };
     const roundDurationSec = parseFloat($('round-duration').value) * durUnits[$('round-duration-unit').value];
+    const name = $('tournament-name').value.trim() || undefined;
+    const isPublic = document.getElementById('is-public').checked;
     const shareCode = $('share-code').value.trim().toUpperCase() || undefined;
+    const autoDestroyInput = $('auto-destroy-days').value.trim();
+    const autoDestroyDays = autoDestroyInput ? parseInt(autoDestroyInput, 10) : null;
 
     const fn = window.httpsCallable
       ? window.httpsCallable(window.firebaseFunctions, 'createTournament')
       : (await import('https://www.gstatic.com/firebasejs/11.0.1/firebase-functions.js')).httpsCallable(window.firebaseFunctions, 'createTournament');
-    const result = (await fn({ gameIds, roundDurationSec, pauseDurationSec: 0, shareCode })).data;
+    const result = (await fn({ gameIds, roundDurationSec, pauseDurationSec: 0, name, isPublic, shareCode, autoDestroyDays })).data;
     tournamentId = result.tournamentId;
     window.history.replaceState({}, '', `?t=${tournamentId}`);
     hide('setup-view');
@@ -213,9 +226,21 @@ let currentUpcomingOrder = null;
 let currentGamesArray = null;
 function renderTournament(t, id) {
   tournamentData = t;
+  $('display-name').textContent = t.name || `Tournoi #${t.shareCode}`;
   $('display-sharecode').textContent = t.shareCode;
 
-  const shareUrl = `${window.location.origin}/tournoi/join/?c=${t.shareCode}`;
+  const badge = $('display-type-badge');
+  if (t.isPublic) {
+    badge.textContent = 'Public';
+    badge.style.background = '#28a745';
+    badge.style.color = 'white';
+  } else {
+    badge.textContent = 'Privé';
+    badge.style.background = '#ffc107';
+    badge.style.color = '#1a1a2e';
+  }
+
+  const shareUrl = `${window.location.origin}/tournoi/play/?t=${id}`;
   $('share-link-input').value = shareUrl;
 
   const statusLabels = { registration: 'Inscription', active: 'Actif', finished: 'Terminé' };

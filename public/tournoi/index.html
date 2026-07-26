@@ -6,37 +6,328 @@
     <title>Tournoi BonjourArcade</title>
     <link rel="icon" href="../favicon.ico" type="image/x-icon">
     <style>
-        :root { --bg: #0a0a0f; --text: #e0e0e0; --surface: #1a1a2e; --border: #2a2a4a; --muted: #aaa; --muted-strong: #666; }
-        body.theme-light { --bg: #f0f2f5; --text: #222; --surface: #fff; --border: #ddd; --muted: #666; --muted-strong: #999; }
-        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
-        .card { background: var(--surface); border-radius: 16px; padding: 40px; max-width: 480px; width: 90%; border: 1px solid var(--border); text-align: center; }
-        h1 { color: #ffd700; font-size: 1.6rem; margin: 0 0 8px; }
-        p { color: var(--muted); margin: 8px 0 24px; line-height: 1.5; }
-        .links { display: flex; flex-direction: column; gap: 12px; }
-        .links a { display: block; padding: 14px 24px; border-radius: 10px; text-decoration: none; font-weight: 600; transition: all 0.2s; }
-        .links a.primary { background: #ffd700; color: #1a1a2e; }
-        .links a.primary:hover { background: #ffe44d; }
-        .links a.secondary { background: #2a2a4a; color: #e0e0e0; }
-        .links a.secondary:hover { background: #3a3a5a; }
-        .small { font-size: 0.85rem; color: var(--muted-strong); margin-top: 24px; }
+        :root { --bg: #0a0a0f; --text: #e0e0e0; --surface: #1a1a2e; --border: #2a2a4a; --muted: #aaa; --muted-strong: #666; --btn-secondary-bg: #2a2a4a; --btn-secondary-text: #e0e0e0; }
+        body.theme-light { --bg: #f0f2f5; --text: #222; --surface: #fff; --border: #ddd; --muted: #666; --muted-strong: #999; --btn-secondary-bg: #e0e0e0; --btn-secondary-text: #333; }
+        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; margin: 0; display: flex; flex-direction: column; align-items: center; }
+        .container { max-width: 600px; width: 90%; margin: 20px auto; }
+        .card { background: var(--surface); border-radius: 16px; padding: 32px; border: 1px solid var(--border); margin-bottom: 20px; }
+        h1 { color: #ffd700; font-size: 1.5rem; margin: 0 0 4px; }
+        h2 { color: #ffd700; font-size: 1.1rem; margin: 0 0 12px; }
+        p { color: var(--muted); margin: 8px 0; line-height: 1.5; }
+        button { padding: 10px 20px; border: none; border-radius: 8px; font-size: 0.95rem; cursor: pointer; font-weight: 600; transition: all 0.2s; }
+        .btn-primary { background: #ffd700; color: #1a1a2e; }
+        .btn-primary:hover { background: #ffe44d; }
+        .btn-secondary { background: var(--btn-secondary-bg); color: var(--btn-secondary-text); }
+        .btn-secondary:hover { background: #3a3a5a; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-danger:hover { background: #e04848; }
+        .btn-sm { padding: 6px 14px; font-size: 0.85rem; }
+        .btn-google { background: white; color: #333; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 24px; width: 100%; }
+        .btn-google:hover { background: #f0f0f0; }
+        .hidden { display: none !important; }
+        input, select { padding: 10px; border-radius: 8px; background: #12121f; border: 1px solid #333; color: var(--text); font-size: 0.95rem; box-sizing: border-box; }
+        body.theme-light input, body.theme-light select { background: #f8f9fa; border-color: #ddd; }
+        .flex { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .flex-between { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
         .theme-btn { position: fixed; top: 16px; right: 16px; background: none; border: 1px solid var(--border); font-size: 1.2rem; cursor: pointer; padding: 6px 10px; border-radius: 8px; color: var(--text); z-index: 10; }
         .theme-btn:hover { background: rgba(255,255,255,0.06); }
         .home-btn { position: fixed; top: 16px; left: 16px; background: none; border: 1px solid var(--border); font-size: 1.2rem; cursor: pointer; padding: 6px 10px; border-radius: 8px; color: var(--text); z-index: 10; text-decoration: none; display: flex; align-items: center; gap: 6px; }
         .home-btn:hover { background: rgba(255,255,255,0.06); }
+        .tournament-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; border-radius: 10px; background: var(--surface); border: 1px solid var(--border); margin-bottom: 8px; transition: border-color 0.2s; }
+        .tournament-item:hover { border-color: #ffd700; }
+        .tournament-item .info { text-align: left; flex: 1; }
+        .tournament-item .info .name { font-weight: 700; color: #ffd700; font-size: 1rem; }
+        .tournament-item .info .meta { font-size: 0.85rem; color: var(--muted); margin-top: 2px; }
+        .tournament-item .actions { display: flex; gap: 8px; }
+        .tournament-item .actions a, .tournament-item .actions button { padding: 6px 14px; border-radius: 6px; font-size: 0.85rem; text-decoration: none; font-weight: 600; border: none; cursor: pointer; }
+        .tournament-item .actions .join-link { background: #ffd700; color: #1a1a2e; }
+        .tournament-item .actions .join-link:hover { background: #ffe44d; }
+        .tournament-item .actions .play-link { background: #4a9eff; color: white; }
+        .tournament-item .actions .play-link:hover { background: #5aafff; }
+        .tournament-item .actions .host-link { background: var(--btn-secondary-bg); color: var(--btn-secondary-text); }
+        .tournament-item .actions .host-link:hover { background: #3a3a5a; }
+        .tournament-item .actions .destroy-btn { background: #dc3545; color: white; }
+        .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; white-space: nowrap; }
+        .tag-public { background: #28a745; color: white; }
+        .tag-private { background: #ffc107; color: #1a1a2e; }
+        .tag-registration { background: #ffc107; color: #1a1a2e; }
+        .tag-active { background: #28a745; color: white; }
+        .tag-finished { background: #6c757d; color: white; }
+        .code-input-area { display: flex; gap: 8px; margin-top: 8px; }
+        .code-input-area input { flex: 1; font-family: monospace; font-size: 1.1rem; text-align: center; text-transform: uppercase; letter-spacing: 4px; }
+        .section-divider { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.85); color: white; padding: 10px 20px; border-radius: 8px; z-index: 2000; font-size: 0.9rem; }
+        .empty-state { text-align: center; padding: 30px; color: var(--muted); }
+        .spinner { display: inline-block; width: 20px; height: 20px; border: 2px solid #ffd700; border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
     <a href="/" class="home-btn">🏠 Accueil</a>
     <button class="theme-btn" id="theme-btn">🌙</button>
-  <div class="card">
-        <h1>🎮 Tournois BonjourArcade</h1>
-        <p>Bienvenue sur la plateforme de tournois. Connecte-toi comme admin pour organiser ou rejoins un tournoi existant avec un code.</p>
-        <div class="links">
-            <a href="host/" class="primary">🎬 Organiser un tournoi (Admin)</a>
-            <a href="join/" class="secondary">🔗 Rejoindre avec un code</a>
+
+    <div class="container">
+        <div class="card" style="text-align:center;">
+            <h1>🎮 Tournois BonjourArcade</h1>
+            <p>Rejoins un tournoi public ou utilise un code d'invitation.</p>
+            <div class="links" style="display:flex;flex-direction:column;gap:10px;margin-top:16px;">
+                <a href="host/" class="btn-primary" style="display:block;text-decoration:none;text-align:center;">🎬 Organiser (Admin)</a>
+            </div>
         </div>
-        <div class="small">Le code de partage t'est fourni par l'organisateur du tournoi.</div>
+
+        <div id="login-prompt" class="card" style="text-align:center;">
+            <p>Connecte-toi pour voir les tournois et y participer.</p>
+            <button id="login-btn" class="btn-google">
+                <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59A14.5 14.5 0 0 1 9.5 24c0-1.59.28-3.14.76-4.59l-7.98-6.19A23.99 23.99 0 0 0 0 24c0 3.77.87 7.35 2.56 10.56l7.97-5.97z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 5.97C6.51 42.62 14.62 48 24 48z"/></svg>
+                Connexion avec Google
+            </button>
+            <div id="login-error" class="hidden" style="color:#dc3545;margin-top:8px;font-size:0.9rem;"></div>
+        </div>
+
+        <div id="main-content" class="hidden">
+            <div class="card">
+                <div class="flex-between">
+                    <h2>🌍 Tournois publics</h2>
+                    <span id="public-count" style="color:var(--muted);font-size:0.9rem;"></span>
+                </div>
+                <div id="public-tournaments">
+                    <div class="empty-state">Chargement...</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>🔑 Rejoindre avec un code</h2>
+                <p>Si tu as un code d'invitation, entre-le ici.</p>
+                <div class="code-input-area">
+                    <input type="text" id="invite-code" placeholder="Code" maxlength="20" style="text-transform:uppercase;">
+                    <button id="lookup-code-btn" class="btn-primary" style="white-space:nowrap;">Rejoindre</button>
+                </div>
+                <div id="invite-error" class="hidden" style="color:#dc3545;margin-top:8px;font-size:0.9rem;"></div>
+            </div>
+
+            <div id="admin-view" class="hidden">
+                <div class="card">
+                    <div class="flex-between">
+                        <h2>🔒 Tournois privés en cours</h2>
+                        <a href="host/" class="btn-secondary btn-sm" style="text-decoration:none;">🎬 Créer</a>
+                    </div>
+                    <div id="private-tournaments">
+                        <div class="empty-state">Aucun tournoi privé en cours.</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="flex-between">
+                        <h2>🏁 Tournois terminés</h2>
+                        <span id="finished-count" style="color:var(--muted);font-size:0.9rem;"></span>
+                    </div>
+                    <div id="finished-tournaments">
+                        <div class="empty-state">Aucun tournoi terminé.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+
+    <script type="module">
+        import '../assets/js/firebase-setup.js';
+        const { collection, query, where, getDocs, doc, getDoc } = window.Firestore;
+
+        let currentUser = null;
+        let currentGamelist = [];
+
+        async function fetchGamelist() {
+            try {
+                const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+                const url = isLocal ? '/gamelist.json' : 'https://storage.googleapis.com/bonjourarcade/gamelist.json';
+                const r = await fetch(url + '?v=' + Date.now());
+                const data = await r.json();
+                currentGamelist = data.games || [];
+            } catch (e) {}
+        }
+
+        function getGameName(id) {
+            const g = currentGamelist.find(x => x.id === id);
+            return g ? g.title : id;
+        }
+
+        function $(id) { return document.getElementById(id); }
+        function showToast(msg) {
+            const t = document.createElement('div');
+            t.className = 'toast';
+            t.textContent = msg;
+            document.body.appendChild(t);
+            setTimeout(() => t.remove(), 3000);
+        }
+
+        async function joinByCode(code) {
+            try {
+                const fn = window.httpsCallable
+                    ? window.httpsCallable(window.firebaseFunctions, 'joinTournament')
+                    : (await import('https://www.gstatic.com/firebasejs/11.0.1/firebase-functions.js')).httpsCallable(window.firebaseFunctions, 'joinTournament');
+                const result = (await fn({ tournamentId: code })).data;
+                if (result.alreadyJoined) {
+                    window.location.href = `/tournoi/play/?t=${code}`;
+                } else {
+                    showToast('Inscrit au tournoi !');
+                    setTimeout(() => window.location.href = `/tournoi/play/?t=${code}`, 1000);
+                }
+            } catch (e) {
+                showToast(e.message || 'Erreur');
+            }
+        }
+
+        async function destroyTournament(id) {
+            if (!confirm(`Détruire définitivement le tournoi ${id} ? Cette action est irréversible.`)) return;
+            try {
+                const fn = window.httpsCallable
+                    ? window.httpsCallable(window.firebaseFunctions, 'destroyTournament')
+                    : (await import('https://www.gstatic.com/firebasejs/11.0.1/firebase-functions.js')).httpsCallable(window.firebaseFunctions, 'destroyTournament');
+                await fn({ tournamentId: id });
+                showToast('Tournoi détruit');
+                renderFinished();
+            } catch (e) {
+                showToast('Erreur: ' + (e.message || e));
+            }
+        }
+
+        async function renderPublic() {
+            try {
+                const fn = window.httpsCallable
+                    ? window.httpsCallable(window.firebaseFunctions, 'getPublicTournaments')
+                    : (await import('https://www.gstatic.com/firebasejs/11.0.1/firebase-functions.js')).httpsCallable(window.firebaseFunctions, 'getPublicTournaments');
+                const result = (await fn({})).data;
+                const tournaments = result.tournaments || [];
+                const container = $('public-tournaments');
+                $('public-count').textContent = tournaments.length + ' actif' + (tournaments.length > 1 ? 's' : '');
+                if (tournaments.length === 0) {
+                    container.innerHTML = '<div class="empty-state">Aucun tournoi public en ce moment.</div>';
+                    return;
+                }
+                container.innerHTML = tournaments.map(t => {
+                    const roundInfo = t.status === 'active' ? `· Ronde ${(t.currentRoundIndex || 0) + 1}/${t.games?.length || '?'}` : '';
+                    const tagClass = t.status === 'registration' ? 'tag-registration' : 'tag-active';
+                    const tagLabel = t.status === 'registration' ? 'Inscription' : 'En cours';
+                    return `<div class="tournament-item">
+                        <div class="info">
+                            <div class="name">${t.name}</div>
+                            <div class="meta"><span class="tag ${tagClass}">${tagLabel}</span> ${roundInfo} · ${t.gamePoolLength} jeux</div>
+                        </div>
+                        <div class="actions">
+                            <a href="/tournoi/play/?t=${t.id}" class="join-link">Jouer</a>
+                        </div>
+                    </div>`;
+                }).join('');
+            } catch (e) {
+                $('public-tournaments').innerHTML = '<div class="empty-state">Erreur de chargement.</div>';
+            }
+        }
+
+        async function renderAdmin() {
+            const isAdmin = await window.checkFirebaseAdminAccess();
+            if (!isAdmin) { $('admin-view').classList.add('hidden'); return; }
+            $('admin-view').classList.remove('hidden');
+
+            const db = window.firebaseDb;
+
+            const privateSnap = await getDocs(query(
+                collection(db, 'tournaments'),
+                where('isPublic', '==', false),
+                where('status', 'in', ['registration', 'active'])
+            ));
+            const privateContainer = $('private-tournaments');
+            if (privateSnap.empty) {
+                privateContainer.innerHTML = '<div class="empty-state">Aucun tournoi privé en cours.</div>';
+            } else {
+                privateContainer.innerHTML = privateSnap.docs.map(d => {
+                    const t = d.data();
+                    const statusLabel = t.status === 'registration' ? 'Inscription' : 'En cours';
+                    const roundInfo = t.status === 'active' ? `· Ronde ${(t.currentRoundIndex || 0) + 1}/${t.games?.length || '?'}` : '';
+                    return `<div class="tournament-item">
+                        <div class="info">
+                            <div class="name">${t.name || `Tournoi #${d.id}`}</div>
+                            <div class="meta"><span class="tag tag-private">Privé</span> <span class="tag tag-${t.status === 'registration' ? 'registration' : 'active'}">${statusLabel}</span> ${roundInfo}</div>
+                        </div>
+                        <div class="actions">
+                            <a href="host/?t=${d.id}" class="host-link">Host</a>
+                            <a href="play/?t=${d.id}" class="play-link">Jouer</a>
+                        </div>
+                    </div>`;
+                }).join('');
+            }
+
+            await renderFinished();
+        }
+
+        async function renderFinished() {
+            const db = window.firebaseDb;
+            const finishedSnap = await getDocs(query(
+                collection(db, 'tournaments'),
+                where('status', '==', 'finished')
+            ));
+            const container = $('finished-tournaments');
+            $('finished-count').textContent = finishedSnap.size + ' tournoi' + (finishedSnap.size > 1 ? 's' : '');
+            if (finishedSnap.empty) {
+                container.innerHTML = '<div class="empty-state">Aucun tournoi terminé.</div>';
+            } else {
+                container.innerHTML = finishedSnap.docs.map(d => {
+                    const t = d.data();
+                    return `<div class="tournament-item">
+                        <div class="info">
+                            <div class="name">${t.name || `Tournoi #${d.id}`}</div>
+                            <div class="meta"><span class="tag tag-finished">Terminé</span> · ${t.gamePool?.length || 0} jeux</div>
+                        </div>
+                        <div class="actions">
+                            <a href="play/?t=${d.id}" class="play-link">Voir</a>
+                            <button class="destroy-btn" data-id="${d.id}">🗑️</button>
+                        </div>
+                    </div>`;
+                }).join('');
+                container.querySelectorAll('.destroy-btn').forEach(btn => {
+                    btn.addEventListener('click', () => destroyTournament(btn.dataset.id));
+                });
+            }
+        }
+
+        window.onFirebaseAuthStateChanged(async (user) => {
+            currentUser = user;
+            if (user) {
+                $('login-prompt').classList.add('hidden');
+                $('main-content').classList.remove('hidden');
+                await fetchGamelist();
+                await renderPublic();
+                await renderAdmin();
+            } else {
+                $('login-prompt').classList.remove('hidden');
+                $('main-content').classList.add('hidden');
+            }
+        });
+
+        $('login-btn').addEventListener('click', async () => {
+            try {
+                await window.signInWithGoogle();
+            } catch (e) {
+                $('login-error').textContent = 'Erreur: ' + e.message;
+                $('login-error').classList.remove('hidden');
+            }
+        });
+
+        $('lookup-code-btn').addEventListener('click', async () => {
+            const code = $('invite-code').value.trim().toUpperCase();
+            if (!code) { $('invite-error').textContent = 'Entre un code.'; $('invite-error').classList.remove('hidden'); return; }
+            $('invite-error').classList.add('hidden');
+            if (!currentUser) {
+                $('invite-error').textContent = 'Connecte-toi d\'abord.';
+                $('invite-error').classList.remove('hidden');
+                return;
+            }
+            await joinByCode(code);
+        });
+
+        $('invite-code').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') $('lookup-code-btn').click();
+        });
+    </script>
     <script>
         function applyTheme(theme) {
             const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;

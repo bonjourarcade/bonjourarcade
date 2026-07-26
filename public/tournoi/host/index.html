@@ -237,6 +237,8 @@
           <div id="create-form">
             <label>Nom du tournoi (optionnel)</label>
             <input type="text" id="tournament-name" placeholder="Ex: Tournoi d'été 2026" maxlength="100">
+            <label>Description (optionnelle)</label>
+            <textarea id="tournament-description" placeholder="Décris ton tournoi, les règles, etc." style="min-height:60px;"></textarea>
 
             <label style="display:flex;align-items:center;gap:10px;margin:12px 0;cursor:pointer;">
               <input type="checkbox" id="is-public" style="width:auto;margin:0;">
@@ -294,6 +296,7 @@
             <div>
               <strong id="display-name" style="color:#ffd700;font-size:1.2rem;"></strong>
               <span id="display-type-badge" style="font-size:0.75rem;padding:2px 6px;border-radius:4px;margin-left:6px;"></span>
+              <div id="display-description" style="font-size:0.9rem;color:var(--muted);margin-top:4px;"></div>
               <div style="margin-top:4px;">
                 <span style="color:#aaa;font-size:0.9rem;">Code:</span>
                 <span id="display-sharecode" style="font-family:monospace;font-size:1rem;color:var(--text);"></span>

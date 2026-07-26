@@ -211,6 +211,7 @@
                     return `<div class="tournament-item">
                         <div class="info">
                             <div class="name">${t.name}</div>
+                            <div style="font-size:0.85rem;color:var(--muted);margin:2px 0;">${t.description || ''}</div>
                             <div class="meta"><span class="tag ${tagClass}">${tagLabel}</span> ${roundInfo} · ${t.gamePoolLength} jeux</div>
                         </div>
                         <div class="actions">

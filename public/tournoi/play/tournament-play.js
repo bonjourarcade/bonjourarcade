@@ -101,6 +101,9 @@ async function checkParticipation() {
 
     const t = tournamentSnap.data();
     $('tournament-title').textContent = t.name || `🎮 Tournoi`;
+    const descEl = $('play-description');
+    if (t.description) { descEl.textContent = t.description; descEl.classList.remove('hidden'); }
+    else { descEl.classList.add('hidden'); }
     $('play-sharecode').textContent = t.shareCode;
 
     if (t.status === 'finished') {

@@ -18,7 +18,10 @@
   const PRESETS = {
     home: {
       items: [
-        { type: 'link', href: '/scores', icon: '🏆', label: 'Scores' },
+        { type: 'submenu', id: 'competition', icon: '🏆', label: 'Compétition', children: [
+          { type: 'link', href: '/scores', icon: '📋', label: 'Scores' },
+          { type: 'link', href: '/tournoi/', icon: '🏅', label: 'Tournois' },
+        ]},
         { type: 'submenu', id: 'jeux', icon: '🕹️', label: 'Jeux', children: [
           { type: 'link', href: '/daily/?seed=' + getTorontoDailySeed(), icon: '📅', label: 'Jeu du jour', id: 'daily-game-link' },
           { type: 'link', href: '/randomgame/', icon: '🎲', label: 'Jeu aléatoire' },
@@ -26,7 +29,7 @@
           { type: 'link', href: '/all', icon: '🕹️', label: 'Tous les jeux' },
           { type: 'link', href: '/upcoming', icon: '🔮', label: 'Bientôt en vedette' },
         ]},
-        { type: 'link', href: '/ratings', icon: '⭐', label: 'Ratings' },
+        { type: 'link', href: '/ratings', icon: '⭐', label: 'Évaluations' },
         { type: 'link', href: '/screensaver', icon: '🌠', label: 'Écran de veille' },
         { type: 'link', href: 'https://ko-fi.com/bonjourarcade', icon: '❤️', label: 'Supporter BonjourArcade', highlight: true, target: '_blank' },
         { type: 'divider' },
@@ -42,14 +45,14 @@
     },
     scores: {
       items: [
-        { type: 'link', href: '/scores', icon: '🏆', label: 'Scores' },
+        { type: 'link', href: '/scores', icon: '📋', label: 'Scores' },
         { type: 'link', href: '/profil/', icon: '👤', label: 'Profil', id: 'dropdown-profil-link', hidden: true },
         { type: 'link', href: '/all', icon: '🕹️', label: 'Tous les jeux' },
         { type: 'link', href: '/daily/?seed=' + getTorontoDailySeed(), icon: '📅', label: 'Jeu du jour', id: 'daily-game-link' },
         { type: 'link', href: '/randomgame/', icon: '🎲', label: 'Jeu aléatoire' },
         { type: 'link', href: '/swipe', icon: '🃏', label: 'Swipe' },
         { type: 'link', href: '/screensaver', icon: '🌠', label: 'Écran de veille' },
-        { type: 'link', href: '/ratings', icon: '⭐', label: 'Ratings' },
+        { type: 'link', href: '/ratings', icon: '⭐', label: 'Évaluations' },
         { type: 'link', href: '/upcoming', icon: '🔮', label: 'Bientôt en vedette' },
         { type: 'link', href: 'https://ko-fi.com/bonjourarcade', icon: '❤️', label: 'Supporter BonjourArcade', highlight: true, target: '_blank' },
         { type: 'divider' },
@@ -62,13 +65,13 @@
     },
     profil: {
       items: [
-        { type: 'link', href: '/scores', icon: '🏆', label: 'Scores' },
+        { type: 'link', href: '/scores', icon: '📋', label: 'Scores' },
         { type: 'link', href: '/all', icon: '🕹️', label: 'Tous les jeux' },
         { type: 'link', href: '/daily/?seed=' + getTorontoDailySeed(), icon: '📅', label: 'Jeu du jour', id: 'daily-game-link' },
         { type: 'link', href: '/randomgame/', icon: '🎲', label: 'Jeu aléatoire' },
         { type: 'link', href: '/swipe', icon: '🃏', label: 'Swipe' },
         { type: 'link', href: '/screensaver', icon: '🌠', label: 'Écran de veille' },
-        { type: 'link', href: '/ratings', icon: '⭐', label: 'Ratings' },
+        { type: 'link', href: '/ratings', icon: '⭐', label: 'Évaluations' },
         { type: 'link', href: '/upcoming', icon: '🔮', label: 'Bientôt en vedette' },
         { type: 'link', href: 'https://ko-fi.com/bonjourarcade', icon: '❤️', label: 'Supporter BonjourArcade', highlight: true, target: '_blank' },
         { type: 'divider' },
@@ -87,12 +90,13 @@
       return `<div class="dropdown-divider" id="${item.id || ''}"${style}></div>`;
     }
     if (item.type === 'submenu') {
+      const id = item.id || 'submenu';
       return `
-        <div class="submenu-toggle dropdown-option" id="jeux-submenu-toggle">
+        <div class="submenu-toggle dropdown-option" id="${id}-toggle">
           <span>${item.icon}</span>${item.label}
           <span class="arrow">▼</span>
         </div>
-        <div class="submenu" id="jeux-submenu">
+        <div class="submenu" id="${id}">
           ${item.children.map(c => buildItemHTML(c)).join('')}
         </div>`;
     }
@@ -173,16 +177,18 @@
       setDropdownOpen(false);
     };
 
-    // --- Submenu toggle (home preset) ---
-    const jeuxToggle = document.getElementById('jeux-submenu-toggle');
-    const jeuxSubmenu = document.getElementById('jeux-submenu');
-    if (jeuxToggle && jeuxSubmenu) {
-      jeuxToggle.addEventListener('click', (e) => {
-        e.stopPropagation();
-        jeuxToggle.classList.toggle('open');
-        jeuxSubmenu.classList.toggle('open');
-      });
-    }
+    // --- Submenu toggles ---
+    document.querySelectorAll('.submenu-toggle').forEach(toggle => {
+      const id = toggle.id.replace('-toggle', '');
+      const submenu = document.getElementById(id);
+      if (submenu) {
+        toggle.addEventListener('click', (e) => {
+          e.stopPropagation();
+          toggle.classList.toggle('open');
+          submenu.classList.toggle('open');
+        });
+      }
+    });
 
     // --- Theme ---
     function setTheme(theme) {

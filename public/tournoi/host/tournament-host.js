@@ -95,6 +95,7 @@ $('create-tournament-btn').addEventListener('click', async () => {
     const durUnits = { minutes: 60, heures: 3600, jours: 86400 };
     const roundDurationSec = parseFloat($('round-duration').value) * durUnits[$('round-duration-unit').value];
     const name = $('tournament-name').value.trim() || undefined;
+    const description = $('tournament-description').value.trim() || undefined;
     const isPublic = document.getElementById('is-public').checked;
     const shareCode = $('share-code').value.trim().toUpperCase() || undefined;
     const autoDestroyInput = $('auto-destroy-days').value.trim();
@@ -103,7 +104,7 @@ $('create-tournament-btn').addEventListener('click', async () => {
     const fn = window.httpsCallable
       ? window.httpsCallable(window.firebaseFunctions, 'createTournament')
       : (await import('https://www.gstatic.com/firebasejs/11.0.1/firebase-functions.js')).httpsCallable(window.firebaseFunctions, 'createTournament');
-    const result = (await fn({ gameIds, roundDurationSec, pauseDurationSec: 0, name, isPublic, shareCode, autoDestroyDays })).data;
+    const result = (await fn({ gameIds, roundDurationSec, pauseDurationSec: 0, name, description, isPublic, shareCode, autoDestroyDays })).data;
     tournamentId = result.tournamentId;
     window.history.replaceState({}, '', `?t=${tournamentId}`);
     hide('setup-view');
@@ -227,6 +228,11 @@ let currentGamesArray = null;
 function renderTournament(t, id) {
   tournamentData = t;
   $('display-name').textContent = t.name || `Tournoi #${t.shareCode}`;
+  const descEl = document.getElementById('display-description');
+  if (descEl) {
+    if (t.description) { descEl.textContent = t.description; descEl.classList.remove('hidden'); }
+    else { descEl.classList.add('hidden'); }
+  }
   $('display-sharecode').textContent = t.shareCode;
 
   const badge = $('display-type-badge');

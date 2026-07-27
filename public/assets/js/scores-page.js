@@ -353,7 +353,7 @@
 
     function renderPlayerAnchor(score, label) {
         const anchorLabel = escapeHtml(label || ('Voir le profil de ' + (score.playerName || 'Anonymous')));
-        const href = score.userId ? '/profil/' + encodeURIComponent(score.userId) : buildPlayerScoresUrl(getPlayerKey(score));
+        const href = score.userId ? '/profil/?uid=' + encodeURIComponent(score.userId) : buildPlayerScoresUrl(getPlayerKey(score));
         return [
             '<a class="player-link player-link-anchor" href="', href, '" aria-label="', anchorLabel, '">',
             renderPlayerCell(score),

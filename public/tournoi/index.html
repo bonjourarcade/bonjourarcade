@@ -208,18 +208,18 @@
                     const roundInfo = t.status === 'active' ? `· Ronde ${(t.currentRoundIndex || 0) + 1}/${t.games?.length || '?'}` : '';
                     const tagClass = t.status === 'registration' ? 'tag-registration' : 'tag-active';
                     const tagLabel = t.status === 'registration' ? 'Inscription' : 'En cours';
-                    const gameName = t.currentGame ? getGameName(t.currentGame) : null;
+                    const currentGameId = t.currentGame || (t.games && t.games[t.currentRoundIndex || 0]);
+                    const gameName = currentGameId ? getGameName(currentGameId) : null;
                     return `<div class="tournament-item">
                         <div class="info">
                             <div class="name">${t.name}</div>
                             ${t.description ? `<div style="font-size:0.85rem;color:var(--muted);margin:2px 0;">${t.description}</div>` : ''}
-                            <div class="meta"><span class="tag ${tagClass}">${tagLabel}</span> ${roundInfo} · ${t.gamePoolLength} jeux</div>
+                            <div class="meta"><span class="tag ${tagClass}">${tagLabel}</span> ${roundInfo} · ${t.gamePoolLength} jeux${gameName && t.status === 'active' ? ` · 🎮 ${gameName}` : ''}</div>
                             ${t.leader ? `<div style="display:flex;align-items:center;gap:6px;margin-top:6px;padding-top:6px;border-top:1px solid var(--border);font-size:0.85rem;">
                                 <span>👑</span>
                                 <img src="${t.leader.photoURL || '../assets/default-avatar.png'}" style="width:18px;height:18px;border-radius:50%;object-fit:cover;">
                                 <span style="color:var(--text);">${t.leader.displayName}</span>
                                 <span style="color:#ffd700;font-weight:700;margin-left:auto;">${t.leader.score.toLocaleString()}</span>
-                                ${gameName ? `<span style="color:#4a9eff;margin-left:4px;">· ${gameName}</span>` : ''}
                             </div>` : ''}
                         </div>
                         <div class="actions">

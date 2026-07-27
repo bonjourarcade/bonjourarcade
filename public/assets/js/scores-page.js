@@ -7,6 +7,7 @@
         featuredIds: [],
         latestScores: [],
         allScores: [],
+        allScoresLoaded: false,
         medalsRanking: [],
         selectedPlayerKey: '',
         rawScores: [],
@@ -1451,7 +1452,9 @@
 
         elements.playerScoresTitle.textContent = 'Chargement du joueur...';
         elements.playerScoresSubtitle.textContent = '';
-        elements.playerScoresBody.innerHTML = renderApprovedPlayerScoresRows(playerScores);
+        elements.playerScoresBody.innerHTML = !state.allScoresLoaded
+            ? '<tr><td class="player-scores-empty" colspan="5">Chargement des scores...</td></tr>'
+            : renderApprovedPlayerScoresRows(playerScores);
 
         if (isOwnProfile) {
             renderPendingScoresState('Chargement de tes soumissions...', 'loading');
@@ -1886,6 +1889,7 @@
 
         if (results[2].status === 'fulfilled') {
             state.allScores = results[2].value;
+            state.allScoresLoaded = true;
             if (results[1].status === 'fulfilled') {
                 syncLatestScoresWithKnownPlayers();
                 renderLatestScores();
@@ -1898,6 +1902,7 @@
         } else {
             console.error(results[2].reason);
             state.allScores = [];
+            state.allScoresLoaded = true;
             state.medalsRanking = [];
             hidePlayerScores();
             setSectionState(elements.medalsState, 'Erreur pendant le calcul des medailles.', 'error');

@@ -128,7 +128,7 @@ async function checkParticipation() {
         (t.status === 'active' && t.currentRoundIndex === 0);
 
       $('join-tournament-name').textContent = `Tournoi #${t.shareCode}`;
-      const pCount = (await getDocs(collection(tournamentRef, 'participants'))).size;
+      const pCount = t.participantCount ?? (await getDocs(collection(tournamentRef, 'participants'))).size;
 
       let joinStatus = 'Terminé';
       if (isJoinable) joinStatus = '✅ Inscriptions ouvertes';
@@ -246,31 +246,11 @@ function renderFormatInfo(t) {
     return;
   }
 
-  const totalRounds = t.games.length;
-  const durationMin = t.roundDurationSec ? Math.round(t.roundDurationSec / 60) : null;
-  const cutoffs = t.cutoffs || [];
-
-  let html = '';
-
-  html += `<div style="font-size:0.95rem;font-weight:600;margin-bottom:8px;">${totalRounds} round${totalRounds > 1 ? 's' : ''}${durationMin ? ' · ' + durationMin + ' min chacun' : ''}</div>`;
-
-  if (cutoffs.length > 0) {
-    for (let i = 0; i < totalRounds; i++) {
-      const isLast = i === totalRounds - 1;
-      const qualif = i < cutoffs.length && cutoffs[i] !== undefined && cutoffs[i] !== null;
-      html += `<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:0.9rem;border-bottom:1px solid var(--border);">
-        <span style="color:var(--muted-strong);">Round ${i + 1}</span>
-        <span>${isLast ? '🏆 Le meilleur score gagne' : qualif ? '✔️ Top ' + cutoffs[i] + ' qualifiés' : ''}</span>
-      </div>`;
-    }
-  }
-
-  html += `<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font-size:0.9rem;color:var(--muted);line-height:1.6;">
+  formatContent.innerHTML = `<div style="font-size:0.9rem;color:var(--muted);line-height:1.6;">
     ⚔️ À chaque round, les joueurs avec les plus faibles scores sont éliminés.<br>
     🏆 Le gagnant est le dernier survivant avec le score cumulatif le plus élevé.
   </div>`;
 
-  formatContent.innerHTML = html;
   formatCard.classList.remove('hidden');
 }
 

@@ -479,6 +479,7 @@ function renderScoreboard(roundScores, currentRoundIndex, totalRounds) {
   if (!html) html = '<div style="color:#aaa;text-align:center;padding:20px;">Aucun score pour cette ronde</div>';
   $('scoreboard-entries').innerHTML = html;
   TournoiUtils.enrichScoreboardEntries('scoreboard-entries');
+  $('play-participant-count').textContent = `${document.querySelectorAll('#scoreboard-entries .entry').length}`;
 }
 
 async function showFinished(id) {

@@ -216,6 +216,19 @@
     let scoresData = [];
     let sortState = { column: 'date', direction: 'desc' };
 
+    elements.scoresTable.addEventListener('click', function (e) {
+        const th = e.target.closest('th[data-sort]');
+        if (!th) return;
+        const col = th.dataset.sort;
+        if (sortState.column === col) {
+            sortState.direction = sortState.direction === 'asc' ? 'desc' : 'asc';
+        } else {
+            sortState.column = col;
+            sortState.direction = col === 'date' ? 'desc' : 'asc';
+        }
+        renderScoresBody();
+    });
+
     function renderScoresBody() {
         const sorted = [...scoresData].sort((a, b) => {
             let cmp = 0;
@@ -263,21 +276,6 @@
         });
     }
 
-    function setupSortableHeaders() {
-        document.querySelectorAll('#profil-scores-table th[data-sort]').forEach(th => {
-            th.addEventListener('click', () => {
-                const col = th.dataset.sort;
-                if (sortState.column === col) {
-                    sortState.direction = sortState.direction === 'asc' ? 'desc' : 'asc';
-                } else {
-                    sortState.column = col;
-                    sortState.direction = col === 'date' ? 'desc' : 'asc';
-                }
-                renderScoresBody();
-            });
-        });
-    }
-
     async function loadScores(userId) {
         elements.scoresLoading.style.display = 'block';
         elements.scoresEmpty.style.display = 'none';
@@ -306,7 +304,6 @@
 
             sortState = { column: 'date', direction: 'desc' };
             renderScoresBody();
-            setupSortableHeaders();
         } catch (err) {
             console.error('Error loading scores:', err);
             elements.scoresLoading.textContent = 'Erreur lors du chargement des scores.';

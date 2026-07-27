@@ -667,6 +667,7 @@ body.theme-dark #options-toggle-btn:hover {
 .profil-scores-table th.sortable {
   cursor: pointer;
   user-select: none;
+  white-space: nowrap;
 }
 
 .profil-scores-table th.sortable:hover {

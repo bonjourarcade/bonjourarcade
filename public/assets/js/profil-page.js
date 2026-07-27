@@ -213,17 +213,82 @@
         return s.screenshotUrl || s.imageUrl || s.screenshotDataUrl || null;
     }
 
+    let scoresData = [];
+    let sortState = { column: 'date', direction: 'desc' };
+
+    function renderScoresBody() {
+        const sorted = [...scoresData].sort((a, b) => {
+            let cmp = 0;
+            switch (sortState.column) {
+                case 'rank':
+                    cmp = a.rank - b.rank;
+                    break;
+                case 'game':
+                    cmp = (a.gameTitle || '').localeCompare(b.gameTitle || '');
+                    break;
+                case 'score':
+                    cmp = a.score - b.score;
+                    break;
+                case 'date':
+                    cmp = new Date(a.createdAt) - new Date(b.createdAt);
+                    break;
+            }
+            return sortState.direction === 'asc' ? cmp : -cmp;
+        });
+
+        elements.scoresBody.innerHTML = sorted.map(s => {
+            const rankClass = s.rank <= 3 ? 'rank-' + s.rank : '';
+            const proofUrl = getScoreScreenshotUrl(s);
+            const proofBtn = proofUrl
+                ? '<button class="proof-btn" type="button" data-proof-url="' + escHtml(proofUrl) + '">Voir</button>'
+                : '';
+            return '<tr>' +
+                '<td class="profil-score-rank ' + rankClass + '">#' + s.rank + '</td>' +
+                '<td>' +
+                    '<div class="profil-score-game">' +
+                        (s.gameImageUrl ? '<img class="profil-score-thumb" src="' + s.gameImageUrl + '" alt="" loading="lazy">' : '') +
+                        '<span class="profil-score-title">' + escHtml(s.gameTitle) + '</span>' +
+                    '</div>' +
+                '</td>' +
+                '<td class="profil-score-value">' + formatScore(s.score) + '</td>' +
+                '<td class="profil-score-date">' + formatDate(s.createdAt) + '</td>' +
+                '<td class="profil-score-proof">' + proofBtn + '</td>' +
+            '</tr>';
+        }).join('');
+
+        document.querySelectorAll('#profil-scores-table th[data-sort]').forEach(th => {
+            const col = th.dataset.sort;
+            th.classList.toggle('sort-asc', sortState.column === col && sortState.direction === 'asc');
+            th.classList.toggle('sort-desc', sortState.column === col && sortState.direction === 'desc');
+        });
+    }
+
+    function setupSortableHeaders() {
+        document.querySelectorAll('#profil-scores-table th[data-sort]').forEach(th => {
+            th.addEventListener('click', () => {
+                const col = th.dataset.sort;
+                if (sortState.column === col) {
+                    sortState.direction = sortState.direction === 'asc' ? 'desc' : 'asc';
+                } else {
+                    sortState.column = col;
+                    sortState.direction = col === 'date' ? 'desc' : 'asc';
+                }
+                renderScoresBody();
+            });
+        });
+    }
+
     async function loadScores(userId) {
         elements.scoresLoading.style.display = 'block';
         elements.scoresEmpty.style.display = 'none';
         elements.scoresTable.style.display = 'none';
 
         try {
-            const scores = await window.getUserScores(userId);
+            scoresData = await window.getUserScores(userId);
 
             elements.scoresLoading.style.display = 'none';
 
-            if (!scores || scores.length === 0) {
+            if (!scoresData || scoresData.length === 0) {
                 elements.scoresEmpty.style.display = 'block';
                 if (elements.statGames) elements.statGames.textContent = '0';
                 if (elements.statScores) elements.statScores.textContent = '0';
@@ -233,33 +298,15 @@
 
             elements.scoresTable.style.display = 'table';
 
-            const uniqueGames = new Set(scores.map(s => s.gameTitle).filter(Boolean));
-            const top1Count = scores.filter(s => s.rank === 1).length;
+            const uniqueGames = new Set(scoresData.map(s => s.gameTitle).filter(Boolean));
+            const top1Count = scoresData.filter(s => s.rank === 1).length;
             if (elements.statGames) elements.statGames.textContent = uniqueGames.size;
-            if (elements.statScores) elements.statScores.textContent = scores.length;
+            if (elements.statScores) elements.statScores.textContent = scoresData.length;
             if (elements.statTop) elements.statTop.textContent = top1Count;
 
-            scores.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-            elements.scoresBody.innerHTML = scores.map(s => {
-                const rankClass = s.rank <= 3 ? 'rank-' + s.rank : '';
-                const proofUrl = getScoreScreenshotUrl(s);
-                const proofBtn = proofUrl
-                    ? '<button class="proof-btn" type="button" data-proof-url="' + escHtml(proofUrl) + '">Voir</button>'
-                    : '';
-                return '<tr>' +
-                    '<td class="profil-score-rank ' + rankClass + '">#' + s.rank + '</td>' +
-                    '<td>' +
-                        '<div class="profil-score-game">' +
-                            (s.gameImageUrl ? '<img class="profil-score-thumb" src="' + s.gameImageUrl + '" alt="" loading="lazy">' : '') +
-                            '<span class="profil-score-title">' + escHtml(s.gameTitle) + '</span>' +
-                        '</div>' +
-                    '</td>' +
-                    '<td class="profil-score-value">' + formatScore(s.score) + '</td>' +
-                    '<td class="profil-score-date">' + formatDate(s.createdAt) + '</td>' +
-                    '<td class="profil-score-proof">' + proofBtn + '</td>' +
-                '</tr>';
-            }).join('');
+            sortState = { column: 'date', direction: 'desc' };
+            renderScoresBody();
+            setupSortableHeaders();
         } catch (err) {
             console.error('Error loading scores:', err);
             elements.scoresLoading.textContent = 'Erreur lors du chargement des scores.';

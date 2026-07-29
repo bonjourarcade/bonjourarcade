@@ -4632,14 +4632,14 @@
         var _favoriteUnsub = null;
         var _currentFavGameId = null;
 
-        function initFavoriteButton(gameId) {
+        function initFavoriteButton(gameId, user) {
             _currentFavGameId = gameId;
             var btn = document.getElementById('favorite-button');
             if (!btn) return;
             btn.style.display = 'flex';
 
-            var user = window.firebaseAuth && window.firebaseAuth.currentUser;
-            if (!user) {
+            var uid = user ? user.uid : (window.firebaseAuth && window.firebaseAuth.currentUser && window.firebaseAuth.currentUser.uid);
+            if (!uid) {
                 btn.classList.remove('is-fav');
                 btn.querySelector('span:first-child').textContent = '🖤';
                 return;
@@ -4647,7 +4647,7 @@
 
             // Listen to real-time updates
             if (_favoriteUnsub) _favoriteUnsub();
-            _favoriteUnsub = window.__favorites.listen(user.uid, function (ids) {
+            _favoriteUnsub = window.__favorites.listen(uid, function (ids) {
                 var isFav = ids.indexOf(gameId) !== -1;
                 btn.classList.toggle('is-fav', isFav);
                 btn.querySelector('span:first-child').textContent = isFav ? '❤️' : '🖤';
@@ -4691,6 +4691,15 @@
 
             await window.__favorites.toggle(user.uid, gameId);
         });
+
+        // Re-init favorite button when auth state changes (user logs in/out)
+        if (window.onFirebaseAuthStateChanged) {
+            window.onFirebaseAuthStateChanged(function (user) {
+                if (_currentFavGameId) {
+                    initFavoriteButton(_currentFavGameId, user);
+                }
+            });
+        }
 
         document.querySelectorAll('.rating-thumb').forEach(btn => {
             btn.addEventListener('click', function (e) {

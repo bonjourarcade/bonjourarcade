@@ -122,6 +122,9 @@ alloarcade-backend/     # Backend Firebase (Cloud Functions, Firestore, Auth)
 - Cas spécial : avant-dernier round → minimum 3 survivants si > 3 joueurs
 - Le « danger » affiché dans le scoreboard est un preview de l'élimination (même formule côté frontend dans `computeRoundCutoff` dans `tournament-utils.js`)
 - Types principaux : `Participant { eliminated, eliminatedRound, scores[], scoresVerified[] }`, `Tournament { status, cutoffs[], currentRoundIndex, games[], roundDurationSec }`
+- Auto-inscription : quand un joueur soumet un score avec `tournamentId`, `submit.ts` l'ajoute automatiquement aux participants (via `linkScoreToTournament`)
+- Fonction de réparation : `syncTournamentParticipants` — recrée les participants manquants à partir des `roundScores` (admin seulement)
+- **Attention** : les exports de fonctions vers le `index.ts` principal sont en **liste explicite** (lignes 77-98). Ajouter une nouvelle fonction tournoi nécessite de l'ajouter DANS LES DEUX : `tournaments/index.ts` ET `src/index.ts`
 
 ## Déploiement
 

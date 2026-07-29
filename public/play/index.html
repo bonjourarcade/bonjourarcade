@@ -114,14 +114,14 @@
             background-color: rgba(255, 255, 255, 0.2);
         }
 
-        /* Scores button styling */
+        /* Scores button styling (hidden on desktop, visible on mobile) */
         #scores-button {
             background-color: rgba(0, 0, 0, 0.7);
             color: white;
             padding: 8px 12px !important;
             border-radius: 8px;
             cursor: pointer;
-            display: flex;
+            display: none;
             align-items: center;
             gap: 6px;
             font-family: sans-serif;
@@ -132,14 +132,6 @@
             backdrop-filter: blur(10px);
             user-select: none;
             -webkit-user-select: none;
-        }
-
-        #scores-button:hover {
-            background-color: rgba(0, 0, 0, 0.9);
-        }
-
-        #scores-button:active {
-            background-color: rgba(255, 255, 255, 0.2);
         }
 
         /* Leaderboard button styling */
@@ -1175,7 +1167,8 @@
         }
 
         /* Rating button in header */
-        #rating-button {
+        #rating-button,
+        #favorite-button {
             background-color: rgba(0, 0, 0, 0.7);
             color: white;
             padding: 8px 12px !important;
@@ -1187,20 +1180,28 @@
             font-family: sans-serif;
             font-size: 12px !important;
             border: 1px solid rgba(255, 255, 255, 0.2);
-            transition: background-color 0.2s;
+            transition: background-color 0.2s, color 0.2s;
             margin: 0 !important;
             backdrop-filter: blur(10px);
             user-select: none;
             -webkit-user-select: none;
         }
 
-        #rating-button:hover {
+        #rating-button:hover,
+        #favorite-button:hover {
             background-color: rgba(0, 0, 0, 0.9);
         }
 
-        #rating-button:active {
+        #rating-button:active,
+        #favorite-button:active {
             background-color: rgba(255, 255, 255, 0.2);
         }
+
+        #favorite-button.is-fav {
+            color: #ff4757;
+        }
+
+
 
         /* Mobile rating popup */
         #mobile-rating-popup {
@@ -1357,7 +1358,7 @@
             display: none;
         }
 
-        /* Mobile: show rating button in header, adjust layout */
+        /* Mobile: show rating/favorite buttons in header, adjust layout */
         @media (max-width: 768px) {
             #rating-button {
                 display: flex !important;
@@ -1367,6 +1368,16 @@
             }
 
             #rating-button span:last-child {
+                display: none;
+            }
+
+            #favorite-button {
+                padding: 6px 8px !important;
+                font-size: 11px !important;
+                gap: 4px;
+            }
+
+            #favorite-button span:last-child {
                 display: none;
             }
         }
@@ -1417,6 +1428,10 @@
             <button id="rating-button" title="Noter ce jeu">
                 <span>⭐</span>
                 <span>Noter</span>
+            </button>
+            <button id="favorite-button" title="Ajouter aux favoris">
+                <span>🖤</span>
+                <span>Favori</span>
             </button>
         </div>
     </header>
@@ -1583,6 +1598,7 @@
     <!-- Firebase SDK Modules as ES modules -->
     <!-- The type="module" is handled inside firebase-setup.js to allow async await -->
     <script type="module" src="../assets/js/firebase-setup.js"></script>
+    <script src="../assets/js/favorites.js"></script>
     <script src="../assets/js/loading.js"></script>
     <script src="../assets/js/banner.js"></script>
     <script src="../assets/js/game-history.js"></script>
@@ -2526,6 +2542,9 @@
 
                 console.log("Found game data:", selectedGame);
                 setupLeaderboardSubmitQrCode(gameId, selectedGame);
+
+                // Initialize favorite button state
+                initFavoriteButton(gameId);
 
                 const gameHasKnownProblems = selectedGame.problem === true || selectedGame.problem === 'true';
                 if (gameHasKnownProblems) {
@@ -4608,6 +4627,70 @@
                 });
             }
         }
+
+        // --- Favorite button logic ---
+        var _favoriteUnsub = null;
+        var _currentFavGameId = null;
+
+        function initFavoriteButton(gameId) {
+            _currentFavGameId = gameId;
+            var btn = document.getElementById('favorite-button');
+            if (!btn) return;
+            btn.style.display = 'flex';
+
+            var user = window.firebaseAuth && window.firebaseAuth.currentUser;
+            if (!user) {
+                btn.classList.remove('is-fav');
+                btn.querySelector('span:first-child').textContent = '🖤';
+                return;
+            }
+
+            // Listen to real-time updates
+            if (_favoriteUnsub) _favoriteUnsub();
+            _favoriteUnsub = window.__favorites.listen(user.uid, function (ids) {
+                var isFav = ids.indexOf(gameId) !== -1;
+                btn.classList.toggle('is-fav', isFav);
+                btn.querySelector('span:first-child').textContent = isFav ? '❤️' : '🖤';
+                btn.title = isFav ? 'Retirer des favoris' : 'Ajouter aux favoris';
+            });
+        }
+
+        document.getElementById('favorite-button').addEventListener('click', async function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            var btn = this;
+            var gameId = _currentFavGameId;
+            if (!gameId) return;
+
+            var user = window.firebaseAuth && window.firebaseAuth.currentUser;
+            if (!user) {
+                if (window.signInWithGoogle) {
+                    try {
+                        await window.signInWithGoogle();
+                        user = window.firebaseAuth && window.firebaseAuth.currentUser;
+                        if (user && gameId) {
+                            // Optimistic toggle: flip UI immediately
+                            var nowFav = !btn.classList.contains('is-fav');
+                            btn.classList.toggle('is-fav', nowFav);
+                            btn.querySelector('span:first-child').textContent = nowFav ? '❤️' : '🖤';
+                            btn.title = nowFav ? 'Retirer des favoris' : 'Ajouter aux favoris';
+                            await window.__favorites.toggle(user.uid, gameId);
+                        }
+                    } catch (err) {
+                        console.error('Login error:', err);
+                    }
+                }
+                return;
+            }
+
+            // Optimistic toggle: flip UI immediately
+            var nowFav = !btn.classList.contains('is-fav');
+            btn.classList.toggle('is-fav', nowFav);
+            btn.querySelector('span:first-child').textContent = nowFav ? '❤️' : '🖤';
+            btn.title = nowFav ? 'Retirer des favoris' : 'Ajouter aux favoris';
+
+            await window.__favorites.toggle(user.uid, gameId);
+        });
 
         document.querySelectorAll('.rating-thumb').forEach(btn => {
             btn.addEventListener('click', function (e) {

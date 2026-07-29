@@ -609,4 +609,92 @@
         updateAuthUI(user);
     };
 
+    // --- Favorites ---
+    var _profilFavUnsub = null;
+
+    function initProfilFavorites(uid) {
+        var loadingEl = document.getElementById('profil-fav-loading');
+        var emptyEl = document.getElementById('profil-fav-empty');
+        var gridEl = document.getElementById('profil-fav-grid');
+        if (!gridEl) return;
+
+        if (_profilFavUnsub) { _profilFavUnsub(); _profilFavUnsub = null; }
+
+        loadingEl.style.display = 'block';
+        emptyEl.style.display = 'none';
+        gridEl.style.display = 'none';
+
+        _profilFavUnsub = window.__favorites.listen(uid, async function (favIds) {
+            if (favIds.length === 0) {
+                loadingEl.style.display = 'none';
+                emptyEl.style.display = 'block';
+                gridEl.style.display = 'none';
+                return;
+            }
+
+            loadingEl.style.display = 'block';
+            emptyEl.style.display = 'none';
+            gridEl.style.display = 'none';
+
+            try {
+                var isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.startsWith('192.168.');
+                var cacheBuster = '?v=' + Date.now();
+                var url = isLocalhost ? '../gamelist.json' + cacheBuster : 'https://storage.googleapis.com/bonjourarcade/gamelist.json' + cacheBuster;
+                var resp = await fetch(url);
+                var data = await resp.json();
+                var allGames = data.games || [];
+
+                var matched = allGames.filter(function (g) { return favIds.indexOf(g.id) !== -1; });
+
+                if (matched.length === 0) {
+                    loadingEl.style.display = 'none';
+                    emptyEl.style.display = 'block';
+                    gridEl.style.display = 'none';
+                    return;
+                }
+
+                gridEl.innerHTML = '';
+                matched.forEach(function (game) {
+                    var item = document.createElement('div');
+                    item.className = 'profil-fav-item';
+                    var cover = game.coverArt || '../assets/images/placeholder_thumb.png';
+                    var title = game.title || game.id;
+                    item.innerHTML = '<a href="' + (game.pageUrl || '/b/' + game.id) + '"><img src="' + cover + '" alt="' + title.replace(/"/g, '&quot;') + '" loading="lazy"><div class="profil-fav-title">' + title + '</div></a>';
+                    gridEl.appendChild(item);
+                });
+
+                loadingEl.style.display = 'none';
+                emptyEl.style.display = 'none';
+                gridEl.style.display = 'grid';
+            } catch (e) {
+                console.error('Error loading favorites:', e);
+                loadingEl.style.display = 'none';
+                gridEl.style.display = 'none';
+            }
+        });
+    }
+
+    // Init favorites after profile loads
+    var _origUpdateAuthUI = updateAuthUI;
+    updateAuthUI = function (user) {
+        _origUpdateAuthUI(user);
+        var uid = user && user.uid;
+        if (uid) {
+            setTimeout(function () { initProfilFavorites(uid); }, 1000);
+        }
+    };
+
+    // --- Collapsible sections ---
+    document.addEventListener('click', function (e) {
+        var header = e.target.closest('.profil-collapsible-header');
+        if (!header) return;
+        var targetId = header.dataset.target;
+        if (!targetId) return;
+        var body = document.getElementById(targetId);
+        if (!body) return;
+        var isCollapsed = body.classList.toggle('is-collapsed');
+        var icon = header.querySelector('.profil-collapse-icon');
+        if (icon) icon.textContent = isCollapsed ? '▶' : '▼';
+    });
+
     })();

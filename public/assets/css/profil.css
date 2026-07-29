@@ -837,3 +837,89 @@ body.theme-dark #options-toggle-btn:hover {
     grid-template-columns: 1fr;
   }
 }
+
+/* Favorites grid */
+.profil-favorites-card {
+  margin-top: 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.profil-fav-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.profil-fav-item {
+  text-align: center;
+  background: var(--surface-soft);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: transform 0.15s;
+  border: 1px solid var(--border);
+}
+
+.profil-fav-item:hover {
+  transform: translateY(-3px);
+}
+
+.profil-fav-item a {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.profil-fav-item img {
+  width: 100%;
+  aspect-ratio: 0.73;
+  object-fit: cover;
+  display: block;
+  background: #ddd;
+}
+
+body.theme-dark .profil-fav-item img {
+  background: #333;
+}
+
+.profil-fav-item .profil-fav-title {
+  padding: 6px 4px;
+  font-size: 0.82rem;
+  line-height: 1.2;
+  color: var(--text-color, inherit);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Collapsible sections */
+.profil-collapsible-header {
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.profil-collapsible-header:hover {
+  opacity: 0.8;
+}
+
+.profil-collapse-icon {
+  font-size: 0.75rem;
+  transition: transform 0.2s;
+  color: var(--muted);
+}
+
+.profil-collapsible-body {
+  overflow: hidden;
+}
+
+.profil-collapsible-body.is-collapsed {
+  max-height: 0 !important;
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+}

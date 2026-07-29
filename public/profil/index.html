@@ -115,25 +115,40 @@
                 </div>
             </div>
 
-            <div class="profil-scores-card">
-                <div class="profil-scores-card-header">
-                    <h2 class="profil-section-title">Meilleurs scores</h2>
+            <div class="profil-favorites-card">
+                <div class="profil-scores-card-header profil-collapsible-header" data-target="profil-fav-body-wrap">
+                    <h2 class="profil-section-title">Mes jeux favoris</h2>
+                    <span class="profil-collapse-icon">▼</span>
                 </div>
-                <div id="profil-scores-loading" class="section-state loading">Chargement des scores...</div>
-                <div id="profil-scores-empty" class="section-state empty" style="display:none;">Aucun score pour le moment</div>
-                <div class="profil-scores-table-wrap">
-                    <table class="profil-scores-table" id="profil-scores-table" style="display:none;">
-                        <thead>
-                            <tr>
-                                <th data-sort="rank" class="sortable">Rang</th>
-                                <th data-sort="game" class="sortable">Jeu</th>
-                                <th data-sort="score" class="sortable">Score</th>
-                                <th data-sort="date" class="sortable">Date</th>
-                                <th>Preuve</th>
-                            </tr>
-                        </thead>
-                        <tbody id="profil-scores-body"></tbody>
-                    </table>
+                <div id="profil-fav-body-wrap" class="profil-collapsible-body">
+                    <div id="profil-fav-loading" class="section-state loading">Chargement des favoris...</div>
+                    <div id="profil-fav-empty" class="section-state empty" style="display:none;">Aucun favori pour le moment</div>
+                    <div id="profil-fav-grid" class="profil-fav-grid" style="display:none;"></div>
+                </div>
+            </div>
+
+            <div class="profil-scores-card">
+                <div class="profil-scores-card-header profil-collapsible-header" data-target="profil-scores-body-wrap">
+                    <h2 class="profil-section-title">Meilleurs scores</h2>
+                    <span class="profil-collapse-icon">▼</span>
+                </div>
+                <div id="profil-scores-body-wrap" class="profil-collapsible-body">
+                    <div id="profil-scores-loading" class="section-state loading">Chargement des scores...</div>
+                    <div id="profil-scores-empty" class="section-state empty" style="display:none;">Aucun score pour le moment</div>
+                    <div class="profil-scores-table-wrap">
+                        <table class="profil-scores-table" id="profil-scores-table" style="display:none;">
+                            <thead>
+                                <tr>
+                                    <th data-sort="rank" class="sortable">Rang</th>
+                                    <th data-sort="game" class="sortable">Jeu</th>
+                                    <th data-sort="score" class="sortable">Score</th>
+                                    <th data-sort="date" class="sortable">Date</th>
+                                    <th>Preuve</th>
+                                </tr>
+                            </thead>
+                            <tbody id="profil-scores-body"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -290,6 +305,7 @@
         }
     </style>
     <script type="module" src="../assets/js/firebase-setup.js"></script>
+    <script src="../assets/js/favorites.js"></script>
     <script src="../assets/js/dropdown.js"></script>
     <script src="../assets/js/profil-page.js"></script>
 </body>

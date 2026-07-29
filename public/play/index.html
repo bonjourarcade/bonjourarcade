@@ -3049,6 +3049,15 @@
             silentAudio.volume = 0.01; // Very low volume, almost silent
             silentAudio.play().catch(e => console.log('Silent audio play failed:', e));
 
+            // Set up auth listener for favorites before loadSelectedGame
+            if (window.onFirebaseAuthStateChanged) {
+                window.onFirebaseAuthStateChanged(function (user) {
+                    if (_currentFavGameId) {
+                        initFavoriteButton(_currentFavGameId, user);
+                    }
+                });
+            }
+
             loadSelectedGame();
 
 
@@ -4691,15 +4700,6 @@
 
             await window.__favorites.toggle(user.uid, gameId);
         });
-
-        // Re-init favorite button when auth state changes (user logs in/out)
-        if (window.onFirebaseAuthStateChanged) {
-            window.onFirebaseAuthStateChanged(function (user) {
-                if (_currentFavGameId) {
-                    initFavoriteButton(_currentFavGameId, user);
-                }
-            });
-        }
 
         document.querySelectorAll('.rating-thumb').forEach(btn => {
             btn.addEventListener('click', function (e) {

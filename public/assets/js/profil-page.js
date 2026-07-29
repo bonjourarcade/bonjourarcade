@@ -678,9 +678,10 @@
     var _origUpdateAuthUI = updateAuthUI;
     updateAuthUI = function (user) {
         _origUpdateAuthUI(user);
-        var uid = user && user.uid;
-        if (uid) {
-            setTimeout(function () { initProfilFavorites(uid); }, 1000);
+        // Use the profile owner's uid (from URL), not the logged-in user
+        var targetUid = getUserIdFromUrl() || (user && user.uid);
+        if (targetUid) {
+            setTimeout(function () { initProfilFavorites(targetUid); }, 1000);
         }
     };
 

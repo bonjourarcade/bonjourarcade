@@ -118,13 +118,13 @@ const TournoiUtils = {
     const container = document.getElementById(containerId);
     if (!container) return;
 
-    const entryMap = {};
+    const cellMap = {};
     container.querySelectorAll('[data-game-score-id]').forEach(el => {
       const id = el.dataset.gameScoreId;
-      if (id) entryMap[id] = el;
+      if (id) cellMap[id] = el;
     });
 
-    const ids = Object.keys(entryMap);
+    const ids = Object.keys(cellMap);
     if (ids.length === 0) return;
 
     const db = window.firebaseDb;
@@ -137,43 +137,23 @@ const TournoiUtils = {
     snapshots.forEach((snap, i) => {
       if (!snap || !snap.exists) return;
       const data = snap.data();
-      const entry = entryMap[ids[i]];
-      if (!entry) return;
+      const cell = cellMap[ids[i]];
+      if (!cell) return;
 
-      const nameEl = entry.querySelector('.name');
-      if (!nameEl) return;
-
-      const metaSpan = document.createElement('span');
-      metaSpan.className = 'entry-meta';
-
+      // Set comment as tooltip on the cell
       if (data.comment) {
-        const badge = document.createElement('span');
-        badge.className = 'meta-comment';
-        badge.textContent = '💬';
-        badge.dataset.comment = data.comment;
-        metaSpan.appendChild(badge);
-
-        const scoreEl = entry.querySelector('.score');
-        if (scoreEl) {
-          scoreEl.dataset.comment = data.comment;
-          scoreEl.classList.add('has-comment');
-        }
+        cell.title = data.comment;
+        cell.classList.add('has-comment');
       }
 
+      // Make cell clickable for screenshot
       if (data.screenshotUrl) {
-        const badge = document.createElement('span');
-        badge.className = 'meta-screenshot';
-        badge.textContent = '📷';
-        badge.title = 'Voir la capture d\'écran';
-        badge.addEventListener('click', (e) => {
+        cell.style.cursor = 'pointer';
+        cell.classList.add('has-screenshot');
+        cell.addEventListener('click', (e) => {
           e.stopPropagation();
           TournoiUtils.openScreenshotModal(data.screenshotUrl);
         });
-        metaSpan.appendChild(badge);
-      }
-
-      if (metaSpan.children.length > 0) {
-        nameEl.after(metaSpan);
       }
     });
   },

@@ -80,45 +80,55 @@
 
     .section-title { color: #ffd700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; margin: 16px 0 8px; }
     .eliminated-title { color: #dc3545; }
-    .entry { display: flex; align-items: center; padding: 8px 12px; border-radius: 6px; margin-bottom: 4px; background: var(--entry-bg); gap: 10px; }
-    .entry.safe { border-left: 3px solid #28a745; background: rgba(40, 167, 69, 0.06); }
-    .entry.danger { border-left: 3px solid #e67e22; background: rgba(230, 126, 34, 0.2); color: #f39c12; }
-    .entry.danger .rank, .entry.danger .score { color: #f39c12; }
-    .entry.eliminated { border-left: 3px solid #c0392b; background: rgba(192, 57, 43, 0.25); color: #e74c3c; opacity: 1; }
-    .entry.eliminated .rank, .entry.eliminated .score { color: #e74c3c; }
-    .entry.me { background: var(--me-bg); }
-    .entry.me.danger { background: rgba(230, 126, 34, 0.35); border-left-color: #e67e22; }
-    .entry.me.eliminated { background: rgba(192, 57, 43, 0.4); border-left-color: #c0392b; }
-    .entry .rank { width: 30px; color: var(--muted-strong); font-weight: 700; }
-    .entry .avatar { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; }
-    .entry .name { flex: 1; }
-    .entry .score { font-weight: 700; color: var(--entry-text); cursor: default; position: relative; }
-    .entry .score.has-comment { cursor: help; }
-    .entry .score.has-comment::after {
-      content: attr(data-comment);
+
+    /* Combined table */
+    .combined-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    #scoreboard-entries { overflow-x: auto; }
+    .combined-table th, .combined-table td { padding: 6px 8px; text-align: center; border-bottom: 1px solid var(--table-border); }
+    .combined-table th { color: #ffd700; font-size: 0.75rem; text-transform: uppercase; vertical-align: bottom; white-space: nowrap; }
+    .combined-table .player-cell { font-weight: 600; text-align: left; white-space: nowrap; }
+    .combined-table .rank-cell { color: var(--muted-strong); font-weight: 700; width: 30px; }
+    .combined-table .score-cell { font-family: monospace; font-weight: 600; min-width: 60px; }
+    .combined-table .score-cell.zero { color: var(--muted-strong); font-weight: 400; }
+    .combined-table .score-cell.future { }
+    .combined-table .score-cell.has-comment { text-decoration: underline wavy rgba(255, 255, 255, 0.4); text-underline-offset: 3px; position: relative; cursor: help; }
+    body.theme-light .combined-table .score-cell.has-comment { text-decoration-color: #4a9eff; }
+    .combined-table .score-cell.has-comment:hover::after {
+      content: attr(title);
       position: absolute;
-      bottom: calc(100% + 8px);
+      bottom: calc(100% + 6px);
       left: 50%;
       transform: translateX(-50%);
       background: #222;
       color: #fff;
-      padding: 6px 12px;
-      border-radius: 8px;
+      padding: 5px 10px;
+      border-radius: 6px;
       font-size: 0.8rem;
       font-weight: 400;
       white-space: nowrap;
-      max-width: 300px;
+      max-width: 280px;
       overflow: hidden;
       text-overflow: ellipsis;
-      pointer-events: none;
-      opacity: 0;
       z-index: 20;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      pointer-events: none;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.4);
+      font-family: system-ui, sans-serif;
     }
-    .entry .score.has-comment:hover::after { opacity: 1; }
-    .entry .entry-label { font-size: 0.75rem; margin-right: 6px; flex-shrink: 0; }
-    .entry .entry-label.at-risk { color: #ffc107; font-weight: 600; }
-    .entry .my-badge { background: #4a9eff; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; margin-left: 8px; }
+    .combined-table .score-cell.has-screenshot { cursor: pointer; }
+    .combined-table .score-cell.has-screenshot:hover { background: rgba(255,255,255,0.05); }
+    .combined-table .total-cell { font-family: monospace; font-weight: 700; color: #ffd700; }
+    .combined-table .danger-row { background: rgba(230, 126, 34, 0.2); }
+    .combined-table .danger-row .player-cell { color: #f39c12; }
+    .combined-table .danger-row .score-cell { color: #f39c12; }
+    .combined-table .eliminated-row { background: rgba(192, 57, 43, 0.2); }
+    .combined-table .eliminated-row .player-cell { color: #e74c3c; }
+    .combined-table .eliminated-row .score-cell { color: #e74c3c; }
+    .combined-table .eliminated-row .total-cell { color: #e74c3c; }
+    .combined-table .me-row { outline: 2px solid #4a9eff; outline-offset: -2px; }
+    .combined-table .me-row.danger-row { outline-color: #f39c12; }
+    .combined-table .me-row.eliminated-row { outline-color: #e74c3c; }
+    .combined-table .at-risk { font-size: 0.9rem; }
+    .combined-table .pending-badge { cursor: help; font-size: 0.8rem; }
 
     .upcoming-games { display: flex; gap: 12px; margin: 16px 0; overflow-x: auto; padding-bottom: 8px; justify-content: center; flex-wrap: wrap; }
     .upcoming-game { flex: 0 0 90px; text-align: center; position: relative; }
@@ -146,21 +156,9 @@
     .podium-place.podium-2 { transform: translateY(0); }
     .podium-place.podium-3 { transform: translateY(0); }
 
-    .cumul-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
-    .cumul-table th, .cumul-table td { padding: 6px 10px; text-align: left; border-bottom: 1px solid var(--table-border); }
-    .cumul-table th { color: #ffd700; font-size: 0.8rem; text-transform: uppercase; }
-    .cumul-table .eliminated-row { background: rgba(192, 57, 43, 0.2); color: #e74c3c; }
-    .cumul-table .eliminated-row td { color: #e74c3c; }
-    .cumul-table .highlight-row { background: var(--highlight-row); }
-    .avatar-sm { width: 24px; height: 24px; border-radius: 50%; vertical-align: middle; }
-    .pending-badge { cursor: help; font-size: 0.85rem; }
-
     .info-line { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
     .info-line .label { color: var(--muted-strong); }
     .info-line .value { color: var(--text); }
-    .entry .entry-meta { display: inline-flex; gap: 4px; margin-left: 4px; flex-shrink: 0; }
-    .entry .entry-meta span { font-size: 0.9rem; cursor: default; line-height: 1; }
-    .entry .entry-meta .meta-screenshot { cursor: pointer; }
     .entry .entry-meta .meta-comment { position: relative; cursor: help; }
     .entry .entry-meta .meta-comment::after {
       content: attr(data-comment);
@@ -267,13 +265,8 @@
         </div>
 
         <div class="card">
-          <div class="section-title">Classement de la ronde</div>
+          <div class="section-title">Classement</div>
           <div id="scoreboard-entries"></div>
-        </div>
-
-        <div class="card">
-          <div class="section-title">Classement cumulatif</div>
-          <div id="cumulative-entries"></div>
         </div>
       </div>
 

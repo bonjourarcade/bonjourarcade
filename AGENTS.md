@@ -124,6 +124,8 @@ alloarcade-backend/     # Backend Firebase (Cloud Functions, Firestore, Auth)
 - Types principaux : `Participant { eliminated, eliminatedRound, scores[], scoresVerified[] }`, `Tournament { status, cutoffs[], currentRoundIndex, games[], roundDurationSec }`
 - Auto-inscription : quand un joueur soumet un score avec `tournamentId`, `submit.ts` l'ajoute automatiquement aux participants (via `linkScoreToTournament`)
 - Fonction de réparation : `syncTournamentParticipants` — recrée les participants manquants à partir des `roundScores` (admin seulement)
+- Avancement automatique : `autoAdvanceTournaments` — fonction planifiée toutes les heures qui avance les tournois dont le timer est expiré
+- Formule partagée dans `utils.ts` : `computeCutoff()` importée par `advance.ts` et `auto-advance.ts`
 - **Attention** : les exports de fonctions vers le `index.ts` principal sont en **liste explicite** (lignes 77-98). Ajouter une nouvelle fonction tournoi nécessite de l'ajouter DANS LES DEUX : `tournaments/index.ts` ET `src/index.ts`
 
 ## Déploiement

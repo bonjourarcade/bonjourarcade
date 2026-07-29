@@ -97,9 +97,8 @@ alloarcade-backend/     # Backend Firebase (Cloud Functions, Firestore, Auth)
 - Collection Firestore : `favorites/{userId}:{gameId}` (doc ID composé = pas de doublon)
 - Module partagé : `public/assets/js/favorites.js` — exporte `window.__favorites = { toggle, getAll, isFav, listen }`
 - `listen(userId, callback)` utilise `onSnapshot` pour temps réel
-- Pages avec bouton favori : `/play` (header), `/all` (overlay sur chaque carte)
+- Pages avec bouton favori : `/play` (header)
 - Page `/profil` : section « Mes jeux favoris » avec grille de couvertures
-- Filtre « Favoris » disponible dans `/all` via le sélecteur de recherche
 - Auth requise (popup Google SSO si non connecté, pattern identique aux ratings)
 
 ## Tests
@@ -109,8 +108,24 @@ alloarcade-backend/     # Backend Firebase (Cloud Functions, Firestore, Auth)
 - `scripts/test_progress_tracking.sh` — test suivi progression
 - `scripts/check_metadata_syntax.sh` — vérifie la syntaxe des metadata.yaml
 
+## Tournois
+
+- Cloud Functions : `startTournament`, `joinTournament`, `endRound`, `advanceToNextRound`, `finalizeTournament`, etc.
+- Code dans `alloarcade-backend/firebase/functions/src/tournaments/`
+- Formule de cutoff (nombre de joueurs qui survivent par round) :
+  ```
+  roundsLeft = totalRounds - currentRound
+  if remaining <= roundsLeft → tous survivent
+  else → cutoff = ceil(remaining × (roundsLeft-1) / roundsLeft)
+  ```
+  Le cutoff est **recalculé à chaque advancement** (dans `computeCutoff()` dans `advance.ts`) en fonction du nombre réel de joueurs actifs, pas pré-calculé au start.
+- Cas spécial : avant-dernier round → minimum 3 survivants si > 3 joueurs
+- Le « danger » affiché dans le scoreboard est un preview de l'élimination (même formule côté frontend dans `computeRoundCutoff` dans `tournament-utils.js`)
+- Types principaux : `Participant { eliminated, eliminatedRound, scores[], scoresVerified[] }`, `Tournament { status, cutoffs[], currentRoundIndex, games[], roundDurationSec }`
+
 ## Déploiement
 
 - GitLab CI déclenché sur push à `main` modifiant `public/**/*` ou les scripts de build
 - Pipeline parallèle : déploiement Pages + newsletter hebdomadaire (via schedule)
 - Production : Google Cloud Storage pour les ROMs (`gs://bonjourarcade`), GitLab Pages pour le site
+- **Cloud Functions** à déployer manuellement avec `firebase deploy --only functions` depuis `alloarcade-backend/firebase/`

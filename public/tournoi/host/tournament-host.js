@@ -96,6 +96,7 @@ $('create-tournament-btn').addEventListener('click', async () => {
     const roundDurationSec = parseFloat($('round-duration').value) * durUnits[$('round-duration-unit').value];
     const name = $('tournament-name').value.trim() || undefined;
     const description = $('tournament-description').value.trim() || undefined;
+    const stakes = $('tournament-stakes').value.trim() || undefined;
     const isPublic = document.getElementById('is-public').checked;
     const shareCode = $('share-code').value.trim().toUpperCase() || undefined;
     const autoDestroyInput = $('auto-destroy-days').value.trim();
@@ -104,7 +105,7 @@ $('create-tournament-btn').addEventListener('click', async () => {
     const fn = window.httpsCallable
       ? window.httpsCallable(window.firebaseFunctions, 'createTournament')
       : (await import('https://www.gstatic.com/firebasejs/11.0.1/firebase-functions.js')).httpsCallable(window.firebaseFunctions, 'createTournament');
-    const result = (await fn({ gameIds, roundDurationSec, pauseDurationSec: 0, name, description, isPublic, shareCode, autoDestroyDays })).data;
+    const result = (await fn({ gameIds, roundDurationSec, pauseDurationSec: 0, name, description, stakes, isPublic, shareCode, autoDestroyDays })).data;
     tournamentId = result.tournamentId;
     window.history.replaceState({}, '', `?t=${tournamentId}`);
     hide('setup-view');
@@ -169,6 +170,7 @@ function cleanupListeners() {
 function loadDashboard(id) {
   cleanupListeners();
   show('dashboard-view');
+  $('player-view-btn').href = `/tournoi/play/?t=${id}`;
   const db = window.firebaseDb;
   const tournamentRef = doc(db, 'tournaments', id);
 
@@ -572,7 +574,7 @@ async function renderResults(id) {
         <div class="rank-num">${medal}</div>
         <img src="${p.photoURL || '../assets/default-avatar.png'}" alt="">
         <div class="name">${nameLink}</div>
-        <div class="score">${p.score.toLocaleString()} pts</div>
+        <div class="score"><span class="num">${p.totalPct.toFixed(1)}%</span> <span class="dim">(${p.totalScoreRaw.toLocaleString()} pts)</span></div>
       </div>`;
     }
     html += '</div>';
@@ -581,20 +583,20 @@ async function renderResults(id) {
   if (results.overallChampion) {
     html += `<p style="text-align:center;color:#ffd700;font-size:1.2rem;">
       🏆 Champion cumulatif: <strong>${results.overallChampion.uid ? `<a href="/profil/?uid=${results.overallChampion.uid}" style="color:inherit;text-decoration:none;">${results.overallChampion.name}</a>` : results.overallChampion.name}</strong>
-      (${results.overallChampion.totalScore.toLocaleString()} pts)
+      <span class="num">${results.overallChampion.totalPct.toFixed(1)}%</span> <span class="dim">(${results.overallChampion.totalScoreRaw.toLocaleString()} pts)</span>
     </p>`;
   }
 
   if (results.cumulativeScoresTable) {
     html += '<div class="section-title">Classement cumulatif</div>';
-    html += '<table class="cumul-table"><thead><tr><th>#</th><th></th><th>Joueur</th><th>Total</th></tr></thead><tbody>';
+    html += '<table class="cumul-table"><thead><tr><th>#</th><th></th><th>Joueur</th><th>Total %</th></tr></thead><tbody>';
     results.cumulativeScoresTable.forEach((p, i) => {
       const nameLink = p.uid ? `<a href="/profil/?uid=${p.uid}" style="color:inherit;text-decoration:none;">${p.name}</a>` : p.name;
       html += `<tr class="${p.eliminated ? 'eliminated-row' : ''}">
         <td>${i + 1}</td>
         <td><img src="${p.photoURL || '../assets/default-avatar.png'}" class="avatar-sm"></td>
         <td>${nameLink}</td>
-        <td>${p.totalScore.toLocaleString()}</td>
+        <td><span class="num">${p.totalPct.toFixed(1)}%</span> <span class="dim">(${p.totalScoreRaw.toLocaleString()})</span></td>
       </tr>`;
     });
     html += '</tbody></table>';
@@ -605,39 +607,38 @@ async function renderResults(id) {
 
 function buildResultsFromParticipants(participants) {
   try {
-    const list = Object.entries(participants).map(([uid, p]) => ({
+    const entries = Object.entries(participants).map(([uid, p]) => ({
       uid,
       name: p.displayName || 'Anonyme',
       photoURL: p.photoURL || '',
-      totalScore: (p.scores || []).reduce((s, v) => s + v, 0),
+      scores: p.scores || [],
       eliminated: p.eliminated || false,
       eliminatedRound: p.eliminatedRound,
     }));
 
-    list.sort((a, b) => {
-      const roundA = a.eliminated ? a.eliminatedRound : Infinity;
-      const roundB = b.eliminated ? b.eliminatedRound : Infinity;
-      if (roundB !== roundA) return roundB - roundA;
-      return b.totalScore - a.totalScore;
-    });
+    const totalRounds = entries.reduce((max, p) => Math.max(max, p.scores.length), 0);
+    const scored = TournoiUtils.computePercentages(entries, totalRounds);
+    scored.sort((a, b) => b.totalPct - a.totalPct);
 
-    const podiumPlayers = list.slice(0, 3).map(p => ({
+    const podiumPlayers = scored.slice(0, 3).map(p => ({
       uid: p.uid,
       name: p.name,
       photoURL: p.photoURL,
-      score: p.totalScore,
+      totalPct: p.totalPct,
+      totalScoreRaw: p.totalScoreRaw,
     }));
 
-    const champion = list[0] || null;
+    const champion = scored[0] || null;
 
     return {
       podiumPlayers,
-      overallChampion: champion ? { uid: champion.uid, name: champion.name, totalScore: champion.totalScore } : null,
-      cumulativeScoresTable: list.map(p => ({
+      overallChampion: champion ? { uid: champion.uid, name: champion.name, totalPct: champion.totalPct, totalScoreRaw: champion.totalScoreRaw } : null,
+      cumulativeScoresTable: scored.map(p => ({
         uid: p.uid,
         name: p.name,
         photoURL: p.photoURL,
-        totalScore: p.totalScore,
+        totalPct: p.totalPct,
+        totalScoreRaw: p.totalScoreRaw,
         eliminated: p.eliminated,
       })),
     };

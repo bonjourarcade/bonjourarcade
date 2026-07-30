@@ -1240,32 +1240,56 @@ document.addEventListener('DOMContentLoaded', () => {
         if (finalizeBtn) finalizeBtn.style.display = 'none';
 
         // --- Data preparation for results.html ---
-        const finalRoundIndex = tournamentState.games.length - 1;
+        const totalRounds = tournamentState.games.length;
 
-        // Final Round Scores (for podium)
-        const finalRoundScores = Object.entries(tournamentState.players)
-            .filter(([, data]) => !data.eliminated)
-            .map(([name, data]) => ({ name, score: data.scores[finalRoundIndex] || 0, photoURL: data.photoURL }))
-            .sort((a, b) => b.score - a.score);
+        // Compute percentages
+        const playersList = Object.entries(tournamentState.players).map(([name, data]) => ({
+            name,
+            photoURL: data.photoURL,
+            scores: data.scores,
+            eliminated: data.eliminated,
+            eliminatedRound: data.eliminatedRound,
+        }));
 
-        // Cumulative Scores
-        const cumulativeScores = Object.entries(tournamentState.players).map(([name, data]) => {
-            const totalScore = data.scores.reduce((sum, score) => sum + score, 0);
-            return { name, totalScore, photoURL: data.photoURL };
-        }).sort((a, b) => b.totalScore - a.totalScore);
+        // Compute round totals
+        const roundTotals = Array(totalRounds).fill(0);
+        playersList.forEach(p => {
+            for (let r = 0; r < totalRounds; r++) {
+                roundTotals[r] += (p.scores[r] || 0);
+            }
+        });
+
+        // Compute percentages per player
+        const scored = playersList.map(p => {
+            let totalPct = 0;
+            let totalScoreRaw = 0;
+            const pctScores = Array(totalRounds).fill(0);
+            for (let r = 0; r < totalRounds; r++) {
+                const score = p.scores[r] || 0;
+                totalScoreRaw += score;
+                const pct = roundTotals[r] > 0 ? (score / roundTotals[r]) * 100 : 0;
+                pctScores[r] = pct;
+                totalPct += pct;
+            }
+            return { ...p, totalPct, totalScoreRaw, pctScores };
+        });
+
+        scored.sort((a, b) => b.totalPct - a.totalPct);
 
         // Round Summaries
         const roundSummaries = tournamentState.games.map((gameId, roundIndex) => {
             const gameData = gamelist.find(g => g.id === gameId);
-            const playersForRound = Object.keys(tournamentState.players).map(name => {
-                const player = tournamentState.players[name];
+            const playersForRound = playersList.map(p => {
+                const score = p.scores[roundIndex] || 0;
+                const pct = roundTotals[roundIndex] > 0 ? (score / roundTotals[roundIndex]) * 100 : 0;
                 return {
-                    name,
-                    score: player.scores[roundIndex] || 0,
-                    photoURL: player.photoURL,
-                    eliminatedInThisRoundOrEarlier: (typeof player.eliminatedRound === 'number' && player.eliminatedRound <= roundIndex)
+                    name: p.name,
+                    score,
+                    pct,
+                    photoURL: p.photoURL,
+                    eliminatedInThisRoundOrEarlier: (typeof p.eliminatedRound === 'number' && p.eliminatedRound <= roundIndex)
                 };
-            }).sort((a, b) => b.score - a.score); // Sort by score for this round
+            }).sort((a, b) => b.score - a.score);
 
             return {
                 roundNumber: roundIndex + 1,
@@ -1276,9 +1300,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         const resultsData = {
-            podiumPlayers: finalRoundScores.slice(0, 3), // Top 3 for the final round podium
-            overallChampion: cumulativeScores[0], // The absolute top player by cumulative score
-            cumulativeScoresTable: cumulativeScores, // All players with their cumulative scores
+            podiumPlayers: scored.slice(0, 3).map(p => ({ name: p.name, totalPct: p.totalPct, totalScoreRaw: p.totalScoreRaw, photoURL: p.photoURL })),
+            overallChampion: scored[0] ? { name: scored[0].name, totalPct: scored[0].totalPct, totalScoreRaw: scored[0].totalScoreRaw, photoURL: scored[0].photoURL } : null,
+            cumulativeScoresTable: scored.map(p => ({ name: p.name, totalPct: p.totalPct, totalScoreRaw: p.totalScoreRaw, photoURL: p.photoURL, eliminated: p.eliminated, eliminatedRound: p.eliminatedRound })),
             roundSummaries: roundSummaries
         };
 

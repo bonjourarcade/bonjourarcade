@@ -50,7 +50,7 @@ import re
 import yaml
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from get_current_week_game import get_current_game_id, get_previous_game_id
-from newsletter_metadata import NEWSLETTER_REQUIRED_FIELDS
+
 import questionary
 
 # Configuration - Only keep what's needed
@@ -373,37 +373,6 @@ class NewsletterSender:
         try:
             with open(meta_path, 'r') as f:
                 meta = yaml.safe_load(f)
-            
-            # Keep newsletter metadata validation in sync with validate_metadata.py.
-            missing_fields = [field for field in NEWSLETTER_REQUIRED_FIELDS if not meta.get(field)]
-            
-            if missing_fields:
-                print(f"❌ ERROR: Game of the week metadata is missing required fields: {', '.join(missing_fields)}")
-                print(f"📁 File: {meta_path}")
-                print("📝 These fields are required for the newsletter to be sent:")
-                if 'announcement_message' in missing_fields:
-                    print("   - announcement_message: Description of the game for the newsletter")
-                if 'controls' in missing_fields:
-                    print("   - controls: Array of control instructions for the game")
-                if 'to_start' in missing_fields:
-                    print("   - to_start: Instructions on how to start the game")
-                print("\n🛑 Aborting newsletter send to allow you to add the missing fields.")
-                print("\n💡 Example of what to add to metadata.yaml:")
-                if 'announcement_message' in missing_fields:
-                    print("   announcement_message: 'Un classique arcade rapide et nerveux a essayer cette semaine.'")
-                if 'controls' in missing_fields:
-                    print("   controls:")
-                    print("     - '🕹️ Use arrow keys to move'")
-                    print("     - '🔴 Press SPACE to jump'")
-                if 'to_start' in missing_fields:
-                    print("   to_start: 'Press START or click the play button to begin'")
-                print(f"\n📋 Current metadata structure for {game_id}:")
-                for key, value in meta.items():
-                    if key in missing_fields:
-                        print(f"   {key}: [MISSING]")
-                    else:
-                        print(f"   {key}: {value}")
-                sys.exit(1)
             
             return meta
         except FileNotFoundError:
@@ -1141,25 +1110,22 @@ def main():
     else:
         print('ℹ️  CONVERTKIT_API_SECRET is not set. Email sending will be unavailable for this run.')
     
-    # EARLY VALIDATION: Check if we have an announcement message and required metadata fields before any user interaction
+    # EARLY VALIDATION: Check if we have an announcement message before any user interaction
     if not custom_message:
         print("🔍 Checking game of the week metadata...")
         try:
-            # Create a temporary sender to check the metadata
             temp_sender = NewsletterSender(
                 api_secret=api_secret,
                 api_url=args.mail_api_url,
-                dry_run=True,  # Use dry run to avoid any actual sending
+                dry_run=True,
                 webhook_only=False,
                 facebook_only=False,
                 post_to_facebook=False,
             )
             
-            # Read game data and metadata to check announcement and required fields
             game_id = temp_sender.read_game_of_the_week(args.game_id)
             meta = temp_sender.read_game_metadata(game_id)
             
-            # Check announcement message
             announcement_message = meta.get('announcement_message', '')
             if not announcement_message.strip():
                 print("❌ ERROR: The announcement message for the game of the week is empty!")
@@ -1167,12 +1133,6 @@ def main():
                 print(f"   File: public/games/{game_id}/metadata.yaml")
                 print("   Or use --custom-message to provide a message via command line.")
                 print("\n🛑 Aborting newsletter send to allow you to write the announcement.")
-                print("\n💡 Example of what to add to metadata.yaml:")
-                print("   announcement_message: \"Ce jeu classique de plateforme vous emmène dans une aventure...\"")
-                print("\n💡 Or run with: --custom-message \"Your announcement text here\"")
-                print("\n📝 The announcement message should describe why this game is special,")
-                print("   what makes it fun, or any interesting facts about it.")
-                print("   This text appears prominently at the top of the newsletter.")
                 print(f"\n📋 Current metadata structure for {game_id}:")
                 for key, value in meta.items():
                     if key == 'announcement_message':
@@ -1182,7 +1142,6 @@ def main():
                 sys.exit(1)
             
             print(f"✅ Announcement message found: {announcement_message[:100]}{'...' if len(announcement_message) > 100 else ''}")
-            print("✅ Required metadata fields (controls, to_start) are present")
             
         except Exception as e:
             print(f"⚠️  Warning: Could not validate metadata early: {e}")

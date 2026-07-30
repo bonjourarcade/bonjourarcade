@@ -324,6 +324,9 @@
 }
 
 .end-tournament-button:hover {
-    background-color: #c9302c; /* A darker red on hover */
-    transform: translateY(-2px); /* Slight lift on hover */
+    background-color: #c9302c;
+    transform: translateY(-2px);
 }
+
+.dim { display: block; font-size: 0.75em; color: #888; }
+.num { display: block; }

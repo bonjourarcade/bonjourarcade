@@ -214,6 +214,7 @@
                         <div class="info">
                             <div class="name">${t.name}</div>
                             ${t.description ? `<div style="font-size:0.85rem;color:var(--muted);margin:2px 0;">${t.description}</div>` : ''}
+                            ${t.stakes ? `<div style="font-size:0.85rem;color:#ffd700;margin:2px 0;">🎁 ${t.stakes}</div>` : ''}
                             <div class="meta"><span class="tag ${tagClass}">${tagLabel}</span> ${roundInfo} · ${t.gamePoolLength} jeux${gameName && t.status === 'active' ? ` · 🎮 ${gameName}` : ''}</div>
                             ${t.leader ? `<div style="display:flex;align-items:center;gap:6px;margin-top:6px;padding-top:6px;border-top:1px solid var(--border);font-size:0.85rem;">
                                 <span>👑</span>
@@ -255,6 +256,7 @@
                     return `<div class="tournament-item">
                         <div class="info">
                             <div class="name">${t.name || `Tournoi #${d.id}`}</div>
+                            ${t.stakes ? `<div style="font-size:0.85rem;color:#ffd700;margin:2px 0;">🎁 ${t.stakes}</div>` : ''}
                             <div class="meta"><span class="tag tag-private">Privé</span> <span class="tag tag-${t.status === 'registration' ? 'registration' : 'active'}">${statusLabel}</span> ${roundInfo}</div>
                         </div>
                         <div class="actions">
@@ -284,6 +286,7 @@
                     return `<div class="tournament-item">
                         <div class="info">
                             <div class="name">${t.name || `Tournoi #${d.id}`}</div>
+                            ${t.stakes ? `<div style="font-size:0.85rem;color:#ffd700;margin:2px 0;">🎁 ${t.stakes}</div>` : ''}
                             <div class="meta"><span class="tag tag-finished">Terminé</span> · ${t.gamePool?.length || 0} jeux</div>
                         </div>
                         <div class="actions">

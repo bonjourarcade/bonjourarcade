@@ -32,6 +32,29 @@ const TournoiUtils = {
     return Math.min(remainingPlayers, Math.max(minFinal, Math.ceil(remainingPlayers * (roundsLeft - 1) / roundsLeft)));
   },
 
+  computePercentages(participants, totalRounds) {
+    const roundTotals = Array(totalRounds).fill(0);
+    participants.forEach(p => {
+      for (let r = 0; r < totalRounds; r++) {
+        roundTotals[r] += (p.scores?.[r] || 0);
+      }
+    });
+
+    return participants.map(p => {
+      const pctScores = Array(totalRounds).fill(0);
+      let totalPct = 0;
+      let totalScoreRaw = 0;
+      for (let r = 0; r < totalRounds; r++) {
+        const score = p.scores?.[r] || 0;
+        totalScoreRaw += score;
+        const pct = roundTotals[r] > 0 ? (score / roundTotals[r]) * 100 : 0;
+        pctScores[r] = pct;
+        totalPct += pct;
+      }
+      return { ...p, pctScores, totalPct, totalScoreRaw, roundTotals };
+    });
+  },
+
   getGameUrl(gameId) {
     return `/b/${gameId}`;
   },

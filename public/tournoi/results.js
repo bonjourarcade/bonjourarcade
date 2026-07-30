@@ -53,21 +53,24 @@ document.addEventListener('DOMContentLoaded', () => {
         if (resultsData.overallChampion && overallChampionDisplay) {
             const champion = resultsData.overallChampion;
             const avatarSrc = champion.photoURL ? champion.photoURL : defaultAvatar;
+            const totalPct = typeof champion.totalPct === 'number' ? champion.totalPct : (champion.totalScoreRaw || champion.totalScore || 0);
+            const totalScoreRaw = champion.totalScoreRaw || champion.totalScore || 0;
             overallChampionDisplay.innerHTML = `
                 <img src="${avatarSrc}" alt="${champion.name}" class="player-avatar">
                 <span>${champion.name}</span>
-                <span class="score">(${champion.totalScore.toLocaleString()} points)</span>
+                <span class="score"><span class="num">${totalPct.toFixed(1)}%</span> <span class="dim">(${totalScoreRaw.toLocaleString()} pts)</span></span>
             `;
         }
 
         // Populate Cumulative Scores Table
         const cumulativeScoresTbody = document.getElementById('cumulative-scores-tbody');
         if (cumulativeScoresTbody && resultsData.cumulativeScoresTable) {
-            cumulativeScoresTbody.innerHTML = ''; // Clear existing
-            // Sort cumulative scores in ascending order for suspense, with rank inverted.
-            const sortedCumulativeScores = [...resultsData.cumulativeScoresTable].sort((a, b) => a.totalScore - b.totalScore);
-            const totalPlayers = sortedCumulativeScores.length;
-            sortedCumulativeScores.forEach((player, index) => {
+            cumulativeScoresTbody.innerHTML = '';
+            const sorted = [...resultsData.cumulativeScoresTable].sort((a, b) => (a.totalPct || a.totalScore || 0) - (b.totalPct || b.totalScore || 0));
+            const totalPlayers = sorted.length;
+            sorted.forEach((player, index) => {
+                const totalPct = typeof player.totalPct === 'number' ? player.totalPct : 0;
+                const totalScoreRaw = player.totalScoreRaw || player.totalScore || 0;
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${totalPlayers - index}.</td>
@@ -75,7 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <img src="${player.photoURL ? player.photoURL : defaultAvatar}" alt="${player.name}" class="player-avatar" style="width: 30px; height: 30px; border-radius: 50%; vertical-align: middle; margin-right: 10px;">
                         ${player.name}
                     </td>
-                    <td>${player.totalScore.toLocaleString()}</td>
+                    <td><span class="num">${totalPct.toFixed(1)}%</span> <span class="dim">(${totalScoreRaw.toLocaleString()})</span></td>
                 `;
                 cumulativeScoresTbody.appendChild(row);
             });
@@ -84,7 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Populate Round Summaries
         const roundSummariesContainer = document.getElementById('round-summaries-container');
         if (roundSummariesContainer && resultsData.roundSummaries) {
-            roundSummariesContainer.innerHTML = ''; // Clear existing
+            roundSummariesContainer.innerHTML = '';
             resultsData.roundSummaries.forEach(round => {
                 const roundTable = document.createElement('div');
                 roundTable.className = 'review-round-table';
@@ -92,10 +95,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 let playersHTML = '';
                 round.players.forEach(player => {
                     const eliminatedClass = player.eliminatedInThisRoundOrEarlier ? 'eliminated-in-review' : '';
+                    const pct = typeof player.pct === 'number' ? ` <span class="dim">(${player.pct.toFixed(1)}%)</span>` : '';
                     playersHTML += `
                         <div class="review-entry ${eliminatedClass}">
                             <span class="player-name">${player.name}</span>
-                            <span class="score">${player.score.toLocaleString()}</span>
+                            <span class="score"><span class="num">${player.score.toLocaleString()}</span>${pct}</span>
                         </div>
                     `;
                 });

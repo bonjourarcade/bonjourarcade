@@ -165,7 +165,7 @@ def main():
     
     required_fields = set(NEWSLETTER_REQUIRED_FIELDS)
     print("Validating the metadata fields required by send_newsletter.py")
-    print(f"Validating {len(required_fields)} required fields: {', '.join(sorted(required_fields))}")
+    print(f"Validating {len(required_fields)} required fields: {', '.join(sorted(required_fields)) if required_fields else '(none)'}")
     print()
     
     # Get all game IDs from predictions
@@ -178,9 +178,7 @@ def main():
     valid_count = 0
     
     for seed, game_id in game_entries:
-        # Convert game_id to string in case it's an integer (e.g., 1943)
         game_id_str = str(game_id)
-        # Get title from gamelist.json
         title = get_game_title_from_gamelist(game_id_str, gamelist_path)
         game_metadata_path = games_dir / game_id_str / 'metadata.yaml'
         is_valid, missing_fields, errors = validate_game_metadata(

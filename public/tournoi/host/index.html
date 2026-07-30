@@ -240,6 +240,10 @@
             <label>Description (optionnelle)</label>
             <textarea id="tournament-description" placeholder="Décris ton tournoi, les règles, etc." style="min-height:60px;"></textarea>
 
+            <label>Gains (optionnel)</label>
+            <input type="text" id="tournament-stakes" placeholder="Ex: 50$ pour le 1er, bières pour le top 3, etc.">
+            <div style="font-size:0.85rem;color:var(--muted);margin:-12px 0 16px;">Ce que les gagnants remportent</div>
+
             <label style="display:flex;align-items:center;gap:10px;margin:12px 0;cursor:pointer;">
               <input type="checkbox" id="is-public" style="width:auto;margin:0;">
               <span><strong>Tournoi public</strong> — visible sur la page d'accueil et joignable sans code</span>
@@ -306,6 +310,7 @@
             <div class="flex">
               <span id="participant-count" style="color:#aaa;font-size:0.9rem;"></span>
               <button id="share-link-btn" class="btn-secondary btn-sm">🔗 Partager</button>
+              <a id="player-view-btn" class="btn-secondary btn-sm" style="text-decoration:none;" target="_blank">👤 Vue joueur</a>
               <button id="cancel-tournament-btn" class="btn-danger btn-sm">Annuler</button>
             </div>
           </div>

@@ -556,4 +556,14 @@ textarea { resize: vertical; }
     background-color: #ffca2c;
 }
 
+.num {
+    display: block;
+}
+
+.dim {
+    display: block;
+    font-size: 0.75em;
+    color: #888;
+}
+
 /* Floating skip timer button removed (use existing skip-to-break button) */

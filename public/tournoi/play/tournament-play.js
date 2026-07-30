@@ -134,8 +134,9 @@ async function checkParticipation() {
       if (isJoinable) joinStatus = '✅ Inscriptions ouvertes';
       else if (t.status === 'active') joinStatus = '🔴 En cours';
 
-      $('join-tournament-info').textContent =
-        `${t.gamePool?.length || 0} jeux · ${pCount} participant${pCount > 1 ? 's' : ''} · ${joinStatus}`;
+      $('join-tournament-info').innerHTML =
+        `${t.gamePool?.length || 0} jeux · ${pCount} participant${pCount > 1 ? 's' : ''} · ${joinStatus}` +
+        (t.stakes ? `<br><span style="color:#ffd700;">🎁 ${t.stakes}</span>` : '');
 
       if (!isJoinable) {
         $('join-btn').disabled = true;
@@ -240,11 +241,20 @@ function renderFormatInfo(t) {
     return;
   }
 
-  formatContent.innerHTML = `<div style="font-size:0.9rem;color:var(--muted);line-height:1.6;">
+  let html = `<div style="font-size:0.9rem;color:var(--muted);line-height:1.6;">
     ⚔️ À chaque round, les joueurs avec les plus faibles scores sont éliminés.<br>
-    🏆 Le gagnant est le dernier survivant avec le score cumulatif le plus élevé.
+    📊 Chaque score est converti en <strong>%</strong> de ce que tous les joueurs ont marqué dans cette ronde.<br>
+    Le gagnant est celui avec la <strong>plus grande somme de %</strong> sur toutes les rondes.
   </div>`;
 
+  if (t.stakes) {
+    html += `<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);font-size:0.9rem;line-height:1.6;">
+      <div style="color:#ffd700;font-weight:600;margin-bottom:4px;">🎁 Qu'est-ce qu'on gagne?</div>
+      <span style="color:var(--text);">${t.stakes}</span>
+    </div>`;
+  }
+
+  formatContent.innerHTML = html;
   formatCard.classList.remove('hidden');
 }
 
@@ -354,7 +364,6 @@ function renderCombinedTable(participants, me, roundScores, roundIdx, totalRound
   // Build combined rows
   const rows = Object.entries(participants).map(([uid, p]) => {
     const scores = [...(p.scores || [])];
-    // Override current round score with best entry from roundScores
     if (bestEntry[uid] && bestEntry[uid].score > (scores[roundIdx] || 0)) {
       scores[roundIdx] = bestEntry[uid].score;
     }
@@ -371,7 +380,6 @@ function renderCombinedTable(participants, me, roundScores, roundIdx, totalRound
     };
   });
 
-  // Add roundScores-only users not yet in participants
   (roundScores || []).forEach(rs => {
     if (!rows.find(r => r.uid === rs.userId)) {
       const scores = new Array(totalRounds).fill(0);
@@ -390,8 +398,11 @@ function renderCombinedTable(participants, me, roundScores, roundIdx, totalRound
     }
   });
 
+  // Enrich with percentages
+  const scoredRows = TournoiUtils.computePercentages(rows, totalRounds);
+
   // Sort: non-eliminated first (by current round score DESC), then eliminated
-  rows.sort((a, b) => {
+  scoredRows.sort((a, b) => {
     const aElim = a.eliminated ? (a.eliminatedRound ?? -1) : Infinity;
     const bElim = b.eliminated ? (b.eliminatedRound ?? -1) : Infinity;
     if (bElim !== aElim) return bElim - aElim;
@@ -400,18 +411,16 @@ function renderCombinedTable(participants, me, roundScores, roundIdx, totalRound
     return bCurrent - aCurrent;
   });
 
-  // Compute cutoff for danger
-  const activeCount = rows.filter(r => !r.eliminated).length;
+  const activeCount = scoredRows.filter(r => !r.eliminated).length;
   const cutoff = TournoiUtils.computeRoundCutoff(activeCount, roundIdx, totalRounds) || 0;
 
-  // Build table
   let html = '<table class="combined-table"><thead><tr><th>#</th><th>Joueur</th>';
   for (let r = 0; r < totalRounds; r++) {
     html += `<th>R${r + 1}</th>`;
   }
-  html += '<th>Total</th></tr></thead><tbody>';
+  html += '<th>Total %</th></tr></thead><tbody>';
 
-  rows.forEach((r, i) => {
+  scoredRows.forEach((r, i) => {
     const isMe = r.uid === myUid;
     const isActive = !r.eliminated;
     const isDanger = isActive && cutoff > 0 && i >= cutoff;
@@ -423,7 +432,7 @@ function renderCombinedTable(participants, me, roundScores, roundIdx, totalRound
 
     html += `<tr class="${rowClass}">`;
     html += `<td class="rank-cell">${i + 1}</td>`;
-            html += `<td class="player-cell"><a href="/profil/?uid=${r.uid}" style="color:inherit;text-decoration:none;">${r.name}</a>${isDanger ? ' <span class="at-risk" title="Ce joueur est en danger d&#39;élimination">⚠️</span>' : ''}</td>`;
+    html += `<td class="player-cell"><a href="/profil/?uid=${r.uid}" style="color:inherit;text-decoration:none;">${r.name}</a>${isDanger ? ' <span class="at-risk" title="Ce joueur est en danger d&#39;élimination">⚠️</span>' : ''}</td>`;
 
     for (let rr = 0; rr < totalRounds; rr++) {
       const score = r.scores[rr];
@@ -434,9 +443,10 @@ function renderCombinedTable(participants, me, roundScores, roundIdx, totalRound
           gsAttr = ` data-game-score-id="${bestEntry[r.uid].gameScoreId}"`;
           addClass = ' has-proof';
         }
-        html += `<td class="score-cell${addClass}"${gsAttr}>${score.toLocaleString()}</td>`;
+        const pct = r.pctScores[rr];
+        html += `<td class="score-cell${addClass}"${gsAttr}><span class="num">${score.toLocaleString()}</span><span class="dim">(${pct.toFixed(1)}%)</span></td>`;
       } else if (rr < roundIdx) {
-        html += `<td class="score-cell zero">0</td>`;
+        html += `<td class="score-cell zero"><span class="num">0</span><span class="dim">(0%)</span></td>`;
       } else if (rr === roundIdx) {
         html += `<td class="score-cell zero">—</td>`;
       } else {
@@ -444,7 +454,7 @@ function renderCombinedTable(participants, me, roundScores, roundIdx, totalRound
       }
     }
 
-    html += `<td class="total-cell">${r.total.toLocaleString()}${r.hasUnverified ? ' <span class="pending-badge" title="En attente de validation">⏳</span>' : ''}</td>`;
+    html += `<td class="total-cell"><span class="num">${r.totalPct.toFixed(1)}%</span> <span class="dim">(${r.totalScoreRaw.toLocaleString()})</span>${r.hasUnverified ? ' <span class="pending-badge" title="En attente de validation">⏳</span>' : ''}</td>`;
     html += '</tr>';
   });
 
@@ -515,17 +525,17 @@ async function buildResultsFromFirestore(id) {
     const tSnap = await getDoc(doc(db, 'tournaments', id));
     if (!tSnap.exists) { console.error('Tournament doc not found:', id); return null; }
 
+    const totalRounds = (tSnap.data().games || []).length;
+
     const pSnap = await getDocs(collection(db, 'tournaments', id, 'participants'));
     const participants = [];
     pSnap.forEach(d => {
       const pd = d.data();
-      const totalScore = (pd.scores || []).reduce((s, v) => s + v, 0);
       const hasUnverified = (pd.scores || []).some((s, i) => s > 0 && !(pd.scoresVerified || [])[i]);
       participants.push({
         uid: d.id,
         name: pd.displayName || 'Anonyme',
         photoURL: pd.photoURL || '',
-        totalScore,
         hasUnverified,
         scores: pd.scores || [],
         eliminated: pd.eliminated || false,
@@ -533,12 +543,8 @@ async function buildResultsFromFirestore(id) {
       });
     });
 
-    participants.sort((a, b) => {
-      const roundA = a.eliminated ? a.eliminatedRound : Infinity;
-      const roundB = b.eliminated ? b.eliminatedRound : Infinity;
-      if (roundB !== roundA) return roundB - roundA;
-      return b.totalScore - a.totalScore;
-    });
+    const scored = TournoiUtils.computePercentages(participants, totalRounds);
+    scored.sort((a, b) => b.totalPct - a.totalPct);
 
     // Resolve photoURL for each participant via getPublicProfile
     try {
@@ -557,18 +563,20 @@ async function buildResultsFromFirestore(id) {
       });
     } catch (e) { /* non-critical */ }
 
-    const podiumPlayers = participants.slice(0, 3).map(p => ({
+    const podiumPlayers = scored.slice(0, 3).map(p => ({
       name: p.name,
       photoURL: p.photoURL,
-      score: p.totalScore,
+      totalPct: p.totalPct,
+      totalScoreRaw: p.totalScoreRaw,
     }));
 
     return {
       podiumPlayers,
-      cumulativeScoresTable: participants.map(p => ({
+      cumulativeScoresTable: scored.map(p => ({
         name: p.name,
         photoURL: p.photoURL,
-        totalScore: p.totalScore,
+        totalPct: p.totalPct,
+        totalScoreRaw: p.totalScoreRaw,
         hasUnverified: p.hasUnverified,
         eliminated: p.eliminated,
       })),
@@ -598,7 +606,7 @@ function renderFinishedResults(results) {
         <div class="rank-num">${medal}</div>
         <img src="${p.photoURL || '../assets/default-avatar.png'}">
         <div class="name">${p.name}</div>
-        <div class="score">${p.score.toLocaleString()} pts</div>
+        <div class="score"><span class="num">${p.totalPct.toFixed(1)}%</span> <span class="dim">(${p.totalScoreRaw.toLocaleString()} pts)</span></div>
       </div>`;
     }
     html += '</div>';
@@ -607,14 +615,14 @@ function renderFinishedResults(results) {
   if (results.cumulativeScoresTable) {
     html += '<div style="margin-top:20px;">';
     html += '<div class="section-title">Classement final</div>';
-    html += '<table class="cumul-table"><thead><tr><th>#</th><th></th><th>Joueur</th><th>Total</th></tr></thead><tbody>';
+    html += '<table class="cumul-table"><thead><tr><th>#</th><th></th><th>Joueur</th><th>Total %</th></tr></thead><tbody>';
       results.cumulativeScoresTable.forEach((p, i) => {
         const isMe = p.name === (currentUser?.displayName || '');
         html += `<tr class="${p.eliminated ? 'eliminated-row' : ''} ${isMe ? 'highlight-row' : ''}">
           <td>${i + 1}</td>
           <td><img src="${p.photoURL || '../assets/default-avatar.png'}" class="avatar-sm"></td>
           <td>${p.name}</td>
-          <td>${p.totalScore.toLocaleString()}${p.hasUnverified ? ' <span class="pending-badge" title="Certains scores sont en attente de validation">⏳</span>' : ''}</td>
+          <td><span class="num">${p.totalPct.toFixed(1)}%</span> <span class="dim">(${p.totalScoreRaw.toLocaleString()})</span>${p.hasUnverified ? ' <span class="pending-badge" title="Certains scores sont en attente de validation">⏳</span>' : ''}</td>
         </tr>`;
       });
     html += '</tbody></table></div>';

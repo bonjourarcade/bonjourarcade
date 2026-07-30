@@ -91,8 +91,8 @@
     .combined-table .score-cell { font-family: monospace; font-weight: 600; min-width: 60px; }
     .combined-table .score-cell.zero { color: var(--muted-strong); font-weight: 400; }
     .combined-table .score-cell.future { }
-    .combined-table .score-cell.has-comment { text-decoration: underline wavy rgba(255, 255, 255, 0.4); text-underline-offset: 3px; position: relative; cursor: help; }
-    body.theme-light .combined-table .score-cell.has-comment { text-decoration-color: #4a9eff; }
+    .combined-table .score-cell.has-comment { position: relative; cursor: help; }
+    .combined-table .score-cell.has-comment .dim::after { content: ' 💬'; }
     .combined-table .score-cell.has-comment:hover::after {
       content: attr(title);
       position: absolute;
@@ -129,6 +129,9 @@
     .combined-table .me-row.eliminated-row { outline-color: #e74c3c; }
     .combined-table .at-risk { font-size: 0.9rem; }
     .combined-table .pending-badge { cursor: help; font-size: 0.8rem; }
+
+    .dim { display: block; font-size: 0.75em; color: #888; }
+    .num { display: block; }
 
     .upcoming-games { display: flex; gap: 12px; margin: 16px 0; overflow-x: auto; padding-bottom: 8px; justify-content: center; flex-wrap: wrap; }
     .upcoming-game { flex: 0 0 90px; text-align: center; position: relative; }
@@ -229,9 +232,9 @@
       </div>
 
       <div id="tournament-info" class="hidden">
-        <div class="card">
-          <div id="play-description" style="font-size:0.9rem;color:var(--muted);margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border);"></div>
-          <div class="info-line"><span class="label">Code</span><span class="value" id="play-sharecode"></span></div>
+          <div class="card">
+            <div id="play-description" style="font-size:0.9rem;color:var(--muted);margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border);"></div>
+            <div class="info-line"><span class="label">Code</span><span class="value" id="play-sharecode"></span></div>
           <div class="info-line"><span class="label">Participants</span><span class="value" id="play-participant-count"></span></div>
           <div class="info-line"><span class="label">Ronde</span><span class="value" id="play-round-info"></span></div>
           <div class="info-line"><span class="label">Statut</span><span class="value" id="play-status"></span></div>

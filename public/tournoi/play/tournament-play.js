@@ -244,7 +244,7 @@ function renderFormatInfo(t) {
   let html = `<div style="font-size:0.9rem;color:var(--muted);line-height:1.6;">
     ⚔️ À chaque round, les joueurs avec les plus faibles scores sont éliminés.<br>
     📊 Chaque score est converti en <strong>%</strong> de ce que tous les joueurs ont marqué dans cette ronde.<br>
-    Le gagnant est celui avec la <strong>plus grande somme de %</strong> sur toutes les rondes.
+    🏆 Le gagnant est celui avec la <strong>plus grande somme de %</strong> sur toutes les rondes.
   </div>`;
 
   if (t.stakes) {

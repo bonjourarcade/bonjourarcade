@@ -7,9 +7,12 @@
         avatarFallback: document.getElementById('profil-avatar-fallback'),
         avatarActions: document.getElementById('profil-avatar-actions'),
         avatarUrlInput: document.getElementById('profil-avatar-url'),
-        avatarSetUrl: document.getElementById('profil-avatar-set-url'),
         avatarReset: document.getElementById('profil-avatar-reset'),
         avatarDelete: document.getElementById('profil-avatar-delete'),
+        avatarModal: document.getElementById('avatar-modal'),
+        avatarModalInput: document.getElementById('avatar-modal-input'),
+        avatarModalSave: document.getElementById('avatar-modal-save'),
+        avatarModalCancel: document.getElementById('avatar-modal-cancel'),
         cover: document.querySelector('.profil-cover'),
         bannerPicker: document.getElementById('profil-banner-picker'),
         bannerReset: document.getElementById('profil-banner-reset'),
@@ -449,6 +452,7 @@
 
     elements.nameCancel.addEventListener('click', function () {
         revertOriginals();
+        elements.avatarUrlInput.value = '';
         elements.editName.style.display = 'none';
         elements.avatarActions.style.display = 'none';
         if (elements.editFooter) elements.editFooter.style.display = 'none';
@@ -458,17 +462,15 @@
 
     function savePendingChanges() {
       var promises = [];
-
-      if (pending.avatar !== null) {
-        var avatarPromise = saveAvatarChanges(pending.avatar);
-        promises.push(avatarPromise);
+      var url = elements.avatarUrlInput.value.trim();
+      if (url) {
+        promises.push(saveAvatarChanges(url));
+      } else if (pending.avatar !== null) {
+        promises.push(saveAvatarChanges(pending.avatar));
       }
-
       if (pending.banner !== null) {
-        var bannerPromise = saveBannerColor(pending.banner);
-        promises.push(bannerPromise);
+        promises.push(saveBannerColor(pending.banner));
       }
-
       return Promise.all(promises);
     }
 
@@ -531,6 +533,7 @@
             elements.nameStatus.className = 'profil-name-status success';
             pending.avatar = null;
             pending.banner = null;
+            elements.avatarUrlInput.value = '';
             setTimeout(function () {
                 elements.editName.style.display = 'none';
                 elements.avatarActions.style.display = 'none';
@@ -559,19 +562,56 @@
         window.location.href = '/';
     });
 
-    // Avatar URL
-    elements.avatarSetUrl.addEventListener('click', function () {
-        var url = elements.avatarUrlInput.value.trim();
+    // Crayon click → open avatar modal
+    var editHint = document.querySelector('.profil-avatar-edit-hint');
+    if (editHint) {
+        editHint.addEventListener('click', function () {
+            if (!isOwnProfile) return;
+            elements.avatarModalInput.value = '';
+            elements.avatarModal.style.display = 'flex';
+            elements.avatarModalInput.focus();
+        });
+    }
+
+    // Avatar modal save
+    elements.avatarModalSave.addEventListener('click', async function () {
+        var url = elements.avatarModalInput.value.trim();
         if (!url) return;
-        elements.avatarImg.src = url;
-        elements.avatarImg.style.display = 'block';
-        elements.avatarFallback.style.display = 'none';
-        pending.avatar = url;
-        elements.avatarUrlInput.value = '';
+        elements.avatarModalSave.disabled = true;
+        elements.avatarModalSave.textContent = '...';
+        try {
+            await saveAvatarChanges(url);
+            elements.avatarImg.src = url;
+            elements.avatarImg.style.display = 'block';
+            elements.avatarFallback.style.display = 'none';
+            if (profile) profile.photoURL = url;
+            closeAvatarModal();
+            showToast('Avatar mis à jour !', 'success');
+        } catch (e) {
+            showToast('Erreur lors de la mise à jour', 'error');
+        } finally {
+            elements.avatarModalSave.disabled = false;
+            elements.avatarModalSave.textContent = 'Enregistrer';
+        }
     });
 
-    elements.avatarUrlInput.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter') elements.avatarSetUrl.click();
+    // Avatar modal cancel
+    elements.avatarModalCancel.addEventListener('click', closeAvatarModal);
+    elements.avatarModal.addEventListener('click', function (e) {
+        if (e.target === elements.avatarModal) closeAvatarModal();
+    });
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && elements.avatarModal.style.display === 'flex') closeAvatarModal();
+    });
+
+    function closeAvatarModal() {
+        elements.avatarModal.style.display = 'none';
+        elements.avatarModalInput.value = '';
+    }
+
+    // Enter in avatar modal input
+    elements.avatarModalInput.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') elements.avatarModalSave.click();
     });
 
     elements.avatarReset.addEventListener('click', function () {

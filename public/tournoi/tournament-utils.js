@@ -185,9 +185,20 @@ const TournoiUtils = {
     const modal = document.getElementById('screenshot-modal');
     if (!modal) return;
     const img = document.getElementById('screenshot-modal-img') || modal.querySelector('img');
-    if (img) img.src = url;
+    if (!img) return;
+    modal.classList.add('is-loading');
     modal.style.display = 'flex';
-    modal.onclick = () => { modal.style.display = 'none'; if (img) img.src = ''; };
+    const done = () => { modal.classList.remove('is-loading'); };
+    img.onload = done;
+    img.onerror = done;
+    img.src = url;
+    modal.onclick = () => {
+      modal.style.display = 'none';
+      modal.classList.remove('is-loading');
+      img.onload = null;
+      img.onerror = null;
+      img.src = '';
+    };
   },
 };
 

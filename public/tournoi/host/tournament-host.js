@@ -746,9 +746,20 @@ $('back-to-list-btn').addEventListener('click', () => {
 function showScreenshotPreview(url) {
   const modal = document.getElementById('screenshot-modal');
   const img = document.getElementById('screenshot-modal-img');
-  img.src = url;
+  if (!modal || !img) return;
+  modal.classList.add('is-loading');
   modal.style.display = 'flex';
-  modal.onclick = () => { modal.style.display = 'none'; img.src = ''; };
+  const done = () => { modal.classList.remove('is-loading'); };
+  img.onload = done;
+  img.onerror = done;
+  img.src = url;
+  modal.onclick = () => {
+    modal.style.display = 'none';
+    modal.classList.remove('is-loading');
+    img.onload = null;
+    img.onerror = null;
+    img.src = '';
+  };
 }
 
 // Collapsible create section

@@ -71,9 +71,6 @@
                 <div id="profil-avatar-actions" class="profil-avatar-actions" style="display:none;">
                     <input id="profil-avatar-url" type="text" placeholder="URL de l'image (https://...)" class="profil-avatar-url-input">
                     <div class="profil-avatar-actions-btns">
-                        <button id="profil-avatar-set-url" class="profil-avatar-btn" type="button" title="Utiliser cette URL">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                        </button>
                         <button id="profil-avatar-reset" class="profil-avatar-btn" type="button" title="Revenir a l'avatar SSO">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
                         </button>
@@ -153,6 +150,17 @@
             </div>
         </div>
     </main>
+
+    <div id="avatar-modal" class="avatar-modal" role="dialog" aria-modal="true" aria-label="Modifier l'avatar">
+        <div class="avatar-modal-content">
+            <h3 class="avatar-modal-title">Modifier l'avatar</h3>
+            <input id="avatar-modal-input" type="text" placeholder="URL de l'image (https://...)" class="avatar-modal-input" autocomplete="off">
+            <div class="avatar-modal-actions">
+                <button id="avatar-modal-cancel" class="profil-name-cancel" type="button">Annuler</button>
+                <button id="avatar-modal-save" class="profil-name-save" type="button">Enregistrer</button>
+            </div>
+        </div>
+    </div>
 
     <div id="proof-modal" class="proof-modal" role="dialog" aria-modal="true" aria-label="Preuve du score">
         <div class="proof-modal-content">
@@ -302,6 +310,49 @@
         }
         @keyframes proof-modal-spin {
             to { transform: rotate(360deg); }
+        }
+        .avatar-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .avatar-modal-content {
+            background: var(--surface);
+            border-radius: 16px;
+            padding: 28px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+        }
+        .avatar-modal-title {
+            margin: 0 0 16px;
+            font-size: 1.1rem;
+            color: var(--text-color);
+        }
+        .avatar-modal-input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--surface);
+            color: var(--text-color);
+            font-size: 0.95rem;
+            box-sizing: border-box;
+            outline: none;
+        }
+        .avatar-modal-input:focus {
+            border-color: var(--accent);
+        }
+        .avatar-modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 18px;
         }
     </style>
     <script type="module" src="../assets/js/firebase-setup.js"></script>

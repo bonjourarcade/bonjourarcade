@@ -345,7 +345,10 @@
         }
 
         function getGameName(gameId, gamelist) {
-          const g = gamelist.find(x => x.id === gameId);
+          if (!gameId) return null;
+          const id = String(gameId).toLowerCase();
+          const g = gamelist.find(x => x.id === gameId) ||
+                    gamelist.find(x => x.id && String(x.id).toLowerCase() === id);
           return g ? g.title : gameId;
         }
 
@@ -393,8 +396,10 @@
           }
         }
 
-        loadGamelist().then(list => { gamelist = list; });
-        refreshTournaments();
+        loadGamelist().then(list => {
+          gamelist = list;
+          refreshTournaments();
+        });
         if (refreshInterval) clearInterval(refreshInterval);
         refreshInterval = setInterval(refreshTournaments, 30000);
       }

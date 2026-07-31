@@ -2141,7 +2141,8 @@
 
         try {
             const token = await user.getIdTokenResult(true);
-            const hasAdminClaim = Boolean(token && token.claims && token.claims.admin === true);
+            const claimEnabled = (value) => value === true || value === 'true';
+            const hasAdminClaim = Boolean(token && token.claims && (claimEnabled(token.claims.admin) || claimEnabled(token.claims.scoreModerator)));
 
             if (hasAdminClaim) {
                 applyAdminState(true);
@@ -2156,9 +2157,9 @@
             console.warn('Impossible de verifier les claims admin:', error);
         }
 
-        if (typeof window.checkFirebaseAdminAccess === 'function') {
+        if (typeof window.checkFirebaseScoreModeratorAccess === 'function') {
             try {
-                applyAdminState(await window.checkFirebaseAdminAccess());
+                applyAdminState(await window.checkFirebaseScoreModeratorAccess());
 
                 if (state.selectedPlayerKey) {
                     showPlayerScores(state.selectedPlayerKey);

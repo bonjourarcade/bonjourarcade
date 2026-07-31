@@ -301,12 +301,12 @@
     }
 
     async function checkAdminAndPending() {
-      if (!window.firebaseAuth || !window.checkFirebaseAdminAccess) return;
+      if (!window.firebaseAuth || !window.checkFirebaseScoreModeratorAccess) return;
       const now = Date.now();
       if (now - lastAdminCheck < 30000 && !lastAdminResult) return;
       lastAdminCheck = now;
       try {
-        const isAdmin = await window.checkFirebaseAdminAccess();
+        const isAdmin = await window.checkFirebaseScoreModeratorAccess();
         lastAdminResult = isAdmin;
         if (isAdmin && adminReviewLink && adminReviewSection && adminReviewBadge) {
           adminReviewLink.style.display = 'flex';

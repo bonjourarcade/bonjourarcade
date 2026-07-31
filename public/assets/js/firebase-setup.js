@@ -65,18 +65,62 @@ window.onFirebaseAuthStateChanged = (callback) => {
     return onAuthStateChanged(auth, callback);
 };
 
-window.checkFirebaseAdminAccess = async () => {
+async function getFirebaseClaims() {
     if (!auth.currentUser) {
-        return false;
+        return { admin: false, scoreModerator: false, tournamentHost: false };
     }
+
+    const claimEnabled = (value) => value === true || value === 'true';
 
     try {
         const token = await auth.currentUser.getIdTokenResult(true);
-        if (token && token.claims && token.claims.admin === true) {
-            return true;
-        }
+        const claims = (token && token.claims) || {};
+        return {
+            admin: claimEnabled(claims.admin),
+            scoreModerator: claimEnabled(claims.scoreModerator),
+            tournamentHost: claimEnabled(claims.tournamentHost),
+        };
     } catch (error) {
-        console.warn('Admin claim refresh failed:', error);
+        console.warn('Claims refresh failed:', error);
+        return { admin: false, scoreModerator: false, tournamentHost: false };
+    }
+}
+
+window.getFirebaseClaims = getFirebaseClaims;
+
+// Strict full admin check (claim only): used for permission management UI.
+window.checkFirebaseAdminAccess = async () => {
+    const claims = await getFirebaseClaims();
+    return claims.admin;
+};
+
+// Score moderator: can validate pending scores. Fallback probe for the emulator.
+window.checkFirebaseScoreModeratorAccess = async () => {
+    const claims = await getFirebaseClaims();
+    if (claims.admin || claims.scoreModerator) {
+        return true;
+    }
+
+    try {
+        const fn = httpsCallable(functions, 'getSubmissionQueue');
+        await fn({ status: 'pending', limit: 1 });
+        return true;
+    } catch (error) {
+        return false;
+    }
+};
+
+// Tournament host: can create and manage their own tournaments.
+window.checkFirebaseTournamentHostAccess = async () => {
+    const claims = await getFirebaseClaims();
+    return claims.admin || claims.tournamentHost;
+};
+
+// Any admin-like role (used to surface admin links in the UI).
+window.checkFirebaseAnyAdminAccess = async () => {
+    const claims = await getFirebaseClaims();
+    if (claims.admin || claims.scoreModerator || claims.tournamentHost) {
+        return true;
     }
 
     try {

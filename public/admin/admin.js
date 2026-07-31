@@ -16,16 +16,42 @@ const scoresContainer = document.getElementById('scores-container');
 const imageModal = document.getElementById('image-modal');
 const imageModalPreview = document.getElementById('image-modal-preview');
 
+const tabScores = document.getElementById('tab-scores');
+const tabPermissions = document.getElementById('tab-permissions');
+const scoresView = document.getElementById('scores-view');
+const permissionsView = document.getElementById('permissions-view');
+
 const scoreDrafts = new Map();
 
-window.onFirebaseAuthStateChanged((user) => {
+function switchTab(tab) {
+    const isScores = tab === 'scores';
+    tabScores.classList.toggle('active', isScores);
+    tabPermissions.classList.toggle('active', !isScores);
+    scoresView.style.display = isScores ? 'block' : 'none';
+    permissionsView.style.display = isScores ? 'none' : 'block';
+}
+
+tabScores.addEventListener('click', () => switchTab('scores'));
+tabPermissions.addEventListener('click', () => switchTab('permissions'));
+
+window.onFirebaseAuthStateChanged(async (user) => {
     if (user) {
         authSection.style.display = 'none';
         adminSection.style.display = 'block';
         loadPendingScores();
+
+        const isFullAdmin = typeof window.checkFirebaseAdminAccess === 'function'
+            ? await window.checkFirebaseAdminAccess()
+            : false;
+        if (isFullAdmin) {
+            tabPermissions.style.display = '';
+        } else {
+            tabPermissions.style.display = 'none';
+        }
     } else {
         authSection.style.display = 'block';
         adminSection.style.display = 'none';
+        tabPermissions.style.display = 'none';
     }
 });
 

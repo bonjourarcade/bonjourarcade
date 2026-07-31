@@ -39,7 +39,7 @@ function setupAuth() {
     currentUser = user;
     if (user) {
       $('admin-name').textContent = user.displayName || user.email;
-      isAdmin = await window.checkFirebaseAdminAccess();
+      isAdmin = await window.checkFirebaseTournamentHostAccess();
       if (isAdmin) {
         hide('auth-section');
         show('admin-section');

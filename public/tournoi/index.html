@@ -234,7 +234,7 @@
         }
 
         async function renderAdmin() {
-            const isAdmin = await window.checkFirebaseAdminAccess();
+            const isAdmin = await window.checkFirebaseTournamentHostAccess();
             if (!isAdmin) { $('admin-view').classList.add('hidden'); return; }
             $('admin-view').classList.remove('hidden');
 

@@ -12,7 +12,7 @@ pages:
   stage: deploy
   before_script:
     - apk update
-    - apk add --no-cache bash curl imagemagick git python3 py3-pip jq tzdata #zip  # Install necessary packages
+    - apk add --no-cache bash curl imagemagick git python3 py3-pip jq ruby tzdata #zip  # Install necessary packages
 
     # Install Google Cloud SDK (non-interactive)
     - curl https://sdk.cloud.google.com | bash -s -- --disable-prompts > /dev/null
@@ -44,7 +44,7 @@ pages:
         #- scripts/build_parallel.sh
         - scripts/build_sequential.sh
         #- scripts/generate_gamelist_parallel.sh
-        - scripts/generate_gamelist_sequential.sh
+        - scripts/generate_gamelist.rb
         - scripts/generate_thumbnails.sh
         - scripts/get_current_week_game.py
 

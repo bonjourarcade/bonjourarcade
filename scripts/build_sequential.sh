@@ -21,7 +21,7 @@ echo -e "${CYAN}📋 Generating gamelist.json first, then thumbnails...${NC}"
 # Step 1: Generate gamelist.json (sequential with progress)
 echo -e "${BLUE}🔄 Step 1: Generating gamelist.json...${NC}"
 GAMELIST_START_TIME=$(date +%s)
-bash scripts/generate_gamelist_sequential.sh
+ruby scripts/generate_gamelist.rb
 GAMELIST_EXIT_CODE=$?
 GAMELIST_END_TIME=$(date +%s)
 GAMELIST_DURATION=$((GAMELIST_END_TIME - GAMELIST_START_TIME))

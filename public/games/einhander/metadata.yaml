@@ -10,7 +10,7 @@ genre: Shooter
 #  - "V: "
 
 #to_start: Espace, puis Enter
-announcement_message: "Il fut un temps… à l’ère du grand chaos, où la Terre et la Lune étaient en guerre. Un casse-cou venu de la Lune pilotait un engin étrange. Redouté, il était appelé… Einhänder en raison de sa forme."
+announcement_message: "Il fut un temps… à l’ère du grand chaos, où la Terre et la Lune étaient en guerre. Un casse-cou venu de la Lune pilotait un engin étrange. On le redoutait et, en raison de sa forme, il était appelé… Einhänder."
 
 enable_score: true
 hide: yes

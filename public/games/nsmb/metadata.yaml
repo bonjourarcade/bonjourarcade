@@ -1,7 +1,7 @@
-title: 
-year: 
-developer: 
-genre: 
+title: New Super Mario Bros.
+year: 2006
+developer: Nintendo EAD
+genre: Platform
 #controls:
 #  - "←↓↑→: Mouvement"
 #  - "Z: "
@@ -15,4 +15,4 @@ genre:
 
 enable_score: true
 
-added: DATE_PLACEHOLDER
+added: 2026-08-01

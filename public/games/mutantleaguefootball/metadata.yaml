@@ -1,7 +1,7 @@
-title: 
-year: 
-developer: 
-genre: 
+title: Mutant League Football
+developer: Mutant Productions
+year: 1993
+genre: Sports
 #controls:
 #  - "←↓↑→: Mouvement"
 #  - "Z: "
@@ -15,4 +15,4 @@ genre:
 
 enable_score: true
 
-added: DATE_PLACEHOLDER
+added: 2026-08-01

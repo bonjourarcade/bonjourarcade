@@ -1,7 +1,7 @@
-title: 
-year: 
-developer: 
-genre: 
+title: "Mazin Saga: Mutant Fighter"
+developer: Almanic Corp
+year: 1993
+genre: Action, Beat 'em up
 #controls:
 #  - "←↓↑→: Mouvement"
 #  - "Z: "
@@ -15,4 +15,4 @@ genre:
 
 enable_score: true
 
-added: DATE_PLACEHOLDER
+added: 2026-08-01

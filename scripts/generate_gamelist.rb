@@ -22,7 +22,7 @@ ROMS_DIR = 'roms'
 OUTPUT_FILE = 'public/gamelist.json'
 DEFAULT_COVER = 'assets/images/placeholder_thumb.png'
 LAUNCHER_PAGE = '/b'
-TEXT_HELPER_EXTENSIONS = %w[.md .markdown .txt .sh .bash .zsh .ps1 .bat].freeze
+TEXT_HELPER_EXTENSIONS = %w[.markdown .txt .sh .bash .zsh .ps1 .bat].freeze
 
 CORE_BY_DIR = {
   'arcade' => 'arcade',

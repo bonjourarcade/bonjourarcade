@@ -1,0 +1,18 @@
+title: Super Mario 64 DS
+year: 2004
+developer: Nintendo EAD
+genre: Platform
+#controls:
+#  - "←↓↑→: Mouvement"
+#  - "Z: "
+#  - "X: "
+#  - "C: "
+#  - "V: "
+
+#to_start: Espace, puis Enter
+#announcement_message: ""
+#problem: true
+
+enable_score: true
+
+added: 2026-08-01

@@ -6,7 +6,7 @@ core: external
 game_type: external
 external_url: /rogue
 launch_button_text: "Play Now!"
-launch_button_url: "/rogue"
+launch_button_url: "https://bonjourarcade.com/dos/?game=rogue.jsdos"
 description: |
   Le jeu qui a défini un nouveau genre : les roguelikes.
 enable_score: true

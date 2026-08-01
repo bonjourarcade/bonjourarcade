@@ -1,0 +1,18 @@
+title: OutRun (GEN)
+year: 1991
+developer: Studio 128
+genre: Racing
+#controls:
+#  - "←↓↑→: Mouvement"
+#  - "Z: "
+#  - "X: "
+#  - "C: "
+#  - "V: "
+
+#to_start: Espace, puis Enter
+#announcement_message: ""
+#problem: true
+
+enable_score: true
+
+added: 2026-08-01

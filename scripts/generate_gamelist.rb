@@ -108,12 +108,13 @@ def collect_rom_entries
               log(BLUE, "🗂️  Scanning roms directory: #{ROMS_DIR}")
               return [] unless Dir.exist?(ROMS_DIR)
 
+              root = File.realpath(ROMS_DIR)
               found = []
-              Find.find(ROMS_DIR) do |path|
+              Find.find(root) do |path|
                 next unless File.file?(path)
-                next if File.basename(path).start_with?('.')
+                next if path.split('/').any? { |segment| segment.start_with?('.') }
 
-                relative = path.sub(%r{\A#{Regexp.escape(ROMS_DIR)}/}, '')
+                relative = path.sub(%r{\A#{Regexp.escape(root)}/}, '')
                 next if relative.count('/') > 1
 
                 found << relative

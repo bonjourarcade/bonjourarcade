@@ -136,7 +136,7 @@ async function checkParticipation() {
 
       $('join-tournament-info').innerHTML =
         `${t.gamePool?.length || 0} jeux · ${pCount} participant${pCount > 1 ? 's' : ''} · ${joinStatus}` +
-        (t.stakes ? `<br><span style="color:#ffd700;">🎁 ${t.stakes}</span>` : '');
+        (t.stakes ? `<br><span class="accent-text">🎁 ${t.stakes}</span>` : '');
 
       if (!isJoinable) {
         $('join-btn').disabled = true;
@@ -249,7 +249,7 @@ function renderFormatInfo(t) {
 
   if (t.stakes) {
     html += `<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);font-size:0.9rem;line-height:1.6;">
-      <div style="color:#ffd700;font-weight:600;margin-bottom:4px;">🎁 Qu'est-ce qu'on gagne?</div>
+      <div class="accent-text" style="font-weight:600;margin-bottom:4px;display:inline-block;">🎁 Qu'est-ce qu'on gagne?</div>
       <span style="color:var(--text);">${t.stakes}</span>
     </div>`;
   }

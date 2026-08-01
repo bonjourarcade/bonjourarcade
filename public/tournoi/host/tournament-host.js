@@ -581,7 +581,7 @@ async function renderResults(id) {
   }
 
   if (results.overallChampion) {
-    html += `<p style="text-align:center;color:#ffd700;font-size:1.2rem;">
+    html += `<p class="accent-text" style="text-align:center;font-size:1.2rem;display:inline-block;width:100%;box-sizing:border-box;">
       🏆 Champion cumulatif: <strong>${results.overallChampion.uid ? `<a href="/profil/?uid=${results.overallChampion.uid}" style="color:inherit;text-decoration:none;">${results.overallChampion.name}</a>` : results.overallChampion.name}</strong>
       <span class="num">${results.overallChampion.totalPct.toFixed(1)}%</span> <span class="dim">(${results.overallChampion.totalScoreRaw.toLocaleString()} pts)</span>
     </p>`;

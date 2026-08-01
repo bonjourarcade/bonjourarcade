@@ -20,6 +20,10 @@
             --text: #f0f0f5;
             --muted: #888898;
             --radius: 14px;
+            --accent-text: #ffd700;
+            --accent-bg: transparent;
+            --accent-pad: 0;
+            --accent-radius: 0;
         }
 
         body.theme-light {
@@ -29,6 +33,10 @@
             --border: rgba(0, 0, 0, 0.12);
             --text: #1d1d1f;
             --muted: #6e6e7a;
+            --accent-text: #1d1d1f;
+            --accent-bg: rgba(255, 215, 0, 0.55);
+            --accent-pad: 1px 6px;
+            --accent-radius: 4px;
         }
 
         * {
@@ -76,8 +84,15 @@
         header h1 {
             font-size: 1.1rem;
             font-weight: 700;
-            color: var(--accent);
+            color: var(--accent-text);
+            background: var(--accent-bg);
+            padding: var(--accent-pad);
+            border-radius: var(--accent-radius);
             letter-spacing: 0.5px;
+        }
+
+        body.theme-light header h1 {
+            display: inline-block;
         }
 
         .header-meta {

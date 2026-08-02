@@ -93,19 +93,7 @@
     }
 
     async function getGameList() {
-        const cacheBuster = '?v=' + Date.now();
-        const url = isLocalhost() ? '/gamelist.json' + cacheBuster : 'https://storage.googleapis.com/bonjourarcade/gamelist.json' + cacheBuster;
-        const response = await fetch(url);
-
-        if (!response.ok) {
-            throw new Error('Impossible de charger gamelist.json');
-        }
-
-        const data = await response.json();
-        if (!data || !Array.isArray(data.games)) {
-            throw new Error('Format de gamelist.json invalide');
-        }
-
+        const data = await window.fetchGamelist();
         return data.games;
     }
 
@@ -217,13 +205,9 @@
     }
 
     async function listGameScores(gameId) {
-        const payload = {
-            timeRange: 'all',
-            gameId: gameId || 'all'
-        };
-
-        const result = await callFunction('listGameScores', payload, 'listGameScores');
-        const scores = Array.isArray(result.scores) ? result.scores : [];
+        // fetchLeaderboardScores handles localhost + production and caches (5 min TTL)
+        const data = await window.fetchLeaderboardScores(gameId || 'all');
+        const scores = data && data.result && Array.isArray(data.result.scores) ? data.result.scores : [];
         return scores.map(normalizeGameScore);
     }
 

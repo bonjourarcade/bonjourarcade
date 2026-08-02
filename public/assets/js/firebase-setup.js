@@ -156,6 +156,7 @@ window.submitGameScore = async (gameId, score, comment, screenshotBase64, tourna
     for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
         try {
             const result = await submitScoreFn(body);
+            if (window.invalidateLeaderboard) window.invalidateLeaderboard(gameId);
             return result.data;
         } catch (error) {
             const isRetryable = error && typeof error.code === 'string' &&
@@ -199,6 +200,7 @@ window.verifyGameScore = async (scoreId, override, notifyWebhooks) => {
         override: override || undefined,
         notifyWebhooks: notifyWebhooks === false ? false : undefined
     });
+    if (window.invalidateLeaderboardAll) window.invalidateLeaderboardAll();
     return result.data;
 };
 
@@ -206,19 +208,28 @@ window.verifyGameScore = async (scoreId, override, notifyWebhooks) => {
 window.deleteGameScore = async (scoreId) => {
     const fn = httpsCallable(functions, 'deleteScore');
     const result = await fn({ scoreId: scoreId });
+    if (window.invalidateLeaderboardAll) window.invalidateLeaderboardAll();
     return result.data;
 };
 
 window.rateGame = async (gameId, rating) => {
     const fn = httpsCallable(functions, 'rateGame');
     const result = await fn({ gameId, rating });
+    if (window.TTLCache) window.TTLCache.invalidate('ratings_' + gameId);
     return result.data;
 };
 
 window.getGameRatings = async (gameId) => {
+    const cacheKey = 'ratings_' + gameId;
+    if (window.TTLCache) {
+        const cached = window.TTLCache.get(cacheKey);
+        if (cached !== undefined) return cached;
+    }
     const fn = httpsCallable(functions, 'getGameRatings');
     const result = await fn({ gameId });
-    return result.data;
+    const data = result.data;
+    if (window.TTLCache) window.TTLCache.set(cacheKey, data, 10 * 60 * 1000);
+    return data;
 };
 
 window.listGameRatings = async () => {
@@ -234,9 +245,16 @@ window.getLatestRatings = async () => {
 };
 
 window.getPublicProfile = async (userId) => {
+    const cacheKey = 'publicProfile_' + userId;
+    if (window.TTLCache) {
+        const cached = window.TTLCache.get(cacheKey);
+        if (cached !== undefined) return cached;
+    }
     const fn = httpsCallable(functions, 'getPublicProfile');
     const result = await fn({ userId });
-    return result.data;
+    const data = result.data;
+    if (window.TTLCache) window.TTLCache.set(cacheKey, data, 10 * 60 * 1000);
+    return data;
 };
 
 window.getUserScores = async (userId) => {

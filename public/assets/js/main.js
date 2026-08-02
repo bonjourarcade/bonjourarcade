@@ -186,7 +186,7 @@ function formatTimeRemaining(targetDate) {
 
 document.addEventListener('DOMContentLoaded', () => {
     // This function starts the process when the HTML page is fully loaded
-    fetchGameData();
+    fetchGameData(false);
 
     // Initialize newsletter functionality
     initializeNewsletter();
@@ -234,7 +234,7 @@ function updateSearchPlaceholder() {
     }
 }
 
-async function fetchGameData() {
+async function fetchGameData(forceGamelist = false) {
     try {
         // Use local gamelist.json for development, Google Cloud Storage for production
         const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.startsWith('192.168.');
@@ -269,20 +269,7 @@ async function fetchGameData() {
             console.warn('Could not fetch previous games from API:', error);
         }
 
-        const cacheBuster = '?v=' + Date.now();
-        const gamelistUrl = isLocalhost ? 'gamelist.json' + cacheBuster : 'https://storage.googleapis.com/bonjourarcade/gamelist.json' + cacheBuster;
-        const response = await fetch(gamelistUrl);
-
-        if (!response.ok) {
-            // Handle common errors like file not found
-            if (response.status === 404) {
-                throw new Error(`gamelist.json not found at ${response.url}. Did you run the generation script?`);
-            } else {
-                throw new Error(`HTTP error fetching gamelist.json! Status: ${response.status}`);
-            }
-        }
-        // Parse the JSON data from the response
-        const data = await response.json();
+        const data = await window.fetchGamelist({ force: forceGamelist });
 
         // Check if the received data structure is as expected (now simplified)
         if (!data || !Array.isArray(data.games)) {
@@ -911,10 +898,10 @@ function populateFeaturedGame(game) {
         leaderboardContent.innerHTML = '<div class="featured-leaderboard-loading">Chargement...</div>';
         leaderboard.appendChild(leaderboardContent);
 
-        // Clear any existing refresh interval before creating a new one
-        if (window.featuredGameLeaderboardRefreshInterval) {
-            clearInterval(window.featuredGameLeaderboardRefreshInterval);
-            window.featuredGameLeaderboardRefreshInterval = null;
+        // Clear any existing refresh disposable before creating a new one
+        if (typeof window.featuredGameLeaderboardRefreshDispose === 'function') {
+            window.featuredGameLeaderboardRefreshDispose();
+            window.featuredGameLeaderboardRefreshDispose = null;
         }
 
         // Fetch leaderboard data - use setTimeout to ensure DOM is ready
@@ -923,22 +910,23 @@ function populateFeaturedGame(game) {
             fetchFeaturedGameLeaderboard(game.id);
         }, 100);
 
-        // Set up periodic refresh of leaderboard every 2 minutes (silent background refresh)
-        const scoreRefreshInterval = setInterval(() => {
-            console.log('Refreshing featured game leaderboard scores (2-minute interval)');
-            // Use silent refresh to avoid flashing "Chargement..." message
-            fetchFeaturedGameLeaderboard(game.id, true);
-        }, 120000); // 2 minutes = 120,000 milliseconds
+        // Refresh leaderboard when the tab becomes visible again (no polling while open)
+        const disposeScoreRefresh = (typeof window.refreshOnVisible === 'function')
+            ? window.refreshOnVisible(() => {
+                // Use silent refresh to avoid flashing "Chargement..." message
+                fetchFeaturedGameLeaderboard(game.id, true);
+            })
+            : null;
 
-        // Store interval ID for cleanup if needed
-        window.featuredGameLeaderboardRefreshInterval = scoreRefreshInterval;
+        // Store dispose function for cleanup if needed
+        window.featuredGameLeaderboardRefreshDispose = disposeScoreRefresh;
 
-        // Cleanup interval when page is unloaded
+        // Cleanup when page is unloaded
         if (!window.featuredGameLeaderboardCleanupAdded) {
             window.addEventListener('beforeunload', function () {
-                if (window.featuredGameLeaderboardRefreshInterval) {
-                    clearInterval(window.featuredGameLeaderboardRefreshInterval);
-                    window.featuredGameLeaderboardRefreshInterval = null;
+                if (typeof window.featuredGameLeaderboardRefreshDispose === 'function') {
+                    window.featuredGameLeaderboardRefreshDispose();
+                    window.featuredGameLeaderboardRefreshDispose = null;
                 }
             });
             window.featuredGameLeaderboardCleanupAdded = true;
@@ -1025,77 +1013,12 @@ async function fetchFeaturedGameLeaderboard(gameId, isRefresh = false) {
     }
 
     try {
-        // Check if we're on localhost and use mock data
-        const isLocalhost = window.location.hostname === 'localhost' ||
-            window.location.hostname === '127.0.0.1' ||
-            window.location.hostname.includes('localhost') ||
-            window.location.hostname.startsWith('192.168.');
-
         let data;
 
-        if (isLocalhost) {
-            // Try emulator data first on localhost, then fallback to mock scores.
-            try {
-                if (typeof window.listGameScores !== 'function') {
-                    throw new Error('window.listGameScores is not available yet');
-                }
-
-                const localResultRaw = await window.listGameScores(gameId);
-                const localResult = localResultRaw && localResultRaw.result ? localResultRaw.result : localResultRaw;
-
-                if (!localResult || localResult.success !== true || !Array.isArray(localResult.scores)) {
-                    throw new Error('Invalid emulator leaderboard response format');
-                }
-
-                data = { result: localResult };
-                console.log('Using Firebase emulator leaderboard data for homepage localhost');
-            } catch (localError) {
-                console.warn('Failed to load emulator leaderboard data on homepage, using mock scores:', localError);
-                data = {
-                    result: {
-                        success: true,
-                        scores: generateMockScores(gameId)
-                    }
-                };
-            }
-        } else {
-            // Use real API for production
-            console.log(`Fetching leaderboard from API for game: ${gameId}`);
-            const response = await fetch('https://us-central1-alloarcade.cloudfunctions.net/listGameScores', {
-                method: 'POST',
-                headers: {
-                    'accept': '*/*',
-                    'accept-language': 'en-CA,en;q=0.9,fr-CA;q=0.8,fr;q=0.7,en-GB;q=0.6,en-US;q=0.5',
-                    'cache-control': 'no-cache',
-                    'content-type': 'application/json',
-                    'firebase-instance-id-token': 'd81DC0UGvyC6i41_okOipa:APA91bHNG-8qmIvzgyCLGKg54RBFwRyB2hx6QEcZ2BJUHcbmcvilEJnpCQscmrnOgpVrFlurW4Fg6b0Lkzs_Lzgl53iECK6E8-pPLVN_yHC8_beMww7Blxg',
-                    'origin': 'https://alloarcade.web.app',
-                    'pragma': 'no-cache',
-                    'priority': 'u=1, i',
-                    'referer': 'https://alloarcade.web.app/',
-                    'sec-ch-ua': '"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"',
-                    'sec-ch-ua-mobile': '?0',
-                    'sec-ch-ua-platform': '"Windows"',
-                    'sec-fetch-dest': 'empty',
-                    'sec-fetch-mode': 'cors',
-                    'sec-fetch-site': 'cross-site',
-                    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36'
-                },
-                body: JSON.stringify({
-                    data: {
-                        timeRange: "all",
-                        gameId: gameId
-                    }
-                })
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            data = await response.json();
-            console.log('Leaderboard API response received:', data);
-        }
+        // fetchLeaderboardScores handles localhost (emulator + mock fallback) and
+        // production API, with a 5-minute TTL cache to avoid repeated calls.
+        data = await window.fetchLeaderboardScores(gameId);
+        console.log('Leaderboard data received:', data);
 
         if (!data.result || !data.result.success || !data.result.scores) {
             console.error('Invalid response format:', data);
@@ -1940,7 +1863,7 @@ function checkAndRefreshAt5AM() {
     // Also, ensure we don't refresh multiple times within the same hour if the page is left open
     if (now.getHours() === 5 && now.getMinutes() < 5 && !window.screensaverActive) { // Refresh within the first 5 minutes of 5 AM
         console.log("It's 5 AM local time. Refreshing game list to get latest updates.");
-        fetchGameData(); // Re-fetch game data
+        fetchGameData(true); // Re-fetch game data (bypass cache at 5 AM)
     }
 }
 

@@ -445,6 +445,7 @@
     </div>
 
     <script src="../assets/js/utils.js"></script>
+    <script src="../assets/js/ttl-cache.js"></script>
     <script>
         // Theme toggling logic (copied from main page)
         function setTheme(theme) {
@@ -538,26 +539,22 @@
         // Load upcoming games
         async function loadUpcomingGames() {
             try {
-                // Determine gamelist URL based on hostname
-                const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.startsWith('192.168.');
                 const cacheBuster = '?v=' + Date.now();
-                const gamelistUrl = isLocalhost ? '../gamelist.json' + cacheBuster : 'https://storage.googleapis.com/bonjourarcade/gamelist.json' + cacheBuster;
                 const upcomingGamesUrl = '/api/upcoming-games.json' + cacheBuster;
 
-                // Load both upcoming games and game data
-                const [upcomingGamesResponse, gamesResponse] = await Promise.all([
+                // Load upcoming games and game data (gamelist is cached 15 min)
+                const [upcomingGamesResponse, gamelistData] = await Promise.all([
                     fetch(upcomingGamesUrl),
-                    fetch(gamelistUrl)
+                    window.fetchGamelist({ localUrl: '../gamelist.json' })
                 ]);
 
-                if (!upcomingGamesResponse.ok || !gamesResponse.ok) {
+                if (!upcomingGamesResponse.ok) {
                     throw new Error('Failed to fetch data');
                 }
 
                 const upcomingGames = await upcomingGamesResponse.json();
-                const gamesData = await gamesResponse.json();
 
-                const enrichedGames = enrichUpcomingGamesWithGameData(upcomingGames, gamesData.games);
+                const enrichedGames = enrichUpcomingGamesWithGameData(upcomingGames, gamelistData.games);
 
                 displayUpcomingGames(enrichedGames);
             } catch (error) {
@@ -602,57 +599,15 @@
 
         async function fetchLeaderboardData(gameId) {
             try {
-                // Check if we're on localhost and use mock data
-                const isLocalhost = window.location.hostname === 'localhost' ||
-                    window.location.hostname === '127.0.0.1' ||
-                    window.location.hostname.includes('localhost') ||
-                    window.location.hostname.startsWith('192.168.');
-
                 let data;
 
-                if (isLocalhost) {
-                    // Use mock data for localhost
-                    data = {
-                        result: {
-                            success: true,
-                            scores: generateMockScores(gameId)
-                        }
-                    };
-                } else {
-                    console.log('[leaderboard] fetching scores for', gameId, 'from alloarcade');
-                    const response = await fetch('https://us-central1-alloarcade.cloudfunctions.net/listGameScores', {
-                        method: 'POST',
-                        headers: {
-                            'accept': '*/*',
-                            'content-type': 'application/json',
-                            'origin': 'https://alloarcade.web.app',
-                            'referer': 'https://alloarcade.web.app/',
-                        },
-                        body: JSON.stringify({
-                            data: {
-                                timeRange: "all",
-                                gameId: gameId
-                            }
-                        })
-                    });
-
-                    console.log('[leaderboard] response status for', gameId, response.status, response.statusText);
-                    if (!response.ok) {
-                        // Try to get response text for debugging
-                        let respText = '';
-                        try { respText = await response.text(); } catch (e) { /* ignore */ }
-                        console.error('[leaderboard] non-ok response:', response.status, respText);
-                        throw new Error(`HTTP error! status: ${response.status}`);
+                // fetchLeaderboardScores caches results (5 min TTL) to avoid repeated calls.
+                // On localhost it uses the provided localFetcher (mock scores here).
+                data = await window.fetchLeaderboardScores(gameId, {
+                    localFetcher: async function () {
+                        return { result: { success: true, scores: generateMockScores(gameId) } };
                     }
-
-                    try {
-                        data = await response.json();
-                        console.log('[leaderboard] got data for', gameId, data && data.result && data.result.success);
-                    } catch (e) {
-                        console.error('[leaderboard] failed to parse JSON for', gameId, e);
-                        throw e;
-                    }
-                }
+                });
 
                 if (!data.result || !data.result.success || !data.result.scores) {
                     return null;

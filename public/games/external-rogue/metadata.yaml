@@ -4,7 +4,7 @@ year: 1980
 genre: Roguelike
 core: external
 game_type: external
-external_url: /rogue
+external_url: https://bonjourarcade.com/dos/?game=rogue.jsdos
 launch_button_text: "Play Now!"
 launch_button_url: "https://bonjourarcade.com/dos/?game=rogue.jsdos"
 description: |

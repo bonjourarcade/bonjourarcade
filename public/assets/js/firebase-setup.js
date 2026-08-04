@@ -32,16 +32,15 @@ if (isLocalhost) {
     connectFirestoreEmulator(db, "127.0.0.1", 8080);
 }
 
-// TODO: Remplacer par ta site key reCAPTCHA Enterprise
-const RECAPTCHA_SITE_KEY = '6LcEenUtAAAAAAGtXWglzBecp6ctyztE8q4aEPd';
-
-if (!isLocalhost) {
-    const appCheck = initializeAppCheck(app, {
-        provider: new ReCaptchaEnterpriseProvider(RECAPTCHA_SITE_KEY),
-        isTokenAutoRefreshEnabled: true
-    });
-    window.firebaseAppCheck = appCheck;
-}
+// TODO: Réactiver quand reCAPTCHA Enterprise sera configuré
+// const RECAPTCHA_SITE_KEY = '6LcEenUtAAAAAAGtXWglzBecp6ctyztE8q4aEPd';
+// if (!isLocalhost) {
+//     const appCheck = initializeAppCheck(app, {
+//         provider: new ReCaptchaEnterpriseProvider(RECAPTCHA_SITE_KEY),
+//         isTokenAutoRefreshEnabled: true
+//     });
+//     window.firebaseAppCheck = appCheck;
+// }
 
 window.firebaseAuth = auth;
 window.firebaseFunctions = functions;

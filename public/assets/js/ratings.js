@@ -81,18 +81,23 @@ function renderRatingValue(rating) {
 }
 
 function renderDistribution(distribution, count) {
-    if (!distribution || count === 0) return '<div class="ratings-dist-bar"></div>';
+    if (!distribution || count === 0) return '<div class="ratings-histogram"></div>';
     const segments = [
-        { key: '-2', cls: 'neg2' },
-        { key: '-1', cls: 'neg1' },
-        { key: '1', cls: 'pos1' },
-        { key: '2', cls: 'pos2' },
+        { key: '-2', cls: 'neg2', label: '👎👎' },
+        { key: '-1', cls: 'neg1', label: '👎' },
+        { key: '1', cls: 'pos1', label: '👍' },
+        { key: '2', cls: 'pos2', label: '👍👍' },
     ];
+    const maxVal = Math.max(...segments.map(s => distribution[s.key] || 0), 1);
     const html = segments.map(seg => {
-        const pct = (distribution[seg.key] || 0) / count * 100;
-        return `<div class="ratings-dist-seg ${seg.cls}" style="flex:${pct || 0.5}"></div>`;
+        const val = distribution[seg.key] || 0;
+        const heightPct = (val / maxVal) * 100;
+        return `<div class="ratings-hist-col">
+            <div class="ratings-hist-bar ${seg.cls}" style="height:${Math.max(heightPct, 4)}%"></div>
+            <div class="ratings-hist-label">${seg.label}</div>
+        </div>`;
     }).join('');
-    return `<div class="ratings-dist-bar">${html}</div>`;
+    return `<div class="ratings-histogram">${html}</div>`;
 }
 
 function renderRatingsGrid(ratings) {

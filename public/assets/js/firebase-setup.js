@@ -2,6 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebas
 import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut, connectAuthEmulator, updateProfile } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { getFunctions, httpsCallable, connectFunctionsEmulator } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-functions.js";
 import { getFirestore, connectFirestoreEmulator, collection, query, where, orderBy, onSnapshot, doc, getDoc, getDocs, addDoc, updateDoc, setDoc, deleteDoc, serverTimestamp, limit } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+import { initializeAppCheck, ReCAPTCHAEnterpriseProvider } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app-check.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyAh5PlPLpy8sfB5QxmjWiXaA_Qrtszc2Vg",
@@ -29,6 +30,17 @@ if (isLocalhost) {
     connectAuthEmulator(auth, "http://127.0.0.1:9099");
     connectFunctionsEmulator(functions, "127.0.0.1", 5001);
     connectFirestoreEmulator(db, "127.0.0.1", 8080);
+}
+
+// TODO: Remplacer par ta site key reCAPTCHA Enterprise
+const RECAPTCHA_SITE_KEY = '6LcEenUtAAAAAAGtXWglzBecp6ctyztE8q4aEPd';
+
+if (!isLocalhost) {
+    const appCheck = initializeAppCheck(app, {
+        provider: new ReCAPTCHAEnterpriseProvider(RECAPTCHA_SITE_KEY),
+        isTokenAutoRefreshEnabled: true
+    });
+    window.firebaseAppCheck = appCheck;
 }
 
 window.firebaseAuth = auth;

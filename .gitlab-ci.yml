@@ -60,8 +60,6 @@ send_newsletter:
     - echo "Starting automated newsletter send..."
     - echo "Current time = $(date)"
     - echo "Day of week = $(date +%A)"
-    - python3 scripts/send_newsletter.py --mail-only
-    - echo "Email sent successfully"
     - python3 scripts/send_newsletter.py --webhook-only --webhook-all
     - echo "Webhooks sent successfully"
     - python3 scripts/send_newsletter.py --facebook-only

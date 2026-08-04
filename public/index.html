@@ -97,7 +97,7 @@
 
     <div id="tournament-section" style="display:none;margin:12px auto;max-width:900px;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;padding:0 4px;">
-        <span style="color:#ffd700;font-weight:700;font-size:0.9rem;">🏆 Tournois publics</span>
+        <span id="tournament-section-title" style="font-weight:700;font-size:0.9rem;display:inline-block;">🏆 Tournois publics</span>
         <a href="/tournoi/" style="color:#4a9eff;font-size:0.8rem;text-decoration:none;">Voir tout →</a>
       </div>
       <div id="tournament-list-hp"></div>
@@ -326,6 +326,8 @@
   <script>
     // Public tournaments list
     document.addEventListener('DOMContentLoaded', () => {
+      let hpTimerInterval = null;
+
       function initTournamentList() {
         if (!window.TournoiUtils || !window.onFirebaseAuthStateChanged) {
           setTimeout(initTournamentList, 200);
@@ -353,6 +355,34 @@
         let gamelist = [];
         let refreshInterval = null;
 
+        function parseFirebaseTimestamp(ts) {
+          if (!ts) return 0;
+          if (typeof ts.toMillis === 'function') return ts.toMillis();
+          if (ts.seconds != null) return ts.seconds * 1000 + (ts.nanoseconds || 0) / 1e6;
+          const t = new Date(ts).getTime();
+          return isNaN(t) ? 0 : t;
+        }
+
+        function renderTimerHTML(t) {
+          if (t.status !== 'active' || !t.roundStartTime || !t.roundDurationSec) return '';
+          const startMs = parseFirebaseTimestamp(t.roundStartTime);
+          if (!startMs) return '';
+          const remaining = Math.max(0, Math.floor((t.roundDurationSec * 1000 - (Date.now() - startMs)) / 1000));
+          if (remaining <= 0) return '';
+          const timerClass = remaining <= 60 ? 'tournament-timer-hp timer-warning' : 'tournament-timer-hp';
+          return `<span class="${timerClass}" data-tournament-id="${t.id}" data-start-ms="${startMs}" data-duration="${t.roundDurationSec}">⏱ ${TournoiUtils.formatTimer(remaining)}</span>`;
+        }
+
+        function updateHpTimers() {
+          document.querySelectorAll('.tournament-timer-hp[data-tournament-id]').forEach(el => {
+            const startMs = Number(el.dataset.startMs);
+            const duration = Number(el.dataset.duration);
+            const remaining = Math.max(0, Math.floor((duration * 1000 - (Date.now() - startMs)) / 1000));
+            el.textContent = '⏱ ' + TournoiUtils.formatTimer(remaining);
+            el.classList.toggle('timer-warning', remaining <= 60);
+          });
+        }
+
         async function refreshTournaments() {
           try {
             let tournaments;
@@ -377,6 +407,7 @@
               const tagLabel = t.status === 'active' ? 'En cours' : 'Inscription';
               const currentGameId = t.currentGame || (t.games && t.games[t.currentRoundIndex || 0]);
               const gameName = currentGameId ? getGameName(currentGameId, gamelist) : null;
+              const timerHTML = renderTimerHTML(t);
               return `<a href="/tournoi/play/?t=${t.id}" style="display:block;padding:8px 14px;background:linear-gradient(135deg,#1a1a2e 0%,#16213e 100%);border:1px solid #333;border-radius:8px;text-decoration:none;color:#eee;font-size:13px;margin-bottom:4px;transition:border-color 0.2s;" onmouseover="this.style.borderColor='#ffd700'" onmouseout="this.style.borderColor='#333'">
                 <div style="display:flex;align-items:center;gap:10px;">
                   <span style="font-size:18px;">🏆</span>
@@ -384,6 +415,7 @@
                     <div style="font-weight:600;color:#ffd700;">${t.name}</div>
                     ${t.description ? `<div style="font-size:11px;color:#888;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${t.description}</div>` : ''}
                   </div>
+                  ${timerHTML}
                   <span style="font-size:11px;padding:2px 6px;border-radius:4px;background:${tagColor};color:${tagColor === '#ffc107' ? '#1a1a2e' : 'white'};font-weight:600;white-space:nowrap;">${tagLabel}</span>
                   <span style="color:#888;font-size:11px;white-space:nowrap;">${roundInfo}</span>
                 </div>
@@ -396,6 +428,8 @@
                 </div>` : ''}
               </a>`;
             }).join('');
+            if (hpTimerInterval) clearInterval(hpTimerInterval);
+            hpTimerInterval = setInterval(updateHpTimers, 1000);
           } catch (e) {
             section.style.display = 'none';
           }

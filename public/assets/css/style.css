@@ -2817,3 +2817,24 @@ body.theme-dark .loading-text {
         display: inline !important;
     }
 }
+
+/* Tournament section */
+#tournament-section-title {
+    color: #ffd700;
+}
+body.theme-light #tournament-section-title {
+    color: #1a1a2e;
+    background: rgba(255, 215, 0, 0.55);
+    padding: 1px 6px;
+    border-radius: 4px;
+}
+.tournament-timer-hp {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    color: #888;
+    white-space: nowrap;
+}
+.tournament-timer-hp.timer-warning {
+    color: #dc3545;
+}

@@ -83,19 +83,16 @@ function renderRatingValue(rating) {
 function renderDistribution(distribution, count) {
     if (!distribution || count === 0) return '<div class="ratings-histogram"></div>';
     const segments = [
-        { key: '-2', cls: 'neg2', label: '👎👎' },
-        { key: '-1', cls: 'neg1', label: '👎' },
-        { key: '1', cls: 'pos1', label: '👍' },
-        { key: '2', cls: 'pos2', label: '👍👍' },
+        { key: '-2', cls: 'neg2' },
+        { key: '-1', cls: 'neg1' },
+        { key: '1', cls: 'pos1' },
+        { key: '2', cls: 'pos2' },
     ];
     const maxVal = Math.max(...segments.map(s => distribution[s.key] || 0), 1);
     const html = segments.map(seg => {
         const val = distribution[seg.key] || 0;
         const heightPct = (val / maxVal) * 100;
-        return `<div class="ratings-hist-col">
-            <div class="ratings-hist-bar ${seg.cls}" style="height:${Math.max(heightPct, 4)}%"></div>
-            <div class="ratings-hist-label">${seg.label}</div>
-        </div>`;
+        return `<div class="ratings-hist-bar ${seg.cls}" style="height:${Math.max(heightPct, 4)}%"></div>`;
     }).join('');
     return `<div class="ratings-histogram">${html}</div>`;
 }

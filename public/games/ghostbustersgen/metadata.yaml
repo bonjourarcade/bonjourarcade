@@ -1,0 +1,18 @@
+title: Ghostbusters (GEN)
+year: 1990
+developer: Compile, Sega
+genre: Action, Platform
+#controls:
+#  - "←↓↑→: Mouvement"
+#  - "Z: "
+#  - "X: "
+#  - "C: "
+#  - "V: "
+
+#to_start: Espace, puis Enter
+#announcement_message: ""
+#problem: true
+
+enable_score: true
+
+added: 2026-08-05

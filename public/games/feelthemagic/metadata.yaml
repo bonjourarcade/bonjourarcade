@@ -1,0 +1,18 @@
+title: Feel the Magic XY/XX
+year: 2004
+developer: Sonic Team
+genre: Minigames
+#controls:
+#  - "←↓↑→: Mouvement"
+#  - "Z: "
+#  - "X: "
+#  - "C: "
+#  - "V: "
+
+#to_start: Espace, puis Enter
+#announcement_message: ""
+#problem: true
+
+enable_score: true
+
+added: 2026-08-05

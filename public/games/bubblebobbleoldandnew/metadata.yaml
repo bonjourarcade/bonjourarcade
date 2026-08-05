@@ -1,0 +1,18 @@
+title: Bubble Bobble Old & New
+year: 2002
+developer: Taito
+genre: Platform, Compilation
+#controls:
+#  - "←↓↑→: Mouvement"
+#  - "Z: "
+#  - "X: "
+#  - "C: "
+#  - "V: "
+
+#to_start: Espace, puis Enter
+#announcement_message: ""
+#problem: true
+
+enable_score: true
+
+added: 2026-08-05

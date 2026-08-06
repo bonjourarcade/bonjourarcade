@@ -415,9 +415,11 @@
                     <div style="font-weight:600;color:#ffd700;">${t.name}</div>
                     ${t.description ? `<div style="font-size:11px;color:#888;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${t.description}</div>` : ''}
                   </div>
-                  ${timerHTML}
                   <span style="font-size:11px;padding:2px 6px;border-radius:4px;background:${tagColor};color:${tagColor === '#ffc107' ? '#1a1a2e' : 'white'};font-weight:600;white-space:nowrap;">${tagLabel}</span>
-                  <span style="color:#888;font-size:11px;white-space:nowrap;">${roundInfo}</span>
+                  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;">
+                    <span style="color:#888;font-size:11px;white-space:nowrap;">${roundInfo}</span>
+                    ${timerHTML}
+                  </div>
                 </div>
                 ${gameName && t.status === 'active' ? `<div style="font-size:11px;color:#4a9eff;margin-top:2px;padding-left:28px;">🎮 ${gameName}</div>` : ''}
                 ${t.leader ? `<div style="display:flex;align-items:center;gap:6px;margin-top:4px;padding-top:4px;border-top:1px solid rgba(255,255,255,0.06);font-size:12px;">

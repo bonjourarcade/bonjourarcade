@@ -1,0 +1,18 @@
+title: Vanguard (2600)
+year: 1981
+developer: General Computer Corporation
+genre: Shooter
+#controls:
+#  - "←↓↑→: Mouvement"
+#  - "Z: "
+#  - "X: "
+#  - "C: "
+#  - "V: "
+
+#to_start: Espace, puis Enter
+#announcement_message: ""
+#problem: true
+
+enable_score: true
+
+added: 2026-08-06

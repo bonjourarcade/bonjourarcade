@@ -20,7 +20,7 @@
     "segaCD": "https://storage.googleapis.com/bonjourarcade/roms/bios/bios_CD_U.bin",
     "segaSaturn": "https://storage.googleapis.com/bonjourarcade/roms/bios/saturn_bios.bin"
   },
-  "EJS_pathtodata": "https://cdn.emulatorjs.org/stable/data/",
+  "EJS_pathtodata": "https://cdn.emulatorjs.org/latest/data/",
   "EJS_AdUrl": "/ads",
   "EJS_AdTimer": 4000,
   "EJS_AdSize": ["400px", "262px"],

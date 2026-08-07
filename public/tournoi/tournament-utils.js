@@ -12,7 +12,13 @@ const TournoiUtils = {
 
   getRemainingSeconds(roundStartTime, durationSec) {
     if (!roundStartTime) return 0;
-    const start = roundStartTime.toMillis ? roundStartTime.toMillis() : new Date(roundStartTime).getTime();
+    let start;
+    if (roundStartTime.toMillis) start = roundStartTime.toMillis();
+    else if (roundStartTime.seconds != null || roundStartTime._seconds != null) {
+      const sec = roundStartTime.seconds != null ? roundStartTime.seconds : roundStartTime._seconds;
+      const nano = roundStartTime.nanoseconds != null ? roundStartTime.nanoseconds : roundStartTime._nanoseconds;
+      start = sec * 1000 + (nano || 0) / 1e6;
+    } else start = new Date(roundStartTime).getTime();
     const elapsed = Math.floor((Date.now() - start) / 1000);
     return Math.max(0, durationSec - elapsed);
   },

@@ -2838,3 +2838,99 @@ body.theme-light #tournament-section-title {
 .tournament-timer-hp.timer-warning {
     color: #dc3545;
 }
+
+.tournament-card-hp {
+    display: block;
+    padding: 8px 14px;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    border: 1px solid #333;
+    border-radius: 8px;
+    text-decoration: none;
+    color: #eee;
+    font-size: 13px;
+    margin-bottom: 4px;
+    transition: border-color 0.2s;
+}
+
+.tournament-card-hp:hover {
+    border-color: #ffd700;
+}
+
+.tournament-card-hp .tchp-title {
+    font-weight: 600;
+    color: #ffd700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tournament-card-hp .tchp-desc {
+    font-size: 11px;
+    color: #888;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.tournament-card-hp .tchp-round {
+    color: #888;
+    font-size: 11px;
+    white-space: nowrap;
+}
+
+.tournament-card-hp .tchp-game {
+    font-size: 11px;
+    color: #4a9eff;
+}
+
+.tournament-card-hp .tchp-leader-name {
+    color: #ccc;
+}
+
+.tournament-card-hp .tchp-leader-score {
+    color: #ffd700;
+    font-weight: 700;
+}
+
+.tournament-card-hp .tchp-leader-sep {
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+body.theme-light .tournament-card-hp {
+    background: #ececec;
+    border-color: #d6d6d6;
+    color: #222;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+body.theme-light .tournament-card-hp:hover {
+    border-color: #2196f3;
+}
+
+body.theme-light .tournament-card-hp .tchp-title {
+    color: #b8860b;
+}
+
+body.theme-light .tournament-card-hp .tchp-desc {
+    color: #666;
+}
+
+body.theme-light .tournament-card-hp .tchp-round {
+    color: #666;
+}
+
+body.theme-light .tournament-card-hp .tchp-game {
+    color: #1976d2;
+}
+
+body.theme-light .tournament-card-hp .tchp-leader-name {
+    color: #333;
+}
+
+body.theme-light .tournament-card-hp .tchp-leader-score {
+    color: #b8860b;
+}
+
+body.theme-light .tournament-card-hp .tchp-leader-sep {
+    border-top-color: #eee;
+}

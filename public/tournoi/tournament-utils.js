@@ -143,6 +143,8 @@ const TournoiUtils = {
     return html;
   },
 
+  _gameScoreCache: {},
+
   async enrichScoreboardEntries(containerId) {
     const container = document.getElementById(containerId);
     if (!container) return;
@@ -158,16 +160,11 @@ const TournoiUtils = {
 
     const db = window.firebaseDb;
     const { doc, getDoc } = window.Firestore;
+    const cache = TournoiUtils._gameScoreCache;
 
-    const snapshots = await Promise.all(
-      ids.map(id => getDoc(doc(db, 'game-scores', id)).catch(() => null))
-    );
-
-    snapshots.forEach((snap, i) => {
-      if (!snap || !snap.exists) return;
-      const data = snap.data();
-      const cell = cellMap[ids[i]];
-      if (!cell) return;
+    const applyToCell = (id, data) => {
+      const cell = cellMap[id];
+      if (!cell || !data) return;
 
       // Set comment as tooltip on the cell
       if (data.comment) {
@@ -184,7 +181,20 @@ const TournoiUtils = {
           TournoiUtils.openScreenshotModal(data.screenshotUrl);
         });
       }
-    });
+    };
+
+    const idsToFetch = ids.filter(id => !(id in cache));
+
+    await Promise.all(idsToFetch.map(async id => {
+      try {
+        const snap = await getDoc(doc(db, 'game-scores', id));
+        cache[id] = snap.exists ? snap.data() : null;
+      } catch (e) {
+        cache[id] = null;
+      }
+    }));
+
+    ids.forEach(id => applyToCell(id, cache[id]));
   },
 
   openScreenshotModal(url) {

@@ -1,4 +1,4 @@
-const { collection, query, where, onSnapshot, doc, getDoc, getDocs, serverTimestamp, limit: fsLimit } = window.Firestore;
+const { collection, onSnapshot, doc, getDoc, getDocs, serverTimestamp, limit: fsLimit } = window.Firestore;
 
 let currentUser = null;
 let tournamentId = null;
@@ -7,6 +7,7 @@ let displayNameCache = {};
 let myParticipantData = null;
 let currentParticipants = {};
 let currentRoundScores = [];
+let allRoundScores = [];
 let currentRoundIndex = -1;
 let currentTotalRounds = 0;
 let isInTournament = false;
@@ -199,7 +200,7 @@ function listenToTournament(initialData) {
       }
     }
     currentParticipants = participants;
-    renderCombinedTable(participants, me, currentRoundScores, currentRoundIndex, currentTotalRounds);
+    renderCombinedTable(participants, me, allRoundScores, currentRoundIndex, currentTotalRounds);
     if (newUids.length > 0) {
       Promise.all(newUids.map(uid =>
         TournoiUtils.callFunction('getPublicProfile', {userId: uid}).catch(() => null)
@@ -225,7 +226,7 @@ function listenToTournament(initialData) {
             }
           }
           currentParticipants = participants;
-          renderCombinedTable(participants, me, currentRoundScores, currentRoundIndex, currentTotalRounds);
+          renderCombinedTable(participants, me, allRoundScores, currentRoundIndex, currentTotalRounds);
         }
       }).catch(e => console.error('Error fetching profiles:', e));
     }
@@ -348,18 +349,22 @@ function renderTournament(t) {
   }
 }
 
-function renderCombinedTable(participants, me, roundScores, roundIdx, totalRounds) {
+function renderCombinedTable(participants, me, allScores, roundIdx, totalRounds) {
   const count = Object.keys(participants).length;
   $('play-participant-count').textContent = `${count}`;
 
-  // Best entry for current round from roundScores
-  const bestEntry = {};
-  (roundScores || []).forEach(rs => {
-    const prev = bestEntry[rs.userId];
+  // Best entry per round (and per user) from roundScores, across all rounds
+  const bestEntryByRound = {};
+  (allScores || []).forEach(rs => {
+    if (rs.roundIndex == null) return;
+    const bucket = bestEntryByRound[rs.roundIndex] || (bestEntryByRound[rs.roundIndex] = {});
+    const prev = bucket[rs.userId];
     if (!prev || rs.score > prev.score || (rs.score === prev.score && rs.verified && !prev.verified)) {
-      bestEntry[rs.userId] = { score: rs.score, gameScoreId: rs.gameScoreId, verified: rs.verified, screenshotUrl: rs.screenshotUrl, comment: rs.comment };
+      bucket[rs.userId] = { score: rs.score, gameScoreId: rs.gameScoreId, verified: rs.verified, screenshotUrl: rs.screenshotUrl, comment: rs.comment };
     }
   });
+  const roundScores = (allScores || []).filter(rs => rs.roundIndex === roundIdx);
+  const bestEntry = bestEntryByRound[roundIdx] || {};
 
   // Build combined rows
   const rows = Object.entries(participants).map(([uid, p]) => {
@@ -439,8 +444,9 @@ function renderCombinedTable(participants, me, roundScores, roundIdx, totalRound
       if (score > 0) {
         let gsAttr = '';
         let addClass = '';
-        if (rr === roundIdx && bestEntry[r.uid]?.gameScoreId) {
-          gsAttr = ` data-game-score-id="${bestEntry[r.uid].gameScoreId}"`;
+        const roundEntry = bestEntryByRound[rr]?.[r.uid];
+        if (roundEntry?.gameScoreId) {
+          gsAttr = ` data-game-score-id="${roundEntry.gameScoreId}"`;
           addClass = ' has-proof';
         }
         const pct = r.pctScores[rr];
@@ -475,14 +481,13 @@ function setupRoundScoresListener(t) {
   currentTotalRounds = t.games?.length || 0;
 
   const db = window.firebaseDb;
-  const q = query(collection(db, 'tournaments', tournamentId, 'roundScores'),
-    where('roundIndex', '==', round));
+  const q = collection(db, 'tournaments', tournamentId, 'roundScores');
   unsubscribeRoundScores = onSnapshot(q, (snap) => {
     const scores = [];
     snap.forEach(d => scores.push({ id: d.id, ...d.data() }));
-    scores.sort((a, b) => b.score - a.score);
-    currentRoundScores = scores;
-    renderCombinedTable(currentParticipants, null, scores, round, currentTotalRounds);
+    allRoundScores = scores;
+    currentRoundScores = scores.filter(s => s.roundIndex === round).sort((a, b) => b.score - a.score);
+    renderCombinedTable(currentParticipants, null, allRoundScores, round, currentTotalRounds);
   }, (err) => console.error('roundScores snapshot error:', err));
 }
 

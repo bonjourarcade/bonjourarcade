@@ -2041,7 +2041,7 @@
                     });
 
                     // Convert to array and sort by score (highest first)
-                    const sortedScores = Array.from(playerBestScores.values()).sort((a, b) => b.score - a.score).slice(0, 10); // Show top 10 players
+                    const sortedScores = Array.from(playerBestScores.values()).sort((a, b) => b.score - a.score).slice(0, 50); // Show top 50 players
 
                     if (sortedScores.length === 0) {
                         if (!isRefresh) {
@@ -2223,7 +2223,7 @@
 
                 const sorted = Array.from(playerBest.values())
                     .sort((a, b) => b.score - a.score)
-                    .slice(0, 10);
+                    .slice(0, 50);
 
                 if (sorted.length === 0) {
                     leaderboardContent.innerHTML = '<div class="leaderboard-loading">Aucun score trouvé</div>';
@@ -2431,13 +2431,17 @@
                         console.warn('Firestore not available for leaderboard realtime');
                         return;
                     }
-                    const { collection, query, where, orderBy, onSnapshot } = window.Firestore;
+                    const { collection, query, where, orderBy, limit, onSnapshot } = window.Firestore;
                     // We use orderBy so Firestore sends them pre-sorted, but we still need to deduplicate
-                    // by userId (keep best score per player) on the client side.
+                    // by userId (keep best score per player) on the client side. Only the top 50 distinct
+                    // players are ever displayed. The raw fetch is capped well above 50 (players who
+                    // resubmit many times can otherwise crowd out the count of *distinct* players within
+                    // the limit) while still avoiding a full read of the game's entire score history.
                     const q = query(collection(db, 'game-scores'),
                         where('game', '==', gameId),
                         where('verified', '==', true),
-                        orderBy('score', 'desc'));
+                        orderBy('score', 'desc'),
+                        limit(200));
                     let debounceTimer = null;
                     window._leaderboardUnsub = onSnapshot(q, (snap) => {
                         if (debounceTimer) clearTimeout(debounceTimer);
@@ -4809,7 +4813,8 @@
             const db = window.firebaseDb;
             if (!db) { if (tbHeader) tbHeader.innerHTML = '<span style="color:#dc3545;">Firebase non disponible</span>'; return; }
 
-            const { doc, onSnapshot, collection, query, where, orderBy, getDocs } = window.Firestore;
+            const { doc, onSnapshot, collection, query, where, orderBy, getDoc } = window.Firestore;
+            const leaderProfileCache = {};
 
             let unsubTournament = null;
             let unsubScores = null;
@@ -4899,16 +4904,22 @@
 
                 let name = top.displayName || 'Anonyme';
                 let photo = top.photoURL || '';
-                try {
-                    const pSnap = await getDocs(collection(tournamentRef, 'participants'));
-                    pSnap.forEach(d => {
-                        if (d.id === top.userId) {
-                            const pd = d.data();
-                            name = pd.displayName || name;
-                            photo = pd.photoURL || photo;
+                if (top.userId) {
+                    try {
+                        if (!leaderProfileCache[top.userId]) {
+                            const pSnap = await getDoc(doc(tournamentRef, 'participants', top.userId));
+                            if (pSnap.exists) {
+                                const pd = pSnap.data();
+                                leaderProfileCache[top.userId] = { name: pd.displayName, photo: pd.photoURL };
+                            }
                         }
-                    });
-                } catch (e) { /* ignore */ }
+                        const cached = leaderProfileCache[top.userId];
+                        if (cached) {
+                            name = cached.name || name;
+                            photo = cached.photo || photo;
+                        }
+                    } catch (e) { /* ignore */ }
+                }
                 leaderEl.innerHTML = `<span style="font-size:14px;">👑</span><img src="${photo || '../assets/default-avatar.png'}"><span class="name">${name}</span><span class="score">${top.score.toLocaleString()}</span>`;
                 leaderEl.style.display = 'flex';
             });

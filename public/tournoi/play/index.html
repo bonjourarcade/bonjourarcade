@@ -125,6 +125,10 @@
       box-shadow: 0 3px 10px rgba(0,0,0,0.4);
       font-family: system-ui, sans-serif;
     }
+    .combined-table tbody tr:first-child .score-cell.has-comment:hover::after {
+      bottom: auto;
+      top: calc(100% + 6px);
+    }
     .combined-table .score-cell.has-screenshot { cursor: pointer; }
     .combined-table .score-cell.has-screenshot:hover { background: rgba(255,255,255,0.05); }
     .combined-table .total-cell { font-family: monospace; font-weight: 700; color: var(--accent-text); background: var(--accent-bg); padding: var(--accent-pad); border-radius: var(--accent-radius); }

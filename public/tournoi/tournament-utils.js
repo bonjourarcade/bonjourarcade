@@ -65,6 +65,79 @@ const TournoiUtils = {
     return `/b/${gameId}`;
   },
 
+  // Renders the combined per-round scoreboard/results table (columns: #, Joueur, R1..Rn, Total %).
+  // Used both for the live in-progress round view (pass roundIdx) and the finished-results view
+  // (omit roundIdx — every non-eliminated player is treated as having reached the last round).
+  //
+  // Ranking: players who went further (higher eliminatedRound, or still active) rank above those
+  // eliminated earlier. Players eliminated in the same round are tied-broken by their score in
+  // that specific round (not by whatever round is currently displayed).
+  renderCombinedTableHtml(rows, totalRounds, opts = {}) {
+    const { roundIdx = null, highlightUid = null, cutoff = 0, bestEntryByRound = {} } = opts;
+    const referenceRound = roundIdx != null ? roundIdx : totalRounds - 1;
+
+    const sorted = [...rows].sort((a, b) => {
+      const aRound = a.eliminated ? (a.eliminatedRound ?? -1) : referenceRound;
+      const bRound = b.eliminated ? (b.eliminatedRound ?? -1) : referenceRound;
+      if (bRound !== aRound) return bRound - aRound;
+      const aScore = bestEntryByRound[aRound]?.[a.uid]?.score ?? a.scores?.[aRound] ?? 0;
+      const bScore = bestEntryByRound[bRound]?.[b.uid]?.score ?? b.scores?.[bRound] ?? 0;
+      return bScore - aScore;
+    });
+
+    let html = '<table class="combined-table"><thead><tr><th>#</th><th>Joueur</th>';
+    for (let r = 0; r < totalRounds; r++) {
+      html += `<th>R${r + 1}</th>`;
+    }
+    html += '<th>Total %</th></tr></thead><tbody>';
+
+    sorted.forEach((r, i) => {
+      const isMe = highlightUid && r.uid === highlightUid;
+      const isActive = !r.eliminated;
+      const isDanger = roundIdx != null && isActive && cutoff > 0 && i >= cutoff;
+
+      let rowClass = '';
+      if (r.eliminated) rowClass = 'eliminated-row';
+      else if (isDanger) rowClass = 'danger-row';
+      if (isMe) rowClass += ' me-row';
+
+      const nameCell = r.uid
+        ? `<a href="/profil/?uid=${r.uid}" style="color:inherit;text-decoration:none;">${r.name}</a>`
+        : r.name;
+
+      html += `<tr class="${rowClass}">`;
+      html += `<td class="rank-cell">${i + 1}</td>`;
+      html += `<td class="player-cell">${nameCell}${isDanger ? ' <span class="at-risk" title="Ce joueur est en danger d&#39;élimination">⚠️</span>' : ''}</td>`;
+
+      for (let rr = 0; rr < totalRounds; rr++) {
+        const score = r.scores?.[rr] || 0;
+        if (score > 0) {
+          let gsAttr = '';
+          let addClass = '';
+          const roundEntry = bestEntryByRound[rr]?.[r.uid];
+          if (roundEntry?.gameScoreId) {
+            gsAttr = ` data-game-score-id="${roundEntry.gameScoreId}"`;
+            addClass = ' has-proof';
+          }
+          const pct = r.pctScores ? r.pctScores[rr] : 0;
+          html += `<td class="score-cell${addClass}"${gsAttr}><span class="num">${score.toLocaleString()}</span><span class="dim">(${pct.toFixed(1)}%)</span></td>`;
+        } else if (roundIdx == null || rr < roundIdx) {
+          html += `<td class="score-cell zero"><span class="num">0</span><span class="dim">(0%)</span></td>`;
+        } else if (rr === roundIdx) {
+          html += `<td class="score-cell zero">—</td>`;
+        } else {
+          html += `<td class="score-cell future"></td>`;
+        }
+      }
+
+      html += `<td class="total-cell"><span class="num">${(r.totalPct || 0).toFixed(1)}%</span> <span class="dim">(${(r.totalScoreRaw || 0).toLocaleString()})</span>${r.hasUnverified ? ' <span class="pending-badge" title="En attente de validation">⏳</span>' : ''}</td>`;
+      html += '</tr>';
+    });
+
+    html += '</tbody></table>';
+    return html;
+  },
+
   renderScoreboardHtml(roundScores, participants, currentRoundIndex, cutoffs, totalRounds) {
     const bestEntryMap = {};
     roundScores.forEach(rs => {

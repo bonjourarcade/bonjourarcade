@@ -406,66 +406,12 @@ function renderCombinedTable(participants, me, allScores, roundIdx, totalRounds)
   // Enrich with percentages
   const scoredRows = TournoiUtils.computePercentages(rows, totalRounds);
 
-  // Sort: non-eliminated first (by current round score DESC), then eliminated
-  scoredRows.sort((a, b) => {
-    const aElim = a.eliminated ? (a.eliminatedRound ?? -1) : Infinity;
-    const bElim = b.eliminated ? (b.eliminatedRound ?? -1) : Infinity;
-    if (bElim !== aElim) return bElim - aElim;
-    const aCurrent = bestEntry[a.uid]?.score || a.scores[roundIdx] || 0;
-    const bCurrent = bestEntry[b.uid]?.score || b.scores[roundIdx] || 0;
-    return bCurrent - aCurrent;
-  });
-
   const activeCount = scoredRows.filter(r => !r.eliminated).length;
   const cutoff = TournoiUtils.computeRoundCutoff(activeCount, roundIdx, totalRounds) || 0;
 
-  let html = '<table class="combined-table"><thead><tr><th>#</th><th>Joueur</th>';
-  for (let r = 0; r < totalRounds; r++) {
-    html += `<th>R${r + 1}</th>`;
-  }
-  html += '<th>Total %</th></tr></thead><tbody>';
-
-  scoredRows.forEach((r, i) => {
-    const isMe = r.uid === myUid;
-    const isActive = !r.eliminated;
-    const isDanger = isActive && cutoff > 0 && i >= cutoff;
-
-    let rowClass = '';
-    if (r.eliminated) rowClass = 'eliminated-row';
-    else if (isDanger) rowClass = 'danger-row';
-    if (isMe) rowClass += ' me-row';
-
-    html += `<tr class="${rowClass}">`;
-    html += `<td class="rank-cell">${i + 1}</td>`;
-    html += `<td class="player-cell"><a href="/profil/?uid=${r.uid}" style="color:inherit;text-decoration:none;">${r.name}</a>${isDanger ? ' <span class="at-risk" title="Ce joueur est en danger d&#39;élimination">⚠️</span>' : ''}</td>`;
-
-    for (let rr = 0; rr < totalRounds; rr++) {
-      const score = r.scores[rr];
-      if (score > 0) {
-        let gsAttr = '';
-        let addClass = '';
-        const roundEntry = bestEntryByRound[rr]?.[r.uid];
-        if (roundEntry?.gameScoreId) {
-          gsAttr = ` data-game-score-id="${roundEntry.gameScoreId}"`;
-          addClass = ' has-proof';
-        }
-        const pct = r.pctScores[rr];
-        html += `<td class="score-cell${addClass}"${gsAttr}><span class="num">${score.toLocaleString()}</span><span class="dim">(${pct.toFixed(1)}%)</span></td>`;
-      } else if (rr < roundIdx) {
-        html += `<td class="score-cell zero"><span class="num">0</span><span class="dim">(0%)</span></td>`;
-      } else if (rr === roundIdx) {
-        html += `<td class="score-cell zero">—</td>`;
-      } else {
-        html += `<td class="score-cell future"></td>`;
-      }
-    }
-
-    html += `<td class="total-cell"><span class="num">${r.totalPct.toFixed(1)}%</span> <span class="dim">(${r.totalScoreRaw.toLocaleString()})</span>${r.hasUnverified ? ' <span class="pending-badge" title="En attente de validation">⏳</span>' : ''}</td>`;
-    html += '</tr>';
+  $('scoreboard-entries').innerHTML = TournoiUtils.renderCombinedTableHtml(scoredRows, totalRounds, {
+    roundIdx, highlightUid: myUid, cutoff, bestEntryByRound,
   });
-
-  html += '</tbody></table>';
-  $('scoreboard-entries').innerHTML = html;
 
   // Enrich
   TournoiUtils.enrichScoreboardEntries('scoreboard-entries');
@@ -577,13 +523,18 @@ async function buildResultsFromFirestore(id) {
 
     return {
       podiumPlayers,
+      totalRounds,
       cumulativeScoresTable: scored.map(p => ({
+        uid: p.uid,
         name: p.name,
         photoURL: p.photoURL,
+        scores: p.scores,
+        pctScores: p.pctScores,
         totalPct: p.totalPct,
         totalScoreRaw: p.totalScoreRaw,
         hasUnverified: p.hasUnverified,
         eliminated: p.eliminated,
+        eliminatedRound: p.eliminatedRound,
       })),
     };
   } catch (e) {
@@ -620,17 +571,8 @@ function renderFinishedResults(results) {
   if (results.cumulativeScoresTable) {
     html += '<div style="margin-top:20px;">';
     html += '<div class="section-title">Classement final</div>';
-    html += '<table class="cumul-table"><thead><tr><th>#</th><th></th><th>Joueur</th><th>Total %</th></tr></thead><tbody>';
-      results.cumulativeScoresTable.forEach((p, i) => {
-        const isMe = p.name === (currentUser?.displayName || '');
-        html += `<tr class="${p.eliminated ? 'eliminated-row' : ''} ${isMe ? 'highlight-row' : ''}">
-          <td>${i + 1}</td>
-          <td><img src="${p.photoURL || '../assets/default-avatar.png'}" class="avatar-sm"></td>
-          <td>${p.name}</td>
-          <td><span class="num">${p.totalPct.toFixed(1)}%</span> <span class="dim">(${p.totalScoreRaw.toLocaleString()})</span>${p.hasUnverified ? ' <span class="pending-badge" title="Certains scores sont en attente de validation">⏳</span>' : ''}</td>
-        </tr>`;
-      });
-    html += '</tbody></table></div>';
+    html += TournoiUtils.renderCombinedTableHtml(results.cumulativeScoresTable, results.totalRounds, { highlightUid: myUid });
+    html += '</div>';
   }
 
   $('play-results').innerHTML = html;

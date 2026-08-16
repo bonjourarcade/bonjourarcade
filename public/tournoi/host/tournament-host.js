@@ -589,17 +589,7 @@ async function renderResults(id) {
 
   if (results.cumulativeScoresTable) {
     html += '<div class="section-title">Classement cumulatif</div>';
-    html += '<table class="cumul-table"><thead><tr><th>#</th><th></th><th>Joueur</th><th>Total %</th></tr></thead><tbody>';
-    results.cumulativeScoresTable.forEach((p, i) => {
-      const nameLink = p.uid ? `<a href="/profil/?uid=${p.uid}" style="color:inherit;text-decoration:none;">${p.name}</a>` : p.name;
-      html += `<tr class="${p.eliminated ? 'eliminated-row' : ''}">
-        <td>${i + 1}</td>
-        <td><img src="${p.photoURL || '../assets/default-avatar.png'}" class="avatar-sm"></td>
-        <td>${nameLink}</td>
-        <td><span class="num">${p.totalPct.toFixed(1)}%</span> <span class="dim">(${p.totalScoreRaw.toLocaleString()})</span></td>
-      </tr>`;
-    });
-    html += '</tbody></table>';
+    html += TournoiUtils.renderCombinedTableHtml(results.cumulativeScoresTable, results.totalRounds);
   }
 
   $('results-content').innerHTML = html;
@@ -612,6 +602,7 @@ function buildResultsFromParticipants(participants) {
       name: p.displayName || 'Anonyme',
       photoURL: p.photoURL || '',
       scores: p.scores || [],
+      hasUnverified: (p.scores || []).some((s, i) => s > 0 && !(p.scoresVerified || [])[i]),
       eliminated: p.eliminated || false,
       eliminatedRound: p.eliminatedRound,
     }));
@@ -632,14 +623,19 @@ function buildResultsFromParticipants(participants) {
 
     return {
       podiumPlayers,
+      totalRounds,
       overallChampion: champion ? { uid: champion.uid, name: champion.name, totalPct: champion.totalPct, totalScoreRaw: champion.totalScoreRaw } : null,
       cumulativeScoresTable: scored.map(p => ({
         uid: p.uid,
         name: p.name,
         photoURL: p.photoURL,
+        scores: p.scores,
+        pctScores: p.pctScores,
         totalPct: p.totalPct,
         totalScoreRaw: p.totalScoreRaw,
+        hasUnverified: p.hasUnverified,
         eliminated: p.eliminated,
+        eliminatedRound: p.eliminatedRound,
       })),
     };
   } catch (e) {

@@ -197,10 +197,30 @@
     .podium-place.podium-2 { transform: translateY(0); }
     .podium-place.podium-3 { transform: translateY(0); }
 
-    .cumul-table { width: 100%; border-collapse: collapse; }
-    .cumul-table th, .cumul-table td { padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--table-border); }
-    .cumul-table th { color: var(--accent-text); background: var(--accent-bg); padding: var(--accent-pad); border-radius: var(--accent-radius); font-size: 0.85rem; text-transform: uppercase; }
-    .cumul-table .eliminated-row { opacity: 0.5; }
+    .dim { display: block; font-size: 0.75em; color: #888; }
+    .num { display: block; }
+
+    #results-content { overflow-x: auto; }
+    .combined-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    .combined-table th, .combined-table td { padding: 6px 8px; text-align: center; border-bottom: 1px solid var(--table-border); }
+    .combined-table th { color: var(--accent-text); background: var(--accent-bg); padding: var(--accent-pad); border-radius: var(--accent-radius); font-size: 0.75rem; text-transform: uppercase; vertical-align: bottom; white-space: nowrap; }
+    .combined-table .player-cell { font-weight: 600; text-align: left; white-space: nowrap; }
+    .combined-table .rank-cell { color: var(--muted-strong); font-weight: 700; width: 30px; }
+    .combined-table .score-cell { font-family: monospace; font-weight: 600; min-width: 60px; }
+    .combined-table .score-cell.zero { color: var(--muted-strong); font-weight: 400; }
+    .combined-table .total-cell { font-family: monospace; font-weight: 700; color: var(--accent-text); background: var(--accent-bg); padding: var(--accent-pad); border-radius: var(--accent-radius); }
+    .combined-table .danger-row { background: rgba(230, 126, 34, 0.2); }
+    .combined-table .danger-row .player-cell { color: #f39c12; }
+    .combined-table .danger-row .score-cell { color: #f39c12; }
+    .combined-table .eliminated-row { background: rgba(192, 57, 43, 0.2); }
+    .combined-table .eliminated-row .player-cell { color: #e74c3c; }
+    .combined-table .eliminated-row .score-cell { color: #e74c3c; }
+    .combined-table .eliminated-row .total-cell { color: #e74c3c; }
+    .combined-table .me-row { outline: 2px solid #4a9eff; outline-offset: -2px; }
+    .combined-table .me-row.danger-row { outline-color: #f39c12; }
+    .combined-table .me-row.eliminated-row { outline-color: #e74c3c; }
+    .combined-table .at-risk { font-size: 0.9rem; }
+    .combined-table .pending-badge { cursor: help; font-size: 0.8rem; }
     .avatar-sm { width: 24px; height: 24px; border-radius: 50%; vertical-align: middle; }
 
     .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.85); color: white; padding: 10px 20px; border-radius: 8px; z-index: 2000; font-size: 0.9rem; }

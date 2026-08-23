@@ -4,10 +4,9 @@ developer: Crawfish Interactive
 genre: Combat
 #controls:
 #  - "←↓↑→: Mouvement"
-#  - "Z: "
-#  - "X: "
-#  - "C: "
-#  - "V: "
+#  - "Z: Coup de poing"
+#  - "X: Coup de pied"
+#  - "Enter: Pause"
 
 announcement_message: "Street Fighter Alpha: Warriors' Dreams est un jeu de combat en un-contre-un de Capcom situé avant Street Fighter II, avec des versions plus jeunes de certains combattants et de nouvelles mécaniques comme les Super Combos et les Alpha Counters. Cette version Game Boy Color est un démake portable qui adapte brillamment l'esprit du jeu d'arcade aux limites de la console. Dan, Akuma et M. Bison sont jouables, mais uniquement en passant par l'option [Random] dans l'écran de choix du personnage."
 

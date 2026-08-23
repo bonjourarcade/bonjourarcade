@@ -1,0 +1,18 @@
+title: "Street Fighter Alpha: Warriors' Dreams"
+year: 2000
+developer: Crawfish Interactive
+genre: Combat
+#controls:
+#  - "←↓↑→: Mouvement"
+#  - "Z: "
+#  - "X: "
+#  - "C: "
+#  - "V: "
+
+#to_start: Espace, puis Enter
+announcement_message: "Street Fighter Alpha débarque sur Game Boy Color dans un démake impressionnant du classique de Capcom. Dan, Akuma et M. Bison sont jouables, mais uniquement en passant par l’option « Random »."
+#problem: true
+
+enable_score: true
+
+added: 2026-08-23

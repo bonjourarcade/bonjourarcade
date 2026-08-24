@@ -4,8 +4,8 @@ year: 1989
 genre: "Beat 'em up"
 controls:
   - "←↓↑→: Déplacer"
-  - "Z: Bouton 1 / Coup de pied"
-  - "X: Bouton 2 / Coup de poing"
+  - "Z: Coup de pied"
+  - "X: Coup de poing"
   - "Z + X: Sauter"
 
 to_start: Z

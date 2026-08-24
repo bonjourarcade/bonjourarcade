@@ -3,9 +3,12 @@ developer: "Atari Games"
 year: 1991
 genre: "Racing shooter"
 controls:
-  - "À confirmer lorsque le support Lynx sera ajouté"
+  - "←→: Diriger"
+  - "X: Tir laser"
+  - "Z: Shockwave"
+  - "Enter: Pause"
 
-to_start: "À confirmer"
+to_start: "X"
 announcement_message: "S.T.U.N. Runner sur Atari Lynx est l'adaptation portable du jeu d'arcade futuriste d'Atari Games, un mélange de course à très haute vitesse et de tir en tunnel où le joueur fonce dans des circuits de science-fiction en détruisant les obstacles et les ennemis sur sa route. Voir ce jeu d'arcade en fausse 3D arriver sur Lynx est déjà étrange, mais la version portable garde une vitesse et une énergie impressionnantes, avec un score visible, des bonus de temps et une vraie sensation de machine qui hurle pour rester en vie."
 
 enable_score: true

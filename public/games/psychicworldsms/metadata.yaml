@@ -1,15 +1,15 @@
-title: "Altered Beast"
-developer: Sega
-year: 1989
-genre: "Beat 'em up"
+title: "Psychic World"
+developer: "Sanritsu"
+year: 1991
+genre: "Action-platformer"
 controls:
   - "←↓↑→: Déplacer"
-  - "Z: Bouton 1 / Coup de pied"
-  - "X: Bouton 2 / Coup de poing"
-  - "Z + X: Sauter"
+  - "Z: Utiliser l'arme / pouvoir"
+  - "X: Sauter"
+  - "↓ + X: Sélection des pouvoirs"
 
 to_start: Z
-announcement_message: "Altered Beast sur Master System est un port 8-bit étonnant du célèbre jeu d'arcade de Sega, où un centurion ressuscité par Zeus doit sauver Athéna des griffes de Neff. Cette version transforme le spectacle massif de l'arcade en une adaptation plus brute et étrange, avec des combats au corps à corps, des boules d'esprit à récupérer et des métamorphoses en créatures mythiques comme le loup-garou, le dragon et le tigre-garou."
+announcement_message: "Psychic World sur Master System est l'adaptation Sega de Psycho World, un jeu d'action-aventure culte du MSX2. On y incarne Lucia, une jeune fille dotée de pouvoirs psychiques qui traverse des niveaux labyrinthiques pour sauver sa soeur Cecile, avec des attaques élémentaires, des jauges d'énergie et un système de sélection de pouvoirs étonnamment ambitieux pour la console. Le jeu évoque aussi étrangement Mega Man 2 avec son savant de laboratoire, ses pouvoirs à gérer et sa révélation finale extraterrestre. Attention: pour soumettre un score, le score disparaît très vite après la mort du joueur; prenez rapidement une capture d'écran ou utilisez la fonction de pause générale de l'émulateur."
 
 enable_score: true
 hide: yes

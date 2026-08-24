@@ -1,0 +1,18 @@
+title: "1943 Kai: Midway Kaisen"
+developer: Capcom
+year: 1988
+genre: "Shoot 'em up"
+controls:
+  - "←↓↑→: Déplacer"
+  - "X: Tirer"
+  - "Z: Arme spéciale"
+  - "Space: Select"
+  - "Enter: Start"
+
+to_start: Enter
+announcement_message: "1943 Kai: Midway Kaisen est une version remaniée de 1943: The Battle of Midway, le shoot 'em up vertical de Capcom inspiré des combats aériens du Pacifique. Plus courte, plus colorée et plus fantaisiste que l'originale, cette version japonaise propose 10 missions, des armes plus spectaculaires et des affrontements contre des avions géants et des navires inspirés de la marine impériale japonaise, jusqu'au cuirassé Yamato en boss final."
+
+enable_score: true
+hide: yes
+
+added: 2026-08-23

@@ -4,8 +4,8 @@ year: 1988
 genre: "Shoot 'em up"
 controls:
   - "←↓↑→: Déplacer"
-  - "X: Tirer"
-  - "Z: Arme spéciale"
+  - "Z: Tirer"
+  - "X: Arme spéciale"
   - "Space: Select"
   - "Enter: Start"
 

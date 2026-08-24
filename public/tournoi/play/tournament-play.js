@@ -242,11 +242,19 @@ function renderFormatInfo(t) {
     return;
   }
 
-  let html = `<div style="font-size:0.9rem;color:var(--muted);line-height:1.6;">
-    ⚔️ À chaque round, les joueurs avec les plus faibles scores sont éliminés.<br>
-    📊 Chaque score est converti en <strong>%</strong> de ce que tous les joueurs ont marqué dans cette ronde.<br>
-    🏆 Le gagnant est celui avec la <strong>plus grande somme de %</strong> sur toutes les rondes.
-  </div>`;
+  const isPercentage = (t.type === 'percentage');
+
+  let html = isPercentage
+    ? `<div style="font-size:0.9rem;color:var(--muted);line-height:1.6;">
+      📊 Chaque score est converti en <strong>%</strong> de ce que tous les joueurs ont marqué dans cette ronde.<br>
+      🏆 Le classement se fait sur la <strong>plus grande somme de %</strong> accumulés sur toutes les rondes — personne n'est éliminé.<br>
+      🔓 Vous pouvez rejoindre le tournoi à tout moment, même en cours de route.
+    </div>`
+    : `<div style="font-size:0.9rem;color:var(--muted);line-height:1.6;">
+      ⚔️ À chaque round, les joueurs avec les plus faibles scores sont éliminés.<br>
+      📊 Chaque score est converti en <strong>%</strong> de ce que tous les joueurs ont marqué dans cette ronde.<br>
+      🏆 Le gagnant est celui avec la <strong>plus grande somme de %</strong> sur toutes les rondes.
+    </div>`;
 
   if (t.stakes) {
     html += `<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);font-size:0.9rem;line-height:1.6;">

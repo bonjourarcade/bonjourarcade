@@ -9,12 +9,14 @@ let unsubscribeRoundScores = null;
 let timerInterval = null;
 let gamelist = [];
 let displayNameCache = {};
+let selectedGameIds = [];
 
 document.addEventListener('DOMContentLoaded', async () => {
   const params = new URLSearchParams(window.location.search);
   if (params.get('t')) tournamentId = params.get('t');
 
   await fetchGamelist();
+  renderSelectedGames();
   setupAuth();
 });
 
@@ -123,7 +125,92 @@ $('generate-games-btn').addEventListener('click', () => {
   const numGames = parseInt($('num-games').value, 10) || 4;
   const eligible = gamelist.filter(g => g.enable_score && !g.problem);
   const shuffled = [...eligible].sort(() => Math.random() - 0.5);
-  $('game-ids').value = shuffled.slice(0, numGames).map(g => g.id).join('\n');
+  selectedGameIds = shuffled.slice(0, numGames).map(g => g.id);
+  renderSelectedGames();
+});
+
+function removeAccentsForSearch(text) {
+  if (!text) return '';
+  return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+}
+
+function syncGameIdsField() {
+  $('game-ids').value = selectedGameIds.join('\n');
+}
+
+function renderSelectedGames() {
+  const list = $('selected-games-list');
+  if (selectedGameIds.length === 0) {
+    list.innerHTML = '<span class="selected-games-empty">Aucun jeu sélectionné — utilise la recherche ci-dessus ou "Générer aléatoire".</span>';
+  } else {
+    list.innerHTML = selectedGameIds.map(id => {
+      const g = gamelist.find(g => g.id === id);
+      const title = g ? g.title : id;
+      return `<span class="selected-game-chip" data-id="${id}">
+        <img src="/games/${id}/cover.png" alt="" onerror="this.style.display='none'">
+        <span>${title}</span>
+        <span class="remove-chip" data-id="${id}" title="Retirer">×</span>
+      </span>`;
+    }).join('');
+    list.querySelectorAll('.remove-chip').forEach(el => {
+      el.addEventListener('click', () => {
+        selectedGameIds = selectedGameIds.filter(id => id !== el.dataset.id);
+        renderSelectedGames();
+      });
+    });
+  }
+  syncGameIdsField();
+}
+
+function addSelectedGame(id) {
+  if (!selectedGameIds.includes(id)) {
+    selectedGameIds.push(id);
+    renderSelectedGames();
+  }
+  $('game-search').value = '';
+  $('game-search-results').classList.add('hidden');
+  $('game-search-results').innerHTML = '';
+}
+
+function renderGameSearchResults(term) {
+  const resultsEl = $('game-search-results');
+  const normalized = removeAccentsForSearch(term.trim());
+  if (!normalized) { resultsEl.classList.add('hidden'); resultsEl.innerHTML = ''; return; }
+
+  const eligible = gamelist.filter(g => g.enable_score && !g.problem);
+  const matches = eligible.filter(g => {
+    const title = removeAccentsForSearch(g.title || g.id);
+    const id = removeAccentsForSearch(g.id);
+    return title.includes(normalized) || id.includes(normalized);
+  }).slice(0, 8);
+
+  if (matches.length === 0) {
+    resultsEl.innerHTML = '<div class="game-search-empty">Aucun jeu trouvé</div>';
+  } else {
+    resultsEl.innerHTML = matches.map(g => `
+      <div class="game-search-result" data-id="${g.id}">
+        <img src="/games/${g.id}/cover.png" alt="" onerror="this.style.display='none'">
+        <div>
+          <div class="gsr-title">${g.title || g.id}${selectedGameIds.includes(g.id) ? ' ✓' : ''}</div>
+          <div class="gsr-id">${g.id}</div>
+        </div>
+      </div>`).join('');
+    resultsEl.querySelectorAll('.game-search-result').forEach(el => {
+      el.addEventListener('click', () => addSelectedGame(el.dataset.id));
+    });
+  }
+  resultsEl.classList.remove('hidden');
+}
+
+$('game-search').addEventListener('input', (e) => renderGameSearchResults(e.target.value));
+$('game-search').addEventListener('focus', (e) => {
+  if (e.target.value.trim()) renderGameSearchResults(e.target.value);
+});
+document.addEventListener('click', (e) => {
+  const wrap = document.querySelector('.game-search-wrap');
+  if (wrap && !wrap.contains(e.target)) {
+    $('game-search-results').classList.add('hidden');
+  }
 });
 
 async function checkActiveTournaments() {

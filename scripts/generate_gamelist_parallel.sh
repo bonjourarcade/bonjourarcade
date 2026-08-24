@@ -59,6 +59,7 @@ get_core_from_dir() {
         GENESIS|MEGADRIVE) echo "segaMD" ;;
         GG) echo "segaGG" ;;
         JAGUAR) echo "jaguar" ;;
+        LYNX) echo "lynx" ;;
         N64)   echo "n64" ;;
         NES)   echo "nes" ;;
         NDS)   echo "nds" ;;

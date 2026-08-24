@@ -51,7 +51,7 @@ count_total_roms() {
             -name "*.gg" -o -name "*.sms" -o -name "*.32x" -o \
             -name "*.vb" -o -name "*.wsc" -o -name "*.pce" -o \
             -name "*.a26" -o -name "*.j64" -o -name "*.z64" -o \
-            -name "*.n64" -o -name "*.zip" \) | wc -l | tr -d ' '
+            -name "*.n64" -o -name "*.lnx" -o -name "*.zip" \) | wc -l | tr -d ' '
     else
         # If roms directory doesn't exist, estimate from log files
         local gamelist_count=$(count_processed_files "$GAMELIST_LOG")

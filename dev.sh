@@ -6,22 +6,19 @@
 # 
 # This script provides a complete local development environment for BonjourArcade:
 # 
-# 1. LOCAL TESTING MODE: Generates gamelist.json with local ROM paths (/roms/...)
-#    and thumbnails, allowing you to test ROMs locally without pushing
-#    to the repository.
-# 
+# 1. LOCAL TESTING MODE: Generates gamelist.json with local ROM paths (/roms/...),
+#    allowing you to test ROMs locally without pushing to the repository.
+#
 # 2. SERVER STARTUP: Launches a local HTTP server from the public/ directory
 #    so you can test the full application in your browser.
-# 
+#
 # USAGE:
 #   ./dev.sh                     # Start with local testing mode (default)
 #   ./dev.sh --production        # Start with production Google Cloud Storage URLs
 #   ./dev.sh --help              # Show this help message
-# 
+#
 # FEATURES:
 #   - Automatic gamelist generation with local ROM paths
-#   - Automatic thumbnail generation for all games
-#   - Parallel processing for fast build generation
 #   - Local server startup at http://localhost:8000
 #   - Easy switching between local and production modes
 #   - Production mode uses Google Cloud Storage CDN (no CORS issues)
@@ -58,15 +55,13 @@ echo "  ./dev.sh --production # Start with production Google Cloud Storage URLs"
     echo ""
     echo "Local testing mode will:"
 echo "  1. Generate gamelist.json with local ROM paths (/roms/...)"
-echo "  2. Generate thumbnails for all games"
-echo "  3. Start local server at http://localhost:8000"
-echo "  4. Allow testing ROMs from local filesystem"
+echo "  2. Start local server at http://localhost:8000"
+echo "  3. Allow testing ROMs from local filesystem"
 echo ""
 echo "Production mode will:"
 echo "  1. Generate gamelist.json with Google Cloud Storage URLs"
-echo "  2. Generate thumbnails for all games"
-echo "  3. Start local server at http://localhost:8000"
-echo "  4. Test with production ROM URLs (requires internet)"
+echo "  2. Start local server at http://localhost:8000"
+echo "  3. Test with production ROM URLs (requires internet)"
 }
 
 # --- Parse command line arguments ---
@@ -136,8 +131,8 @@ done
 echo -e "${GREEN}✅ All prerequisites met${NC}"
 echo ""
 
-# --- Generate gamelist and thumbnails ---
-echo -e "${BLUE}📋 Building project (gamelist + thumbnails)...${NC}"
+# --- Generate gamelist ---
+echo -e "${BLUE}📋 Building project (gamelist)...${NC}"
 
 if [ "$LOCAL_TESTING" = "true" ]; then
     export LOCAL_TESTING=true
@@ -154,24 +149,16 @@ echo "   Found $TOTAL_GAMES ROM files to process"
 echo ""
 
 # Run the build process and capture output cleanly
-echo "   Starting parallel build process..."
-echo "   (This may take a few minutes for large ROM collections)"
+echo "   Starting gamelist generation (ruby)..."
 echo ""
-
-# Clear any existing temp files to avoid conflicts
-rm -f /tmp/gamelist_output.log /tmp/thumbnails_output.log
-
-# Set flag to disable progress bar when called from script
-export CALLED_FROM_SCRIPT=true
 
 # Capture build start time
 BUILD_START_TIME=$(date +%s)
 
-if bash scripts/build_parallel.sh; then
+if ruby scripts/generate_gamelist.rb; then
     echo ""
     echo -e "${GREEN}✅ Build completed successfully${NC}"
     echo -e "${GREEN}   • Gamelist generated${NC}"
-    echo -e "${GREEN}   • Thumbnails generated${NC}"
 else
     echo -e "${RED}❌ Build failed${NC}"
     exit 1

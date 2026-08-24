@@ -49,18 +49,18 @@ fi
 
 echo "PNG optimization completed successfully"
 
-# Push ROMs
-cd ~/perso/roms
-git add -A && git commit -m "Update ROM collection: $(git diff --cached --name-only | wc -l | tr -d ' ') files modified
-
-Files changed:
-$(git diff --cached --name-only | sed 's/^/- /')"
-git push origin main
-
-echo "Pushed ROMs successfully"
-
-cd -
-exit 0
+## Push ROMs
+#cd ~/perso/roms
+#git add -A && git commit -m "Update ROM collection: $(git diff --cached --name-only | wc -l | tr -d ' ') files modified
+#
+#Files changed:
+#$(git diff --cached --name-only | sed 's/^/- /')"
+#git push origin main
+#
+#echo "Pushed ROMs successfully"
+#
+#cd -
+#exit 0
 ################################################################
 
 

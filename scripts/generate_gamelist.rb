@@ -36,6 +36,7 @@ CORE_BY_DIR = {
   'MEGADRIVE' => 'segaMD',
   'GG' => 'segaGG',
   'JAGUAR' => 'jaguar',
+  'LYNX' => 'lynx',
   'N64' => 'n64',
   'NES' => 'nes',
   'NDS' => 'nds',

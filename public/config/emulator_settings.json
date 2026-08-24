@@ -18,7 +18,8 @@
     "psx": "https://storage.googleapis.com/bonjourarcade/roms/bios/scph5501.bin",
     "nds": "https://storage.googleapis.com/bonjourarcade/roms/bios/ndsbios.zip",
     "segaCD": "https://storage.googleapis.com/bonjourarcade/roms/bios/bios_CD_U.bin",
-    "segaSaturn": "https://storage.googleapis.com/bonjourarcade/roms/bios/saturn_bios.bin"
+    "segaSaturn": "https://storage.googleapis.com/bonjourarcade/roms/bios/saturn_bios.bin",
+    "lynx": "https://storage.googleapis.com/bonjourarcade/roms/bios/lynxboot.img"
   },
   "EJS_pathtodata": "https://cdn.emulatorjs.org/latest/data/",
   "EJS_AdUrl": "/ads",

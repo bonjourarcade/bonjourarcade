@@ -564,7 +564,7 @@ async function renderResults(id) {
 
   if (results.podiumPlayers && results.podiumPlayers.length > 0) {
     html += '<div class="podium">';
-    const order = [2, 0, 1];
+    const order = [1, 0, 2];
     for (const idx of order) {
       const p = results.podiumPlayers[idx];
       if (!p) continue;

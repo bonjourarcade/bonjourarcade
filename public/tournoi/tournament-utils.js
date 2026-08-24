@@ -29,6 +29,15 @@ const TournoiUtils = {
     return result.data;
   },
 
+  // Mirrors isJoinable() in the Cloud Functions backend (tournaments/utils.ts) — keep both in sync.
+  isJoinable(tournament) {
+    if (tournament.status === 'registration') return true;
+    if (tournament.status !== 'active') return false;
+    if (tournament.type === 'percentage') return true;
+    if (tournament.currentRoundIndex !== 0) return false;
+    return TournoiUtils.getRemainingSeconds(tournament.roundStartTime, tournament.roundDurationSec) > 0;
+  },
+
   computeRoundCutoff(remainingPlayers, currentRound, totalRounds) {
     if (!totalRounds || currentRound >= totalRounds - 1) return null;
     const roundsLeft = totalRounds - currentRound;
@@ -69,14 +78,19 @@ const TournoiUtils = {
   // Used both for the live in-progress round view (pass roundIdx) and the finished-results view
   // (omit roundIdx — every non-eliminated player is treated as having reached the last round).
   //
-  // Ranking: players who went further (higher eliminatedRound, or still active) rank above those
-  // eliminated earlier. Players eliminated in the same round are tied-broken by their score in
-  // that specific round (not by whatever round is currently displayed).
+  // Ranking (opts.rankBy, default 'survival'):
+  //  - 'survival': players who went further (higher eliminatedRound, or still active) rank above
+  //    those eliminated earlier. Players eliminated in the same round are tied-broken by their
+  //    score in that specific round. This matches an 'elimination'-type tournament.
+  //  - 'totalPct': ranked purely by cumulative percentage across all rounds, ignoring elimination
+  //    status. Use this for 'percentage'-type tournaments, where nobody is ever eliminated and the
+  //    accumulated % across rounds is what decides the standings.
   renderCombinedTableHtml(rows, totalRounds, opts = {}) {
-    const { roundIdx = null, highlightUid = null, cutoff = 0, bestEntryByRound = {} } = opts;
+    const { roundIdx = null, highlightUid = null, cutoff = 0, bestEntryByRound = {}, rankBy = 'survival' } = opts;
     const referenceRound = roundIdx != null ? roundIdx : totalRounds - 1;
 
     const sorted = [...rows].sort((a, b) => {
+      if (rankBy === 'totalPct') return (b.totalPct || 0) - (a.totalPct || 0);
       const aRound = a.eliminated ? (a.eliminatedRound ?? -1) : referenceRound;
       const bRound = b.eliminated ? (b.eliminatedRound ?? -1) : referenceRound;
       if (bRound !== aRound) return bRound - aRound;
@@ -138,7 +152,7 @@ const TournoiUtils = {
     return html;
   },
 
-  renderScoreboardHtml(roundScores, participants, currentRoundIndex, cutoffs, totalRounds) {
+  renderScoreboardHtml(roundScores, participants, currentRoundIndex, cutoffs, totalRounds, tournamentType = 'elimination') {
     const bestEntryMap = {};
     roundScores.forEach(rs => {
       if (!bestEntryMap[rs.userId] || rs.score > bestEntryMap[rs.userId].score) {
@@ -168,7 +182,7 @@ const TournoiUtils = {
 
     const storedCutoff = (cutoffs && typeof cutoffs[currentRoundIndex] === 'number') ? cutoffs[currentRoundIndex] : null;
     const computedCutoff = TournoiUtils.computeRoundCutoff(active.length, currentRoundIndex, totalRounds);
-    const cutoff = computedCutoff !== null ? computedCutoff : storedCutoff;
+    const cutoff = tournamentType === 'percentage' ? 0 : (computedCutoff !== null ? computedCutoff : storedCutoff);
 
     let html = '';
 

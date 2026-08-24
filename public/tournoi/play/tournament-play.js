@@ -11,6 +11,7 @@ let allRoundScores = [];
 let currentRoundIndex = -1;
 let currentTotalRounds = 0;
 let isInTournament = false;
+let currentTournamentType = 'elimination';
 let unsubscribeTournament = null;
 let unsubscribeParticipants = null;
 let unsubscribeRoundScores = null;
@@ -125,9 +126,7 @@ async function checkParticipation() {
       hide('tournament-info');
       show('join-phase');
 
-      const isJoinable = t.status === 'registration' ||
-        (t.status === 'active' && t.currentRoundIndex === 0 &&
-          TournoiUtils.getRemainingSeconds(t.roundStartTime, t.roundDurationSec) > 0);
+      const isJoinable = TournoiUtils.isJoinable(t);
 
       $('join-tournament-name').textContent = `Tournoi #${t.shareCode}`;
       const pCount = t.participantCount ?? (await getDocs(collection(tournamentRef, 'participants'))).size;
@@ -261,6 +260,7 @@ function renderFormatInfo(t) {
 }
 
 function renderTournament(t) {
+  currentTournamentType = t.type === 'percentage' ? 'percentage' : 'elimination';
   $('play-participant-count').textContent = '...';
   $('play-round-info').textContent = t.currentRoundIndex >= 0 ? `Ronde ${t.currentRoundIndex + 1}/${t.games.length}` : 'Pas commencé';
   $('play-status').textContent = t.status === 'registration' ? 'Inscription' : t.status === 'active' ? 'En cours' : 'Terminé';
@@ -408,10 +408,12 @@ function renderCombinedTable(participants, me, allScores, roundIdx, totalRounds)
   const scoredRows = TournoiUtils.computePercentages(rows, totalRounds);
 
   const activeCount = scoredRows.filter(r => !r.eliminated).length;
-  const cutoff = TournoiUtils.computeRoundCutoff(activeCount, roundIdx, totalRounds) || 0;
+  const cutoff = currentTournamentType === 'percentage' ? 0 :
+    (TournoiUtils.computeRoundCutoff(activeCount, roundIdx, totalRounds) || 0);
+  const rankBy = currentTournamentType === 'percentage' ? 'totalPct' : 'survival';
 
   $('scoreboard-entries').innerHTML = TournoiUtils.renderCombinedTableHtml(scoredRows, totalRounds, {
-    roundIdx, highlightUid: myUid, cutoff, bestEntryByRound,
+    roundIdx, highlightUid: myUid, cutoff, bestEntryByRound, rankBy,
   });
 
   // Enrich
@@ -495,8 +497,18 @@ async function buildResultsFromFirestore(id) {
       });
     });
 
+    const tournamentType = tSnap.data().type === 'percentage' ? 'percentage' : 'elimination';
     const scored = TournoiUtils.computePercentages(participants, totalRounds);
-    scored.sort((a, b) => b.totalPct - a.totalPct);
+    if (tournamentType === 'percentage') {
+      scored.sort((a, b) => b.totalPct - a.totalPct);
+    } else {
+      scored.sort((a, b) => {
+        const aRound = typeof a.eliminatedRound === 'number' ? a.eliminatedRound : totalRounds - 1;
+        const bRound = typeof b.eliminatedRound === 'number' ? b.eliminatedRound : totalRounds - 1;
+        if (bRound !== aRound) return bRound - aRound;
+        return (b.scores[bRound] || 0) - (a.scores[aRound] || 0);
+      });
+    }
 
     // Resolve photoURL for each participant via getPublicProfile
     try {
@@ -523,6 +535,7 @@ async function buildResultsFromFirestore(id) {
     }));
 
     return {
+      type: tournamentType,
       podiumPlayers,
       totalRounds,
       cumulativeScoresTable: scored.map(p => ({
@@ -572,7 +585,8 @@ function renderFinishedResults(results) {
   if (results.cumulativeScoresTable) {
     html += '<div style="margin-top:20px;">';
     html += '<div class="section-title">Classement final</div>';
-    html += TournoiUtils.renderCombinedTableHtml(results.cumulativeScoresTable, results.totalRounds, { highlightUid: myUid });
+    const rankBy = results.type === 'percentage' ? 'totalPct' : 'survival';
+    html += TournoiUtils.renderCombinedTableHtml(results.cumulativeScoresTable, results.totalRounds, { highlightUid: myUid, rankBy });
     html += '</div>';
   }
 

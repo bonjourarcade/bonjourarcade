@@ -100,6 +100,7 @@ $('create-tournament-btn').addEventListener('click', async () => {
     const description = $('tournament-description').value.trim() || undefined;
     const stakes = $('tournament-stakes').value.trim() || undefined;
     const isPublic = document.getElementById('is-public').checked;
+    const type = document.querySelector('input[name="tournament-type"]:checked')?.value || 'elimination';
     const shareCode = $('share-code').value.trim().toUpperCase() || undefined;
     const autoDestroyInput = $('auto-destroy-days').value.trim();
     const autoDestroyDays = autoDestroyInput ? parseInt(autoDestroyInput, 10) : null;
@@ -107,7 +108,7 @@ $('create-tournament-btn').addEventListener('click', async () => {
     const fn = window.httpsCallable
       ? window.httpsCallable(window.firebaseFunctions, 'createTournament')
       : (await import('https://www.gstatic.com/firebasejs/11.0.1/firebase-functions.js')).httpsCallable(window.firebaseFunctions, 'createTournament');
-    const result = (await fn({ gameIds, roundDurationSec, pauseDurationSec: 0, name, description, stakes, isPublic, shareCode, autoDestroyDays })).data;
+    const result = (await fn({ gameIds, roundDurationSec, pauseDurationSec: 0, name, description, stakes, isPublic, shareCode, autoDestroyDays, type })).data;
     tournamentId = result.tournamentId;
     window.history.replaceState({}, '', `?t=${tournamentId}`);
     hide('setup-view');
@@ -618,7 +619,7 @@ function renderParticipants(participants) {
 function renderScoreboard(roundScores) {
   const cutoffs = tournamentData?.cutoffs || null;
   const totalRounds = tournamentData?.games?.length || 0;
-  const html = TournoiUtils.renderScoreboardHtml(roundScores, currentParticipants, lastRoundIndex, cutoffs, totalRounds);
+  const html = TournoiUtils.renderScoreboardHtml(roundScores, currentParticipants, lastRoundIndex, cutoffs, totalRounds, tournamentData?.type);
   $('scoreboard-entries').innerHTML = html;
   TournoiUtils.enrichScoreboardEntries('scoreboard-entries');
 }
@@ -639,7 +640,7 @@ async function renderResults(id) {
   }
 
   if (!results || !results.cumulativeScoresTable) {
-    results = buildResultsFromParticipants(currentParticipants);
+    results = buildResultsFromParticipants(currentParticipants, tournamentData?.type);
     if (!results) {
       console.error('buildResultsFromParticipants also failed. CF error:', lastError);
       $('results-content').innerHTML = '<p style="color:#dc3545;">Erreur de chargement des résultats. Vérifie la console.</p>';
@@ -676,13 +677,14 @@ async function renderResults(id) {
 
   if (results.cumulativeScoresTable) {
     html += '<div class="section-title">Classement cumulatif</div>';
-    html += TournoiUtils.renderCombinedTableHtml(results.cumulativeScoresTable, results.totalRounds);
+    const rankBy = (results.type || tournamentData?.type) === 'percentage' ? 'totalPct' : 'survival';
+    html += TournoiUtils.renderCombinedTableHtml(results.cumulativeScoresTable, results.totalRounds, { rankBy });
   }
 
   $('results-content').innerHTML = html;
 }
 
-function buildResultsFromParticipants(participants) {
+function buildResultsFromParticipants(participants, tournamentType) {
   try {
     const entries = Object.entries(participants).map(([uid, p]) => ({
       uid,
@@ -696,7 +698,16 @@ function buildResultsFromParticipants(participants) {
 
     const totalRounds = entries.reduce((max, p) => Math.max(max, p.scores.length), 0);
     const scored = TournoiUtils.computePercentages(entries, totalRounds);
-    scored.sort((a, b) => b.totalPct - a.totalPct);
+    if (tournamentType === 'percentage') {
+      scored.sort((a, b) => b.totalPct - a.totalPct);
+    } else {
+      scored.sort((a, b) => {
+        const aRound = typeof a.eliminatedRound === 'number' ? a.eliminatedRound : totalRounds - 1;
+        const bRound = typeof b.eliminatedRound === 'number' ? b.eliminatedRound : totalRounds - 1;
+        if (bRound !== aRound) return bRound - aRound;
+        return (b.scores[bRound] || 0) - (a.scores[aRound] || 0);
+      });
+    }
 
     const podiumPlayers = scored.slice(0, 3).map(p => ({
       uid: p.uid,

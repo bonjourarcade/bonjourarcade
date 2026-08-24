@@ -291,7 +291,23 @@
             <label>Nom du tournoi (optionnel)</label>
             <input type="text" id="tournament-name" placeholder="Ex: Tournoi d'été 2026" maxlength="100">
             <label>Description (optionnelle)</label>
-            <textarea id="tournament-description" placeholder="Décris ton tournoi, les règles, etc." style="min-height:60px;"></textarea>
+            <textarea id="tournament-description" placeholder="Décris ton tournoi, le thème, etc." style="min-height:60px;"></textarea>
+
+            <label>Type de tournoi</label>
+            <div class="flex" style="gap:16px;margin:0 0 4px;">
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-weight:normal;">
+                <input type="radio" name="tournament-type" id="type-elimination" value="elimination" checked style="width:auto;margin:0;">
+                <span>Élimination</span>
+              </label>
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-weight:normal;">
+                <input type="radio" name="tournament-type" id="type-percentage" value="percentage" style="width:auto;margin:0;">
+                <span>% accumulation</span>
+              </label>
+            </div>
+            <div style="font-size:0.85rem;color:var(--muted);margin:0 0 16px;">
+              <strong>Élimination</strong> : les moins bons scores sont éliminés à chaque ronde ; les gagnants sont ceux qui survivent jusqu'à la dernière ronde. Impossible de rejoindre après le début de la 1ère ronde.<br>
+              <strong>% accumulation</strong> : personne n'est éliminé, le classement se fait sur le % de points accumulés à travers toutes les rondes. Les joueurs peuvent rejoindre en tout temps, même en cours de tournoi.
+            </div>
 
             <label>Gains (optionnel)</label>
             <input type="text" id="tournament-stakes" placeholder="Ex: 50$ pour le 1er, bières pour le top 3, etc.">

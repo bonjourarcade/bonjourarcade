@@ -261,7 +261,7 @@ const TournoiUtils = {
     await Promise.all(idsToFetch.map(async id => {
       try {
         const snap = await getDoc(doc(db, 'game-scores', id));
-        cache[id] = snap.exists ? snap.data() : null;
+        cache[id] = snap.exists() ? snap.data() : null;
       } catch (e) {
         cache[id] = null;
       }

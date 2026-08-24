@@ -175,7 +175,7 @@ function loadDashboard(id) {
   const tournamentRef = doc(db, 'tournaments', id);
 
   unsubscribeTournament = onSnapshot(tournamentRef, (snap) => {
-    if (!snap.exists) { showToast('Tournoi introuvable'); return; }
+    if (!snap.exists()) { showToast('Tournoi introuvable'); return; }
     renderTournament(snap.data(), snap.id);
   });
 

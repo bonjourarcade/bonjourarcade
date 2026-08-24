@@ -95,7 +95,7 @@ async function checkParticipation() {
     const tournamentRef = doc(window.firebaseDb, 'tournaments', tournamentId);
     const tournamentSnap = await getDoc(tournamentRef);
 
-    if (!tournamentSnap.exists) {
+    if (!tournamentSnap.exists()) {
       renderError('Tournoi introuvable.');
       return;
     }
@@ -115,7 +115,7 @@ async function checkParticipation() {
     const participantRef = doc(window.firebaseDb, 'tournaments', tournamentId, 'participants', myUid);
     const participantSnap = await getDoc(participantRef);
 
-    if (participantSnap.exists) {
+    if (participantSnap.exists()) {
       isInTournament = true;
       myParticipantData = participantSnap.data();
       hide('join-phase');
@@ -126,7 +126,8 @@ async function checkParticipation() {
       show('join-phase');
 
       const isJoinable = t.status === 'registration' ||
-        (t.status === 'active' && t.currentRoundIndex === 0);
+        (t.status === 'active' && t.currentRoundIndex === 0 &&
+          TournoiUtils.getRemainingSeconds(t.roundStartTime, t.roundDurationSec) > 0);
 
       $('join-tournament-name').textContent = `Tournoi #${t.shareCode}`;
       const pCount = t.participantCount ?? (await getDocs(collection(tournamentRef, 'participants'))).size;
@@ -178,7 +179,7 @@ function listenToTournament(initialData) {
   const tournamentRef = doc(window.firebaseDb, 'tournaments', tournamentId);
 
   unsubscribeTournament = onSnapshot(tournamentRef, (snap) => {
-    if (!snap.exists) return;
+    if (!snap.exists()) return;
     renderTournament(snap.data());
   });
 
@@ -474,7 +475,7 @@ async function buildResultsFromFirestore(id) {
     if (!id) { console.error('No tournament ID provided'); return null; }
 
     const tSnap = await getDoc(doc(db, 'tournaments', id));
-    if (!tSnap.exists) { console.error('Tournament doc not found:', id); return null; }
+    if (!tSnap.exists()) { console.error('Tournament doc not found:', id); return null; }
 
     const totalRounds = (tSnap.data().games || []).length;
 

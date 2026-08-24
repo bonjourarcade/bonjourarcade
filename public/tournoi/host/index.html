@@ -235,6 +235,23 @@
     .theme-toggle-wrapper { position: relative; }
     .home-btn { position: fixed; top: 16px; left: 16px; font-size: 0.85rem; cursor: pointer; padding: 6px 10px; border-radius: 8px; z-index: 10; text-decoration: none; display: flex; align-items: center; gap: 6px; background: var(--btn-secondary-bg); color: var(--btn-secondary-text); border: none; font-weight: 600; }
     .home-btn:hover { background: #3a3a5a; }
+
+    .game-search-wrap { position: relative; margin-bottom: 8px; }
+    .game-search-wrap input { margin-bottom: 0; }
+    .game-search-results { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; max-height: 280px; overflow-y: auto; z-index: 50; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+    .game-search-result { display: flex; align-items: center; gap: 10px; padding: 8px 12px; cursor: pointer; }
+    .game-search-result:hover { background: var(--surface-alt); }
+    .game-search-result img { width: 32px; height: 32px; border-radius: 6px; object-fit: cover; flex-shrink: 0; background: var(--surface-alt); }
+    .game-search-result .gsr-title { font-size: 0.9rem; }
+    .game-search-result .gsr-id { font-size: 0.75rem; color: var(--muted); }
+    .game-search-empty { padding: 10px 12px; color: var(--muted); font-size: 0.85rem; }
+
+    .selected-games-list { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    .selected-game-chip { display: flex; align-items: center; gap: 6px; background: var(--surface-alt); border-radius: 20px; padding: 4px 10px 4px 4px; font-size: 0.85rem; }
+    .selected-game-chip img { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; }
+    .selected-game-chip .remove-chip { cursor: pointer; color: var(--muted); font-weight: 700; padding: 0 2px; }
+    .selected-game-chip .remove-chip:hover { color: #dc3545; }
+    .selected-games-empty { color: var(--muted); font-size: 0.85rem; padding: 4px 0; }
   </style>
 </head>
 <body>
@@ -291,8 +308,13 @@
               <div style="font-size:0.85rem;color:var(--muted);margin:-12px 0 16px;">Nécessaire pour rejoindre ce tournoi privé</div>
             </div>
 
-            <label>IDs des jeux (un par ligne)</label>
-            <textarea id="game-ids" placeholder="1943&#10;sf2&#10;pacman"></textarea>
+            <label>Jeux du tournoi</label>
+            <div class="game-search-wrap">
+              <input type="text" id="game-search" placeholder="Rechercher un jeu par titre ou ID..." autocomplete="off">
+              <div id="game-search-results" class="game-search-results hidden"></div>
+            </div>
+            <div id="selected-games-list" class="selected-games-list"></div>
+            <textarea id="game-ids" class="hidden"></textarea>
             <div class="flex">
               <button id="generate-games-btn" class="btn-secondary btn-sm">Générer aléatoire</button>
               <label style="flex:1;">Nombre de jeux: <input type="number" id="num-games" value="4" min="1" max="20" style="width:80px;display:inline;"></label>

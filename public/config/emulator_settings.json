@@ -3,6 +3,7 @@
     "mame2003-plus_neogeo_bios": "unibios40",
     "mame2003-plus_skip_disclaimer": "enabled",
     "mame2003-plus_skip_warnings": "enabled",
+    "smsplus_fm_sound": "disabled",
     "fceumm_nospritelimit": "enabled",
     "ff-ratio": "8.0",
     "gambatte_gb_colorization": "GBC",
@@ -12,6 +13,7 @@
   "EJS_backgroundBlur": true,
   "EJS_disableAutoLang": true,
   "EJS_alignStartButton": "bottom",
+  "EJS_DEBUG_XX": true,
   "EJS_startOnLoaded": true,
   "EJS_biosByCore": {
     "pce": "https://storage.googleapis.com/bonjourarcade/roms/bios/syscard3.pce",

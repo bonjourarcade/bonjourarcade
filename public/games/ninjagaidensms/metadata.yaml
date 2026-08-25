@@ -14,7 +14,7 @@ controls:
   - "↑ + Z = arme spéciale"
 
 to_start: "Entrée"
-announcement_message: Ninja Gaiden sur Master System est une merveille 8-bit taillée au Dragon Sword, un épisode original, rapide, jouissif et incroyablement fluide qui enterre honorablement les versions NES avec la politesse d’un maître ninja qui s’excuse avant de te couper en deux, tout en offrant des sauts muraux propres, de l’action au quart de tour, des décors qui respirent la classe et cette sensation délicieuse d’un jeu qui sait exactement ce qu’il fait; bref, un rappel nécessaire que pendant que certains comptaient les couleurs, la Master System régnait déjà sur le royaume 8-bit avec un bandeau au vent et aucun besoin de se justifier."
+announcement_message: Ninja Gaiden sur Master System est une merveille 8-bit taillée au Dragon Sword, un épisode original, rapide, jouissif et incroyablement fluide qui enterre honorablement les versions NES avec la politesse d’un maître ninja qui s’excuse avant de te couper en deux, tout en offrant des sauts muraux propres, de l’action au quart de tour, des décors qui respirent la classe et cette sensation délicieuse d’un jeu qui sait exactement ce qu’il fait; bref, un rappel nécessaire que pendant que Nintendo publiait des jeux sans âme, la Master System régnait déjà sur le royaume 8-bit avec un bandeau au vent et aucun besoin de se justifier et Nintendo pleurait de jalousie dans son coin. -Nintendo Power Magazine, édition n°69"
 
 enable_score: true
 hide: yes

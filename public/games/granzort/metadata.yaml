@@ -1,0 +1,18 @@
+title: Madō King Granzort
+year: 1990
+developer: Mutech
+genre: Platform, Shooter
+#controls:
+#  - "←↓↑→: Mouvement"
+#  - "Z: "
+#  - "X: "
+#  - "C: "
+#  - "V: "
+
+#to_start: Espace, puis Enter
+#announcement_message: ""
+#problem: true
+
+enable_score: true
+
+added: 2026-08-25

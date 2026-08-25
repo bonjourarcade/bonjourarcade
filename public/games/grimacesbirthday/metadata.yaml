@@ -1,0 +1,18 @@
+title: Grimace's Birthday
+year: 2023
+developer: Gumpy Function, Pearacidic Games, Krool Toys
+genre: Platform, Skateboarding, Sports
+#controls:
+#  - "←↓↑→: Mouvement"
+#  - "Z: "
+#  - "X: "
+#  - "C: "
+#  - "V: "
+
+#to_start: Espace, puis Enter
+#announcement_message: ""
+#problem: true
+
+enable_score: true
+
+added: 2026-08-25

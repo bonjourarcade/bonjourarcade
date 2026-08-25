@@ -1,0 +1,18 @@
+title: Xain'd Sleena
+year: 1986
+developer: Technos Japan
+genre: Platform, Shooter
+#controls:
+#  - "←↓↑→: Mouvement"
+#  - "Z: "
+#  - "X: "
+#  - "C: "
+#  - "V: "
+
+#to_start: Espace, puis Enter
+#announcement_message: ""
+#problem: true
+
+enable_score: true
+
+added: 2026-08-25

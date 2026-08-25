@@ -1,0 +1,18 @@
+title: Banana Bash
+year: 2024
+developer: Work3 Studio
+genre: Action, Puzzle
+#controls:
+#  - "←↓↑→: Mouvement"
+#  - "Z: "
+#  - "X: "
+#  - "C: "
+#  - "V: "
+
+#to_start: Espace, puis Enter
+#announcement_message: ""
+#problem: true
+
+enable_score: true
+
+added: 2026-08-25

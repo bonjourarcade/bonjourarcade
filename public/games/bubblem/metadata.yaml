@@ -1,0 +1,18 @@
+title: "Bubble Memories: The Story of Bubble Bobble III"
+year: 1996
+developer: Taito
+genre: Action, Platform
+#controls:
+#  - "←↓↑→: Mouvement"
+#  - "Z: "
+#  - "X: "
+#  - "C: "
+#  - "V: "
+
+#to_start: Espace, puis Enter
+#announcement_message: ""
+#problem: true
+
+enable_score: true
+
+added: 2026-08-25

@@ -2,16 +2,18 @@ title: "Snow Bros. 2: With New Elves"
 developer: Toaplan
 year: 1994
 genre: Platform
-#controls:
-#  - "←↓↑→: Déplacer"
-#  - "Z: Tirer"
-#  - "X: Bombe"
+controls:
+  - "Espace = ajouter un crédit"
+  - "Entrée = démarrer"
+  - "← → ↑ ↓ = se déplacer"
+  - "Z = lancer une boule de neige"
+  - "X = sauter"
 
-#to_start: Select -> Start
+to_start: "Espace puis Entrée"
 
 # Message d'annonce personnalisé pour la newsletter
 # Ce message apparaîtra en haut de l'email et des webhooks
-announcement_message:
+announcement_message:"Snow Bros. 2: With New Elves sur MAME est une dernière salve Toaplan en mode Bubble Bobble sous amphétamines, un jeu de plateforme fixe où l'on transforme les ennemis en boules de neige avant de les catapulter pour nettoyer l'écran, faire grimper le score et transformer chaque petit étage en carnage mignon mais très sérieux."
 
 hide: yes
 

@@ -1,13 +1,20 @@
 title: Ninja Gaiden (SMS)
 developer: SIMS
 year: 1992
-genre: Hack and slash, Platform
-#controls:
-#  - "←↓↑→: Déplacer"
-#  - "Z: Tirer"
-#  - "X: Bombe"
+genre: "Action-platformer ninja, jeu parfait"
+controls:
+  - "Entrée = démarrer"
+  - "← → ↑ ↓ = se déplacer"
+  - "Z = katana"
+  - "X = sauter"
+  - "X contre un mur = saut mural"
+  - "↑ sous une plateforme = s'accrocher"
+  - "↓ + X sur une plateforme = se suspendre"
+  - "Z + X = super"
+  - "↑ + Z = arme spéciale"
 
-#to_start: Select -> Start
+to_start: "Entrée"
+announcement_message: Ninja Gaiden sur Master System est une merveille 8-bit taillée au Dragon Sword, un épisode original, rapide, jouissif et incroyablement fluide qui enterre honorablement les versions NES avec la politesse d’un maître ninja qui s’excuse avant de te couper en deux, tout en offrant des sauts muraux propres, de l’action au quart de tour, des décors qui respirent la classe et cette sensation délicieuse d’un jeu qui sait exactement ce qu’il fait; bref, un rappel nécessaire que pendant que certains comptaient les couleurs, la Master System régnait déjà sur le royaume 8-bit avec un bandeau au vent et aucun besoin de se justifier."
 
 enable_score: true
 hide: yes

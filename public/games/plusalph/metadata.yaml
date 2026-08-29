@@ -1,14 +1,16 @@
-title: "S.T.U.N. Runner"
-developer: "Atari Games"
-year: 1991
-genre: "Racing shooter"
+title: "Plus Alpha"
+developer: "Jaleco"
+year: 1989
+genre: "Shoot 'em up vertical"
 controls:
-  - "À confirmer lorsque le support Lynx sera ajouté"
+  - "↑ ↓ ← → : déplacer le vaisseau"
+  - "Z : tirer"
+  - "X : utiliser un Hyper"
 
-to_start: "À confirmer"
-announcement_message: "S.T.U.N. Runner sur Atari Lynx est l'adaptation portable du jeu d'arcade futuriste d'Atari Games, un mélange de course à très haute vitesse et de tir en tunnel où le joueur fonce dans des circuits de science-fiction en détruisant les obstacles et les ennemis sur sa route. Voir ce jeu d'arcade en fausse 3D arriver sur Lynx est déjà étrange, mais la version portable garde une vitesse et une énergie impressionnantes, avec un score visible, des bonus de temps et une vraie sensation de machine qui hurle pour rester en vie."
+to_start: "Espace puis appuyer sur Start"
+announcement_message: "Plus Alpha est un shoot 'em up vertical de Jaleco sorti en arcade en 1989, dans lequel les guerrières Selia et Rumy partent libérer sept royaumes à bord de leurs chasseurs. Le vaisseau peut adopter trois formes différentes en récupérant des objets, chacune avec son propre type de tir et son propre Hyper. Avec ses graphismes colorés, son univers de fantasy et son système très simple à prendre en main, Plus Alpha est un jeu de tir particulièrement accessible pour son époque, sans pour autant oublier les gros boss, les nuées d'ennemis et la chasse au score."
 
 enable_score: true
 hide: yes
 
-added: 2026-08-23
+added: 2026-08-29

@@ -1,0 +1,16 @@
+title: "Mystic Riders"
+developer: "Irem"
+year: 1992
+genre: "Shoot 'em up horizontal"
+controls:
+  - "↑ ↓ ← → : se déplacer"
+  - "Z : tirer / maintenir pour charger la magie"
+  - "X : lancer le balai"
+
+to_start: "Espace puis appuyer sur Enter"
+announcement_message: "Mystic Riders est un shoot 'em up horizontal d'Irem sorti en arcade en 1992. À dos de balai magique, Mark et Zeal traversent un monde de fantasy peuplé de démons, de créatures étranges et de boss gigantesques. Le jeu se distingue surtout par son balai, qui peut être lancé comme un boomerang pour infliger de lourds dégâts et détruire certains projectiles ennemis, ainsi que par ses tirs magiques que l'on peut charger pour déclencher des attaques plus puissantes. Avec ses décors colorés, son ambiance de dessin animé et son action beaucoup plus accessible que la plupart des shoot 'em up d'Irem, Mystic Riders est l'un des petits bijoux méconnus de l'arcade du début des années 90."
+
+enable_score: true
+hide: yes
+
+added: 2026-08-29

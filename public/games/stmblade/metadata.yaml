@@ -1,14 +1,16 @@
-title: "S.T.U.N. Runner"
-developer: "Atari Games"
-year: 1991
-genre: "Racing shooter"
+title: "Storm Blade"
+developer: "Visco"
+year: 1996
+genre: "Shoot 'em up vertical"
 controls:
-  - "À confirmer lorsque le support Lynx sera ajouté"
+  - "↑ ↓ ← → : déplacer l'avion"
+  - "Z : tirer"
+  - "X : utiliser une bombe"
 
-to_start: "À confirmer"
-announcement_message: "S.T.U.N. Runner sur Atari Lynx est l'adaptation portable du jeu d'arcade futuriste d'Atari Games, un mélange de course à très haute vitesse et de tir en tunnel où le joueur fonce dans des circuits de science-fiction en détruisant les obstacles et les ennemis sur sa route. Voir ce jeu d'arcade en fausse 3D arriver sur Lynx est déjà étrange, mais la version portable garde une vitesse et une énergie impressionnantes, avec un score visible, des bonus de temps et une vraie sensation de machine qui hurle pour rester en vie."
+to_start: "Espace puis appuyer sur Entrer"
+announcement_message: "Storm Blade est un shoot 'em up vertical de Visco sorti en arcade en 1996. Le joueur choisit parmi plusieurs avions possédant chacun leurs propres caractéristiques, puis traverse une série de stages remplis d'escadrilles ennemies, de véhicules militaires et de machines de guerre gigantesques. Les améliorations de tir, les missiles secondaires et les bombes permettent d'adapter son arsenal au fil de la partie. Avec son rythme soutenu, ses nombreux effets à l'écran et son style typique des shoot 'em up du milieu des années 90, Storm Blade est un titre assez méconnu mais solide et immédiatement plaisant à prendre en main."
 
 enable_score: true
 hide: yes
 
-added: 2026-08-23
+added: 2026-08-29

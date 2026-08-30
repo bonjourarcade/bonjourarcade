@@ -76,14 +76,17 @@ function setupAuth() {
   });
 }
 
-document.getElementById('is-public').addEventListener('change', function () {
+function syncPrivateCodeSection() {
   const section = document.getElementById('private-code-section');
-  section.style.opacity = this.checked ? '0.3' : '1';
+  const checked = document.getElementById('is-public').checked;
+  section.style.opacity = checked ? '0.3' : '1';
   const inputs = section.querySelectorAll('input');
-  if (this.checked) {
+  if (checked) {
     inputs.forEach(i => i.removeAttribute('required'));
   }
-});
+}
+document.getElementById('is-public').addEventListener('change', syncPrivateCodeSection);
+syncPrivateCodeSection();
 
 let isCreating = false;
 $('create-tournament-btn').addEventListener('click', async () => {
@@ -497,10 +500,12 @@ function renderUpcomingHtml(games, round) {
     const title = g ? g.title : gid;
     const label = `Ronde ${round + i + 2}`;
     return `<div class="upcoming-game" draggable="true" data-index="${i}" data-game="${gid}">
+      <div class="upcoming-header">
+        <span class="upcoming-label">${label}</span>
+        <button type="button" class="upcoming-edit-btn" draggable="false" data-index="${i}" title="Remplacer ce jeu">✏️</button>
+      </div>
       <div class="upcoming-img-wrap">
         <img src="/games/${gid}/cover.png" alt="${title}" loading="lazy" onerror="this.style.display='none'">
-        <div class="upcoming-label">${label}</div>
-        <button type="button" class="upcoming-edit-btn" draggable="false" data-index="${i}" title="Remplacer ce jeu">✏️</button>
       </div>
       <div class="upcoming-title" title="${title}">${title}</div>
     </div>`;

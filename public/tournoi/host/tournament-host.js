@@ -9,14 +9,14 @@ let unsubscribeRoundScores = null;
 let timerInterval = null;
 let gamelist = [];
 let displayNameCache = {};
-let selectedGameIds = [];
+let editGamePoolLoadedFor = null;
+let replaceTargetIndex = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
   const params = new URLSearchParams(window.location.search);
   if (params.get('t')) tournamentId = params.get('t');
 
   await fetchGamelist();
-  renderSelectedGames();
   setupAuth();
 });
 
@@ -122,95 +122,144 @@ $('create-tournament-btn').addEventListener('click', async () => {
   }
 });
 
-$('generate-games-btn').addEventListener('click', () => {
-  const numGames = parseInt($('num-games').value, 10) || 4;
-  const eligible = gamelist.filter(g => g.enable_score && !g.problem);
-  const shuffled = [...eligible].sort(() => Math.random() - 0.5);
-  selectedGameIds = shuffled.slice(0, numGames).map(g => g.id);
-  renderSelectedGames();
-});
-
 function removeAccentsForSearch(text) {
   if (!text) return '';
   return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 }
 
-function syncGameIdsField() {
-  $('game-ids').value = selectedGameIds.join('\n');
-}
+// Reusable search+chips widget for picking a list of game IDs. Used both by
+// the "create tournament" form and by the "edit game pool" panel shown for
+// tournaments still in registration.
+function createGamePicker({ searchId, resultsId, listId, hiddenFieldId }) {
+  let selected = [];
 
-function renderSelectedGames() {
-  const list = $('selected-games-list');
-  if (selectedGameIds.length === 0) {
-    list.innerHTML = '<span class="selected-games-empty">Aucun jeu sélectionné — utilise la recherche ci-dessus ou "Générer aléatoire".</span>';
-  } else {
-    list.innerHTML = selectedGameIds.map(id => {
-      const g = gamelist.find(g => g.id === id);
-      const title = g ? g.title : id;
-      return `<span class="selected-game-chip" data-id="${id}">
-        <img src="/games/${id}/cover.png" alt="" onerror="this.style.display='none'">
-        <span>${title}</span>
-        <span class="remove-chip" data-id="${id}" title="Retirer">×</span>
-      </span>`;
-    }).join('');
-    list.querySelectorAll('.remove-chip').forEach(el => {
-      el.addEventListener('click', () => {
-        selectedGameIds = selectedGameIds.filter(id => id !== el.dataset.id);
-        renderSelectedGames();
+  function sync() {
+    $(hiddenFieldId).value = selected.join('\n');
+  }
+
+  function render() {
+    const list = $(listId);
+    if (selected.length === 0) {
+      list.innerHTML = '<span class="selected-games-empty">Aucun jeu sélectionné — utilise la recherche ci-dessus ou "Générer aléatoire".</span>';
+    } else {
+      list.innerHTML = selected.map(id => {
+        const g = gamelist.find(g => g.id === id);
+        const title = g ? g.title : id;
+        return `<span class="selected-game-chip" data-id="${id}">
+          <img src="/games/${id}/cover.png" alt="" onerror="this.style.display='none'">
+          <span>${title}</span>
+          <span class="remove-chip" data-id="${id}" title="Retirer">×</span>
+        </span>`;
+      }).join('');
+      list.querySelectorAll('.remove-chip').forEach(el => {
+        el.addEventListener('click', () => {
+          selected = selected.filter(id => id !== el.dataset.id);
+          render();
+        });
       });
-    });
+    }
+    sync();
   }
-  syncGameIdsField();
+
+  function add(id) {
+    if (!selected.includes(id)) {
+      selected.push(id);
+      render();
+    }
+    $(searchId).value = '';
+    $(resultsId).classList.add('hidden');
+    $(resultsId).innerHTML = '';
+  }
+
+  function renderResults(term) {
+    const resultsEl = $(resultsId);
+    const normalized = removeAccentsForSearch(term.trim());
+    if (!normalized) { resultsEl.classList.add('hidden'); resultsEl.innerHTML = ''; return; }
+
+    const eligible = gamelist.filter(g => g.enable_score && !g.problem);
+    const matches = eligible.filter(g => {
+      const title = removeAccentsForSearch(g.title || g.id);
+      const gid = removeAccentsForSearch(g.id);
+      return title.includes(normalized) || gid.includes(normalized);
+    }).slice(0, 8);
+
+    if (matches.length === 0) {
+      resultsEl.innerHTML = '<div class="game-search-empty">Aucun jeu trouvé</div>';
+    } else {
+      resultsEl.innerHTML = matches.map(g => `
+        <div class="game-search-result" data-id="${g.id}">
+          <img src="/games/${g.id}/cover.png" alt="" onerror="this.style.display='none'">
+          <div>
+            <div class="gsr-title">${g.title || g.id}${selected.includes(g.id) ? ' ✓' : ''}</div>
+            <div class="gsr-id">${g.id}</div>
+          </div>
+        </div>`).join('');
+      resultsEl.querySelectorAll('.game-search-result').forEach(el => {
+        el.addEventListener('click', () => add(el.dataset.id));
+      });
+    }
+    resultsEl.classList.remove('hidden');
+  }
+
+  $(searchId).addEventListener('input', (e) => renderResults(e.target.value));
+  $(searchId).addEventListener('focus', (e) => {
+    if (e.target.value.trim()) renderResults(e.target.value);
+  });
+
+  render();
+
+  return {
+    setIds(ids) { selected = [...ids]; render(); },
+    getIds() { return [...selected]; },
+  };
 }
 
-function addSelectedGame(id) {
-  if (!selectedGameIds.includes(id)) {
-    selectedGameIds.push(id);
-    renderSelectedGames();
-  }
-  $('game-search').value = '';
-  $('game-search-results').classList.add('hidden');
-  $('game-search-results').innerHTML = '';
-}
-
-function renderGameSearchResults(term) {
-  const resultsEl = $('game-search-results');
-  const normalized = removeAccentsForSearch(term.trim());
-  if (!normalized) { resultsEl.classList.add('hidden'); resultsEl.innerHTML = ''; return; }
-
-  const eligible = gamelist.filter(g => g.enable_score && !g.problem);
-  const matches = eligible.filter(g => {
-    const title = removeAccentsForSearch(g.title || g.id);
-    const id = removeAccentsForSearch(g.id);
-    return title.includes(normalized) || id.includes(normalized);
-  }).slice(0, 8);
-
-  if (matches.length === 0) {
-    resultsEl.innerHTML = '<div class="game-search-empty">Aucun jeu trouvé</div>';
-  } else {
-    resultsEl.innerHTML = matches.map(g => `
-      <div class="game-search-result" data-id="${g.id}">
-        <img src="/games/${g.id}/cover.png" alt="" onerror="this.style.display='none'">
-        <div>
-          <div class="gsr-title">${g.title || g.id}${selectedGameIds.includes(g.id) ? ' ✓' : ''}</div>
-          <div class="gsr-id">${g.id}</div>
-        </div>
-      </div>`).join('');
-    resultsEl.querySelectorAll('.game-search-result').forEach(el => {
-      el.addEventListener('click', () => addSelectedGame(el.dataset.id));
-    });
-  }
-  resultsEl.classList.remove('hidden');
-}
-
-$('game-search').addEventListener('input', (e) => renderGameSearchResults(e.target.value));
-$('game-search').addEventListener('focus', (e) => {
-  if (e.target.value.trim()) renderGameSearchResults(e.target.value);
-});
 document.addEventListener('click', (e) => {
-  const wrap = document.querySelector('.game-search-wrap');
-  if (wrap && !wrap.contains(e.target)) {
-    $('game-search-results').classList.add('hidden');
+  document.querySelectorAll('.game-search-wrap').forEach(wrap => {
+    if (!wrap.contains(e.target)) {
+      wrap.querySelector('.game-search-results')?.classList.add('hidden');
+    }
+  });
+});
+
+const gamePicker = createGamePicker({
+  searchId: 'game-search', resultsId: 'game-search-results',
+  listId: 'selected-games-list', hiddenFieldId: 'game-ids',
+});
+
+const editGamePicker = createGamePicker({
+  searchId: 'edit-game-search', resultsId: 'edit-game-search-results',
+  listId: 'edit-selected-games-list', hiddenFieldId: 'edit-game-ids',
+});
+
+$('generate-games-btn').addEventListener('click', () => {
+  const numGames = parseInt($('num-games').value, 10) || 4;
+  const eligible = gamelist.filter(g => g.enable_score && !g.problem);
+  const shuffled = [...eligible].sort(() => Math.random() - 0.5);
+  gamePicker.setIds(shuffled.slice(0, numGames).map(g => g.id));
+});
+
+$('save-game-pool-btn').addEventListener('click', async () => {
+  const gameIds = editGamePicker.getIds();
+  $('edit-game-pool-error').classList.add('hidden');
+  if (gameIds.length === 0) {
+    $('edit-game-pool-error').textContent = 'Entre au moins un jeu.';
+    $('edit-game-pool-error').classList.remove('hidden');
+    return;
+  }
+  const btn = $('save-game-pool-btn');
+  btn.disabled = true;
+  try {
+    const fn = window.httpsCallable
+      ? window.httpsCallable(window.firebaseFunctions, 'updateTournamentGamePool')
+      : (await import('https://www.gstatic.com/firebasejs/11.0.1/firebase-functions.js')).httpsCallable(window.firebaseFunctions, 'updateTournamentGamePool');
+    await fn({ tournamentId, gameIds });
+    showToast('Jeux du tournoi mis à jour ✓');
+  } catch (e) {
+    $('edit-game-pool-error').textContent = e.message || 'Erreur';
+    $('edit-game-pool-error').classList.remove('hidden');
+  } finally {
+    btn.disabled = false;
   }
 });
 
@@ -257,7 +306,9 @@ function cleanupListeners() {
 
 function loadDashboard(id) {
   cleanupListeners();
+  hide('setup-view');
   show('dashboard-view');
+  editGamePoolLoadedFor = null;
   $('player-view-btn').href = `/tournoi/play/?t=${id}`;
   const db = window.firebaseDb;
   const tournamentRef = doc(db, 'tournaments', id);
@@ -347,6 +398,10 @@ function renderTournament(t, id) {
     hide('finished-phase');
     show('setup-phase');
     $('setup-phase').classList.remove('hidden');
+    if (editGamePoolLoadedFor !== id) {
+      editGamePoolLoadedFor = id;
+      editGamePicker.setIds(t.gamePool || []);
+    }
   } else if (t.status === 'active') {
     hide('setup-phase');
     hide('finished-phase');
@@ -411,7 +466,7 @@ function ensureSaveOrderBtn() {
   const saveBtn = document.createElement('button');
   saveBtn.id = 'save-order-btn';
   saveBtn.className = 'btn btn-sm btn-primary';
-  saveBtn.textContent = "Enregistrer l'ordre";
+  saveBtn.textContent = 'Enregistrer les changements';
   saveBtn.addEventListener('click', async () => {
     saveBtn.disabled = true;
     saveBtn.textContent = 'Enregistrement...';
@@ -420,13 +475,13 @@ function ensureSaveOrderBtn() {
         ? window.httpsCallable(window.firebaseFunctions, 'reorderRounds')
         : (await import('https://www.gstatic.com/firebasejs/11.0.1/firebase-functions.js')).httpsCallable(window.firebaseFunctions, 'reorderRounds');
       await fn({ tournamentId, games: currentGamesArray });
-      showToast('Ordre enregistré ✓');
-      saveBtn.textContent = "Enregistrer l'ordre";
+      showToast('Changements enregistrés ✓');
+      saveBtn.textContent = 'Enregistrer les changements';
     } catch (e) {
       showToast('Erreur: ' + (e.message || e));
     } finally {
       saveBtn.disabled = false;
-      saveBtn.textContent = "Enregistrer l'ordre";
+      saveBtn.textContent = 'Enregistrer les changements';
     }
   });
   container.parentNode.insertBefore(saveBtn, container.nextSibling);
@@ -445,10 +500,20 @@ function renderUpcomingHtml(games, round) {
       <div class="upcoming-img-wrap">
         <img src="/games/${gid}/cover.png" alt="${title}" loading="lazy" onerror="this.style.display='none'">
         <div class="upcoming-label">${label}</div>
+        <button type="button" class="upcoming-edit-btn" draggable="false" data-index="${i}" title="Remplacer ce jeu">✏️</button>
       </div>
       <div class="upcoming-title" title="${title}">${title}</div>
     </div>`;
   }).join('');
+
+  container.querySelectorAll('.upcoming-edit-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const i = parseInt(btn.dataset.index, 10);
+      openReplacePopover(btn.closest('.upcoming-game'), round + 1 + i);
+    });
+    btn.addEventListener('dragstart', (e) => e.stopPropagation());
+  });
 
   let dragIndex = null;
   container.querySelectorAll('.upcoming-game').forEach(el => {
@@ -476,11 +541,70 @@ function renderUpcomingHtml(games, round) {
       }
       currentGamesArray = newGames;
       renderUpcomingHtml(currentGamesArray, round);
-      showToast('Ordre modifié — clique sur "Enregistrer l\'ordre" pour sauvegarder');
+      showToast('Ordre modifié — clique sur "Enregistrer les changements" pour sauvegarder');
     });
     el.addEventListener('dragend', () => { dragIndex = null; });
   });
 }
+
+function openReplacePopover(tileEl, absoluteIndex) {
+  replaceTargetIndex = absoluteIndex;
+  const pop = $('replace-game-popover');
+  const rect = tileEl.getBoundingClientRect();
+  pop.style.left = `${Math.min(rect.left, window.innerWidth - 268)}px`;
+  pop.style.top = `${rect.bottom + 4}px`;
+  pop.classList.remove('hidden');
+  $('replace-game-search').value = '';
+  renderReplaceResults('');
+  $('replace-game-search').focus();
+}
+
+function closeReplacePopover() {
+  $('replace-game-popover').classList.add('hidden');
+  replaceTargetIndex = null;
+}
+
+function renderReplaceResults(term) {
+  const resultsEl = $('replace-game-search-results');
+  const normalized = removeAccentsForSearch(term.trim());
+  const eligible = gamelist.filter(g => g.enable_score && !g.problem);
+  const matches = (normalized
+    ? eligible.filter(g => removeAccentsForSearch(g.title || g.id).includes(normalized) || removeAccentsForSearch(g.id).includes(normalized))
+    : eligible
+  ).slice(0, 8);
+
+  resultsEl.innerHTML = matches.length === 0
+    ? '<div class="game-search-empty">Aucun jeu trouvé</div>'
+    : matches.map(g => `
+      <div class="game-search-result" data-id="${g.id}">
+        <img src="/games/${g.id}/cover.png" alt="" onerror="this.style.display='none'">
+        <div>
+          <div class="gsr-title">${g.title || g.id}</div>
+          <div class="gsr-id">${g.id}</div>
+        </div>
+      </div>`).join('');
+
+  resultsEl.querySelectorAll('.game-search-result').forEach(el => {
+    el.addEventListener('click', () => {
+      if (replaceTargetIndex == null || !currentGamesArray) { closeReplacePopover(); return; }
+      const newGames = [...currentGamesArray];
+      newGames[replaceTargetIndex] = el.dataset.id;
+      currentGamesArray = newGames;
+      currentUpcomingOrder = currentGamesArray.slice(lastRoundIndex + 1);
+      renderUpcomingHtml(currentGamesArray, lastRoundIndex);
+      closeReplacePopover();
+      showToast('Jeu remplacé — clique sur "Enregistrer les changements" pour sauvegarder');
+    });
+  });
+}
+
+$('replace-game-search').addEventListener('input', (e) => renderReplaceResults(e.target.value));
+document.addEventListener('click', (e) => {
+  const pop = $('replace-game-popover');
+  if (!pop.classList.contains('hidden') && !pop.contains(e.target) && !e.target.classList.contains('upcoming-edit-btn')) {
+    closeReplacePopover();
+  }
+});
 
 function startRoundTimer(t) {
   if (timerInterval) clearInterval(timerInterval);

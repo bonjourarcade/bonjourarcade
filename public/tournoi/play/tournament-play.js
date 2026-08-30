@@ -56,6 +56,12 @@ function setupAuth() {
     $('user-info').textContent = u.displayName || u.email;
     hide('loading-state');
     show('play-section');
+    window.checkFirebaseTournamentHostAccess().then(isAdmin => {
+      if (!isAdmin) return;
+      const btn = $('host-view-btn');
+      btn.href = `/tournoi/host/?t=${tournamentId}`;
+      btn.classList.remove('hidden');
+    }).catch(() => {});
     checkParticipation();
   };
 

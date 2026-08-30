@@ -139,6 +139,7 @@
 
         let currentUser = null;
         let currentGamelist = [];
+        let isAdmin = false;
 
         async function fetchGamelist() {
             try {
@@ -229,6 +230,7 @@
                         </div>
                         <div class="actions">
                             <a href="/tournoi/play/?t=${t.id}" class="join-link">Jouer</a>
+                            ${isAdmin ? `<a href="/tournoi/host/?t=${t.id}" class="host-link">Host</a>` : ''}
                         </div>
                     </div>`;
                 }).join('');
@@ -238,7 +240,6 @@
         }
 
         async function renderAdmin() {
-            const isAdmin = await window.checkFirebaseTournamentHostAccess();
             if (!isAdmin) { $('admin-view').classList.add('hidden'); return; }
             $('admin-view').classList.remove('hidden');
 
@@ -310,6 +311,7 @@
             if (user) {
                 $('login-prompt').classList.add('hidden');
                 $('main-content').classList.remove('hidden');
+                isAdmin = await window.checkFirebaseTournamentHostAccess();
                 await fetchGamelist();
                 await renderPublic();
                 await renderAdmin();

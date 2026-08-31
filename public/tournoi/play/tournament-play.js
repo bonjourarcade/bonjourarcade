@@ -311,9 +311,18 @@ function renderTournament(t) {
         } else {
           coverImg.style.display = 'none';
         }
+        const announcementEl = $('game-announcement');
+        const announcement = g && String(g.announcement_message || '').trim();
+        if (announcement) {
+          announcementEl.textContent = announcement;
+          announcementEl.classList.remove('hidden');
+        } else {
+          announcementEl.classList.add('hidden');
+        }
       } else {
         $('game-link').innerHTML = '<span style="color:#aaa;">Tirage du jeu en cours...</span>';
         $('game-cover').style.display = 'none';
+        $('game-announcement').classList.add('hidden');
       }
 
       const upcomingGameIds = t.games.slice(round + 1);

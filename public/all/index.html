@@ -43,6 +43,7 @@
         }
 
         .game {
+            position: relative;
             background: var(--card-bg);
             border-radius: 8px;
             overflow: hidden;
@@ -642,10 +643,23 @@
 
     <script src="../assets/js/banner.js"></script>
     <script src="../assets/js/utils.js"></script>
+    <script src="../assets/js/announcement-modal.js"></script>
     <script>
         // Store all games data globally
         let gamesData = [];
         let filteredGamesData = [];
+
+        // Delegated click handler for the announcement info badge on tiles
+        document.addEventListener('click', (e) => {
+            const badge = e.target.closest('.announcement-badge');
+            if (!badge) return;
+            e.preventDefault();
+            e.stopPropagation();
+            const game = gamesData.find(g => g.id === badge.dataset.gameId);
+            if (game && window.AnnouncementModal) {
+                window.AnnouncementModal.open(game);
+            }
+        });
 
         let gameHistory = [];
         const FILTERS_STORAGE_KEY = 'bonjourarcade_all_filters_v1';
@@ -1248,7 +1262,7 @@
                                 ${isNewGame ? '<span class="new-badge">NOUVEAU</span>' : ''}
                                 <img src="${coverSrc}" alt="${game.title}">
                             </div>
-                            <div class="game-title">${getDisplayTitle(game)}</div>
+                            <div class="game-title">${getDisplayTitle(game)}</div>${window.AnnouncementModal && window.AnnouncementModal.hasAnnouncement(game) ? `<button type="button" class="announcement-badge announcement-badge--bottom-right" data-game-id="${game.id}" aria-label="Annonce"></button>` : ''}
                         </a>
                     `;
 
@@ -1389,7 +1403,7 @@
                                 ${isNewGame ? '<span class="new-badge">NOUVEAU</span>' : ''}
                                 <img src="${coverSrc}" alt="${game.title}">
                             </div>
-                            <div class="game-title">${getDisplayTitle(game)}</div>
+                            <div class="game-title">${getDisplayTitle(game)}</div>${window.AnnouncementModal && window.AnnouncementModal.hasAnnouncement(game) ? `<button type="button" class="announcement-badge announcement-badge--bottom-right" data-game-id="${game.id}" aria-label="Annonce"></button>` : ''}
                         </a>
                     `;
 
@@ -1561,9 +1575,10 @@
                             <a href="${game.pageUrl}" class="game-link">
                                 <div class="game-cover" style="position:relative;">
                                     ${isNewGame ? '<span class="new-badge">NOUVEAU</span>' : ''}
+                                ${window.AnnouncementModal && window.AnnouncementModal.hasAnnouncement(game) ? `<button type="button" class="announcement-badge" data-game-id="${game.id}" aria-label="Annonce"></button>` : ''}
                                     <img src="${coverSrc}" alt="${game.title}">
                                 </div>
-                                <div class="game-title">${getDisplayTitle(game)}</div>
+                                <div class="game-title">${getDisplayTitle(game)}</div>${window.AnnouncementModal && window.AnnouncementModal.hasAnnouncement(game) ? `<button type="button" class="announcement-badge announcement-badge--bottom-right" data-game-id="${game.id}" aria-label="Annonce"></button>` : ''}
                             </a>
                         `;
 
@@ -1638,9 +1653,10 @@
                             <a href="${game.pageUrl}" class="game-link">
                                 <div class="game-cover" style="position:relative;">
                                     ${isNewGame ? '<span class="new-badge">NOUVEAU</span>' : ''}
+                                ${window.AnnouncementModal && window.AnnouncementModal.hasAnnouncement(game) ? `<button type="button" class="announcement-badge" data-game-id="${game.id}" aria-label="Annonce"></button>` : ''}
                                     <img src="${coverSrc}" alt="${game.title}">
                                 </div>
-                                <div class="game-title">${getDisplayTitle(game)}</div>
+                                <div class="game-title">${getDisplayTitle(game)}</div>${window.AnnouncementModal && window.AnnouncementModal.hasAnnouncement(game) ? `<button type="button" class="announcement-badge announcement-badge--bottom-right" data-game-id="${game.id}" aria-label="Annonce"></button>` : ''}
                             </a>
                         `;
                         div.querySelector('a').addEventListener('click', function (e) {
@@ -1732,9 +1748,10 @@
                             <a href="${game.pageUrl}" class="game-link">
                                 <div class="game-cover" style="position:relative;">
                                     ${isNewGame ? '<span class="new-badge">NOUVEAU</span>' : ''}
+                                ${window.AnnouncementModal && window.AnnouncementModal.hasAnnouncement(game) ? `<button type="button" class="announcement-badge" data-game-id="${game.id}" aria-label="Annonce"></button>` : ''}
                                     <img src="${coverSrc}" alt="${game.title}">
                                 </div>
-                                <div class="game-title">${getDisplayTitle(game)}</div>
+                                <div class="game-title">${getDisplayTitle(game)}</div>${window.AnnouncementModal && window.AnnouncementModal.hasAnnouncement(game) ? `<button type="button" class="announcement-badge announcement-badge--bottom-right" data-game-id="${game.id}" aria-label="Annonce"></button>` : ''}
                             </a>
                         `;
                         div.querySelector('a').addEventListener('click', function (e) {
@@ -1845,7 +1862,7 @@
                                 ${isNewGame ? '<span class="new-badge">NOUVEAU</span>' : ''}
                                 <img src="${coverSrc}" alt="${game.title}">
                             </div>
-                            <div class="game-title">${getDisplayTitle(game)}</div>
+                            <div class="game-title">${getDisplayTitle(game)}</div>${window.AnnouncementModal && window.AnnouncementModal.hasAnnouncement(game) ? `<button type="button" class="announcement-badge announcement-badge--bottom-right" data-game-id="${game.id}" aria-label="Annonce"></button>` : ''}
                         </a>
                     `;
 
@@ -1956,9 +1973,10 @@
                             <a href="${game.pageUrl}" class="game-link">
                                 <div class="game-cover" style="position:relative;">
                                     ${isNewGame ? '<span class="new-badge">NOUVEAU</span>' : ''}
+                                ${window.AnnouncementModal && window.AnnouncementModal.hasAnnouncement(game) ? `<button type="button" class="announcement-badge" data-game-id="${game.id}" aria-label="Annonce"></button>` : ''}
                                     <img src="${coverSrc}" alt="${game.title}">
                                 </div>
-                                <div class="game-title">${getDisplayTitle(game)}</div>
+                                <div class="game-title">${getDisplayTitle(game)}</div>${window.AnnouncementModal && window.AnnouncementModal.hasAnnouncement(game) ? `<button type="button" class="announcement-badge announcement-badge--bottom-right" data-game-id="${game.id}" aria-label="Annonce"></button>` : ''}
                             </a>
                         `;
 

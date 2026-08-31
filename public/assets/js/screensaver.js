@@ -111,8 +111,18 @@ function startScreensaver() {
         // Set main image source - try to get from EJS_backgroundImage, else fallback
         let coverSrc = '/assets/images/placeholder_thumb.png';
         const isIndexPage = window.location.pathname === '/' || window.location.pathname.includes('index.html');
+        const featuredGameImgElement = document.getElementById('featured-game-img');
+        // The featured game image, if already displayed on the page, was already fetched
+        // successfully and is sitting in the browser's image cache. Reusing it avoids
+        // triggering a brand new network request for the screensaver image, which can
+        // intermittently fail (flaky network/CDN blip) even though the cover art is
+        // otherwise displaying fine elsewhere on the page.
+        const featuredGameImgAlreadyLoaded = featuredGameImgElement && featuredGameImgElement.src &&
+            featuredGameImgElement.complete && featuredGameImgElement.naturalWidth > 0;
 
-        if (isIndexPage && window.featuredGameCoverArt) {
+        if (isIndexPage && featuredGameImgAlreadyLoaded) {
+            coverSrc = featuredGameImgElement.src;
+        } else if (isIndexPage && window.featuredGameCoverArt) {
             // Validate that featuredGameCoverArt is a valid string (not an object or other type)
             if (typeof window.featuredGameCoverArt === 'string' && window.featuredGameCoverArt.trim()) {
                 coverSrc = window.featuredGameCoverArt;
@@ -122,18 +132,15 @@ function startScreensaver() {
             if (typeof window.EJS_backgroundImage === 'string' && window.EJS_backgroundImage.trim()) {
                 coverSrc = window.EJS_backgroundImage;
             }
-        } else {
-            const featuredGameImgElement = document.getElementById('featured-game-img');
-            if (featuredGameImgElement && featuredGameImgElement.src) {
-                coverSrc = featuredGameImgElement.src;
-            }
+        } else if (featuredGameImgElement && featuredGameImgElement.src) {
+            coverSrc = featuredGameImgElement.src;
         }
-        
+
         // Ensure coverSrc is a valid URL string
         if (typeof coverSrc !== 'string' || !coverSrc.trim()) {
             coverSrc = '/assets/images/placeholder_thumb.png';
         }
-        
+
         screensaverImage.src = coverSrc;
 
         // Set logo source
@@ -184,11 +191,28 @@ function startScreensaver() {
             }
         };
 
-        // Error handler for image loading failures
-        const imageErrorHandler = (imgElement, fallbackSrc) => {
+        // Error handler for image loading failures. Network blips are transient, so retry
+        // a couple of times before giving up and swapping in the fallback image.
+        const IMAGE_LOAD_MAX_RETRIES = 2;
+        const IMAGE_LOAD_RETRY_DELAY_MS = 400;
+        const imageRetryCounts = {};
+        const imageErrorHandler = (imgElement, fallbackSrc, retryKey, retrySrc) => {
             return () => {
-                // If image fails to load, use fallback
+                const retryCount = imageRetryCounts[retryKey] || 0;
+                if (retrySrc && retryCount < IMAGE_LOAD_MAX_RETRIES) {
+                    imageRetryCounts[retryKey] = retryCount + 1;
+                    // Cache-bust so the browser can't just replay a cached failed response,
+                    // and so re-assigning the same src is guaranteed to trigger a new request.
+                    const separator = retrySrc.includes('?') ? '&' : '?';
+                    const retryUrl = `${retrySrc}${separator}_screensaverRetry=${Date.now()}`;
+                    setTimeout(() => {
+                        imgElement.src = retryUrl;
+                    }, IMAGE_LOAD_RETRY_DELAY_MS);
+                    return;
+                }
+                // If image still fails to load after retries, use fallback
                 if (imgElement.src !== fallbackSrc) {
+                    console.warn(`Screensaver: image failed to load after ${retryCount} retr${retryCount === 1 ? 'y' : 'ies'}, falling back to placeholder (${retryKey}):`, retrySrc || imgElement.src);
                     imgElement.src = fallbackSrc;
                 } else {
                     // Even fallback failed, but still try to start animation
@@ -214,13 +238,13 @@ function startScreensaver() {
             imageLoadHandler({ target: { id: 'screensaver-image', src: screensaverImage.src } });
         } else {
             screensaverImage.onload = imageLoadHandler;
-            screensaverImage.onerror = imageErrorHandler(screensaverImage, '/assets/images/placeholder_thumb.png');
+            screensaverImage.onerror = imageErrorHandler(screensaverImage, '/assets/images/placeholder_thumb.png', 'main', coverSrc);
         }
         if (screensaverLogo.complete && screensaverLogo.naturalWidth > 0) {
             imageLoadHandler({ target: { id: 'screensaver-logo', src: screensaverLogo.src } });
         } else {
             screensaverLogo.onload = imageLoadHandler;
-            screensaverLogo.onerror = imageErrorHandler(screensaverLogo, '/assets/images/bonjourarcade-logo.png');
+            screensaverLogo.onerror = imageErrorHandler(screensaverLogo, '/assets/images/bonjourarcade-logo.png', 'logo', screensaverLogo.src);
         }
     }
 }

@@ -1010,6 +1010,26 @@
             word-break: break-word;
         }
 
+        .game-info-announcement-link {
+            display: block;
+            width: 100%;
+            margin-top: 10px;
+            padding: 7px 8px;
+            background: rgba(255, 215, 0, 0.12);
+            border: 1px solid rgba(255, 215, 0, 0.4);
+            border-radius: 6px;
+            color: #ffd700;
+            font-size: 12px;
+            font-weight: 600;
+            font-family: sans-serif;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .game-info-announcement-link:hover {
+            background: rgba(255, 215, 0, 0.22);
+        }
+
         @media (max-width: 768px) {
             #controls-overlay {
                 display: none !important;
@@ -1606,6 +1626,7 @@
     <script src="../assets/js/ttl-cache.js"></script>
     <script src="../assets/js/qrcode.min.js"></script>
     <script src="../tournoi/tournament-utils.js"></script>
+    <script src="../assets/js/announcement-modal.js"></script>
     <script>
         // Helper to navigate even if in iframe
         function navigate(url) {
@@ -2625,8 +2646,22 @@
                             html += '</div>';
                         }
 
+                        const hasAnnouncement = window.AnnouncementModal && window.AnnouncementModal.hasAnnouncement(selectedGame);
+                        if (hasAnnouncement) {
+                            html += '<button type="button" id="game-info-announcement-link" class="game-info-announcement-link">En savoir plus sur ce jeu</button>';
+                        }
+
                         gameInfoContent.innerHTML = html;
                         gameInfoOverlay.style.display = 'block';
+
+                        if (hasAnnouncement) {
+                            const announcementLink = document.getElementById('game-info-announcement-link');
+                            if (announcementLink) {
+                                announcementLink.addEventListener('click', () => {
+                                    window.AnnouncementModal.open(selectedGame);
+                                });
+                            }
+                        }
 
                         const isInfoCollapsed = localStorage.getItem('game_info_collapsed') === 'true';
                         if (isInfoCollapsed) {

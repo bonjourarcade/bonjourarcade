@@ -1543,6 +1543,12 @@ function populateRecentlyPlayedGames(allGames) {
         titleContainer.appendChild(title);
         link.appendChild(img);
         link.appendChild(titleContainer);
+
+        const announcementBadge = window.AnnouncementModal ? window.AnnouncementModal.createBadge(game) : null;
+        if (announcementBadge) {
+            link.appendChild(announcementBadge);
+        }
+
         gameItem.appendChild(link);
         listContainer.appendChild(gameItem);
 
@@ -1794,6 +1800,15 @@ function populatePreviousGames(games) {
         link.appendChild(img);
         link.appendChild(title);
         gameItem.appendChild(link);
+
+        // Anchor the announcement badge to the tile itself (not the cover), so it
+        // sits flush in the tile's own corner instead of overlapping the cover art.
+        const announcementBadge = window.AnnouncementModal ? window.AnnouncementModal.createBadge(game) : null;
+        if (announcementBadge) {
+            gameItem.style.position = 'relative';
+            gameItem.appendChild(announcementBadge);
+        }
+
         gridContainer.appendChild(gameItem);
 
         // --- Mouse hover behavior (same as keyboard navigation) ---
@@ -1856,20 +1871,6 @@ function capitalizeFirst(str) {
     if (!str) return '';
     return str.charAt(0).toUpperCase() + str.slice(1);
 }
-
-// Feature: Refresh menu at 5 AM local time to fetch latest updates
-function checkAndRefreshAt5AM() {
-    const now = new Date();
-    // Only refresh if it's 5 AM and the screensaver is not active to prevent disruption
-    // Also, ensure we don't refresh multiple times within the same hour if the page is left open
-    if (now.getHours() === 5 && now.getMinutes() < 5 && !window.screensaverActive) { // Refresh within the first 5 minutes of 5 AM
-        console.log("It's 5 AM local time. Refreshing game list to get latest updates.");
-        fetchGameData(true); // Re-fetch game data (bypass cache at 5 AM)
-    }
-}
-
-// Set up interval to check every hour (3,600,000 milliseconds)
-setInterval(checkAndRefreshAt5AM, 3600000);
 
 // --- Global functions for navigation and highlighting ---
 let tooltipTimeout = null;

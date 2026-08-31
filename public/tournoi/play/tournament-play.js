@@ -90,11 +90,6 @@ function setupAuth() {
   });
 }
 
-$('logout-btn').addEventListener('click', () => {
-  window.signOutFirebase();
-  window.location.reload();
-});
-
 $('join-btn').addEventListener('click', joinTournament);
 
 async function checkParticipation() {

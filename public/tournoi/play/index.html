@@ -243,7 +243,6 @@
             </div>
           </div>
           <a id="host-view-btn" class="btn-secondary hidden" style="padding:6px 12px;font-size:0.85rem;text-decoration:none;" target="_blank">🎬 Vue host</a>
-          <button id="logout-btn" class="btn-secondary" style="padding:6px 12px;font-size:0.85rem;">Quitter</button>
         </div>
       </div>
 
@@ -254,22 +253,14 @@
       </div>
 
       <div id="tournament-info" class="hidden">
-          <div class="card">
-            <div id="play-description" style="font-size:0.9rem;color:var(--muted);margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border);"></div>
-            <div class="info-line"><span class="label">Code</span><span class="value" id="play-sharecode"></span></div>
-          <div class="info-line"><span class="label">Participants</span><span class="value" id="play-participant-count"></span></div>
-          <div class="info-line"><span class="label">Ronde</span><span class="value" id="play-round-info"></span></div>
-          <div class="info-line"><span class="label">Statut</span><span class="value" id="play-status"></span></div>
-        </div>
-
-        <div id="format-card" class="card hidden">
-          <div class="section-title">Format du tournoi</div>
-          <div id="format-content"></div>
-        </div>
-
         <div id="waiting-phase" class="card card-center hidden">
           <p class="accent-text" style="font-size:1.1rem;display:inline-block;">En attente du début du tournoi...</p>
           <p style="color:#aaa;">L'administrateur lancera la première ronde sous peu.</p>
+        </div>
+
+        <div id="eliminated-phase" class="card card-center hidden">
+          <h2 style="color:#dc3545;">💀 Éliminé</h2>
+          <p style="color:#aaa;">Tu as été éliminé à la <span id="eliminated-round"></span>e ronde. Merci d'avoir participé !</p>
         </div>
 
         <div id="round-phase" class="hidden">
@@ -282,17 +273,26 @@
             <div class="game-link" id="game-link"></div>
             <div class="game-announcement hidden" id="game-announcement"></div>
           </div>
-          <div id="upcoming-games" class="upcoming-games hidden" oncontextmenu="return false"></div>
-        </div>
-
-        <div id="eliminated-phase" class="card card-center hidden">
-          <h2 style="color:#dc3545;">💀 Éliminé</h2>
-          <p style="color:#aaa;">Tu as été éliminé à la <span id="eliminated-round"></span>e ronde. Merci d'avoir participé !</p>
         </div>
 
         <div class="card">
           <div class="section-title">Classement</div>
           <div id="scoreboard-entries"></div>
+        </div>
+
+        <div id="upcoming-games" class="upcoming-games hidden" oncontextmenu="return false"></div>
+
+        <div id="format-card" class="card hidden">
+          <div class="section-title">Format du tournoi</div>
+          <div id="format-content"></div>
+        </div>
+
+        <div class="card">
+          <div id="play-description" style="font-size:0.9rem;color:var(--muted);margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border);"></div>
+          <div class="info-line"><span class="label">Code</span><span class="value" id="play-sharecode"></span></div>
+          <div class="info-line"><span class="label">Participants</span><span class="value" id="play-participant-count"></span></div>
+          <div class="info-line"><span class="label">Ronde</span><span class="value" id="play-round-info"></span></div>
+          <div class="info-line"><span class="label">Statut</span><span class="value" id="play-status"></span></div>
         </div>
       </div>
 

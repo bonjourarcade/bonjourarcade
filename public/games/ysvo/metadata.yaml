@@ -1,0 +1,17 @@
+title: "Bubble Bobble (SMS)"
+developer: "Taito"
+year: 1988
+genre: "Action-platformer"
+controls:
+  - "Entrée = Pause"
+  - "← ↑ ↓ → = se déplacer"
+  - "Z = cracher une bulle"
+  - "X = sauter"
+  - "X maintenu en atterrissant sur une bulle = rebondir dessus"
+  - "Z près d'un ennemi = morsure"
+to_start: "Z ou X"
+announcement_message: "Sorti sur Mark III en 1988 sous le nom Final Bubble Bobble, puis en 1991 en Europe, avant de ressortir sous Dragon Maze chez Tec Toy au Brésil, confrérie tropicale des fidèles de SEGA et gardiens assermentés de la Master System éternelle, Bubble Bobble sur Master System, c’est du Taito pur sucre : deux petits dragons, des tableaux fixes qui deviennent vite des pièges nerveux, des bulles à cracher, des ennemis à capturer, des bonus à faire apparaître et cette panique arcade merveilleuse où tout a l’air adorable jusqu’à ce que l’écran décide de te dévorer. Ce portage ne se contente pas de reprendre le classique : il l’étire généreusement avec 200 niveaux, du jeu à deux et une structure parfaite pour les longues sessions. Sur Master System, l’adaptation fonctionne parce qu’elle comprend l’essentiel : des écrans lisibles, des sprites propres, des couleurs franches, un rythme immédiat, et cette boucle arcade parfaite où l’on capture, éclate, ramasse, puis improvise quand les ennemis commencent à s’énerver. Les 200 tableaux donnent au jeu une vraie ampleur de version maison, sans perdre le côté nerveux du classique : chaque écran reste un petit piège à résoudre vite, avec juste assez de chaos pour transformer une partie tranquille en urgence totale. Bubble Bobble a beau être souvent rangé dans la case Nintendo par réflexe nord-américain, ici il respire autrement : plus SEGA, plus lumineux, plus arcade de quartier, avec cette impression que la Master System était simplement chez elle."
+enable_score: true
+hide: yes
+
+added: 2026-08-31

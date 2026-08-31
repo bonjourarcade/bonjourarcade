@@ -1,17 +1,16 @@
-title: "Bubble Bobble (SMS)"
-developer: "Taito"
+title: "Ys: The Vanished Omens"
+developer: "SEGA / Nihon Falcom"
 year: 1988
-genre: "Action-platformer"
+genre: "Action-RPG"
 controls:
-  - "Entrée = Pause"
-  - "← ↑ ↓ → = se déplacer"
-  - "Z = cracher une bulle"
-  - "X = sauter"
-  - "X maintenu en atterrissant sur une bulle = rebondir dessus"
-  - "Z près d'un ennemi = morsure"
+  - "Z ou X = démarrer"
+  - "Entrée = pause"
+  - "← → ↑ ↓ = se déplacer / naviguer dans les menus"
+  - "X = ouvrir le menu / valider"
+  - "Z = annuler / revenir en arrière"
 to_start: "Z ou X"
-announcement_message: "Sorti sur Mark III en 1988 sous le nom Final Bubble Bobble, puis en 1991 en Europe, avant de ressortir sous Dragon Maze chez Tec Toy au Brésil, confrérie tropicale des fidèles de SEGA et gardiens assermentés de la Master System éternelle, Bubble Bobble sur Master System, c’est du Taito pur sucre : deux petits dragons, des tableaux fixes qui deviennent vite des pièges nerveux, des bulles à cracher, des ennemis à capturer, des bonus à faire apparaître et cette panique arcade merveilleuse où tout a l’air adorable jusqu’à ce que l’écran décide de te dévorer. Ce portage ne se contente pas de reprendre le classique : il l’étire généreusement avec 200 niveaux, du jeu à deux et une structure parfaite pour les longues sessions. Sur Master System, l’adaptation fonctionne parce qu’elle comprend l’essentiel : des écrans lisibles, des sprites propres, des couleurs franches, un rythme immédiat, et cette boucle arcade parfaite où l’on capture, éclate, ramasse, puis improvise quand les ennemis commencent à s’énerver. Les 200 tableaux donnent au jeu une vraie ampleur de version maison, sans perdre le côté nerveux du classique : chaque écran reste un petit piège à résoudre vite, avec juste assez de chaos pour transformer une partie tranquille en urgence totale. Bubble Bobble a beau être souvent rangé dans la case Nintendo par réflexe nord-américain, ici il respire autrement : plus SEGA, plus lumineux, plus arcade de quartier, avec cette impression que la Master System était simplement chez elle."
-enable_score: true
+announcement_message: "Adaptation Master System du premier Ys de Nihon Falcom, The Vanished Omens envoie le jeune aventurier Adol Christin sur l'île d'Esteria, à la recherche des six livres d'Ys et des secrets d'un ancien royaume disparu. C'est un action-RPG rapide et direct, construit autour du fameux bump combat : pas de bouton d'attaque, on combat en percutant les ennemis avec le bon angle, en gérant son équipement, son niveau, ses soins et ses déplacements. La version Master System donne au jeu une forme claire et accessible, avec sauvegarde intégrée, exploration lisible, villages, donjons, boss et cette cadence très particulière des premiers Ys, entre RPG classique et action immédiate. Sobre, efficace et encore très jouable, c'est une belle porte d'entrée vers une série qui deviendra l'un des grands noms du RPG japonais."
+enable_score: false
 hide: yes
 
 added: 2026-08-31

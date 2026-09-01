@@ -1,16 +1,15 @@
-title: "Dyna Gear"
-developer: "Scarab"
+title: "Eagle Shot Golf"
+developer: "Sammy"
 year: 1994
-genre: "Action-platformer / Run and gun"
+genre: "Sports / Golf"
 controls:
   - "Entrée = Pause"
-  - "← ↑ ↓ → = se déplacer"
-  - "Z = attaquer / utiliser l'arme"
-  - "X = sauter"
-  - "X à nouveau en l'air = double saut"
+  - "← ↑ ↓ → = naviguer dans les menus et ajuster les paramètres du coup"
+  - "Z = frapper / confirmer"
+  - "X = sélectionner et parcourir les réglages"
 to_start: "Z ou X"
-announcement_message: "Développé par Scarab et publié par Sammy en 1994 sur le système d'arcade SSV, Dyna Gear est un jeu d'action et de plates-formes à défilement horizontal qui se distingue par son rythme particulièrement soutenu et son univers préhistorique. Le joueur incarne Roger, un patrouilleur temporel projeté dans une époque peuplée de dinosaures, ou Wolf, un guerrier homme-loup qui l'accompagne dans son affrontement contre Gustaf. Les niveaux alternent combats, séquences de plates-formes et déplacements rapides à travers des environnements variés, avec la possibilité de jouer à deux simultanément. Les personnages disposent d'un double saut et peuvent récupérer différentes armes dans les coffres rencontrés en chemin, ce qui donne au combat une grande variété malgré des commandes très simples. Les ennemis abandonnent également des pièces qui alimentent le score, tandis que chaque stage se conclut par un affrontement contre un boss. Avec ses grands sprites, ses animations expressives et une action qui conserve presque constamment son élan vers l'avant, Dyna Gear représente bien le style spectaculaire des productions arcade du début des années 1990 tout en restant l'un des titres les plus singuliers du catalogue SSV."
-  enable_score: true
-  hide: yes
+announcement_message: "Développé et publié par Sammy en 1994 sur le système d'arcade SSV, Eagle Shot Golf est une simulation de golf qui privilégie une approche relativement traditionnelle du sport. Le joueur choisit parmi quatre golfeurs possédant des caractéristiques différentes, puis doit gérer plusieurs paramètres avant chaque coup, notamment le club utilisé, la posture, la direction, la puissance et le moment de l'impact. La direction et la force du vent influencent également la trajectoire de la balle et doivent être prises en compte pour atteindre le green dans de bonnes conditions. Le jeu propose trois niveaux adaptés aux joueurs débutants, amateurs et expérimentés, ainsi qu'un parcours de dix-huit trous et des parties pouvant réunir jusqu'à quatre participants à tour de rôle. Eagle Shot Golf se distingue notamment par l'utilisation de golfeurs numérisés et par ses vues aériennes du parcours, qui permettent d'évaluer la position de la balle et les obstacles avant de préparer le coup suivant. La borne d'origine pouvait être configurée pour utiliser un trackball ou un joystick, une particularité qui rapproche son interface des jeux de golf d'arcade spécialisés de la même période. Moins spectaculaire que les jeux d'action généralement associés au matériel SSV, Eagle Shot Golf montre une autre facette du catalogue de Sammy, avec une adaptation méthodique du golf centrée sur la préparation et l'exécution précise de chaque coup."
+enable_score: true
+hide: yes
 
 added: 2026-09-01

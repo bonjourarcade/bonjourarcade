@@ -3,7 +3,7 @@ year:
 developer: 
 genre: 
 #controls:
-#  - "←↓↑→: Mouvement"
+#  - "← ↓ ↑ →: Mouvement"
 #  - "Z: "
 #  - "X: "
 #  - "C: "
@@ -11,8 +11,9 @@ genre:
 
 #to_start: Espace, puis Enter
 #announcement_message: ""
-#problem: true
 
-enable_score: true
+# Pour les jeux qui coopèrent pas bien
+#problem: true
+#enable_score: false
 
 added: DATE_PLACEHOLDER

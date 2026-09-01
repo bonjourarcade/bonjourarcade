@@ -9,9 +9,9 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-  # Runs on the 1st and 15th of each month at 11 AM UTC (6 AM EST / 7 AM EDT)
+  # Runs on the 1st and 15th of each month
   schedule:
-    - cron: '0 11 1,15 * *'
+    - cron: '0 0 1,15 * *'
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:

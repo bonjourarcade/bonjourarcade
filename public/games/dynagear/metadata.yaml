@@ -8,7 +8,7 @@ controls:
   - "Z = attaquer / utiliser l'arme"
   - "X = sauter"
   - "X à nouveau en l'air = double saut"
-to_start: "Z ou X"
+to_start: "Espace, puis Entrée"
 announcement_message: "Développé par Scarab et publié par Sammy en 1994 sur le système d'arcade SSV, Dyna Gear est un jeu d'action et de plates-formes à défilement horizontal qui se distingue par son rythme particulièrement soutenu et son univers préhistorique. Le joueur incarne Roger, un patrouilleur temporel projeté dans une époque peuplée de dinosaures, ou Wolf, un guerrier homme-loup qui l'accompagne dans son affrontement contre Gustaf. Les niveaux alternent combats, séquences de plates-formes et déplacements rapides à travers des environnements variés, avec la possibilité de jouer à deux simultanément. Les personnages disposent d'un double saut et peuvent récupérer différentes armes dans les coffres rencontrés en chemin, ce qui donne au combat une grande variété malgré des commandes très simples. Les ennemis abandonnent également des pièces qui alimentent le score, tandis que chaque stage se conclut par un affrontement contre un boss. Avec ses grands sprites, ses animations expressives et une action qui conserve presque constamment son élan vers l'avant, Dyna Gear représente bien le style spectaculaire des productions arcade du début des années 1990 tout en restant l'un des titres les plus singuliers du catalogue SSV."
   enable_score: true
   hide: yes

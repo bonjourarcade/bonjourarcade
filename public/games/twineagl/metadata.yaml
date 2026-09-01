@@ -1,16 +1,15 @@
-title: "Dyna Gear"
-developer: "Scarab"
-year: 1994
-genre: "Action-platformer / Run and gun"
+title: "Twin Eagle - Revenge Joe's Brother"
+developer: "Seta"
+year: 1988
+genre: "Shoot 'em up / Vertical shooter"
 controls:
   - "Entrée = Pause"
-  - "← ↑ ↓ → = se déplacer"
-  - "Z = attaquer / utiliser l'arme"
-  - "X = sauter"
-  - "X à nouveau en l'air = double saut"
-to_start: "Z ou X"
-announcement_message: "Développé par Scarab et publié par Sammy en 1994 sur le système d'arcade SSV, Dyna Gear est un jeu d'action et de plates-formes à défilement horizontal qui se distingue par son rythme particulièrement soutenu et son univers préhistorique. Le joueur incarne Roger, un patrouilleur temporel projeté dans une époque peuplée de dinosaures, ou Wolf, un guerrier homme-loup qui l'accompagne dans son affrontement contre Gustaf. Les niveaux alternent combats, séquences de plates-formes et déplacements rapides à travers des environnements variés, avec la possibilité de jouer à deux simultanément. Les personnages disposent d'un double saut et peuvent récupérer différentes armes dans les coffres rencontrés en chemin, ce qui donne au combat une grande variété malgré des commandes très simples. Les ennemis abandonnent également des pièces qui alimentent le score, tandis que chaque stage se conclut par un affrontement contre un boss. Avec ses grands sprites, ses animations expressives et une action qui conserve presque constamment son élan vers l'avant, Dyna Gear représente bien le style spectaculaire des productions arcade du début des années 1990 tout en restant l'un des titres les plus singuliers du catalogue SSV."
-  enable_score: true
-  hide: yes
+  - "← ↑ ↓ → = déplacer l'hélicoptère"
+  - "Z = tirer"
+  - "X = bombe"
+to_start: "Espace + Entrée"
+announcement_message: "Développé par Seta et sorti en arcade en 1988, Twin Eagle - Revenge Joe's Brother est un shoot 'em up à défilement vertical dans lequel un ou deux joueurs contrôlent simultanément des hélicoptères de combat. L'action alterne entre des secteurs terrestres et maritimes remplis de véhicules, de fortifications et d'hélicoptères ennemis, et des séquences consacrées à des affrontements contre des formations d'avions de chasse. Le système de jeu repose sur deux commandes principales : un tir frontal destiné à éliminer les cibles aériennes et terrestres, et un stock limité de bombes permettant de nettoyer une zone dangereuse ou d'infliger rapidement d'importants dégâts. Plusieurs types de bonus peuvent être récupérés au cours des stages afin d'augmenter le nombre de projectiles tirés, leur portée, la vitesse de déplacement de l'hélicoptère ou la réserve de bombes. La disposition d'une grande partie des forces terrestres reste fixe d'une partie à l'autre, favorisant progressivement la mémorisation des stages, tandis que certaines vagues aériennes disposent d'un comportement moins prévisible. Le jeu se caractérise par une difficulté élevée, une forte densité d'ennemis et la nécessité de maintenir une puissance de feu suffisante pour suivre l'augmentation progressive de la pression offensive. Twin Eagle se distingue également par sa bande sonore rock, qui accompagne notamment certaines séquences de combat aérien et utilise exceptionnellement des parties vocales pour un jeu d'arcade de cette période. Premier épisode de la série, il établit plusieurs éléments que Seta reprendra six ans plus tard dans Twin Eagle II, tout en appartenant à une génération de matériel antérieure au système SSV."
+enable_score: true
+hide: yes
 
-added: 2026-09-01
+added: 2026-08-31

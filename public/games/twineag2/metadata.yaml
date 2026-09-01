@@ -1,16 +1,16 @@
-title: "Dyna Gear"
-developer: "Scarab"
+title: "Twin Eagle II - The Rescue Mission"
+developer: "Seta"
 year: 1994
-genre: "Action-platformer / Run and gun"
+genre: "Shoot 'em up / Vertical shooter"
 controls:
   - "Entrée = Pause"
-  - "← ↑ ↓ → = se déplacer"
-  - "Z = attaquer / utiliser l'arme"
-  - "X = sauter"
-  - "X à nouveau en l'air = double saut"
-to_start: "Z ou X"
-announcement_message: "Développé par Scarab et publié par Sammy en 1994 sur le système d'arcade SSV, Dyna Gear est un jeu d'action et de plates-formes à défilement horizontal qui se distingue par son rythme particulièrement soutenu et son univers préhistorique. Le joueur incarne Roger, un patrouilleur temporel projeté dans une époque peuplée de dinosaures, ou Wolf, un guerrier homme-loup qui l'accompagne dans son affrontement contre Gustaf. Les niveaux alternent combats, séquences de plates-formes et déplacements rapides à travers des environnements variés, avec la possibilité de jouer à deux simultanément. Les personnages disposent d'un double saut et peuvent récupérer différentes armes dans les coffres rencontrés en chemin, ce qui donne au combat une grande variété malgré des commandes très simples. Les ennemis abandonnent également des pièces qui alimentent le score, tandis que chaque stage se conclut par un affrontement contre un boss. Avec ses grands sprites, ses animations expressives et une action qui conserve presque constamment son élan vers l'avant, Dyna Gear représente bien le style spectaculaire des productions arcade du début des années 1990 tout en restant l'un des titres les plus singuliers du catalogue SSV."
-  enable_score: true
-  hide: yes
+  - "← ↑ ↓ → = déplacer l'hélicoptère"
+  - "Z = canon / tir air-air"
+  - "X = roquettes / tir air-sol"
+  - "C = arme spéciale"
+to_start: "Espace + Entrée"
+announcement_message: "Développé par Seta et sorti en arcade en février 1994, Twin Eagle II - The Rescue Mission est un shoot 'em up à défilement vertical conçu pour le système SSV et faisant suite à Twin Eagle, paru en 1988. Un ou deux joueurs contrôlent simultanément des hélicoptères de combat équipés de trois types d'attaque complémentaires : un canon destiné principalement aux cibles aériennes, des roquettes permettant de détruire les unités et installations au sol, et une puissante arme spéciale capable d'éliminer rapidement les ennemis et projectiles présents à l'écran. Le jeu est organisé en trois grandes missions, chacune divisée en plusieurs zones dont le joueur peut choisir l'ordre au début du stage. Cette structure permet d'alterner entre des secteurs dominés par les combats aériens et d'autres où la destruction des objectifs terrestres devient essentielle. Certaines zones adoptent une perspective inclinée donnant davantage de profondeur aux villes, installations militaires et autres environnements traversés. De nombreux bâtiments peuvent être détruits et dissimulent parfois des véhicules transportant des améliorations d'armement ou des bonus de points, encourageant le joueur à attaquer le décor plutôt que de se concentrer uniquement sur les ennemis immédiats. Chaque secteur se termine par un boss, tandis que la dernière mission ajoute un affrontement supplémentaire avant la conclusion du jeu. Twin Eagle II se distingue également par son utilisation d'un processeur ST010 auxiliaire sur certaines versions du matériel, ainsi que par une présentation mêlant sprites détaillés, effets de mise à l'échelle et décors cherchant un rendu plus réaliste que celui de nombreux shoot 'em up contemporains. Avec son système séparant clairement les attaques aériennes et terrestres, ses parcours partiellement sélectionnables et son environnement largement destructible, Twin Eagle II propose une approche inhabituelle du shoot 'em up vertical traditionnel."
+enable_score: true
+hide: yes
 
-added: 2026-09-01
+added: 2026-08-31

@@ -1,16 +1,16 @@
-title: "Dyna Gear"
-developer: "Scarab"
-year: 1994
-genre: "Action-platformer / Run and gun"
+title: "Mobile Suit Gundam Final Shooting"
+developer: "Banpresto"
+year: 1995
+genre: "Light gun shooter / Rail shooter"
 controls:
   - "Entrée = Pause"
-  - "← ↑ ↓ → = se déplacer"
-  - "Z = attaquer / utiliser l'arme"
-  - "X = sauter"
-  - "X à nouveau en l'air = double saut"
+  - "Souris = viser"
+  - "Z = tirer"
+  - "X = bouclier"
+  - "C = bazooka"
 to_start: "Z ou X"
-announcement_message: "Développé par Scarab et publié par Sammy en 1994 sur le système d'arcade SSV, Dyna Gear est un jeu d'action et de plates-formes à défilement horizontal qui se distingue par son rythme particulièrement soutenu et son univers préhistorique. Le joueur incarne Roger, un patrouilleur temporel projeté dans une époque peuplée de dinosaures, ou Wolf, un guerrier homme-loup qui l'accompagne dans son affrontement contre Gustaf. Les niveaux alternent combats, séquences de plates-formes et déplacements rapides à travers des environnements variés, avec la possibilité de jouer à deux simultanément. Les personnages disposent d'un double saut et peuvent récupérer différentes armes dans les coffres rencontrés en chemin, ce qui donne au combat une grande variété malgré des commandes très simples. Les ennemis abandonnent également des pièces qui alimentent le score, tandis que chaque stage se conclut par un affrontement contre un boss. Avec ses grands sprites, ses animations expressives et une action qui conserve presque constamment son élan vers l'avant, Dyna Gear représente bien le style spectaculaire des productions arcade du début des années 1990 tout en restant l'un des titres les plus singuliers du catalogue SSV."
-  enable_score: true
-  hide: yes
+announcement_message: "Développé et publié par Banpresto en 1995 sur une version adaptée du système d'arcade SSV, Mobile Suit Gundam Final Shooting est un jeu de tir au pistolet optique inspiré de la série télévisée originale Mobile Suit Gundam. Un ou deux joueurs prennent les commandes du Gundam et traversent cinq stages reprenant plusieurs affrontements majeurs de la Guerre d'Un An, notamment les combats de Side 7, l'Opération Odessa, l'attaque de Jaburo, la bataille de Solomon et l'assaut final contre A Baoa Qu. Le déplacement est entièrement automatisé et l'action repose sur la visée : il faut éliminer rapidement les Mobile Suits, véhicules, appareils et vaisseaux ennemis qui apparaissent à l'écran, tout en détruisant les missiles et autres projectiles avant qu'ils n'atteignent le joueur. Le Gundam dispose également d'un bouclier permettant d'absorber un nombre limité d'attaques ainsi que d'une arme secondaire puissante capable de toucher une large zone, dont les réserves peuvent être restaurées grâce à certains éléments rencontrés pendant les stages. Chaque niveau se termine par un combat contre un boss directement tiré de l'univers de la série. Techniquement, Final Shooting est un titre inhabituel dans la ludothèque SSV : il emploie du matériel supplémentaire destiné notamment à la gestion du pistolet optique et à l'affichage de sprites agrandis ou réduits. Cette mise à l'échelle, associée à la superposition de nombreux éléments graphiques en 2D, permet au jeu de simuler la profondeur et les déplacements vers ou depuis l'écran. Final Shooting constitue ainsi l'une des utilisations les plus spécialisées du matériel SSV et une rare adaptation de Gundam sous la forme d'un jeu de tir arcade."
+enable_score: true
+hide: yes
 
-added: 2026-09-01
+added: 2026-08-31

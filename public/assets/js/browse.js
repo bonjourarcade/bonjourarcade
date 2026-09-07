@@ -560,7 +560,12 @@
 
   function renderHero(game) {
     var backdrop = document.getElementById('browse-hero-backdrop');
+    // Two poster elements, only one of which is ever visible (see the
+    // .browse-hero-poster / .browse-hero-poster-large CSS): a small one
+    // next to the title on narrow screens, a large showcase one on the
+    // hero's own empty right side everywhere else.
     var poster = document.getElementById('browse-hero-poster');
+    var posterLarge = document.getElementById('browse-hero-poster-large');
     var title = document.getElementById('browse-hero-title');
     var meta = document.getElementById('browse-hero-meta');
     var desc = document.getElementById('browse-hero-desc');
@@ -571,11 +576,15 @@
     var cover = game.coverArt || PLACEHOLDER_COVER;
     backdrop.style.backgroundImage = 'url(' + cover + ')';
     // The backdrop is a cropped, stretched blow-up of the cover behind the
-    // whole hero (for atmosphere) - the poster shows that same art in full,
+    // whole hero (for atmosphere) - the posters show that same art in full,
     // undistorted, so the featured game's actual box art is still visible.
     if (poster) {
       poster.src = cover;
       poster.alt = getDisplayTitle(game);
+    }
+    if (posterLarge) {
+      posterLarge.src = cover;
+      posterLarge.alt = getDisplayTitle(game);
     }
     title.textContent = getDisplayTitle(game);
 
@@ -1428,12 +1437,43 @@
     var toast = document.getElementById('browse-tournament-toast');
     if (!toast || !window.TournoiUtils) return;
 
-    var hideTimer;
+    // Auto-dismiss counts down on its own, but pauses (see the mouseenter/
+    // mouseleave listeners below) while the cursor is over the toast, so
+    // reading it or clicking through isn't a race against it disappearing.
+    var hideTimer = null;
+    var remainingMs = 0;
+    var hideStartedAt = null;
+
+    function clearHideTimer() {
+      if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
+    }
+
+    function scheduleHide(ms) {
+      clearHideTimer();
+      remainingMs = ms;
+      hideStartedAt = Date.now();
+      hideTimer = setTimeout(dismiss, ms);
+    }
+
+    function pauseHide() {
+      if (!hideTimer) return;
+      clearHideTimer();
+      remainingMs = Math.max(0, remainingMs - (Date.now() - hideStartedAt));
+    }
+
+    function resumeHide() {
+      if (hideTimer || remainingMs <= 0) return;
+      scheduleHide(remainingMs);
+    }
+
     function dismiss() {
-      clearTimeout(hideTimer);
+      clearHideTimer();
+      remainingMs = 0;
       toast.classList.remove('open');
     }
     document.getElementById('browse-toast-close').addEventListener('click', dismiss);
+    toast.addEventListener('mouseenter', pauseHide);
+    toast.addEventListener('mouseleave', resumeHide);
 
     function waitForFunctions(cb, attempts) {
       attempts = attempts || 0;
@@ -1487,7 +1527,7 @@
         bar.style.animationDuration = TOAST_VISIBLE_MS + 'ms';
 
         toast.classList.add('open');
-        hideTimer = setTimeout(dismiss, TOAST_VISIBLE_MS);
+        scheduleHide(TOAST_VISIBLE_MS);
       }).catch(function () { /* silently skip on error */ });
     });
   }

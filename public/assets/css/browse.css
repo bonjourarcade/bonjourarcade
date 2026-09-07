@@ -379,9 +379,9 @@ a {
   margin-bottom: 4px;
 }
 
-/* The backdrop behind the whole hero is a cropped, blurred blow-up of the
-   cover for atmosphere - this shows that same art in full, so the
-   featured game's actual box art is never lost to the crop. */
+/* Small poster next to the title - only used on narrow screens (see the
+   max-width: 700px block below), where there's no room to the side of the
+   hero's text for the large one below. Hidden by default. */
 .browse-hero-poster {
   width: 130px;
   aspect-ratio: 2 / 3;
@@ -391,10 +391,31 @@ a {
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
   background: var(--browse-surface);
   flex-shrink: 0;
-  display: block;
+  display: none;
 }
 
 .browse-hero-heading { min-width: 0; }
+
+/* Large poster showcasing the featured game's real box art, undistorted,
+   in the hero's own empty space to the right of the text (the backdrop
+   there is just a cropped, blurred blow-up of the same art). A flex
+   sibling of .browse-hero-content (not nested inside it) so it can reach
+   all the way to the hero's right edge instead of being capped by
+   .browse-hero-content's own max-width. */
+.browse-hero-poster-large {
+  display: block;
+  flex: 0 0 auto;
+  align-self: center;
+  margin: 0 6% 0 auto;
+  width: min(26vw, 380px);
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  border-radius: 14px;
+  border: 1px solid rgba(253, 246, 232, 0.18);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+  background: var(--browse-surface);
+  z-index: 1;
+}
 
 .browse-hero-badge {
   display: inline-flex;
@@ -1038,6 +1059,12 @@ a {
 .browse-toast.open .browse-toast-progress-bar {
   animation: browse-toast-shrink linear forwards;
 }
+/* Hovering to read it or click through shouldn't have it vanish out from
+   under the cursor - the auto-dismiss timer itself is paused to match
+   (see initTournamentToast). */
+.browse-toast:hover .browse-toast-progress-bar {
+  animation-play-state: paused;
+}
 @keyframes browse-toast-shrink {
   from { transform: scaleX(1); }
   to { transform: scaleX(0); }
@@ -1174,7 +1201,8 @@ a {
   .browse-search.open .browse-search-input { width: 140px; }
   .browse-hero { min-height: 64vh; }
   .browse-hero-title { font-size: 1.8rem; }
-  .browse-hero-poster { width: 92px; border-radius: 6px; }
+  .browse-hero-poster { display: block; width: 92px; border-radius: 6px; }
+  .browse-hero-poster-large { display: none; }
   .browse-hero-top-row { gap: 14px; }
   .browse-hero-desc {
     font-size: 0.88rem;

@@ -1032,6 +1032,39 @@ a {
   .browse-support-link-desktop { display: none; }
   .browse-support-link-mobile { display: block; }
   .browse-user-name { display: none; }
+
+  /* "Retour à v1" and "Supporter" share one row instead of stacking. */
+  .browse-nav-row { display: flex; align-items: center; gap: 16px; width: 100%; }
+  .browse-nav-row a { width: auto; padding: 9px 0; }
+
+  /* Admin link + theme toggle get reparented into this nav on mobile
+     (see initMobileHeaderMenu in browse.js) - restyle them from icon-only
+     circular buttons into full-width labeled rows like the other links. */
+  .browse-nav #browse-admin-link,
+  .browse-nav #browse-theme-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    height: auto;
+    padding: 9px 0;
+    background: none;
+    border-radius: 0;
+    font-size: 1rem;
+    color: var(--browse-text) !important;
+    border-top: 1px solid var(--browse-border);
+  }
+  .browse-nav #browse-admin-link::after,
+  .browse-nav #browse-theme-toggle::after {
+    order: 1;
+  }
+  .browse-nav #browse-admin-link::after { content: 'Administration'; }
+  .browse-nav #browse-theme-toggle::after { content: 'Thème'; }
+  .browse-nav #browse-admin-badge {
+    order: 2;
+    margin-left: auto;
+    position: static;
+  }
 }
 
 @media (max-width: 700px) {

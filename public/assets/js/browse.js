@@ -208,6 +208,36 @@
     nav.addEventListener('click', function (e) { e.stopPropagation(); });
   }
 
+  // On narrow viewports, everything except search and the profile/login
+  // control moves into the hamburger dropdown instead of staying in the
+  // header bar. Reparent the real nodes (rather than duplicating them) so
+  // existing getElementById lookups and event listeners keep working no
+  // matter where they currently sit in the DOM.
+  function initMobileHeaderMenu() {
+    var nav = document.querySelector('[data-browse-menu]');
+    var admin = document.getElementById('browse-admin-link');
+    var theme = document.getElementById('browse-theme-toggle');
+    if (!nav || !admin || !theme) return;
+
+    var adminAnchor = document.createComment('browse-admin-link-anchor');
+    var themeAnchor = document.createComment('browse-theme-toggle-anchor');
+    admin.parentNode.insertBefore(adminAnchor, admin);
+    theme.parentNode.insertBefore(themeAnchor, theme);
+
+    var mq = window.matchMedia('(max-width: 900px)');
+    function apply(isMobile) {
+      if (isMobile) {
+        nav.appendChild(admin);
+        nav.appendChild(theme);
+      } else {
+        adminAnchor.parentNode.insertBefore(admin, adminAnchor);
+        themeAnchor.parentNode.insertBefore(theme, themeAnchor);
+      }
+    }
+    apply(mq.matches);
+    mq.addEventListener('change', function (e) { apply(e.matches); });
+  }
+
   function initDropdowns() {
     var dropdowns = Array.prototype.slice.call(document.querySelectorAll('[data-browse-dropdown]'));
 
@@ -351,7 +381,18 @@
       container.innerHTML = '<p class="browse-loading">Aucun jeu ne correspond à « ' + escapeHtml(query.trim()) + ' ».</p>';
       return;
     }
-    container.appendChild(makeRow({ title: 'Résultats pour « ' + query.trim() + ' »', games: matches }));
+    container.appendChild(makeRow({
+      title: 'Résultats pour « ' + query.trim() + ' »',
+      games: matches,
+      clearLabel: '✕ Effacer',
+      onClear: function () {
+        var input = document.getElementById('browse-search-input');
+        var wrap = document.querySelector('[data-browse-search]');
+        if (input) input.value = '';
+        if (wrap) wrap.classList.remove('open');
+        performSearch('');
+      }
+    }));
   }
 
   /* ---------- Auth / favorites (shared across hero, preview, modal) ---------- */
@@ -905,14 +946,18 @@
       typeLabel.textContent = category.typeLabel;
       titleWrap.appendChild(typeLabel);
     }
-    if (category.clearable) {
+    if (category.clearable || category.onClear) {
       var clearBtn = document.createElement('button');
       clearBtn.type = 'button';
       clearBtn.className = 'browse-row-clear-btn';
-      clearBtn.textContent = '🗑 Vider';
+      clearBtn.textContent = category.clearLabel || '🗑 Vider';
       clearBtn.addEventListener('click', function () {
-        if (typeof clearGameHistory === 'function') clearGameHistory();
-        renderRows(currentCategories.filter(function (c) { return c !== category; }));
+        if (category.onClear) {
+          category.onClear();
+        } else {
+          if (typeof clearGameHistory === 'function') clearGameHistory();
+          renderRows(currentCategories.filter(function (c) { return c !== category; }));
+        }
       });
       titleWrap.appendChild(clearBtn);
     }
@@ -1324,6 +1369,7 @@
     initCursorAutoHide();
     initDropdowns();
     initMobileNav();
+    initMobileHeaderMenu();
     initSearch();
     initModal();
     initKeyboardNav();

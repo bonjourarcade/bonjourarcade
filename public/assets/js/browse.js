@@ -560,10 +560,11 @@
 
   function renderHero(game) {
     var backdrop = document.getElementById('browse-hero-backdrop');
-    // Two poster elements, only one of which is ever visible (see the
+    // Two poster links, only one of which is ever visible (see the
     // .browse-hero-poster / .browse-hero-poster-large CSS): a small one
     // next to the title on narrow screens, a large showcase one on the
-    // hero's own empty right side everywhere else.
+    // hero's own empty right side everywhere else. Both are links so
+    // clicking the art itself launches the game, same as "Jouer".
     var poster = document.getElementById('browse-hero-poster');
     var posterLarge = document.getElementById('browse-hero-poster-large');
     var title = document.getElementById('browse-hero-title');
@@ -578,14 +579,14 @@
     // The backdrop is a cropped, stretched blow-up of the cover behind the
     // whole hero (for atmosphere) - the posters show that same art in full,
     // undistorted, so the featured game's actual box art is still visible.
-    if (poster) {
-      poster.src = cover;
-      poster.alt = getDisplayTitle(game);
-    }
-    if (posterLarge) {
-      posterLarge.src = cover;
-      posterLarge.alt = getDisplayTitle(game);
-    }
+    var playHref = game.pageUrl || ('/b/' + game.id);
+    [poster, posterLarge].forEach(function (link) {
+      if (!link) return;
+      link.href = playHref;
+      var img = link.querySelector('img');
+      img.src = cover;
+      img.alt = getDisplayTitle(game);
+    });
     title.textContent = getDisplayTitle(game);
 
     var metaParts = [];
@@ -597,7 +598,7 @@
     desc.textContent = game.description ||
       ('Découvrez ' + getDisplayTitle(game) + ', jeu en vedette cette semaine sur BonjourArcade.');
 
-    play.href = game.pageUrl || ('/b/' + game.id);
+    play.href = playHref;
 
     favBtn.setAttribute('data-fav-for', game.id);
     setFavButtonState(favBtn, favoriteIds.has(game.id));

@@ -36,7 +36,9 @@
   }
 
   function isVisible(game) {
-    return game.id && !(game.hide === true || game.hide === 'yes') && game.problem !== 'true';
+    // This page ignores the `hide` field entirely - the only reason to
+    // exclude a game here is a known, flagged problem with it.
+    return game.id && game.problem !== 'true';
   }
 
   function shuffleArray(arr) {
@@ -204,7 +206,9 @@
 
     document.addEventListener('click', closeHeaderMenus);
     document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape') closeHeaderMenus();
+      // Focused on a game via keyboard nav: Escape's only job is to drop
+      // that focus (handled in initKeyboardNav) - don't also close menus.
+      if (e.key === 'Escape' && kbRow === -1) closeHeaderMenus();
     });
 
     var dailyLink = document.getElementById('browse-daily-link');
@@ -246,11 +250,20 @@
     });
 
     input.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape') {
+      if (e.key === 'Escape' || e.key === 'Enter') {
         input.value = '';
         performSearch('');
         wrap.classList.remove('open');
         input.blur();
+        e.stopPropagation();
+        return;
+      }
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+        // Hand off to the grid's own keyboard nav instead of blocking it -
+        // don't stopPropagation, let this same keypress reach it once the
+        // input isn't the typing target anymore.
+        input.blur();
+        return;
       }
       e.stopPropagation();
     });
@@ -338,6 +351,62 @@
     });
   }
 
+  /* ---------- Account (profile/login) + admin badge ---------- */
+
+  function initAccountUI() {
+    var loginBtn = document.getElementById('browse-login-btn');
+    var userIndicator = document.getElementById('browse-user-indicator');
+    var userAvatar = document.getElementById('browse-user-avatar');
+    var userName = document.getElementById('browse-user-name');
+    var adminLink = document.getElementById('browse-admin-link');
+    var adminBadge = document.getElementById('browse-admin-badge');
+
+    loginBtn.addEventListener('click', function () {
+      if (window.signInWithGoogle) window.signInWithGoogle().catch(function (err) { console.error('Login error:', err); });
+    });
+
+    if (!window.onFirebaseAuthStateChanged) return;
+    window.onFirebaseAuthStateChanged(function (user) {
+      if (!user) {
+        loginBtn.style.display = '';
+        userIndicator.style.display = 'none';
+        adminLink.style.display = 'none';
+        adminBadge.style.display = 'none';
+        return;
+      }
+
+      loginBtn.style.display = 'none';
+      userIndicator.style.display = 'flex';
+      userName.textContent = user.displayName || 'Anonyme';
+
+      var fallbackAvatar = user.photoURL || '../assets/default-avatar.png';
+      if (window.getPublicProfile) {
+        window.getPublicProfile(user.uid).then(function (profile) {
+          userAvatar.src = (profile && profile.photoURL) || fallbackAvatar;
+        }).catch(function () { userAvatar.src = fallbackAvatar; });
+      } else {
+        userAvatar.src = fallbackAvatar;
+      }
+
+      if (window.checkFirebaseScoreModeratorAccess) {
+        window.checkFirebaseScoreModeratorAccess().then(function (isModerator) {
+          if (!isModerator) { adminLink.style.display = 'none'; adminBadge.style.display = 'none'; return; }
+          adminLink.style.display = 'inline-flex';
+          if (!window.getPendingScoresCount) return;
+          window.getPendingScoresCount().then(function (result) {
+            var count = result && result.count;
+            if (count > 0) {
+              adminBadge.textContent = count;
+              adminBadge.style.display = 'inline-block';
+            } else {
+              adminBadge.style.display = 'none';
+            }
+          }).catch(function () { adminBadge.style.display = 'none'; });
+        }).catch(function () { adminLink.style.display = 'none'; });
+      }
+    });
+  }
+
   function refreshFavoriteButtons() {
     document.querySelectorAll('[data-fav-for]').forEach(function (btn) {
       var gameId = btn.getAttribute('data-fav-for');
@@ -418,6 +487,78 @@
     favBtn.onclick = function () { toggleFavorite(game.id, favBtn); };
 
     infoBtn.onclick = function () { openModal(game); };
+
+    initHeroTimer();
+    loadHeroLeaderboard(game.id);
+  }
+
+  /* ---------- Featured game: rotation countdown + current leaderboard ---------- */
+  /* Rotation happens on the 1st and 15th of each month (see AGENTS.md). */
+
+  var heroTimerInterval = null;
+
+  function getNextGameChangeDate() {
+    var now = new Date();
+    var day = now.getDate();
+    var month = now.getMonth();
+    var year = now.getFullYear();
+    if (day < 15) return new Date(year, month, 15);
+    return new Date(year, month + 1, 1);
+  }
+
+  function formatTimeRemaining(targetDate) {
+    var diff = targetDate - new Date();
+    if (diff <= 0) return 'Bientôt';
+    var days = Math.floor(diff / 86400000);
+    var hours = Math.floor((diff % 86400000) / 3600000);
+    var minutes = Math.floor((diff % 3600000) / 60000);
+    var seconds = Math.floor((diff % 60000) / 1000);
+    var parts = [];
+    if (days > 0) parts.push(String(days).padStart(2, '0') + 'j');
+    if (hours > 0 || days > 0) parts.push(String(hours).padStart(2, '0') + 'h');
+    if (minutes > 0 || hours > 0 || days > 0) parts.push(String(minutes).padStart(2, '0') + 'm');
+    parts.push(String(seconds).padStart(2, '0') + 's');
+    return parts.join(' ');
+  }
+
+  function initHeroTimer() {
+    var timerEl = document.getElementById('browse-hero-timer');
+    if (!timerEl) return;
+    clearInterval(heroTimerInterval);
+
+    function update() {
+      timerEl.textContent = '⏱ Prochain changement dans ' + formatTimeRemaining(getNextGameChangeDate());
+    }
+    update();
+    heroTimerInterval = setInterval(update, 1000);
+  }
+
+  function loadHeroLeaderboard(gameId) {
+    var wrap = document.getElementById('browse-hero-leaderboard');
+    var list = document.getElementById('browse-hero-leaderboard-list');
+    if (!wrap || !list || typeof window.fetchLeaderboardScores !== 'function') return;
+
+    window.fetchLeaderboardScores(gameId).then(function (data) {
+      var scores = data && data.result && data.result.success && data.result.scores;
+      if (!scores || !scores.length) { wrap.style.display = 'none'; return; }
+
+      var bestByPlayer = new Map();
+      scores.forEach(function (s) {
+        var existing = bestByPlayer.get(s.userId);
+        if (!existing || s.score > existing.score) bestByPlayer.set(s.userId, s);
+      });
+      var top = Array.from(bestByPlayer.values()).sort(function (a, b) { return b.score - a.score; }).slice(0, 5);
+      if (!top.length) { wrap.style.display = 'none'; return; }
+
+      list.innerHTML = top.map(function (s, i) {
+        return '<div class="browse-hero-leaderboard-row">' +
+          '<span class="browse-hero-leaderboard-rank">#' + (i + 1) + '</span>' +
+          '<span class="browse-hero-leaderboard-name">' + escapeHtml(s.player || '?') + '</span>' +
+          '<span class="browse-hero-leaderboard-score">' + escapeHtml(String(s.score)) + '</span>' +
+          '</div>';
+      }).join('');
+      wrap.style.display = 'block';
+    }).catch(function () { wrap.style.display = 'none'; });
   }
 
   function pickHeroGame(games, currentGameId) {
@@ -439,39 +580,66 @@
     return 'Les années ' + decade;
   }
 
-  function buildCategories(games) {
-    // Groups games by genre, system/console, and decade. Genre casing is
-    // inconsistent in the source metadata (e.g. "Co-op" vs "co-op"), so
-    // genre keys are normalized to avoid near-duplicate rows.
+  // Genre casing is inconsistent in the source metadata (e.g. "Co-op" vs
+  // "co-op"), so keys are normalized to avoid near-duplicate rows.
+  var CATEGORY_TYPE_LABELS = {
+    genre: 'Genre',
+    system: 'Console',
+    decade: 'Décennie',
+    dev: 'Développeur'
+  };
+
+  function getGameCategoryKeys(game) {
+    var keys = [];
+    getGenres(game).forEach(function (genre) {
+      keys.push({ key: 'genre:' + genre.toLowerCase(), title: capitalize(genre.toLowerCase()), type: 'genre' });
+    });
+
+    var systemLabel = SYSTEM_NAMES[game.core] || game.core;
+    if (systemLabel) keys.push({ key: 'system:' + systemLabel.toLowerCase(), title: systemLabel, type: 'system' });
+
+    var decadeLabel = getDecadeLabel(game);
+    if (decadeLabel) keys.push({ key: 'decade:' + decadeLabel, title: decadeLabel, type: 'decade' });
+
+    var dev = (game.developer || '').trim();
+    if (dev) keys.push({ key: 'dev:' + dev.toLowerCase(), title: dev, type: 'dev' });
+
+    return keys;
+  }
+
+  function buildCategories(games, heroGame) {
     var groups = {};
 
-    function addToGroup(key, title, game) {
-      if (!groups[key]) groups[key] = { title: title, games: [] };
+    function addToGroup(key, title, type, game) {
+      if (!groups[key]) groups[key] = { title: title, type: type, games: [] };
       groups[key].games.push(game);
     }
 
     games.forEach(function (game) {
-      getGenres(game).forEach(function (genre) {
-        addToGroup('genre:' + genre.toLowerCase(), capitalize(genre.toLowerCase()), game);
-      });
-
-      var systemLabel = SYSTEM_NAMES[game.core] || game.core;
-      if (systemLabel) addToGroup('system:' + systemLabel.toLowerCase(), systemLabel, game);
-
-      var decadeLabel = getDecadeLabel(game);
-      if (decadeLabel) addToGroup('decade:' + decadeLabel, decadeLabel, game);
+      getGameCategoryKeys(game).forEach(function (k) { addToGroup(k.key, k.title, k.type, game); });
     });
 
     var eligible = Object.keys(groups).filter(function (key) {
       return groups[key].games.length >= MIN_GAMES_PER_CATEGORY;
     });
 
-    var chosen = shuffleArray(eligible);
+    // Feature a category the hero game itself belongs to first (shared
+    // genre/system/decade/developer), so browsing has an obvious jumping-off
+    // point from whatever's currently spotlighted.
+    var relatedKey = null;
+    if (heroGame) {
+      var heroKeys = getGameCategoryKeys(heroGame).map(function (k) { return k.key; });
+      relatedKey = heroKeys.filter(function (k) { return eligible.indexOf(k) !== -1; })[0] || null;
+    }
 
-    return chosen.map(function (key) {
+    var rest = eligible.filter(function (k) { return k !== relatedKey; });
+    var chosenKeys = relatedKey ? [relatedKey].concat(shuffleArray(rest)) : shuffleArray(rest);
+
+    return chosenKeys.map(function (key) {
       var entry = groups[key];
       return {
         title: entry.title,
+        typeLabel: CATEGORY_TYPE_LABELS[entry.type] || '',
         games: shuffleArray(entry.games).slice(0, MAX_GAMES_PER_ROW)
       };
     });
@@ -585,6 +753,18 @@
     document.addEventListener('keydown', function (e) {
       if (isTypingTarget(document.activeElement)) return;
       if (document.getElementById('browse-modal-overlay').classList.contains('open')) return;
+
+      if (e.key === 'Escape') {
+        // Focused on a game via keyboard nav: Escape's only job here is to
+        // drop that focus, not to also close the search or anything else.
+        if (kbRow !== -1) {
+          e.preventDefault();
+          kbRow = -1;
+          clearKbFocus();
+        }
+        return;
+      }
+
       if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Enter'].indexOf(e.key) === -1) return;
 
       var tracks = getNavTracks();
@@ -629,9 +809,15 @@
     var title = document.createElement('h2');
     title.className = 'browse-row-title';
     title.textContent = category.title;
+    titleWrap.appendChild(title);
+    if (category.typeLabel) {
+      var typeLabel = document.createElement('div');
+      typeLabel.className = 'browse-row-type-label';
+      typeLabel.textContent = category.typeLabel;
+      titleWrap.appendChild(typeLabel);
+    }
     var bar = document.createElement('div');
     bar.className = 'browse-row-title-bar';
-    titleWrap.appendChild(title);
     titleWrap.appendChild(bar);
     row.appendChild(titleWrap);
 
@@ -647,14 +833,6 @@
     // position on reload/back-navigation, which made rows start mid-scroll
     // unpredictably. Force every row back to its start.
     track.scrollLeft = 0;
-    // A plain vertical mouse wheel has no deltaX, so let hovering the row
-    // scroll it sideways instead of scrolling the page.
-    track.addEventListener('wheel', function (e) {
-      if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
-      if (track.scrollWidth <= track.clientWidth) return;
-      e.preventDefault();
-      track.scrollLeft += e.deltaY;
-    }, { passive: false });
 
     var prevBtn = document.createElement('button');
     prevBtn.className = 'browse-row-nav prev';
@@ -1005,6 +1183,7 @@
     initModal();
     initKeyboardNav();
     initFavoritesTracking();
+    initAccountUI();
 
     fetchCurrentGameId()
       .then(function (currentGameId) {
@@ -1026,7 +1205,7 @@
         var heroGame = pickHeroGame(allGames, result.currentGameId);
         renderHero(heroGame);
 
-        var categories = buildCategories(allGames);
+        var categories = buildCategories(allGames, heroGame);
         renderRows(categories);
 
         initTournamentToast();

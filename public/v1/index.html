@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BonjourArcade v1 - Jeu en vedette</title>
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="">
+  <meta property="og:title" content="BonjourArcade - Jeu en vedette">
+  <meta property="og:description" content="Chargement...">
+  <meta property="og:image" content="">
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="">
+  <meta property="twitter:title" content="BonjourArcade - Jeu en vedette">
+  <meta property="twitter:description" content="Chargement...">
+  <meta property="twitter:image" content="">
+
+  <link rel="icon" href="/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <style>
+    .footer-emoji-link {
+      margin: 0 15px;
+      font-size: 0.85rem;
+      text-decoration: none;
+      color: inherit;
+      transition: opacity 0.2s ease;
+    }
+
+    .footer-emoji-link:hover {
+      opacity: 0.7;
+    }
+
+    footer {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+      padding: 20px 0;
+    }
+
+    #user-indicator { display: none; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--text-color); white-space: nowrap; cursor: pointer; }
+    #user-indicator img { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; }
+    #user-indicator .bonjour-text { opacity: 0.8; }
+    #user-indicator .user-name { font-weight: 600; }
+    .header-logo-wrap { position: relative; display: inline-flex; align-items: center; }
+    .admin-notif-badge { display: none; align-items: center; gap: 6px; text-decoration: none; color: var(--text-color); padding: 6px 12px; border-radius: 8px; background: var(--surface-soft, #f0f0f0); border: 1px solid var(--border-color, #ddd); }
+    .admin-notif-count { background: #ff4444; color: #fff; border-radius: 10px; padding: 1px 7px; font-size: 0.75rem; font-weight: 600; }
+    body.theme-dark .admin-notif-badge { background: #2a2a2a; border-color: #444; }
+    .admin-notif-badge svg { flex-shrink: 0; }
+    .submenu-toggle { cursor: pointer; display: flex; align-items: center; }
+    .submenu-toggle .arrow { transition: transform 0.2s; font-size: 0.7rem; margin-left: auto; }
+    .submenu-toggle.open .arrow { transform: rotate(180deg); }
+    .submenu { display: none; flex-direction: column; padding-left: 16px; }
+    .submenu.open { display: flex; }
+    .submenu .dropdown-option { font-size: 0.85rem; padding: 8px 16px; }
+
+    #tournament-list-hp a { transition: border-color 0.2s; }
+    @media (max-width: 600px) {
+      #tournament-list-hp a { font-size: 12px; }
+    }
+  </style>
+  <script src="/assets/js/analytics.js"></script>
+</head>
+
+<body>
+  <!-- Loading overlay (will be populated by loading.js) -->
+  <div id="loading-overlay" class="loading-overlay"></div>
+
+  <div class="container" id="main-container" style="display: none;">
+    <header>
+      <div class="header-flex">
+        <div class="header-logo-wrap">
+          <img src="/assets/images/bonjourarcade-logo.png" alt="BonjourArcade Logo" class="header-logo">
+          <a id="admin-notif-badge" class="admin-notif-badge" href="/admin/" aria-label="Scores en attente" style="display:none;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <span id="admin-notif-count" class="admin-notif-count"></span>
+          </a>
+        </div>
+        <div class="game-launcher">
+          <input type="text" id="game-id-input" placeholder="Recherche">
+          <!-- <button id="launch-game-btn">Lancer</button> -->
+        </div>
+        <div id="user-indicator">
+          <span class="bonjour-text">Bonjour</span>
+          <span class="user-name" id="user-display-name"></span>
+          <img id="user-avatar" src="" alt="Avatar">
+        </div>
+        <div class="theme-toggle-wrapper" style="position: relative;" id="dropdown-root"></div>
+      </div>
+    </header>
+
+    <div id="tournament-section" style="display:none;margin:12px auto;max-width:900px;width:100%;box-sizing:border-box;padding:0 20px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;padding:0 4px;">
+        <span id="tournament-section-title" style="font-weight:700;font-size:0.9rem;display:inline-block;">🏆 Tournois publics</span>
+        <a href="/tournoi/" style="color:#4a9eff;font-size:0.8rem;text-decoration:none;">Voir tout →</a>
+      </div>
+      <div id="tournament-list-hp"></div>
+    </div>
+
+    <main class="main-content">
+      <div class="left-column">
+        <!-- Recently Played Games Section -->
+        <section id="recently-played-section" class="recently-played-section" style="display: none;">
+          <div class="recently-played-header">
+            <h2 id="recently-played-toggle" class="collapsible-toggle">Jeux récemment joués ▼</h2>
+            <button id="clear-recently-played-btn" class="clear-recently-played-btn" type="button">Effacer</button>
+          </div>
+          <div id="recently-played-list" class="recently-played-list collapsible-content">
+            <p>Aucun jeu joué récemment</p>
+          </div>
+        </section>
+
+        <h2 class="game-of-the-week-title">Jeu en vedette</h2>
+        <section id="game-of-the-week" class="featured-section">
+          <div id="featured-game-content" class="featured-content-vertical">
+            <img id="featured-game-img" src="" alt="Couverture du jeu sélectionné">
+          </div>
+        </section>
+      </div>
+
+      <div class="right-column">
+        <section id="previous-week-games" class="previous-week-section">
+          <center>
+            <h2>Jeux vedettes précédents</h2>
+          </center>
+          <div id="previous-week-games-list" class="previous-week-games-list">
+            <p>Chargement des jeux...</p>
+          </div>
+        </section>
+        <section class="grid-section">
+          <div id="previous-games-grid" class="game-grid">
+            <!-- Search results will be displayed here -->
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+  <!-- <div class="all-games-link-container bottom-link">
+        <a href="/all" class="all-games-link">
+            <span class="joystick-emoji">🕹️</span>
+        </a>
+    </div> -->
+
+  <script>
+    window.gameDataLoaded = false;
+  </script>
+  <script src="/assets/js/loading.js"></script>
+  <script src="/assets/js/game-history.js"></script>
+  <script src="/assets/js/screensaver.js"></script>
+  <script src="/assets/js/banner.js"></script>
+  <script src="/assets/js/utils.js"></script>
+  <script src="/assets/js/ttl-cache.js"></script>
+  <script src="/assets/js/announcement-modal.js"></script>
+  <script src="/assets/js/main.js"></script>
+  <script type="module" src="/assets/js/firebase-setup.js"></script>
+  <script src="/tournoi/tournament-utils.js"></script>
+  <script src="/assets/js/dropdown.js"></script>
+
+  <script>
+    // Collapsible functionality for recently played games section
+    document.addEventListener('DOMContentLoaded', function () {
+      const toggle = document.getElementById('recently-played-toggle');
+      const content = document.getElementById('recently-played-list');
+
+      if (toggle && content) {
+        // Start expanded by default
+        toggle.textContent = 'Jeux récemment joués ▼';
+
+        toggle.addEventListener('click', function () {
+          content.classList.toggle('collapsed');
+          if (content.classList.contains('collapsed')) {
+            toggle.textContent = 'Jeux récemment joués ▶';
+          } else {
+            toggle.textContent = 'Jeux récemment joués ▼';
+          }
+        });
+      }
+    });
+  </script>
+  <!--script
+      src="https://unpkg.com/cursor-effects@latest/dist/browser.js"></script-->
+  <script>
+    /*
+    window.addEventListener("load", (event) => {
+      // Only enable cursor effects on non-mobile devices
+      if (!/Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+        const springyEmojiCursor = new cursoreffects.springyEmojiCursor({ emoji: "💛" });
+        setTimeout(() => {
+          const cursorElements = document.querySelectorAll('.cursor-effects');
+          cursorElements.forEach(element => {
+            element.style.zIndex = '99999';
+            element.style.pointerEvents = 'none';
+          });
+        }, 100);
+      }
+    });
+    */
+
+
+    // Key 'z' for directly going to /all (but not when typing in search)
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'z') {
+        // Don't navigate if user is typing in an input or textarea
+        const activeTag = document.activeElement?.tagName;
+        if (activeTag === 'INPUT' || activeTag === 'TEXTAREA') return;
+        window.location.replace("/all");
+      }
+    });
+
+    // Key 'x' for directly going to /upcoming (but not when typing in textbox)
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'x') {
+        // Don't navigate if user is typing in an input or textarea
+        const activeElement = document.activeElement;
+        if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
+          return;
+        }
+        window.location.replace("/upcoming");
+      }
+    });
+
+    // Key 'c' for directly going to today's daily game
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'c' || event.key === 'C') {
+        // Don't navigate if user is typing in an input or textarea
+        const activeElement = document.activeElement;
+        if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
+          return;
+        }
+        window.location.replace(`/daily?seed=${getTorontoDailySeed()}`);
+      }
+    });
+
+    function getTorontoDailySeed() {
+      const formatter = new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'America/Toronto',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      });
+      const parts = formatter.formatToParts(new Date());
+      const year = parts.find(part => part.type === 'year')?.value;
+      const month = parts.find(part => part.type === 'month')?.value;
+      const day = parts.find(part => part.type === 'day')?.value;
+
+      return `${year}${month}${day}`;
+    }
+
+
+  </script>
+  <script>
+    // --- Auto-refresh every 3 hours, and auto-restart screensaver if it was active before refresh ---
+    (function () {
+      // Refresh every 3 hours (10,800,000 ms)
+      const THREE_HOURS_MS = 3 * 60 * 60 * 1000;
+      setTimeout(() => {
+        // If screensaver is active, set a flag before reload
+        if (window.screensaverActive) {
+          sessionStorage.setItem('bonjourarcade_screensaver_was_active', '1');
+        }
+        location.reload();
+      }, THREE_HOURS_MS);
+
+      // On load, if the flag is set, start the screensaver after DOM is ready
+      document.addEventListener('DOMContentLoaded', function () {
+        if (sessionStorage.getItem('bonjourarcade_screensaver_was_active') === '1') {
+          sessionStorage.removeItem('bonjourarcade_screensaver_was_active');
+          // Wait a tick to ensure screensaver.js is initialized
+          setTimeout(function () {
+            if (typeof startScreensaver === 'function') {
+              startScreensaver();
+            }
+          }, 300);
+        }
+      });
+    })();
+  </script>
+
+  <script>
+    // User indicator (avatar + name) in header
+    document.addEventListener('DOMContentLoaded', () => {
+      const userIndicator = document.getElementById('user-indicator');
+      const userNameEl = document.getElementById('user-display-name');
+      const userAvatarEl = document.getElementById('user-avatar');
+      const checkAuth = () => {
+        if (typeof window.onFirebaseAuthStateChanged === 'function') {
+          window.onFirebaseAuthStateChanged(async (user) => {
+            if (userIndicator) {
+              if (user) {
+                userNameEl.textContent = user.displayName || 'Anonyme';
+                // Try to get the resolved photoURL from preferences
+                if (window.getPublicProfile) {
+                  try {
+                    const profile = await window.getPublicProfile(user.uid);
+                    userAvatarEl.src = profile.photoURL || 'assets/default-avatar.png';
+                  } catch {
+                    userAvatarEl.src = user.photoURL || 'assets/default-avatar.png';
+                  }
+                } else {
+                  userAvatarEl.src = user.photoURL || 'assets/default-avatar.png';
+                }
+                userIndicator.style.display = 'flex';
+              } else {
+                userIndicator.style.display = 'none';
+              }
+            }
+          });
+        } else {
+          setTimeout(checkAuth, 100);
+        }
+      };
+      checkAuth();
+      if (userIndicator) {
+        userIndicator.addEventListener('click', () => {
+          window.location.href = '/profil/';
+        });
+      }
+    });
+  </script>
+
+  <script>
+    // Public tournaments list
+    document.addEventListener('DOMContentLoaded', () => {
+      let hpTimerInterval = null;
+
+      function initTournamentList() {
+        if (!window.TournoiUtils || !window.onFirebaseAuthStateChanged) {
+          setTimeout(initTournamentList, 200);
+          return;
+        }
+
+        const section = document.getElementById('tournament-section');
+        const container = document.getElementById('tournament-list-hp');
+
+        async function loadGamelist() {
+          try {
+            const data = await window.fetchGamelist();
+            return data.games || [];
+          } catch (e) { return []; }
+        }
+
+        function getGameName(gameId, gamelist) {
+          if (!gameId) return null;
+          const id = String(gameId).toLowerCase();
+          const g = gamelist.find(x => x.id === gameId) ||
+                    gamelist.find(x => x.id && String(x.id).toLowerCase() === id);
+          return g ? g.title : gameId;
+        }
+
+        let gamelist = [];
+        let refreshInterval = null;
+
+        function parseFirebaseTimestamp(ts) {
+          if (!ts) return 0;
+          if (typeof ts.toMillis === 'function') return ts.toMillis();
+          const sec = ts.seconds != null ? ts.seconds : ts._seconds;
+          if (sec != null) return sec * 1000 + ((ts.nanoseconds != null ? ts.nanoseconds : ts._nanoseconds) || 0) / 1e6;
+          const t = new Date(ts).getTime();
+          return isNaN(t) ? 0 : t;
+        }
+
+        function renderTimerHTML(t) {
+          if (t.status !== 'active' || !t.roundStartTime || !t.roundDurationSec) return '';
+          const startMs = parseFirebaseTimestamp(t.roundStartTime);
+          if (!startMs) return '';
+          const remaining = Math.max(0, Math.floor((t.roundDurationSec * 1000 - (Date.now() - startMs)) / 1000));
+          if (remaining <= 0) return '';
+          const timerClass = remaining <= 60 ? 'tournament-timer-hp timer-warning' : 'tournament-timer-hp';
+          return `<span class="${timerClass}" data-tournament-id="${t.id}" data-start-ms="${startMs}" data-duration="${t.roundDurationSec}">⏱ ${TournoiUtils.formatTimer(remaining)}</span>`;
+        }
+
+        function updateHpTimers() {
+          document.querySelectorAll('.tournament-timer-hp[data-tournament-id]').forEach(el => {
+            const startMs = Number(el.dataset.startMs);
+            const duration = Number(el.dataset.duration);
+            const remaining = Math.max(0, Math.floor((duration * 1000 - (Date.now() - startMs)) / 1000));
+            el.textContent = '⏱ ' + TournoiUtils.formatTimer(remaining);
+            el.classList.toggle('timer-warning', remaining <= 60);
+          });
+        }
+
+        async function refreshTournaments() {
+          try {
+            let tournaments;
+            const cachedTournaments = window.TTLCache ? window.TTLCache.get('publicTournaments') : undefined;
+            if (cachedTournaments !== undefined) {
+              tournaments = cachedTournaments;
+            } else {
+              const result = await TournoiUtils.callFunction('getPublicTournaments', {});
+              tournaments = (result && result.success && result.tournaments) ? result.tournaments : [];
+              if (window.TTLCache) window.TTLCache.set('publicTournaments', tournaments, 10 * 60 * 1000);
+            }
+            if (tournaments.length === 0) {
+              section.style.display = 'none';
+              return;
+            }
+            section.style.display = 'block';
+            container.innerHTML = tournaments.map(t => {
+              const roundInfo = t.status === 'active'
+                ? `Ronde ${(t.currentRoundIndex || 0) + 1}/${t.games?.length || '?'}`
+                : 'Inscriptions ouvertes';
+              const tagColor = t.status === 'active' ? '#28a745' : '#ffc107';
+              const tagLabel = t.status === 'active' ? 'En cours' : 'Inscription';
+              const currentGameId = t.currentGame || (t.games && t.games[t.currentRoundIndex || 0]);
+              const gameName = currentGameId ? getGameName(currentGameId, gamelist) : null;
+              const timerHTML = renderTimerHTML(t);
+              return `<a href="/tournoi/play/?t=${t.id}" class="tournament-card-hp">
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <div style="flex:1;min-width:0;">
+                    <div class="tchp-title">${t.name}</div>
+                    ${t.description ? `<div class="tchp-desc">${t.description}</div>` : ''}
+                  </div>
+                  <span style="font-size:11px;padding:2px 6px;border-radius:4px;background:${tagColor};color:${tagColor === '#ffc107' ? '#1a1a2e' : 'white'};font-weight:600;white-space:nowrap;">${tagLabel}</span>
+                  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;">
+                    <span class="tchp-round">${roundInfo}</span>
+                    ${timerHTML}
+                  </div>
+                </div>
+                ${gameName && t.status === 'active' ? `<div class="tchp-game" style="margin-top:2px;padding-left:28px;">🎮 ${gameName}</div>` : ''}
+                ${t.leader ? `<div class="tchp-leader-sep" style="display:flex;align-items:center;gap:6px;margin-top:4px;padding-top:4px;font-size:12px;">
+                  <span>👑</span>
+                  <img src="${t.leader.photoURL || '../assets/default-avatar.png'}" style="width:16px;height:16px;border-radius:50%;object-fit:cover;">
+                  <span class="tchp-leader-name">${t.leader.displayName}</span>
+                  <span class="tchp-leader-score" style="margin-left:auto;">${t.leader.score.toLocaleString()}</span>
+                </div>` : ''}
+              </a>`;
+            }).join('');
+            if (hpTimerInterval) clearInterval(hpTimerInterval);
+            hpTimerInterval = setInterval(updateHpTimers, 1000);
+          } catch (e) {
+            section.style.display = 'none';
+          }
+        }
+
+        loadGamelist().then(list => {
+          gamelist = list;
+          refreshTournaments();
+        });
+        if (refreshInterval) refreshInterval();
+        refreshInterval = window.refreshOnVisible(refreshTournaments);
+      }
+      initTournamentList();
+    });
+  </script>
+
+  <script>
+    // Initialize meta tags with current domain
+    document.addEventListener('DOMContentLoaded', function () {
+      const currentDomain = window.location.origin;
+      const currentUrl = window.location.href;
+
+      // Update Open Graph meta tags
+      updateMetaTag('og:url', currentUrl);
+      updateMetaTag('og:image', `${currentDomain}/assets/images/bonjourarcade-logo.png`);
+
+      // Update Twitter meta tags
+      updateMetaTag('twitter:url', currentUrl);
+      updateMetaTag('twitter:image', `${currentDomain}/assets/images/bonjourarcade-logo.png`);
+    });
+
+    /**
+     * Helper function to update meta tags
+     * @param {string} property - The meta tag property to update
+     * @param {string} content - The new content value
+     */
+    function updateMetaTag(property, content) {
+      const metaTag = document.querySelector(`meta[property="${property}"]`) ||
+        document.querySelector(`meta[name="${property}"]`);
+      if (metaTag) {
+        metaTag.setAttribute('content', content);
+      }
+    }
+  </script>
+
+  <div id="screensaver-overlay" class="screensaver-overlay">
+    <img id="screensaver-image" class="screensaver-image" src="" alt="Screensaver Image">
+    <img id="screensaver-logo" class="screensaver-logo" src="" alt="BonjourArcade Logo">
+  </div>
+
+  <!-- Newsletter Subscription Modal -->
+  <!-- The newsletter modal and form HTML have been removed. -->
+
+  <footer id="main-footer" style="display: none;">
+    <!-- Sorted from most exciting to most boring -->
+    <div class="footer-row">
+      <a href="https://amazon.ca/dp/B08GJC5WSS" class="footer-emoji-link"
+        title="Manette officielle BonjourArcade sur Amazon" aria-label="Manette officielle BonjourArcade"
+        target="_blank" rel="noopener">🕹️ Manette officielle</a>
+      <a href="https://ko-fi.com/bonjourarcade" class="footer-emoji-link" title="Supportez BonjourArcade sur Ko-fi"
+        aria-label="Supportez BonjourArcade sur Ko-fi" target="_blank" rel="noopener">❤️ Supporter</a>
+      <a href="https://discord.gg/2E48gr5BNJ" class="footer-emoji-link" title="Rejoindre le Discord BonjourArcade"
+        aria-label="Discord BonjourArcade" target="_blank" rel="noopener">
+        <svg width="1.4em" height="1.4em" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;">
+          <path
+            d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276c-.598.3428-1.2205.6447-1.8733.8923a.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1835 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1835 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z" />
+        </svg>
+        Communauté
+      </a>
+      <a href="https://www.facebook.com/profile.php?id=61572089069032" class="footer-emoji-link"
+        title="Suivre BonjourArcade sur Facebook" aria-label="Facebook BonjourArcade" target="_blank"
+        rel="noopener">📘 Facebook</a>
+      <!-- <a href="https://productific.com/@BonjourArcade/preview" class="footer-emoji-link" title="Suggestions?"
+        target="_blank" rel="noopener">💡 Suggestions?</a> -->
+      <a href="https://gitlab.com/bonjourarcade/bonjourarcade" class="footer-emoji-link" title="Code source sur GitLab"
+        aria-label="Code source GitLab" target="_blank" rel="noopener">💻 Code source</a>
+      <a href="/legal.html" class="footer-emoji-link"
+        title="Mentions légales, confidentialité, copyright et contact" aria-label="Mentions légales">📋 Mentions légales</a>
+    </div>
+
+    <!-- Avis de non-garantie -->
+    <div class="footer-row disclaimer-row">
+      <span class="footer-disclaimer-text">Aucune garantie • Le service peut cesser sans préavis • <a
+          href="/legal.html">Mentions légales</a></span>
+    </div>
+  </footer>
+</body>
+
+</html>

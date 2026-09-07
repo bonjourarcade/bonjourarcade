@@ -582,22 +582,25 @@ a {
 }
 .browse-btn-info:hover { background: rgba(253, 246, 232, 0.22); }
 
-.browse-icon-round-btn {
-  width: 44px;
+.browse-fav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   height: 44px;
-  border-radius: 50%;
+  padding: 0 20px;
+  border-radius: 22px;
   border: 1px solid rgba(253, 246, 232, 0.4);
   background: rgba(253, 246, 232, 0.12);
   color: var(--browse-hero-text);
-  font-size: 1.15rem;
+  font-size: 0.95rem;
+  font-weight: 600;
   cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  white-space: nowrap;
   flex-shrink: 0;
 }
-.browse-icon-round-btn:hover { background: rgba(253, 246, 232, 0.22); }
-.browse-icon-round-btn.is-fav { border-color: var(--browse-pink); }
+.browse-fav-btn:hover { background: rgba(253, 246, 232, 0.22); }
+.browse-fav-btn.is-fav { border-color: var(--browse-pink); }
+.browse-fav-icon { font-size: 1.15rem; line-height: 1; }
 
 /* Modal reuses this button but sits on the page surface, not the hero scrim */
 #browse-modal-fav {
@@ -1014,6 +1017,17 @@ a {
   margin-top: 8px;
   font-size: 0.8rem;
   color: var(--browse-text-dim);
+}
+
+.browse-rating-empty {
+  margin: 12px 0 0 0;
+  padding: 10px 14px;
+  border: 1px dashed var(--browse-border);
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--browse-text);
+  text-align: center;
 }
 
 .browse-rating-dist { margin-top: 12px; display: flex; flex-direction: column; gap: 4px; }

@@ -516,9 +516,13 @@
 
   function setFavButtonState(btn, isFav) {
     btn.classList.toggle('is-fav', isFav);
-    var span = btn.querySelector('span');
-    if (span) span.textContent = isFav ? '❤️' : '🤍';
-    btn.title = isFav ? 'Retirer des favoris' : 'Ajouter aux favoris';
+    var icon = btn.querySelector('.browse-fav-icon');
+    if (icon) icon.textContent = isFav ? '❤️' : '🤍';
+    var label = btn.querySelector('.browse-fav-label');
+    var text = isFav ? 'Retirer des favoris' : 'Ajouter aux favoris';
+    if (label) label.textContent = text;
+    btn.title = text;
+    btn.setAttribute('aria-label', text);
   }
 
   function toggleFavorite(gameId, btn) {
@@ -1400,7 +1404,7 @@
             '<span class="browse-rating-dist-bar-wrap"><span class="browse-rating-dist-bar" style="width:' + pct + '%"></span></span>' +
             '<span class="browse-rating-dist-count">' + n + '</span>' +
             '</div>';
-        }).join('') : '';
+        }).join('') : '<p class="browse-rating-empty">✨ Ce jeu n\'a pas encore de note — soyez la première personne à donner votre avis !</p>';
       }
 
       var loginPrompt = document.getElementById('browse-modal-rating-login');

@@ -394,15 +394,7 @@
 
   function performSearch(query) {
     var q = normalizeForSearch(query.trim());
-    var hero = document.getElementById('browse-hero');
-    var rows = document.getElementById('browse-rows');
-    searchHeroHidden = !!q;
-    if (hero) hero.style.display = searchHeroHidden ? 'none' : '';
-    // The header is fixed and normally floats over the hero's own height;
-    // with the hero hidden the rows need that space back so they don't
-    // start underneath it.
-    if (rows) rows.style.paddingTop = searchHeroHidden ? document.getElementById('browse-header').offsetHeight + 'px' : '';
-    updateHeaderSolid();
+    setHeroHidden(!!q);
     if (!q) {
       renderRows(currentCategories);
       return;
@@ -799,10 +791,14 @@
       var isRelated = relatedKeys.indexOf(key) !== -1;
       var prefix = /^[aeiouhâàéèêëîïôùûüœ]/i.test(entry.title) ? "Plus d'" : 'Plus de ';
       var relatedTitle = entry.type === 'genre' ? pluralizeGenre(entry.title) : entry.title;
+      var shuffled = shuffleArray(entry.games);
       return {
         title: isRelated ? prefix + relatedTitle : entry.title,
         typeLabel: CATEGORY_TYPE_LABELS[entry.type] || '',
-        games: shuffleArray(entry.games).slice(0, MAX_GAMES_PER_ROW),
+        games: shuffled.slice(0, MAX_GAMES_PER_ROW),
+        // Kept separately (unsliced) so clicking the row title can open a
+        // view with every matching game, not just the row's own preview.
+        allGames: shuffled,
         related: isRelated
       };
     });
@@ -999,6 +995,21 @@
     var title = document.createElement('h2');
     title.className = 'browse-row-title';
     title.textContent = category.title;
+    // Rows built from a genre/system/year/decade/developer grouping carry
+    // their full game list separately (see buildCategories) - clicking the
+    // title opens just that category full-screen, so scrolling through it
+    // doesn't mean fighting a cramped horizontal carousel.
+    if (category.allGames && !category.gridMode) {
+      title.classList.add('browse-row-title-clickable');
+      title.tabIndex = 0;
+      title.setAttribute('role', 'button');
+      title.setAttribute('aria-label', 'Voir tous les jeux : ' + category.title);
+      var openFocusView = function () { focusCategory(category); };
+      title.addEventListener('click', openFocusView);
+      title.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openFocusView(); }
+      });
+    }
     titleWrap.appendChild(title);
     if (category.typeLabel) {
       var typeLabel = document.createElement('div');
@@ -1016,6 +1027,7 @@
           category.onClear();
         } else {
           if (typeof clearGameHistory === 'function') clearGameHistory();
+          homeCategories = homeCategories.filter(function (c) { return c !== category; });
           renderRows(currentCategories.filter(function (c) { return c !== category; }));
         }
       });
@@ -1038,6 +1050,18 @@
     // position on reload/back-navigation, which made rows start mid-scroll
     // unpredictably. Force every row back to its start.
     track.scrollLeft = 0;
+
+    // The category-focus view (see focusCategory) wraps every card into a
+    // plain grid instead of a horizontal carousel, so there's nothing for
+    // prev/next buttons to do and the page's own vertical scroll is what
+    // moves you through the list.
+    if (category.gridMode) {
+      wrap.classList.add('browse-row-track-wrap--grid');
+      track.classList.add('browse-row-track--grid');
+      wrap.appendChild(track);
+      row.appendChild(wrap);
+      return row;
+    }
 
     var prevBtn = document.createElement('button');
     prevBtn.className = 'browse-row-nav prev';
@@ -1075,6 +1099,50 @@
     row.appendChild(wrap);
 
     return row;
+  }
+
+  /* ---------- Category focus view (click a row title to expand it) ---------- */
+
+  // The normal home page's category rows, kept aside so "back to home" can
+  // restore them - renderRows() itself is also used for the single expanded
+  // category, so its own currentCategories can't double as this.
+  var homeCategories = [];
+
+  function setHeroHidden(hidden) {
+    var hero = document.getElementById('browse-hero');
+    var rows = document.getElementById('browse-rows');
+    var header = document.getElementById('browse-header');
+    searchHeroHidden = hidden;
+    if (hero) hero.style.display = hidden ? 'none' : '';
+    // The header is fixed and normally floats over the hero's own height;
+    // with the hero hidden the rows need that space back so they don't
+    // start underneath it.
+    if (rows) rows.style.paddingTop = hidden && header ? header.offsetHeight + 'px' : '';
+    updateHeaderSolid();
+  }
+
+  function restoreHomeView() {
+    setHeroHidden(false);
+    renderRows(homeCategories);
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }
+
+  function focusCategory(category) {
+    var searchWrap = document.querySelector('[data-browse-search]');
+    var searchInput = document.getElementById('browse-search-input');
+    if (searchInput) searchInput.value = '';
+    if (searchWrap) searchWrap.classList.remove('open');
+
+    setHeroHidden(true);
+    renderRows([{
+      title: category.title,
+      typeLabel: category.typeLabel,
+      games: category.allGames || category.games,
+      gridMode: true,
+      clearLabel: '← Retour à l’accueil',
+      onClear: restoreHomeView
+    }]);
+    window.scrollTo({ top: 0, behavior: 'auto' });
   }
 
   function renderRows(categories) {
@@ -1529,6 +1597,7 @@
           var insertIndex = (categories.length && categories[0].related) ? 1 : 0;
           categories.splice(insertIndex, 0, recentCategory);
         }
+        homeCategories = categories;
         renderRows(categories);
 
         initTournamentToast();

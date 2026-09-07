@@ -74,8 +74,8 @@ a {
 }
 
 .browse-intro-logo {
-  width: 160px;
-  max-width: 50vw;
+  width: 280px;
+  max-width: 65vw;
   opacity: 0;
   transform: scale(0.6);
   animation: browse-intro-logo-in 1s ease forwards 0.15s;
@@ -579,6 +579,18 @@ a {
   color: var(--browse-text);
 }
 
+.browse-row-title-clickable {
+  cursor: pointer;
+  text-decoration-line: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 4px;
+  transition: text-decoration-color 0.15s ease, color 0.15s ease;
+}
+.browse-row-title-clickable:hover,
+.browse-row-title-clickable:focus-visible {
+  text-decoration-color: var(--browse-text-dim);
+}
+
 .browse-row-title-wrap {
   margin: 0 0 12px 0;
 }
@@ -627,6 +639,19 @@ a {
   padding: 4px 5% 10px 5%;
 }
 
+/* On touch devices there's no wheel/trackpad drag to worry about, and no
+   hover-revealed nav buttons either - so let a finger scroll each row
+   directly instead of leaving it stuck behind tap-only nav buttons. */
+@media (hover: none) {
+  .browse-row-track {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+  .browse-row-track::-webkit-scrollbar { display: none; }
+}
+
 .browse-row-nav {
   position: absolute;
   top: 50%;
@@ -652,6 +677,15 @@ a {
 .browse-row-nav.prev { left: 6px; }
 .browse-row-nav.next { right: 6px; }
 .browse-row-nav.disabled { opacity: 0 !important; pointer-events: none; }
+
+/* Category focus view (a row title was clicked): every card wraps onto a
+   plain grid instead of a horizontal carousel, so the page's normal
+   vertical scroll is what moves you through the whole category. */
+.browse-row-track--grid {
+  flex-wrap: wrap;
+  overflow: visible;
+  justify-content: flex-start;
+}
 
 .browse-card {
   position: relative;
@@ -693,6 +727,12 @@ a {
   color: #fff;
 }
 .browse-card:hover .browse-card-overlay { opacity: 1; }
+
+/* No hover on touch devices, so the title would otherwise never show -
+   keep it visible up front to make picking a game out by name easier. */
+@media (hover: none) {
+  .browse-card-overlay { opacity: 1; }
+}
 
 .browse-card.kbfocus {
   box-shadow: 0 0 0 3px var(--browse-amber), var(--browse-shadow);
@@ -1052,6 +1092,16 @@ a {
   }
   .browse-dropdown.open .browse-dropdown-menu { display: block; }
   .browse-dropdown-menu a { padding: 7px 0; }
+
+  /* The dropdown button is full-width here, so the badge's normal
+     corner-of-the-button absolute position (top/right: -4px) leaves it
+     stranded far to the right of "Compétitif" instead of next to it. */
+  .browse-nav-dropbtn #browse-competitif-badge {
+    position: static;
+    margin-left: 6px;
+    top: auto;
+    right: auto;
+  }
 
   .browse-user-name { display: none; }
 

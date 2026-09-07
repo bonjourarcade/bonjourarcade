@@ -5,8 +5,12 @@
   // rows') previous scroll position on reload/back-navigation.
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 
-  var MIN_GAMES_PER_CATEGORY = 6;
   var MAX_GAMES_PER_ROW = 20;
+  // A category needs at least this many games to be worth a row at all.
+  var MIN_GAMES_PER_CATEGORY = 3;
+  // Below this, a category doesn't need the full row width to itself - it's
+  // paired side by side with the next small category instead (desktop only).
+  var PAIRED_ROW_MAX_GAMES = 5;
   var PLACEHOLDER_COVER = '/assets/images/placeholder_thumb.png';
 
   var allGamesById = {};
@@ -56,6 +60,12 @@
     var genre = (game.genre || '').trim();
     if (!genre) return [];
     return genre.split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+  }
+
+  function getDevelopers(game) {
+    var dev = (game.developer || '').trim();
+    if (!dev) return [];
+    return dev.split(',').map(function (s) { return s.trim(); }).filter(Boolean);
   }
 
   /* ---------- Intro ---------- */
@@ -752,8 +762,9 @@
     var decadeLabel = getDecadeLabel(game);
     if (decadeLabel) keys.push({ key: 'decade:' + decadeLabel, title: decadeLabel, type: 'decade' });
 
-    var dev = (game.developer || '').trim();
-    if (dev) keys.push({ key: 'dev:' + dev.toLowerCase(), title: dev, type: 'dev' });
+    getDevelopers(game).forEach(function (dev) {
+      keys.push({ key: 'dev:' + dev.toLowerCase(), title: dev, type: 'dev' });
+    });
 
     return keys;
   }
@@ -1169,6 +1180,39 @@
   // covers at once.
   var HOME_ROW_PAGE_SIZE = 12;
 
+  // Consecutive categories with few enough games are paired side by side
+  // (desktop only - see .browse-row-pair) instead of each claiming a full
+  // row's width; a small category with no small neighbor just renders alone.
+  function appendCategoryRows(container, categories) {
+    // Don't just pair a small category with whichever one happens to be
+    // immediately next - look ahead through the rest of this batch for any
+    // other small category to fill the space with, pulling it forward out
+    // of its original spot. Only a small category with no small partner
+    // left anywhere later in the batch renders alone.
+    var list = categories.slice();
+    for (var i = 0; i < list.length; i++) {
+      var category = list[i];
+      if (category.games.length >= PAIRED_ROW_MAX_GAMES) {
+        container.appendChild(makeRow(category));
+        continue;
+      }
+      var partnerIndex = -1;
+      for (var j = i + 1; j < list.length; j++) {
+        if (list[j].games.length < PAIRED_ROW_MAX_GAMES) { partnerIndex = j; break; }
+      }
+      if (partnerIndex === -1) {
+        container.appendChild(makeRow(category));
+        continue;
+      }
+      var partner = list.splice(partnerIndex, 1)[0];
+      var pair = document.createElement('div');
+      pair.className = 'browse-row-pair';
+      pair.appendChild(makeRow(category));
+      pair.appendChild(makeRow(partner));
+      container.appendChild(pair);
+    }
+  }
+
   function renderRows(categories) {
     currentCategories = categories;
     kbRow = -1;
@@ -1184,9 +1228,7 @@
 
     var visible = categories.slice(0, HOME_ROW_PAGE_SIZE);
     var rest = categories.slice(HOME_ROW_PAGE_SIZE);
-    visible.forEach(function (category) {
-      container.appendChild(makeRow(category));
-    });
+    appendCategoryRows(container, visible);
 
     if (rest.length) {
       var loadMoreWrap = document.createElement('div');
@@ -1197,9 +1239,7 @@
       loadMoreBtn.textContent = 'Charger plus de jeux';
       loadMoreBtn.addEventListener('click', function () {
         loadMoreWrap.remove();
-        rest.forEach(function (category) {
-          container.appendChild(makeRow(category));
-        });
+        appendCategoryRows(container, rest);
       });
       loadMoreWrap.appendChild(loadMoreBtn);
       container.appendChild(loadMoreWrap);

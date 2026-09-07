@@ -617,6 +617,10 @@ a {
   position: relative;
   z-index: 2;
   padding: 0 0 60px 0;
+  /* Lets paired (half-width) rows size their side margins off this
+     container's full width via cqw below, instead of their own narrower
+     one, so they line up with full-width rows. */
+  container-type: inline-size;
 }
 
 .browse-loading {
@@ -660,11 +664,20 @@ a {
   margin-bottom: 30px;
 }
 
+/* Wraps two categories with few enough games that neither needs the full
+   row width to itself, so they share one row side by side on desktop. */
+.browse-row-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 24px;
+}
+
 .browse-row-title {
   font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   font-weight: 700;
   font-size: 1.6rem;
   margin: 0 0 4px 5%;
+  margin-left: 5cqw;
   display: inline-block;
   color: var(--browse-text);
 }
@@ -712,6 +725,7 @@ a {
 
 .browse-row-type-label {
   margin: 0 0 6px 5%;
+  margin-left: 5cqw;
   font-size: 0.72rem;
   font-weight: 600;
   letter-spacing: 0.04em;
@@ -723,6 +737,7 @@ a {
   height: 4px;
   width: 64px;
   margin-left: 5%;
+  margin-left: 5cqw;
   border-radius: 2px;
   background: var(--browse-accent-grad);
 }
@@ -740,6 +755,8 @@ a {
   overflow-x: hidden;
   scroll-behavior: smooth;
   padding: 4px 5% 10px 5%;
+  padding-left: 5cqw;
+  padding-right: 5cqw;
 }
 
 /* On touch devices there's no wheel/trackpad drag to worry about, and no
@@ -840,22 +857,13 @@ a {
   background: linear-gradient(to top, rgba(0,0,0,0.85), rgba(0,0,0,0));
   font-size: 0.78rem;
   font-weight: 600;
-  opacity: 0;
-  transition: opacity 0.2s ease;
+  opacity: 1;
   color: #fff;
-}
-.browse-card:hover .browse-card-overlay { opacity: 1; }
-
-/* No hover on touch devices, so the title would otherwise never show -
-   keep it visible up front to make picking a game out by name easier. */
-@media (hover: none) {
-  .browse-card-overlay { opacity: 1; }
 }
 
 .browse-card.kbfocus {
   box-shadow: 0 0 0 3px var(--browse-amber), var(--browse-shadow);
 }
-.browse-card.kbfocus .browse-card-overlay { opacity: 1; }
 
 /* ---------- Click / activate burst transition ---------- */
 
@@ -1298,4 +1306,7 @@ a {
   .browse-row-title { font-size: 1.25rem; }
   .browse-row-nav { width: 40px; height: 40px; font-size: 1.3rem; }
   .browse-modal { max-width: 100%; }
+  /* Paired rows only make sense side by side where there's room - stack
+     them like any other row on narrow screens. */
+  .browse-row-pair { display: block; }
 }

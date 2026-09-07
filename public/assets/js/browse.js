@@ -1160,6 +1160,11 @@
     return row;
   }
 
+  // How many category rows show up front - the rest stay behind a "load
+  // more" button so a fresh visit doesn't have to load/render every row's
+  // covers at once.
+  var HOME_ROW_PAGE_SIZE = 12;
+
   function renderRows(categories) {
     currentCategories = categories;
     kbRow = -1;
@@ -1173,9 +1178,28 @@
       return;
     }
 
-    categories.forEach(function (category) {
+    var visible = categories.slice(0, HOME_ROW_PAGE_SIZE);
+    var rest = categories.slice(HOME_ROW_PAGE_SIZE);
+    visible.forEach(function (category) {
       container.appendChild(makeRow(category));
     });
+
+    if (rest.length) {
+      var loadMoreWrap = document.createElement('div');
+      loadMoreWrap.className = 'browse-load-more-wrap';
+      var loadMoreBtn = document.createElement('button');
+      loadMoreBtn.type = 'button';
+      loadMoreBtn.className = 'browse-load-more-btn';
+      loadMoreBtn.textContent = 'Charger plus de jeux';
+      loadMoreBtn.addEventListener('click', function () {
+        loadMoreWrap.remove();
+        rest.forEach(function (category) {
+          container.appendChild(makeRow(category));
+        });
+      });
+      loadMoreWrap.appendChild(loadMoreBtn);
+      container.appendChild(loadMoreWrap);
+    }
   }
 
   /* ---------- Full detail modal (singleton) ---------- */

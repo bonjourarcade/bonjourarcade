@@ -657,6 +657,17 @@ a {
   text-decoration-color: var(--browse-text-dim);
 }
 
+.browse-row-chevron {
+  display: inline-block;
+  margin-left: 10px;
+  font-size: 0.65em;
+  vertical-align: middle;
+  transition: transform 0.25s ease;
+}
+.browse-row-title-clickable[aria-expanded="true"] .browse-row-chevron {
+  transform: rotate(90deg);
+}
+
 .browse-row-title-wrap {
   margin: 0 0 12px 0;
 }
@@ -744,13 +755,28 @@ a {
 .browse-row-nav.next { right: 6px; }
 .browse-row-nav.disabled { opacity: 0 !important; pointer-events: none; }
 
-/* Category focus view (a row title was clicked): every card wraps onto a
-   plain grid instead of a horizontal carousel, so the page's normal
-   vertical scroll is what moves you through the whole category. */
-.browse-row-track--grid {
+/* Expand panel (a row title was clicked): slides open below the row's own
+   carousel to reveal every matching game as a wrapping grid. Animated with
+   the CSS grid-template-rows 0fr/1fr trick instead of measuring a pixel
+   height in JS - the 0fr track has no height to transition from/to, so the
+   panel just grows/shrinks smoothly with its content. */
+.browse-row-expand-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.35s ease;
+}
+.browse-row-expand-panel.open {
+  grid-template-rows: 1fr;
+}
+.browse-row-expand-panel-inner {
+  overflow: hidden;
+  min-height: 0;
+}
+.browse-row-expand-grid {
+  display: flex;
   flex-wrap: wrap;
-  overflow: visible;
-  justify-content: flex-start;
+  gap: 8px;
+  padding: 14px 5% 6px 5%;
 }
 
 .browse-card {

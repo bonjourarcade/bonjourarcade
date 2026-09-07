@@ -814,8 +814,9 @@
         title: isRelated ? prefix + relatedTitle : entry.title,
         typeLabel: CATEGORY_TYPE_LABELS[entry.type] || '',
         games: shuffled.slice(0, MAX_GAMES_PER_ROW),
-        // Kept separately (unsliced) so clicking the row title can open a
-        // view with every matching game, not just the row's own preview.
+        // Kept separately (unsliced) so clicking the row title can open an
+        // expand panel with every matching game, not just the row's own
+        // carousel preview.
         allGames: shuffled,
         related: isRelated
       };
@@ -1004,6 +1005,19 @@
     });
   }
 
+  function setHeroHidden(hidden) {
+    var hero = document.getElementById('browse-hero');
+    var rows = document.getElementById('browse-rows');
+    var header = document.getElementById('browse-header');
+    searchHeroHidden = hidden;
+    if (hero) hero.style.display = hidden ? 'none' : '';
+    // The header is fixed and normally floats over the hero's own height;
+    // with the hero hidden the rows need that space back so they don't
+    // start underneath it.
+    if (rows) rows.style.paddingTop = hidden && header ? header.offsetHeight + 'px' : '';
+    updateHeaderSolid();
+  }
+
   function makeRow(category) {
     var row = document.createElement('section');
     row.className = 'browse-row';
@@ -1013,19 +1027,40 @@
     var title = document.createElement('h2');
     title.className = 'browse-row-title';
     title.textContent = category.title;
+
+    var track, expandPanel, expandGrid, expandBuilt;
+
     // Rows built from a genre/system/year/decade/developer grouping carry
     // their full game list separately (see buildCategories) - clicking the
-    // title opens just that category full-screen, so scrolling through it
-    // doesn't mean fighting a cramped horizontal carousel.
-    if (category.allGames && !category.gridMode) {
+    // title slides open a panel with every matching game in a grid below
+    // the carousel, so browsing the whole category doesn't mean fighting a
+    // cramped horizontal scroller. Clicking again slides it back shut.
+    if (category.allGames) {
       title.classList.add('browse-row-title-clickable');
       title.tabIndex = 0;
       title.setAttribute('role', 'button');
+      title.setAttribute('aria-expanded', 'false');
       title.setAttribute('aria-label', 'Voir tous les jeux : ' + category.title);
-      var openFocusView = function () { focusCategory(category); };
-      title.addEventListener('click', openFocusView);
+
+      var chevron = document.createElement('span');
+      chevron.className = 'browse-row-chevron';
+      chevron.textContent = '▸';
+      chevron.setAttribute('aria-hidden', 'true');
+      title.appendChild(chevron);
+
+      var toggleExpand = function () {
+        var opening = title.getAttribute('aria-expanded') !== 'true';
+        title.setAttribute('aria-expanded', String(opening));
+        title.setAttribute('aria-label', (opening ? 'Fermer' : 'Voir tous les jeux : ') + category.title);
+        if (opening && !expandBuilt) {
+          expandBuilt = true;
+          category.allGames.forEach(function (game) { expandGrid.appendChild(makeCard(game)); });
+        }
+        expandPanel.classList.toggle('open', opening);
+      };
+      title.addEventListener('click', toggleExpand);
       title.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openFocusView(); }
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleExpand(); }
       });
     }
     titleWrap.appendChild(title);
@@ -1045,7 +1080,6 @@
           category.onClear();
         } else {
           if (typeof clearGameHistory === 'function') clearGameHistory();
-          homeCategories = homeCategories.filter(function (c) { return c !== category; });
           renderRows(currentCategories.filter(function (c) { return c !== category; }));
         }
       });
@@ -1059,7 +1093,7 @@
     var wrap = document.createElement('div');
     wrap.className = 'browse-row-track-wrap';
 
-    var track = document.createElement('div');
+    track = document.createElement('div');
     track.className = 'browse-row-track';
     category.games.forEach(function (game) {
       track.appendChild(makeCard(game));
@@ -1068,18 +1102,6 @@
     // position on reload/back-navigation, which made rows start mid-scroll
     // unpredictably. Force every row back to its start.
     track.scrollLeft = 0;
-
-    // The category-focus view (see focusCategory) wraps every card into a
-    // plain grid instead of a horizontal carousel, so there's nothing for
-    // prev/next buttons to do and the page's own vertical scroll is what
-    // moves you through the list.
-    if (category.gridMode) {
-      wrap.classList.add('browse-row-track-wrap--grid');
-      track.classList.add('browse-row-track--grid');
-      wrap.appendChild(track);
-      row.appendChild(wrap);
-      return row;
-    }
 
     var prevBtn = document.createElement('button');
     prevBtn.className = 'browse-row-nav prev';
@@ -1116,69 +1138,22 @@
     wrap.appendChild(nextBtn);
     row.appendChild(wrap);
 
-    return row;
-  }
-
-  /* ---------- Category focus view (click a row title to expand it) ---------- */
-
-  // The normal home page's category rows, kept aside so "back to home" can
-  // restore them - renderRows() itself is also used for the single expanded
-  // category, so its own currentCategories can't double as this.
-  var homeCategories = [];
-  // Whichever category's title was clicked to open the focus view, so
-  // "back to home" can scroll back to that same row instead of dumping the
-  // user at the very top of the page.
-  var lastFocusedCategory = null;
-
-  function setHeroHidden(hidden) {
-    var hero = document.getElementById('browse-hero');
-    var rows = document.getElementById('browse-rows');
-    var header = document.getElementById('browse-header');
-    searchHeroHidden = hidden;
-    if (hero) hero.style.display = hidden ? 'none' : '';
-    // The header is fixed and normally floats over the hero's own height;
-    // with the hero hidden the rows need that space back so they don't
-    // start underneath it.
-    if (rows) rows.style.paddingTop = hidden && header ? header.offsetHeight + 'px' : '';
-    updateHeaderSolid();
-  }
-
-  function restoreHomeView() {
-    var container = document.getElementById('browse-rows');
-    var rowIndex = lastFocusedCategory ? homeCategories.indexOf(lastFocusedCategory) : -1;
-    lastFocusedCategory = null;
-
-    setHeroHidden(false);
-    renderRows(homeCategories);
-
-    var rowEl = rowIndex !== -1 ? container.children[rowIndex] : null;
-    if (rowEl) {
-      var header = document.getElementById('browse-header');
-      var headerH = header ? header.offsetHeight : 0;
-      var targetY = rowEl.getBoundingClientRect().top + window.scrollY - headerH - 12;
-      window.scrollTo({ top: Math.max(targetY, 0), behavior: 'auto' });
-    } else {
-      window.scrollTo({ top: 0, behavior: 'auto' });
+    if (category.allGames) {
+      // Collapsed to zero height via the grid-template-rows trick (see the
+      // CSS) so opening/closing it animates smoothly without having to
+      // measure and animate an actual pixel height in JS.
+      expandPanel = document.createElement('div');
+      expandPanel.className = 'browse-row-expand-panel';
+      var expandPanelInner = document.createElement('div');
+      expandPanelInner.className = 'browse-row-expand-panel-inner';
+      expandGrid = document.createElement('div');
+      expandGrid.className = 'browse-row-expand-grid';
+      expandPanelInner.appendChild(expandGrid);
+      expandPanel.appendChild(expandPanelInner);
+      row.appendChild(expandPanel);
     }
-  }
 
-  function focusCategory(category) {
-    var searchWrap = document.querySelector('[data-browse-search]');
-    var searchInput = document.getElementById('browse-search-input');
-    if (searchInput) searchInput.value = '';
-    if (searchWrap) searchWrap.classList.remove('open');
-
-    lastFocusedCategory = category;
-    setHeroHidden(true);
-    renderRows([{
-      title: category.title,
-      typeLabel: category.typeLabel,
-      games: category.allGames || category.games,
-      gridMode: true,
-      clearLabel: '← Retour à l’accueil',
-      onClear: restoreHomeView
-    }]);
-    window.scrollTo({ top: 0, behavior: 'auto' });
+    return row;
   }
 
   function renderRows(categories) {
@@ -1664,7 +1639,6 @@
           var insertIndex = (categories.length && categories[0].related) ? 1 : 0;
           categories.splice(insertIndex, 0, recentCategory);
         }
-        homeCategories = categories;
         renderRows(categories);
 
         initTournamentToast();

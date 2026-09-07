@@ -755,13 +755,30 @@
       var entry = groups[key];
       var isRelated = relatedKeys.indexOf(key) !== -1;
       var prefix = /^[aeiouhâàéèêëîïôùûüœ]/i.test(entry.title) ? "Plus d'" : 'Plus de ';
+      var relatedTitle = entry.type === 'genre' ? pluralizeGenre(entry.title) : entry.title;
       return {
-        title: isRelated ? prefix + entry.title : entry.title,
+        title: isRelated ? prefix + relatedTitle : entry.title,
         typeLabel: CATEGORY_TYPE_LABELS[entry.type] || '',
         games: shuffleArray(entry.games).slice(0, MAX_GAMES_PER_ROW),
         related: isRelated
       };
     });
+  }
+
+  // Genre names are stored as singular English gameplay terms (Shooter,
+  // Puzzle...), but the "Plus de ___" heading reads better in the plural
+  // ("Plus de shooters", "Plus de puzzles"). Only pluralize the last word,
+  // and leave gerunds (Racing, Fighting...) and already-plural names
+  // (Sports, Minigames...) untouched rather than mangling them.
+  function pluralizeGenre(title) {
+    var match = /^(.*\s)?(\S+)$/.exec(title);
+    if (!match) return title;
+    var head = match[1] || '';
+    var last = match[2];
+    if (/(ing|s)$/i.test(last)) return title;
+    if (/[^aeiou]y$/i.test(last)) return head + last.slice(0, -1) + 'ies';
+    if (/(s|x|z|ch|sh)$/i.test(last)) return head + last + 'es';
+    return head + last + 's';
   }
 
   // Builds a "recently played" pseudo-category from this browser's local
@@ -950,7 +967,7 @@
       var clearBtn = document.createElement('button');
       clearBtn.type = 'button';
       clearBtn.className = 'browse-row-clear-btn';
-      clearBtn.textContent = category.clearLabel || '🗑 Vider';
+      clearBtn.textContent = category.clearLabel || '✕ Vider';
       clearBtn.addEventListener('click', function () {
         if (category.onClear) {
           category.onClear();

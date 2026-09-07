@@ -141,9 +141,9 @@ a {
 .browse-logo-link:hover .browse-logo { transform: rotate(-5deg); }
 
 .browse-nav { display: flex; align-items: center; gap: 20px; flex: 1; flex-wrap: nowrap; white-space: nowrap; }
+.browse-nav-row { display: flex; align-items: center; gap: 16px; }
 .browse-header-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
 .browse-menu-toggle { display: none; }
-.browse-support-link-mobile { display: none; }
 .browse-nav a {
   text-decoration: none;
   font-size: 0.9rem;
@@ -1026,12 +1026,10 @@ a {
   .browse-dropdown.open .browse-dropdown-menu { display: block; }
   .browse-dropdown-menu a { padding: 7px 0; }
 
-  .browse-support-link-desktop { display: none; }
-  .browse-support-link-mobile { display: block; }
   .browse-user-name { display: none; }
 
   /* "Retour à v1" and "Supporter" share one row instead of stacking. */
-  .browse-nav-row { display: flex; align-items: center; gap: 16px; width: 100%; }
+  .browse-nav-row { width: 100%; }
   .browse-nav-row a { width: auto; padding: 9px 0; }
 
   /* Admin link + theme toggle get reparented into this nav on mobile

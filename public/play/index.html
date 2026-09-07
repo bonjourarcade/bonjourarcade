@@ -1450,7 +1450,7 @@
                 <span>Noter</span>
             </button>
             <button id="favorite-button" title="Ajouter aux favoris">
-                <span>🖤</span>
+                <span>🤍</span>
                 <span>Favori</span>
             </button>
         </div>
@@ -4646,7 +4646,7 @@
             var uid = user ? user.uid : (window.firebaseAuth && window.firebaseAuth.currentUser && window.firebaseAuth.currentUser.uid);
             if (!uid) {
                 btn.classList.remove('is-fav');
-                btn.querySelector('span:first-child').textContent = '🖤';
+                btn.querySelector('span:first-child').textContent = '🤍';
                 return;
             }
 
@@ -4655,7 +4655,7 @@
             _favoriteUnsub = window.__favorites.listen(uid, function (ids) {
                 var isFav = ids.indexOf(gameId) !== -1;
                 btn.classList.toggle('is-fav', isFav);
-                btn.querySelector('span:first-child').textContent = isFav ? '❤️' : '🖤';
+                btn.querySelector('span:first-child').textContent = isFav ? '❤️' : '🤍';
                 btn.title = isFav ? 'Retirer des favoris' : 'Ajouter aux favoris';
             });
         }
@@ -4677,7 +4677,7 @@
                             // Optimistic toggle: flip UI immediately
                             var nowFav = !btn.classList.contains('is-fav');
                             btn.classList.toggle('is-fav', nowFav);
-                            btn.querySelector('span:first-child').textContent = nowFav ? '❤️' : '🖤';
+                            btn.querySelector('span:first-child').textContent = nowFav ? '❤️' : '🤍';
                             btn.title = nowFav ? 'Retirer des favoris' : 'Ajouter aux favoris';
                             await window.__favorites.toggle(user.uid, gameId);
                         }
@@ -4691,7 +4691,7 @@
             // Optimistic toggle: flip UI immediately
             var nowFav = !btn.classList.contains('is-fav');
             btn.classList.toggle('is-fav', nowFav);
-            btn.querySelector('span:first-child').textContent = nowFav ? '❤️' : '🖤';
+            btn.querySelector('span:first-child').textContent = nowFav ? '❤️' : '🤍';
             btn.title = nowFav ? 'Retirer des favoris' : 'Ajouter aux favoris';
 
             await window.__favorites.toggle(user.uid, gameId);

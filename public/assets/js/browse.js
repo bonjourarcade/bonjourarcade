@@ -441,7 +441,7 @@
   function setFavButtonState(btn, isFav) {
     btn.classList.toggle('is-fav', isFav);
     var span = btn.querySelector('span');
-    if (span) span.textContent = isFav ? '❤️' : '🖤';
+    if (span) span.textContent = isFav ? '❤️' : '🤍';
     btn.title = isFav ? 'Retirer des favoris' : 'Ajouter aux favoris';
   }
 
@@ -589,6 +589,27 @@
     }).catch(function () { wrap.style.display = 'none'; });
   }
 
+  // The comment tooltip follows the cursor rather than being pinned to the
+  // hovered row, so it stays centered above wherever the mouse actually is
+  // (a row can be much wider than the comment icon the user is pointing at).
+  function initLeaderboardTooltip() {
+    var tooltip = document.getElementById('browse-leaderboard-tooltip');
+    var container = document.getElementById('browse-hero-leaderboard-list');
+    if (!tooltip || !container || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+
+    container.addEventListener('mousemove', function (e) {
+      var row = e.target.closest && e.target.closest('.browse-hero-leaderboard-row[data-comment]');
+      if (!row) { tooltip.style.display = 'none'; return; }
+      tooltip.textContent = row.getAttribute('data-comment');
+      tooltip.style.left = e.clientX + 'px';
+      tooltip.style.top = (e.clientY - 12) + 'px';
+      tooltip.style.display = 'block';
+    });
+    container.addEventListener('mouseleave', function () {
+      tooltip.style.display = 'none';
+    });
+  }
+
   function pickHeroGame(games, currentGameId) {
     if (currentGameId) {
       var found = games.find(function (g) { return g.id === currentGameId; });
@@ -613,6 +634,7 @@
   var CATEGORY_TYPE_LABELS = {
     genre: 'Genre',
     system: 'Console',
+    year: 'Année',
     decade: 'Décennie',
     dev: 'Développeur'
   };
@@ -625,6 +647,9 @@
 
     var systemLabel = SYSTEM_NAMES[game.core] || game.core;
     if (systemLabel) keys.push({ key: 'system:' + systemLabel.toLowerCase(), title: systemLabel, type: 'system' });
+
+    var year = parseInt(game.year, 10);
+    if (!isNaN(year)) keys.push({ key: 'year:' + year, title: 'Sortis en ' + year, type: 'year' });
 
     var decadeLabel = getDecadeLabel(game);
     if (decadeLabel) keys.push({ key: 'decade:' + decadeLabel, title: decadeLabel, type: 'decade' });
@@ -651,26 +676,62 @@
       return groups[key].games.length >= MIN_GAMES_PER_CATEGORY;
     });
 
-    // Feature a category the hero game itself belongs to first (shared
-    // genre/system/decade/developer), so browsing has an obvious jumping-off
-    // point from whatever's currently spotlighted.
-    var relatedKey = null;
-    if (heroGame) {
-      var heroKeys = getGameCategoryKeys(heroGame).map(function (k) { return k.key; });
-      relatedKey = heroKeys.filter(function (k) { return eligible.indexOf(k) !== -1; })[0] || null;
+    // There are far more distinct exact years than decades, so left
+    // unchecked every eligible year gets its own row and drowns out
+    // everything else. Cap how many show up per page load to roughly match
+    // how many decade rows exist - a different random subset each reload.
+    var decadeKeyCount = eligible.filter(function (k) { return groups[k].type === 'decade'; }).length;
+    var yearKeys = eligible.filter(function (k) { return groups[k].type === 'year'; });
+    if (yearKeys.length > decadeKeyCount) {
+      var keptYearKeys = shuffleArray(yearKeys).slice(0, Math.max(decadeKeyCount, 1));
+      var keptYearSet = {};
+      keptYearKeys.forEach(function (k) { keptYearSet[k] = true; });
+      eligible = eligible.filter(function (k) { return groups[k].type !== 'year' || keptYearSet[k]; });
     }
 
-    var rest = eligible.filter(function (k) { return k !== relatedKey; });
-    var chosenKeys = relatedKey ? [relatedKey].concat(shuffleArray(rest)) : shuffleArray(rest);
+    // Feature one row per dimension the hero game itself belongs to (shared
+    // genre, system, decade, developer), so browsing has several obvious
+    // jumping-off points from whatever's currently spotlighted - not just
+    // whichever dimension happens to be listed first.
+    var relatedKeys = [];
+    if (heroGame) {
+      var heroKeys = getGameCategoryKeys(heroGame).map(function (k) { return k.key; });
+      var seenTypes = {};
+      heroKeys.forEach(function (k) {
+        if (eligible.indexOf(k) === -1) return;
+        var type = groups[k].type;
+        if (seenTypes[type]) return;
+        seenTypes[type] = true;
+        relatedKeys.push(k);
+      });
+      relatedKeys = shuffleArray(relatedKeys);
+    }
+
+    var rest = eligible.filter(function (k) { return relatedKeys.indexOf(k) === -1; });
+    var chosenKeys = relatedKeys.concat(shuffleArray(rest));
 
     return chosenKeys.map(function (key) {
       var entry = groups[key];
+      var isRelated = relatedKeys.indexOf(key) !== -1;
+      var prefix = /^[aeiouhâàéèêëîïôùûüœ]/i.test(entry.title) ? "Plus d'" : 'Plus de ';
       return {
-        title: entry.title,
+        title: isRelated ? prefix + entry.title : entry.title,
         typeLabel: CATEGORY_TYPE_LABELS[entry.type] || '',
-        games: shuffleArray(entry.games).slice(0, MAX_GAMES_PER_ROW)
+        games: shuffleArray(entry.games).slice(0, MAX_GAMES_PER_ROW),
+        related: isRelated
       };
     });
+  }
+
+  // Builds a "recently played" pseudo-category from this browser's local
+  // play history, so it isn't tied to genre/system/decade/developer grouping.
+  function buildRecentlyPlayedCategory() {
+    if (typeof getHistoryGameIds !== 'function') return null;
+    var games = getHistoryGameIds()
+      .map(function (id) { return allGamesById[id]; })
+      .filter(Boolean);
+    if (!games.length) return null;
+    return { title: 'Continuer?', typeLabel: '', games: games.slice(0, MAX_GAMES_PER_ROW), clearable: true };
   }
 
   function makeCard(game) {
@@ -843,6 +904,17 @@
       typeLabel.className = 'browse-row-type-label';
       typeLabel.textContent = category.typeLabel;
       titleWrap.appendChild(typeLabel);
+    }
+    if (category.clearable) {
+      var clearBtn = document.createElement('button');
+      clearBtn.type = 'button';
+      clearBtn.className = 'browse-row-clear-btn';
+      clearBtn.textContent = '🗑 Vider';
+      clearBtn.addEventListener('click', function () {
+        if (typeof clearGameHistory === 'function') clearGameHistory();
+        renderRows(currentCategories.filter(function (c) { return c !== category; }));
+      });
+      titleWrap.appendChild(clearBtn);
     }
     var bar = document.createElement('div');
     bar.className = 'browse-row-title-bar';
@@ -1105,6 +1177,20 @@
         btn.classList.toggle('active', r === data.userRating);
       });
 
+      var distEl = document.getElementById('browse-modal-rating-dist');
+      if (distEl) {
+        var labels = { '2': '👍👍', '1': '👍', '-1': '👎', '-2': '👎👎' };
+        distEl.innerHTML = count > 0 ? ['2', '1', '-1', '-2'].map(function (r) {
+          var n = dist[r] || 0;
+          var pct = Math.round((n / count) * 100);
+          return '<div class="browse-rating-dist-row" data-rating="' + r + '">' +
+            '<span class="browse-rating-dist-label">' + labels[r] + '</span>' +
+            '<span class="browse-rating-dist-bar-wrap"><span class="browse-rating-dist-bar" style="width:' + pct + '%"></span></span>' +
+            '<span class="browse-rating-dist-count">' + n + '</span>' +
+            '</div>';
+        }).join('') : '';
+      }
+
       var loginPrompt = document.getElementById('browse-modal-rating-login');
       loginPrompt.style.display = currentUid() ? 'none' : 'block';
     }).catch(function (err) { console.error('Error fetching ratings:', err); });
@@ -1171,7 +1257,10 @@
         try { alreadyShown = sessionStorage.getItem(shownKey) === '1'; } catch (e) { /* ignore */ }
         if (alreadyShown) return;
 
-        var candidate = tournaments.find(function (t) { return t.status === 'active' && TournoiUtils.isJoinable(t); }) ||
+        // isJoinable() means "can a *new* player still register" (only true
+        // pre-round-1) - too strict for "is a tournament in progress". Any
+        // active tournament should surface here regardless of that.
+        var candidate = tournaments.find(function (t) { return t.status === 'active'; }) ||
           tournaments.find(function (t) { return TournoiUtils.isJoinable(t); });
         if (!candidate) return;
 
@@ -1191,7 +1280,9 @@
           bodyParts.push('Inscriptions ouvertes');
         }
         document.getElementById('browse-toast-body').textContent = bodyParts.join(' · ');
-        document.getElementById('browse-toast-link').href = '/tournoi/play/?t=' + encodeURIComponent(candidate.id);
+        var toastLink = document.getElementById('browse-toast-link');
+        toastLink.href = '/tournoi/play/?t=' + encodeURIComponent(candidate.id);
+        toastLink.textContent = TournoiUtils.isJoinable(candidate) ? 'Rejoindre →' : 'Suivre →';
 
         var bar = document.getElementById('browse-toast-progress-bar');
         bar.style.animationDuration = TOAST_VISIBLE_MS + 'ms';
@@ -1219,7 +1310,7 @@
     if (!container) return;
     var active = tournaments.filter(function (t) { return t.status === 'active'; });
     container.innerHTML = active.map(function (t) {
-      return '<a href="/tournoi/play/?t=' + encodeURIComponent(t.id) + '">🔴 ' + escapeHtml(t.name || 'Tournoi') + '</a>';
+      return '<a href="/tournoi/play/?t=' + encodeURIComponent(t.id) + '">🟢 ' + escapeHtml(t.name || 'Tournoi') + '</a>';
     }).join('');
   }
 
@@ -1238,6 +1329,7 @@
     initKeyboardNav();
     initFavoritesTracking();
     initAccountUI();
+    initLeaderboardTooltip();
 
     fetchCurrentGameId()
       .then(function (currentGameId) {
@@ -1260,6 +1352,13 @@
         renderHero(heroGame);
 
         var categories = buildCategories(allGames, heroGame);
+        var recentCategory = buildRecentlyPlayedCategory();
+        if (recentCategory) {
+          // Always right after the first "Plus de" row, even when several
+          // related rows are featured, per explicit placement request.
+          var insertIndex = (categories.length && categories[0].related) ? 1 : 0;
+          categories.splice(insertIndex, 0, recentCategory);
+        }
         renderRows(categories);
 
         initTournamentToast();

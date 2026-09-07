@@ -449,12 +449,12 @@ a {
   vertical-align: middle;
 }
 
-.browse-hero-leaderboard-row[data-comment]:hover::after {
-  content: attr(data-comment);
-  position: absolute;
-  bottom: calc(100% + 10px);
-  left: 50%;
-  transform: translateX(-50%);
+.browse-leaderboard-tooltip {
+  display: none;
+  position: fixed;
+  left: 0;
+  top: 0;
+  transform: translate(-50%, -100%);
   background: rgba(20, 17, 13, 0.95);
   color: #fdf6e8;
   padding: 10px 14px;
@@ -471,23 +471,14 @@ a {
   line-height: 1.4;
 }
 
-.browse-hero-leaderboard-row[data-comment]:hover::before {
+.browse-leaderboard-tooltip::after {
   content: '';
   position: absolute;
-  bottom: 100%;
+  top: 100%;
   left: 50%;
   transform: translateX(-50%);
   border: 6px solid transparent;
   border-top-color: rgba(20, 17, 13, 0.95);
-  z-index: 10000;
-  pointer-events: none;
-}
-
-@media (hover: none), (pointer: coarse) {
-  .browse-hero-leaderboard-row[data-comment]:hover::after,
-  .browse-hero-leaderboard-row[data-comment]:hover::before {
-    display: none;
-  }
 }
 .browse-hero-leaderboard-rank { font-weight: 700; width: 1.4em; color: var(--browse-amber); }
 .browse-hero-leaderboard-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -563,9 +554,9 @@ a {
 }
 
 .browse-row-title {
-  font-family: var(--browse-display-font);
-  font-weight: 400;
-  font-size: 1.15rem;
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-weight: 700;
+  font-size: 1.6rem;
   margin: 0 0 4px 5%;
   display: inline-block;
   color: var(--browse-text);
@@ -574,6 +565,18 @@ a {
 .browse-row-title-wrap {
   margin: 0 0 12px 0;
 }
+
+.browse-row-clear-btn {
+  margin: 0 0 4px 12px;
+  border: 1px solid var(--browse-border);
+  background: transparent;
+  color: var(--browse-text-dim);
+  border-radius: 14px;
+  padding: 3px 10px;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+.browse-row-clear-btn:hover { border-color: var(--browse-text); color: var(--browse-text); }
 
 .browse-row-type-label {
   margin: 0 0 6px 5%;
@@ -834,6 +837,15 @@ a {
   color: var(--browse-text-dim);
 }
 
+.browse-rating-dist { margin-top: 12px; display: flex; flex-direction: column; gap: 4px; }
+.browse-rating-dist-row { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: var(--browse-text-dim); }
+.browse-rating-dist-label { width: 44px; flex-shrink: 0; text-align: center; }
+.browse-rating-dist-bar-wrap { flex: 1; height: 8px; border-radius: 4px; background: var(--browse-border); overflow: hidden; }
+.browse-rating-dist-bar { display: block; height: 100%; border-radius: 4px; background: var(--browse-cyan); }
+.browse-rating-dist-row[data-rating="-2"] .browse-rating-dist-bar,
+.browse-rating-dist-row[data-rating="-1"] .browse-rating-dist-bar { background: #e0483f; }
+.browse-rating-dist-count { width: 26px; flex-shrink: 0; text-align: right; }
+
 .browse-modal-desc {
   font-size: 1rem;
   line-height: 1.55;
@@ -1030,7 +1042,7 @@ a {
   .browse-header { padding: 12px 16px; gap: 12px; }
   .browse-nav { gap: 12px; font-size: 0.85rem; }
   .browse-card { width: 118px; }
-  .browse-row-title { font-size: 1rem; }
+  .browse-row-title { font-size: 1.25rem; }
   .browse-row-nav { width: 40px; height: 40px; font-size: 1.3rem; }
   .browse-modal { max-width: 100%; }
 }

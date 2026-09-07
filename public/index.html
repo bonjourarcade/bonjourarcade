@@ -7,7 +7,7 @@
   <link rel="icon" href="/favicon.ico" type="image/x-icon">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bungee&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/css/browse.css" />
   <script src="/assets/js/analytics.js"></script>
 </head>
@@ -40,12 +40,13 @@
             Compétitif <span class="caret">▾</span><span id="browse-competitif-badge" class="browse-admin-badge" style="display:none;"></span>
           </button>
           <div class="browse-dropdown-menu">
-            <a href="/scores">📋 Scores</a>
             <div id="browse-active-tournaments"></div>
-            <a href="/tournoi/">🏅 Tournois</a>
+            <a href="/tournoi/">🏅 Plus de tournois</a>
+            <a href="/scores">📋 Scores</a>
           </div>
         </div>
         <a href="/screensaver">🌠 Écran de veille</a>
+        <a href="/v1/" data-umami-event="v1-return-click">🕰️ Retour à v1</a>
         <a href="https://ko-fi.com/bonjourarcade" target="_blank" rel="noopener" class="browse-support-link browse-support-link-mobile">❤️ Supporter</a>
       </nav>
       <div class="browse-header-right">
@@ -76,7 +77,7 @@
         <p id="browse-hero-desc" class="browse-hero-desc"></p>
         <div class="browse-hero-actions">
           <a id="browse-hero-play" href="#" class="browse-btn browse-btn-play">▶ Jouer</a>
-          <button id="browse-hero-fav" class="browse-icon-round-btn" type="button" aria-label="Ajouter aux favoris" title="Ajouter aux favoris"><span>🖤</span></button>
+          <button id="browse-hero-fav" class="browse-icon-round-btn" type="button" aria-label="Ajouter aux favoris" title="Ajouter aux favoris"><span>🤍</span></button>
           <button id="browse-hero-info" class="browse-btn browse-btn-info" type="button">ⓘ Plus d'infos</button>
           <span id="browse-hero-timer" class="browse-hero-timer"></span>
         </div>
@@ -85,6 +86,7 @@
           <div id="browse-hero-leaderboard-list" class="browse-hero-leaderboard-list"></div>
         </div>
       </div>
+      <div id="browse-leaderboard-tooltip" class="browse-leaderboard-tooltip" role="tooltip"></div>
     </section>
 
     <main id="browse-rows" class="browse-rows">
@@ -126,7 +128,7 @@
       <div class="browse-modal-body">
         <div class="browse-modal-actions">
           <a id="browse-modal-play" href="#" class="browse-btn browse-btn-play">▶ Jouer</a>
-          <button id="browse-modal-fav" class="browse-icon-round-btn" type="button" aria-label="Ajouter aux favoris"><span>🖤</span></button>
+          <button id="browse-modal-fav" class="browse-icon-round-btn" type="button" aria-label="Ajouter aux favoris"><span>🤍</span></button>
         </div>
         <div id="browse-modal-meta" class="browse-modal-meta"></div>
         <div class="browse-modal-rating" id="browse-modal-rating">
@@ -141,6 +143,7 @@
             <button class="browse-rating-thumb" data-rating="1" title="J'aime">👍</button>
             <button class="browse-rating-thumb" data-rating="2" title="J'adore">👍👍</button>
           </div>
+          <div id="browse-modal-rating-dist" class="browse-rating-dist"></div>
           <div id="browse-modal-rating-login" class="browse-rating-login">Connecte-toi pour noter</div>
         </div>
         <p id="browse-modal-desc" class="browse-modal-desc"></p>
@@ -163,6 +166,7 @@
   <script type="module" src="/assets/js/firebase-setup.js"></script>
   <script src="/assets/js/favorites.js"></script>
   <script src="/assets/js/ttl-cache.js"></script>
+  <script src="/assets/js/game-history.js"></script>
   <script src="/tournoi/tournament-utils.js"></script>
   <script src="/assets/js/browse.js"></script>
 </body>

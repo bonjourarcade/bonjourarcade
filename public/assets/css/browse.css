@@ -660,11 +660,13 @@ a {
 .browse-row-chevron {
   display: inline-block;
   margin-left: 10px;
-  font-size: 0.65em;
+  font-size: 0.9em;
   vertical-align: middle;
-  transition: transform 0.25s ease;
+  opacity: 0;
+  transition: transform 0.25s ease, opacity 0.25s ease;
 }
 .browse-row-title-clickable[aria-expanded="true"] .browse-row-chevron {
+  opacity: 1;
   transform: rotate(90deg);
 }
 

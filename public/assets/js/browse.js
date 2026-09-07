@@ -1029,13 +1029,17 @@
     title.textContent = category.title;
 
     var track, expandPanel, expandGrid, expandBuilt;
+    // Only the games beyond what the carousel itself already previews -
+    // otherwise a category with few enough games would open a panel that
+    // just repeats the exact same cards the carousel already shows.
+    var extraGames = category.allGames ? category.allGames.slice(category.games.length) : [];
 
     // Rows built from a genre/system/year/decade/developer grouping carry
     // their full game list separately (see buildCategories) - clicking the
-    // title slides open a panel with every matching game in a grid below
-    // the carousel, so browsing the whole category doesn't mean fighting a
-    // cramped horizontal scroller. Clicking again slides it back shut.
-    if (category.allGames) {
+    // title slides open a panel with the rest of that category's games in a
+    // grid below the carousel, so browsing all of it doesn't mean fighting
+    // a cramped horizontal scroller. Clicking again slides it back shut.
+    if (extraGames.length) {
       title.classList.add('browse-row-title-clickable');
       title.tabIndex = 0;
       title.setAttribute('role', 'button');
@@ -1054,7 +1058,7 @@
         title.setAttribute('aria-label', (opening ? 'Fermer' : 'Voir tous les jeux : ') + category.title);
         if (opening && !expandBuilt) {
           expandBuilt = true;
-          category.allGames.forEach(function (game) { expandGrid.appendChild(makeCard(game)); });
+          extraGames.forEach(function (game) { expandGrid.appendChild(makeCard(game)); });
         }
         expandPanel.classList.toggle('open', opening);
       };
@@ -1138,7 +1142,7 @@
     wrap.appendChild(nextBtn);
     row.appendChild(wrap);
 
-    if (category.allGames) {
+    if (extraGames.length) {
       // Collapsed to zero height via the grid-template-rows trick (see the
       // CSS) so opening/closing it animates smoothly without having to
       // measure and animate an actual pixel height in JS.

@@ -24,7 +24,6 @@
       <button type="button" id="browse-menu-toggle" class="browse-icon-btn browse-menu-toggle" aria-label="Menu">☰</button>
       <nav class="browse-nav" data-browse-menu>
         <a href="/" class="active">Accueil</a>
-        <a href="/all">Tous les jeux</a>
         <div class="browse-dropdown" data-browse-dropdown>
           <button type="button" class="browse-nav-dropbtn">Découvrir</button>
           <div class="browse-dropdown-menu">
@@ -33,6 +32,7 @@
             <a href="/swipe">🃏 Swipe</a>
             <a href="/upcoming">🔮 Bientôt en vedette</a>
             <a href="/ratings">⭐ Mieux notés</a>
+            <a href="/all">🔍 Recherche avancée</a>
           </div>
         </div>
         <div class="browse-dropdown" data-browse-dropdown>
@@ -162,6 +162,16 @@
     <div id="browse-toast-body" class="browse-toast-body"></div>
     <a id="browse-toast-link" href="/tournoi/" class="browse-toast-link">Rejoindre →</a>
     <div class="browse-toast-progress"><div id="browse-toast-progress-bar" class="browse-toast-progress-bar"></div></div>
+  </div>
+
+  <!-- Idle warning (shown after a few minutes of no interaction, before auto-launching the screensaver) -->
+  <div id="browse-idle-overlay" class="browse-modal-overlay browse-idle-overlay">
+    <div class="browse-modal browse-idle-modal" role="dialog" aria-modal="true">
+      <div class="browse-idle-modal-body">
+        <p>💤 Toujours là ? L'écran de veille (mode aléatoire) va démarrer automatiquement dans <strong id="browse-idle-countdown">15</strong>s.</p>
+        <button id="browse-idle-cancel" type="button" class="browse-btn browse-idle-cancel-btn">Rester ici</button>
+      </div>
+    </div>
   </div>
 
   <script type="module" src="/assets/js/firebase-setup.js"></script>

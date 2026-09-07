@@ -17,6 +17,8 @@
   var favoritesUnsub = null;
   var BURST_DELAY = 320;
   var TOAST_VISIBLE_MS = 9000;
+  var IDLE_TIMEOUT_MS = 10 * 60 * 1000;
+  var IDLE_COUNTDOWN_SECONDS = 15;
 
   function escapeHtml(str) {
     if (!str) return '';
@@ -98,11 +100,15 @@
     });
   }
 
+  var searchHeroHidden = false;
+  var updateHeaderSolid = function () {};
+
   function initHeaderScroll() {
     var header = document.getElementById('browse-header');
-    window.addEventListener('scroll', function () {
-      header.classList.toggle('browse-header-solid', window.scrollY > 80);
-    }, { passive: true });
+    updateHeaderSolid = function () {
+      header.classList.toggle('browse-header-solid', window.scrollY > 80 || searchHeroHidden);
+    };
+    window.addEventListener('scroll', updateHeaderSolid, { passive: true });
   }
 
   /* ---------- Logo spin toy ---------- */
@@ -277,7 +283,12 @@
     var input = document.getElementById('browse-search-input');
     var debounceTimer = null;
 
+    // Only auto-close on outside clicks/dropdown switches when the box is
+    // empty - a typed query shouldn't vanish just because focus moved
+    // elsewhere. Clearing the input first (as the toggle button does) lets
+    // it close normally through this same check.
     closeSearch = function () {
+      if (input.value.trim()) return;
       wrap.classList.remove('open');
     };
 
@@ -286,9 +297,9 @@
       var isOpen = wrap.classList.contains('open');
       closeAllDropdowns();
       if (isOpen) {
-        closeSearch();
         input.value = '';
         performSearch('');
+        closeSearch();
       } else {
         wrap.classList.add('open');
         input.focus();
@@ -360,8 +371,38 @@
     return normalizeForSearch(parts.filter(Boolean).join(' | '));
   }
 
+  // Pre-fills /all's own title-search filter (stored under its localStorage
+  // key) so following the "recherche avancée" link lands on the same query
+  // instead of an empty filter list.
+  function goToAdvancedSearch(query) {
+    try {
+      localStorage.setItem('bonjourarcade_all_filters_v1', JSON.stringify({ searchType: 'title', searchInput: query }));
+    } catch (e) { /* ignore */ }
+  }
+
+  function makeAdvancedSearchLink(query) {
+    var p = document.createElement('p');
+    p.className = 'browse-advanced-search-link';
+    p.appendChild(document.createTextNode('Pas ce que vous cherchez ? Essayez la '));
+    var a = document.createElement('a');
+    a.href = '/all';
+    a.textContent = '🔍 Recherche avancée';
+    a.addEventListener('click', function () { goToAdvancedSearch(query); });
+    p.appendChild(a);
+    return p;
+  }
+
   function performSearch(query) {
     var q = normalizeForSearch(query.trim());
+    var hero = document.getElementById('browse-hero');
+    var rows = document.getElementById('browse-rows');
+    searchHeroHidden = !!q;
+    if (hero) hero.style.display = searchHeroHidden ? 'none' : '';
+    // The header is fixed and normally floats over the hero's own height;
+    // with the hero hidden the rows need that space back so they don't
+    // start underneath it.
+    if (rows) rows.style.paddingTop = searchHeroHidden ? document.getElementById('browse-header').offsetHeight + 'px' : '';
+    updateHeaderSolid();
     if (!q) {
       renderRows(currentCategories);
       return;
@@ -379,6 +420,7 @@
     container.innerHTML = '';
     if (!matches.length) {
       container.innerHTML = '<p class="browse-loading">Aucun jeu ne correspond à « ' + escapeHtml(query.trim()) + ' ».</p>';
+      container.appendChild(makeAdvancedSearchLink(query.trim()));
       return;
     }
     container.appendChild(makeRow({
@@ -393,6 +435,7 @@
         performSearch('');
       }
     }));
+    container.appendChild(makeAdvancedSearchLink(query.trim()));
   }
 
   /* ---------- Auth / favorites (shared across hero, preview, modal) ---------- */
@@ -1376,6 +1419,69 @@
     }).join('');
   }
 
+  /* ---------- Idle auto-screensaver ---------- */
+  /* After IDLE_TIMEOUT_MS of no interaction, warn the user for
+     IDLE_COUNTDOWN_SECONDS before auto-launching the screensaver in random
+     mode - mirrors the sessionStorage contract /screensaver's own
+     launchScreensaver() sets up, so /randomgame/ picks it up the same way. */
+
+  function initIdleScreensaver() {
+    var overlay = document.getElementById('browse-idle-overlay');
+    var countdownEl = document.getElementById('browse-idle-countdown');
+    var cancelBtn = document.getElementById('browse-idle-cancel');
+    if (!overlay || !countdownEl || !cancelBtn) return;
+
+    var idleTimer, countdownTimer;
+
+    function launchScreensaver() {
+      try {
+        sessionStorage.removeItem('unplayedRandomGames');
+        sessionStorage.setItem('screensaverMode', 'true');
+        sessionStorage.setItem('screensaverStartTime', Date.now().toString());
+        sessionStorage.setItem('screensaverInterval', '150000');
+        sessionStorage.setItem('chronologicalOrder', 'false');
+        sessionStorage.setItem('screensaverBehavior', 'random');
+      } catch (e) { /* ignore */ }
+      window.location.href = '/randomgame/';
+    }
+
+    function showWarning() {
+      // Don't interrupt someone reading a game's details - try again later.
+      var gameModal = document.getElementById('browse-modal-overlay');
+      if (gameModal && gameModal.classList.contains('open')) {
+        idleTimer = setTimeout(showWarning, IDLE_TIMEOUT_MS);
+        return;
+      }
+      var secondsLeft = IDLE_COUNTDOWN_SECONDS;
+      countdownEl.textContent = secondsLeft;
+      overlay.classList.add('open');
+      countdownTimer = setInterval(function () {
+        secondsLeft--;
+        countdownEl.textContent = secondsLeft;
+        if (secondsLeft <= 0) {
+          clearInterval(countdownTimer);
+          launchScreensaver();
+        }
+      }, 1000);
+    }
+
+    function resetIdleTimer() {
+      clearTimeout(idleTimer);
+      if (overlay.classList.contains('open')) {
+        overlay.classList.remove('open');
+        clearInterval(countdownTimer);
+      }
+      idleTimer = setTimeout(showWarning, IDLE_TIMEOUT_MS);
+    }
+
+    cancelBtn.addEventListener('click', resetIdleTimer);
+    ['mousemove', 'mousedown', 'keydown', 'wheel', 'scroll', 'touchstart'].forEach(function (evt) {
+      document.addEventListener(evt, resetIdleTimer, { passive: true });
+    });
+
+    resetIdleTimer();
+  }
+
   /* ---------- Init ---------- */
 
   document.addEventListener('DOMContentLoaded', function () {
@@ -1393,6 +1499,7 @@
     initFavoritesTracking();
     initAccountUI();
     initLeaderboardTooltip();
+    initIdleScreensaver();
 
     fetchCurrentGameId()
       .then(function (currentGameId) {

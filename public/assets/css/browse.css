@@ -45,9 +45,16 @@ html, body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   width: 100%;
   max-width: 100vw;
+  min-height: 100%;
   overflow-x: hidden;
   overscroll-behavior-x: none;
 }
+
+/* When content is shorter than the viewport (e.g. a short search results
+   list with the hero hidden), body's own background must still reach the
+   bottom of the screen - its dark-mode override doesn't apply to <html>,
+   whose background would otherwise show through below it. */
+body { min-height: 100vh; }
 
 a {
   color: inherit;
@@ -155,6 +162,10 @@ a {
 .browse-header.browse-header-solid .browse-nav a { color: var(--browse-text-dim); }
 .browse-nav a:hover { color: var(--browse-hero-text); }
 .browse-header.browse-header-solid .browse-nav a:hover { color: var(--browse-text); }
+.browse-nav a.browse-support-link,
+.browse-nav a.browse-support-link:hover,
+.browse-header.browse-header-solid .browse-nav a.browse-support-link,
+.browse-header.browse-header-solid .browse-nav a.browse-support-link:hover { color: var(--browse-blue); }
 .browse-nav a.active {
   color: var(--browse-hero-text);
   border-bottom-color: var(--browse-amber);
@@ -545,6 +556,15 @@ a {
   color: var(--browse-text-dim);
 }
 
+.browse-advanced-search-link {
+  text-align: center;
+  padding: 10px 20px 30px;
+  color: var(--browse-text-dim);
+  font-size: 0.9rem;
+}
+.browse-advanced-search-link a { color: var(--browse-blue); font-weight: 700; text-decoration: none; }
+.browse-advanced-search-link a:hover { text-decoration: underline; }
+
 .browse-row {
   padding: 0 0 8px 0;
   margin-bottom: 30px;
@@ -739,6 +759,13 @@ a {
   cursor: pointer;
 }
 .browse-modal-close:hover { background: rgba(10, 8, 6, 0.85); }
+
+.browse-idle-overlay { align-items: center; }
+.browse-idle-modal { max-width: 420px; }
+.browse-idle-modal-body { padding: 30px 26px; text-align: center; }
+.browse-idle-modal-body p { margin: 0 0 20px 0; font-size: 1.05rem; line-height: 1.5; }
+.browse-idle-cancel-btn { background: var(--browse-amber); color: #1a140c; }
+.browse-idle-cancel-btn:hover { opacity: 0.9; }
 
 .browse-modal-hero {
   position: relative;

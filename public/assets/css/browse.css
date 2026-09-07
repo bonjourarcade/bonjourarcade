@@ -140,7 +140,10 @@ a {
 .browse-logo { height: 32px; }
 .browse-logo-link:hover .browse-logo { transform: rotate(-5deg); }
 
-.browse-nav { display: flex; gap: 20px; flex: 1; flex-wrap: wrap; }
+.browse-nav { display: flex; align-items: center; gap: 20px; flex: 1; flex-wrap: nowrap; white-space: nowrap; }
+.browse-header-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.browse-menu-toggle { display: none; }
+.browse-support-link-mobile { display: none; }
 .browse-nav a {
   text-decoration: none;
   font-size: 0.9rem;
@@ -919,6 +922,57 @@ a {
   opacity: 0.8;
 }
 .browse-footer-disclaimer a { color: inherit; text-decoration: underline; }
+
+/* Below this width the nav has too many text items to fit in one row, and
+   since the header is fixed/overlaid on the hero, wrapping would just make
+   it overlap the content below instead of pushing it down - collapse the
+   nav into a hamburger-toggled dropdown panel instead. */
+@media (max-width: 900px) {
+  .browse-menu-toggle { display: flex; }
+
+  .browse-nav {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    background: var(--browse-bg-alt);
+    padding: 10px 20px 18px 20px;
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.3);
+    white-space: normal;
+  }
+  .browse-nav.open { display: flex; }
+  .browse-nav a,
+  .browse-nav-dropbtn {
+    display: block;
+    text-align: left;
+    color: var(--browse-text) !important;
+    width: 100%;
+    padding: 9px 0;
+    border-bottom-color: transparent !important;
+  }
+  .browse-nav a.active { color: var(--browse-amber) !important; }
+  .browse-dropdown { position: static; width: 100%; }
+  .browse-dropdown-menu {
+    position: static;
+    transform: none;
+    display: none;
+    width: 100%;
+    box-shadow: none;
+    border: none;
+    background: none;
+    padding: 0 0 0 14px;
+  }
+  .browse-dropdown.open .browse-dropdown-menu { display: block; }
+  .browse-dropdown-menu a { padding: 7px 0; }
+
+  .browse-support-link-desktop { display: none; }
+  .browse-support-link-mobile { display: block; }
+  .browse-user-name { display: none; }
+}
 
 @media (max-width: 700px) {
   .browse-toast { left: 12px; right: 12px; width: auto; bottom: 12px; }

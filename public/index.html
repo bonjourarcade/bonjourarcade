@@ -21,7 +21,8 @@
       <a href="/" class="browse-logo-link">
         <img src="/assets/images/bonjourarcade-logo.png" alt="BonjourArcade" class="browse-logo">
       </a>
-      <nav class="browse-nav">
+      <button type="button" id="browse-menu-toggle" class="browse-icon-btn browse-menu-toggle" aria-label="Menu">☰</button>
+      <nav class="browse-nav" data-browse-menu>
         <a href="/" class="active">Accueil</a>
         <a href="/all">Tous les jeux</a>
         <div class="browse-dropdown" data-browse-dropdown>
@@ -42,21 +43,24 @@
           </div>
         </div>
         <a href="/screensaver">🌠 Écran de veille</a>
+        <a href="https://ko-fi.com/bonjourarcade" target="_blank" rel="noopener" class="browse-support-link browse-support-link-mobile">❤️ Supporter</a>
       </nav>
-      <div class="browse-search" data-browse-search>
-        <button type="button" id="browse-search-toggle" class="browse-icon-btn" aria-label="Rechercher">🔍</button>
-        <input type="text" id="browse-search-input" class="browse-search-input" placeholder="Rechercher un jeu..." autocomplete="off">
+      <div class="browse-header-right">
+        <div class="browse-search" data-browse-search>
+          <button type="button" id="browse-search-toggle" class="browse-icon-btn" aria-label="Rechercher">🔍</button>
+          <input type="text" id="browse-search-input" class="browse-search-input" placeholder="Rechercher un jeu..." autocomplete="off">
+        </div>
+        <a href="https://ko-fi.com/bonjourarcade" target="_blank" rel="noopener" class="browse-support-link browse-support-link-desktop">❤️ Supporter</a>
+        <a href="/admin/" id="browse-admin-link" class="browse-icon-btn browse-admin-link" aria-label="Administration" title="Administration" style="display:none;">
+          🛡️<span id="browse-admin-badge" class="browse-admin-badge" style="display:none;"></span>
+        </a>
+        <a href="/profil/" id="browse-user-indicator" class="browse-user-indicator" style="display:none;">
+          <img id="browse-user-avatar" src="" alt="">
+          <span id="browse-user-name"></span>
+        </a>
+        <button id="browse-login-btn" class="browse-icon-btn" aria-label="Se connecter" title="Se connecter">👤</button>
+        <button id="browse-theme-toggle" class="browse-icon-btn" aria-label="Changer de thème">🌙</button>
       </div>
-      <a href="https://ko-fi.com/bonjourarcade" target="_blank" rel="noopener" class="browse-support-link">❤️ Supporter</a>
-      <a href="/admin/" id="browse-admin-link" class="browse-icon-btn browse-admin-link" aria-label="Administration" title="Administration" style="display:none;">
-        🛡️<span id="browse-admin-badge" class="browse-admin-badge" style="display:none;"></span>
-      </a>
-      <a href="/profil/" id="browse-user-indicator" class="browse-user-indicator" style="display:none;">
-        <img id="browse-user-avatar" src="" alt="">
-        <span id="browse-user-name"></span>
-      </a>
-      <button id="browse-login-btn" class="browse-icon-btn" aria-label="Se connecter" title="Se connecter">👤</button>
-      <button id="browse-theme-toggle" class="browse-icon-btn" aria-label="Changer de thème">🌙</button>
     </header>
 
     <section id="browse-hero" class="browse-hero">

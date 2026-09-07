@@ -181,10 +181,31 @@
 
   var closeAllDropdowns = function () {};
   var closeSearch = function () {};
+  var closeMobileNav = function () {};
 
   function closeHeaderMenus() {
     closeAllDropdowns();
     closeSearch();
+    closeMobileNav();
+  }
+
+  function initMobileNav() {
+    var toggle = document.getElementById('browse-menu-toggle');
+    var nav = document.querySelector('[data-browse-menu]');
+    if (!toggle || !nav) return;
+
+    closeMobileNav = function () {
+      nav.classList.remove('open');
+    };
+
+    toggle.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var isOpen = nav.classList.contains('open');
+      closeHeaderMenus();
+      if (!isOpen) nav.classList.add('open');
+    });
+
+    nav.addEventListener('click', function (e) { e.stopPropagation(); });
   }
 
   function initDropdowns() {
@@ -1179,6 +1200,7 @@
     initLogoSpin();
     initCursorAutoHide();
     initDropdowns();
+    initMobileNav();
     initSearch();
     initModal();
     initKeyboardNav();

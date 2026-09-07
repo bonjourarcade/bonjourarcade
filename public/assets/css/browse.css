@@ -203,9 +203,6 @@ a {
 .browse-header.browse-header-solid .browse-nav-dropbtn:hover { color: var(--browse-text); }
 .browse-dropdown.open .browse-nav-dropbtn { color: var(--browse-hero-text); border-bottom-color: var(--browse-amber); }
 .browse-header.browse-header-solid .browse-dropdown.open .browse-nav-dropbtn { color: var(--browse-text); }
-.browse-nav-dropbtn .caret { font-size: 0.7em; transition: transform 0.15s ease; }
-.browse-dropdown.open .browse-nav-dropbtn .caret { transform: rotate(180deg); }
-
 .browse-nav-dropbtn-competitif { color: #2fbf5f; }
 .browse-header.browse-header-solid .browse-nav-dropbtn-competitif { color: #1f9d4a; }
 .browse-nav-dropbtn-competitif:hover,

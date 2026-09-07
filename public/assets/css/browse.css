@@ -184,6 +184,7 @@ a {
 .browse-dropdown { position: relative; }
 
 .browse-nav-dropbtn {
+  position: relative;
   background: none;
   border: none;
   cursor: pointer;
@@ -430,6 +431,7 @@ a {
   gap: 4px;
 }
 .browse-hero-leaderboard-row {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -439,6 +441,53 @@ a {
   padding: 5px 10px;
   font-size: 0.82rem;
   color: var(--browse-hero-text);
+}
+
+.browse-hero-leaderboard-comment-icon {
+  margin-left: 6px;
+  font-size: 0.9em;
+  vertical-align: middle;
+}
+
+.browse-hero-leaderboard-row[data-comment]:hover::after {
+  content: attr(data-comment);
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(20, 17, 13, 0.95);
+  color: #fdf6e8;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: normal;
+  white-space: pre-wrap;
+  width: min(240px, 80vw);
+  z-index: 10000;
+  pointer-events: none;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(253, 246, 232, 0.14);
+  text-align: left;
+  line-height: 1.4;
+}
+
+.browse-hero-leaderboard-row[data-comment]:hover::before {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: rgba(20, 17, 13, 0.95);
+  z-index: 10000;
+  pointer-events: none;
+}
+
+@media (hover: none), (pointer: coarse) {
+  .browse-hero-leaderboard-row[data-comment]:hover::after,
+  .browse-hero-leaderboard-row[data-comment]:hover::before {
+    display: none;
+  }
 }
 .browse-hero-leaderboard-rank { font-weight: 700; width: 1.4em; color: var(--browse-amber); }
 .browse-hero-leaderboard-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -499,7 +548,6 @@ a {
 .browse-rows {
   position: relative;
   z-index: 2;
-  margin-top: -6vh;
   padding: 0 0 60px 0;
 }
 

@@ -220,7 +220,10 @@
       btn.addEventListener('click', function (e) {
         e.stopPropagation();
         var isOpen = dropdown.classList.contains('open');
-        closeHeaderMenus();
+        // Close other dropdowns/search, but NOT the mobile nav panel - this
+        // button lives inside it on narrow viewports.
+        closeAllDropdowns();
+        closeSearch();
         if (!isOpen) dropdown.classList.add('open');
       });
     });
@@ -572,9 +575,13 @@
       if (!top.length) { wrap.style.display = 'none'; return; }
 
       list.innerHTML = top.map(function (s, i) {
-        return '<div class="browse-hero-leaderboard-row">' +
+        var comment = (s.comment || '').trim().slice(0, 200);
+        var commentAttr = comment ? ' data-comment="' + escapeHtml(comment) + '"' : '';
+        var commentIcon = comment ? ' <span class="browse-hero-leaderboard-comment-icon" aria-label="Commentaire disponible">💬</span>' : '';
+        return '<div class="browse-hero-leaderboard-row"' + commentAttr + '>' +
           '<span class="browse-hero-leaderboard-rank">#' + (i + 1) + '</span>' +
           '<span class="browse-hero-leaderboard-name">' + escapeHtml(s.player || '?') + '</span>' +
+          commentIcon +
           '<span class="browse-hero-leaderboard-score">' + escapeHtml(String(s.score)) + '</span>' +
           '</div>';
       }).join('');
@@ -1136,11 +1143,6 @@
     var toast = document.getElementById('browse-tournament-toast');
     if (!toast || !window.TournoiUtils) return;
 
-    var shownKey = 'browseTournamentToastShown';
-    try {
-      if (sessionStorage.getItem(shownKey) === '1') return;
-    } catch (e) { /* ignore */ }
-
     var hideTimer;
     function dismiss() {
       clearTimeout(hideTimer);
@@ -1158,7 +1160,16 @@
     waitForFunctions(function () {
       TournoiUtils.callFunction('getPublicTournaments', {}).then(function (result) {
         var tournaments = (result && result.success && result.tournaments) || [];
+
+        updateCompetitifBadge(tournaments);
+        renderActiveTournamentLinks(tournaments);
+
         if (!tournaments.length) return;
+
+        var shownKey = 'browseTournamentToastShown';
+        var alreadyShown = false;
+        try { alreadyShown = sessionStorage.getItem(shownKey) === '1'; } catch (e) { /* ignore */ }
+        if (alreadyShown) return;
 
         var candidate = tournaments.find(function (t) { return t.status === 'active' && TournoiUtils.isJoinable(t); }) ||
           tournaments.find(function (t) { return TournoiUtils.isJoinable(t); });
@@ -1187,8 +1198,29 @@
 
         toast.classList.add('open');
         hideTimer = setTimeout(dismiss, TOAST_VISIBLE_MS);
-      }).catch(function () { /* silently skip the toast on error */ });
+      }).catch(function () { /* silently skip on error */ });
     });
+  }
+
+  function updateCompetitifBadge(tournaments) {
+    var badge = document.getElementById('browse-competitif-badge');
+    if (!badge) return;
+    var activeCount = tournaments.filter(function (t) { return t.status === 'active'; }).length;
+    if (activeCount > 0) {
+      badge.textContent = activeCount;
+      badge.style.display = 'inline-block';
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+
+  function renderActiveTournamentLinks(tournaments) {
+    var container = document.getElementById('browse-active-tournaments');
+    if (!container) return;
+    var active = tournaments.filter(function (t) { return t.status === 'active'; });
+    container.innerHTML = active.map(function (t) {
+      return '<a href="/tournoi/play/?t=' + encodeURIComponent(t.id) + '">🔴 ' + escapeHtml(t.name || 'Tournoi') + '</a>';
+    }).join('');
   }
 
   /* ---------- Init ---------- */

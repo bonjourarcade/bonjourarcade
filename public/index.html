@@ -36,9 +36,12 @@
           </div>
         </div>
         <div class="browse-dropdown" data-browse-dropdown>
-          <button type="button" class="browse-nav-dropbtn browse-nav-dropbtn-competitif">Compétitif <span class="caret">▾</span></button>
+          <button type="button" class="browse-nav-dropbtn browse-nav-dropbtn-competitif">
+            Compétitif <span class="caret">▾</span><span id="browse-competitif-badge" class="browse-admin-badge" style="display:none;"></span>
+          </button>
           <div class="browse-dropdown-menu">
             <a href="/scores">📋 Scores</a>
+            <div id="browse-active-tournaments"></div>
             <a href="/tournoi/">🏅 Tournois</a>
           </div>
         </div>

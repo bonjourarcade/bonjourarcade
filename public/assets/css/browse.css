@@ -339,6 +339,12 @@ a {
   align-items: flex-end;
   overflow: hidden;
   background: var(--browse-bg-alt);
+  /* The header is fixed and floats transparently over this image on
+     purpose, but the hero's own content (badge/title/buttons...) must
+     never render underneath it - if the description is long enough to
+     push the (bottom-aligned) content past this box's min-height, this
+     padding is what keeps it from starting up under the header instead. */
+  padding-top: 76px;
 }
 
 .browse-hero-backdrop {
@@ -362,9 +368,33 @@ a {
   position: relative;
   z-index: 2;
   padding: 0 5% 6% 5%;
-  max-width: 640px;
+  max-width: 720px;
   color: var(--browse-hero-text);
 }
+
+.browse-hero-top-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 20px;
+  margin-bottom: 4px;
+}
+
+/* The backdrop behind the whole hero is a cropped, blurred blow-up of the
+   cover for atmosphere - this shows that same art in full, so the
+   featured game's actual box art is never lost to the crop. */
+.browse-hero-poster {
+  width: 130px;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid rgba(253, 246, 232, 0.2);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
+  background: var(--browse-surface);
+  flex-shrink: 0;
+  display: block;
+}
+
+.browse-hero-heading { min-width: 0; }
 
 .browse-hero-badge {
   display: inline-flex;
@@ -1144,6 +1174,18 @@ a {
   .browse-search.open .browse-search-input { width: 140px; }
   .browse-hero { min-height: 64vh; }
   .browse-hero-title { font-size: 1.8rem; }
+  .browse-hero-poster { width: 92px; border-radius: 6px; }
+  .browse-hero-top-row { gap: 14px; }
+  .browse-hero-desc {
+    font-size: 0.88rem;
+    line-height: 1.4;
+    /* Keeps the description from growing tall enough to crowd out the
+       featured art behind it - "Plus d'infos" always has the full text. */
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
   .browse-header { padding: 12px 16px; gap: 12px; }
   .browse-nav { gap: 12px; font-size: 0.85rem; }
   .browse-card { width: 118px; }

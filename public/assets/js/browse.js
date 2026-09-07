@@ -560,6 +560,7 @@
 
   function renderHero(game) {
     var backdrop = document.getElementById('browse-hero-backdrop');
+    var poster = document.getElementById('browse-hero-poster');
     var title = document.getElementById('browse-hero-title');
     var meta = document.getElementById('browse-hero-meta');
     var desc = document.getElementById('browse-hero-desc');
@@ -569,6 +570,13 @@
 
     var cover = game.coverArt || PLACEHOLDER_COVER;
     backdrop.style.backgroundImage = 'url(' + cover + ')';
+    // The backdrop is a cropped, stretched blow-up of the cover behind the
+    // whole hero (for atmosphere) - the poster shows that same art in full,
+    // undistorted, so the featured game's actual box art is still visible.
+    if (poster) {
+      poster.src = cover;
+      poster.alt = getDisplayTitle(game);
+    }
     title.textContent = getDisplayTitle(game);
 
     var metaParts = [];

@@ -10,7 +10,7 @@ genre:
 #  - "V: "
 
 #to_start: Espace, puis Enter
-#announcement_message: ""
+#description: ""
 
 # Pour les jeux qui coopèrent pas bien
 #problem: true

@@ -214,7 +214,7 @@ def build_rom_game(rom_entry, use_local_paths, now_date, missing_covers)
     controls: metadata_value(metadata, 'controls'),
     to_start: string_field(metadata, 'to_start'),
     new_flag: new_flag,
-    announcement_message: string_field(metadata, 'announcement_message')
+    description: string_field(metadata, 'description')
   }
 end
 

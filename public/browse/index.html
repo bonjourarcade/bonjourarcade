@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Parcourir - BonjourArcade</title>
+  <link rel="icon" href="/favicon.ico" type="image/x-icon">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bungee&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/browse.css" />
+  <script src="../assets/js/analytics.js"></script>
+</head>
+<body>
+  <div id="browse-intro" class="browse-intro">
+    <img src="../assets/images/bonjourarcade-logo.png" alt="BonjourArcade" class="browse-intro-logo">
+  </div>
+
+  <div id="browse-root" class="browse-root">
+    <header class="browse-header" id="browse-header">
+      <a href="/" class="browse-logo-link">
+        <img src="../assets/images/bonjourarcade-logo.png" alt="BonjourArcade" class="browse-logo">
+      </a>
+      <nav class="browse-nav">
+        <a href="/">Accueil</a>
+        <a href="/all">Tous les jeux</a>
+        <a href="/browse/" class="active">Parcourir</a>
+        <div class="browse-dropdown" data-browse-dropdown>
+          <button type="button" class="browse-nav-dropbtn">Découvrir <span class="caret">▾</span></button>
+          <div class="browse-dropdown-menu">
+            <a href="/daily/" id="browse-daily-link">📅 Jeu du jour</a>
+            <a href="/randomgame/">🎲 Jeu aléatoire</a>
+            <a href="/swipe">🃏 Swipe</a>
+          </div>
+        </div>
+        <div class="browse-dropdown" data-browse-dropdown>
+          <button type="button" class="browse-nav-dropbtn browse-nav-dropbtn-competitif">Compétitif <span class="caret">▾</span></button>
+          <div class="browse-dropdown-menu">
+            <a href="/scores">📋 Scores</a>
+            <a href="/tournoi/">🏅 Tournois</a>
+          </div>
+        </div>
+        <a href="/upcoming">🔮 Bientôt en vedette</a>
+        <a href="/ratings">⭐ Mieux notés</a>
+        <a href="/screensaver">🌠 Écran de veille</a>
+      </nav>
+      <div class="browse-search" data-browse-search>
+        <button type="button" id="browse-search-toggle" class="browse-icon-btn" aria-label="Rechercher">🔍</button>
+        <input type="text" id="browse-search-input" class="browse-search-input" placeholder="Rechercher un jeu..." autocomplete="off">
+      </div>
+      <a href="https://ko-fi.com/bonjourarcade" target="_blank" rel="noopener" class="browse-support-link">❤️ Supporter</a>
+      <button id="browse-theme-toggle" class="browse-icon-btn" aria-label="Changer de thème">🌙</button>
+    </header>
+
+    <section id="browse-hero" class="browse-hero">
+      <div class="browse-hero-backdrop" id="browse-hero-backdrop"></div>
+      <div class="browse-hero-fade"></div>
+      <div class="browse-hero-content">
+        <div class="browse-hero-badge">🎮 Jeu en vedette</div>
+        <h1 id="browse-hero-title" class="browse-hero-title"></h1>
+        <div id="browse-hero-meta" class="browse-hero-meta"></div>
+        <p id="browse-hero-desc" class="browse-hero-desc"></p>
+        <div class="browse-hero-actions">
+          <a id="browse-hero-play" href="#" class="browse-btn browse-btn-play">▶ Jouer</a>
+          <button id="browse-hero-fav" class="browse-icon-round-btn" type="button" aria-label="Ajouter aux favoris" title="Ajouter aux favoris"><span>🖤</span></button>
+          <button id="browse-hero-info" class="browse-btn browse-btn-info" type="button">ⓘ Plus d'infos</button>
+        </div>
+      </div>
+    </section>
+
+    <main id="browse-rows" class="browse-rows">
+      <p class="browse-loading">Chargement des jeux...</p>
+    </main>
+
+    <footer class="browse-footer">
+      <div class="browse-footer-row">
+        <a href="https://amazon.ca/dp/B08GJC5WSS" class="browse-footer-link"
+          title="Manette officielle BonjourArcade sur Amazon" target="_blank" rel="noopener">🕹️ Manette officielle</a>
+        <a href="https://ko-fi.com/bonjourarcade" class="browse-footer-link"
+          title="Supportez BonjourArcade sur Ko-fi" target="_blank" rel="noopener">❤️ Supporter</a>
+        <a href="https://discord.gg/2E48gr5BNJ" class="browse-footer-link" title="Rejoindre le Discord BonjourArcade"
+          target="_blank" rel="noopener">
+          <svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;">
+            <path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276c-.598.3428-1.2205.6447-1.8733.8923a.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1835 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1835 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z" />
+          </svg>
+          Communauté
+        </a>
+        <a href="https://www.facebook.com/profile.php?id=61572089069032" class="browse-footer-link"
+          title="Suivre BonjourArcade sur Facebook" target="_blank" rel="noopener">📘 Facebook</a>
+        <a href="https://gitlab.com/bonjourarcade/bonjourarcade" class="browse-footer-link"
+          title="Code source sur GitLab" target="_blank" rel="noopener">💻 Code source</a>
+        <a href="/legal.html" class="browse-footer-link" title="Mentions légales, confidentialité, copyright et contact">📋 Mentions légales</a>
+      </div>
+      <div class="browse-footer-row browse-footer-disclaimer">
+        Aucune garantie • Le service peut cesser sans préavis • <a href="/legal.html">Mentions légales</a>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Full detail modal (singleton) -->
+  <div id="browse-modal-overlay" class="browse-modal-overlay">
+    <div id="browse-modal" class="browse-modal" role="dialog" aria-modal="true">
+      <button id="browse-modal-close" class="browse-modal-close" type="button" aria-label="Fermer">&times;</button>
+      <div class="browse-modal-hero">
+        <img id="browse-modal-img" class="browse-modal-img" alt="">
+        <div class="browse-modal-hero-fade"></div>
+        <h2 id="browse-modal-title" class="browse-modal-title"></h2>
+      </div>
+      <div class="browse-modal-body">
+        <div class="browse-modal-actions">
+          <a id="browse-modal-play" href="#" class="browse-btn browse-btn-play">▶ Jouer</a>
+          <button id="browse-modal-fav" class="browse-icon-round-btn" type="button" aria-label="Ajouter aux favoris"><span>🖤</span></button>
+        </div>
+        <div id="browse-modal-meta" class="browse-modal-meta"></div>
+        <div class="browse-modal-rating" id="browse-modal-rating">
+          <div class="browse-rating-header">
+            <span>Note du jeu</span>
+            <span id="browse-modal-rating-average">-</span>
+            <span id="browse-modal-rating-count"></span>
+          </div>
+          <div class="browse-rating-thumbs">
+            <button class="browse-rating-thumb" data-rating="-2" title="Je n'aime pas du tout">👎👎</button>
+            <button class="browse-rating-thumb" data-rating="-1" title="Je n'aime pas">👎</button>
+            <button class="browse-rating-thumb" data-rating="1" title="J'aime">👍</button>
+            <button class="browse-rating-thumb" data-rating="2" title="J'adore">👍👍</button>
+          </div>
+          <div id="browse-modal-rating-login" class="browse-rating-login">Connecte-toi pour noter</div>
+        </div>
+        <p id="browse-modal-desc" class="browse-modal-desc"></p>
+        <div id="browse-modal-desc-source" class="browse-modal-desc-source"></div>
+        <div id="browse-modal-details" class="browse-modal-details"></div>
+        <div id="browse-modal-score" class="browse-modal-score"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tournament toast (auto-dismissing, shown once per session when a tournament is live/joinable) -->
+  <div id="browse-tournament-toast" class="browse-toast">
+    <button id="browse-toast-close" class="browse-toast-close" type="button" aria-label="Fermer">&times;</button>
+    <div class="browse-toast-header">🏆 <span id="browse-toast-title"></span></div>
+    <div id="browse-toast-body" class="browse-toast-body"></div>
+    <a id="browse-toast-link" href="/tournoi/" class="browse-toast-link">Rejoindre →</a>
+    <div class="browse-toast-progress"><div id="browse-toast-progress-bar" class="browse-toast-progress-bar"></div></div>
+  </div>
+
+  <script type="module" src="../assets/js/firebase-setup.js"></script>
+  <script src="../assets/js/favorites.js"></script>
+  <script src="../assets/js/ttl-cache.js"></script>
+  <script src="../tournoi/tournament-utils.js"></script>
+  <script src="../assets/js/browse.js"></script>
+</body>
+</html>

@@ -305,17 +305,17 @@ Génère maintenant l'annonce pour {game_title} :"""
             with open(meta_path, 'r', encoding='utf-8') as f:
                 lines = f.readlines()
             
-            # Find and update the announcement_message line
+            # Find and update the description line
             updated = False
             for i, line in enumerate(lines):
-                if line.strip().startswith('announcement_message:'):
+                if line.strip().startswith('description:'):
                     # Preserve the exact indentation
                     indent = len(line) - len(line.lstrip())
-                    lines[i] = ' ' * indent + f'announcement_message: "{announcement}"\n'
+                    lines[i] = ' ' * indent + f'description: "{announcement}"\n'
                     updated = True
                     break
             
-            # If no existing announcement_message line found, add it at the end
+            # If no existing description line found, add it at the end
             if not updated:
                 # Find the last non-empty line to add the announcement
                 last_line_index = len(lines) - 1
@@ -327,7 +327,7 @@ Génère maintenant l'annonce pour {game_title} :"""
                     lines[last_line_index] += '\n'
                 
                 # Add the announcement message
-                lines.append(f'announcement_message: "{announcement}"\n')
+                lines.append(f'description: "{announcement}"\n')
             
             # Write back to file, preserving all original content
             with open(meta_path, 'w', encoding='utf-8') as f:
@@ -367,7 +367,7 @@ Génère maintenant l'annonce pour {game_title} :"""
         print('✅ Metadata loaded')
         
         # Check if announcement already exists
-        existing_announcement = meta.get('announcement_message', '') or ''
+        existing_announcement = meta.get('description', '') or ''
         if existing_announcement.strip():
             print(f"📝 Existing announcement found: {existing_announcement}")
             response = input("Do you want to replace it? (y/N): ").strip().lower()
@@ -455,7 +455,7 @@ Génère maintenant l'annonce pour {game_title} :"""
         else:
             print("\n💡 To automatically update the metadata file, run with --update-metadata")
             print(f"💡 Or manually add this line to public/games/{game_id}/metadata.yaml:")
-            print(f"   announcement_message: \"{announcement}\"")
+            print(f"   description: \"{announcement}\"")
 
 def main():
     parser = argparse.ArgumentParser(description='Generate AI-powered announcement messages for BonjourArcade games')

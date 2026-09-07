@@ -871,10 +871,10 @@ function populateFeaturedGame(game) {
     metadataWrapper.appendChild(metadataLeft);
 
     // Description (right side of right column)
-    if (game.announcement_message && game.announcement_message.trim()) {
+    if (game.description && game.description.trim()) {
         const descriptionDiv = document.createElement('div');
         descriptionDiv.className = 'featured-game-description';
-        descriptionDiv.textContent = game.announcement_message;
+        descriptionDiv.textContent = game.description;
         metadataWrapper.appendChild(descriptionDiv);
     }
 

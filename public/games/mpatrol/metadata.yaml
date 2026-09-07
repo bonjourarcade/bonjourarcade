@@ -10,7 +10,7 @@ controls:
 
 to_start: Espace, puis Enter
 
-announcement_message: "Premier jeu de l'histoire à utiliser le scrolling parallaxe pour donner de la profondeur à ses décors, ce classique de 1982 vous propulse à la surface de la Lune. Aux commandes d’un rover tout-terrain, votre mission est de rallier le secteur Z en partant du secteur A tout en évitant les cratères et les attaques d'ovnis. Entre sauts précis et tirs frénétiques, ce pionnier de l'action motorisée offre une expérience rétro simple et redoutablement efficace."
+description: "Premier jeu de l'histoire à utiliser le scrolling parallaxe pour donner de la profondeur à ses décors, ce classique de 1982 vous propulse à la surface de la Lune. Aux commandes d’un rover tout-terrain, votre mission est de rallier le secteur Z en partant du secteur A tout en évitant les cratères et les attaques d'ovnis. Entre sauts précis et tirs frénétiques, ce pionnier de l'action motorisée offre une expérience rétro simple et redoutablement efficace."
 
 hide: yes
 

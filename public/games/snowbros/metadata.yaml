@@ -8,7 +8,7 @@ controls:
 - 'X: Sauter'
 to_start: Espace -> Enter
 
-announcement_message: "Rejoignez Nick et Tom dans un voyage à travers 50 niveaux glacés
+description: "Rejoignez Nick et Tom dans un voyage à travers 50 niveaux glacés
   de Snowland, remplis d'ennemis prêts à être transformés en boules de neige!"
 
 hide: yes

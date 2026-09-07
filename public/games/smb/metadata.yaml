@@ -8,7 +8,7 @@ controls:
 - 'Z: Courir/Feu'
 - 'X: Sauter'
 to_start: Enter
-announcement_message: "L'original! Aidez Mario à sauver la princesse Peach gardée
+description: "L'original! Aidez Mario à sauver la princesse Peach gardée
   prisonnière dans le château de Bowser, le roi des Koopas."
 
 enable_score: true

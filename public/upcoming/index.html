@@ -578,7 +578,7 @@
                         year: gameData.year,
                         genre: gameData.genre,
                         enable_score: gameData.enable_score,
-                        announcement_message: gameData.announcement_message
+                        description: gameData.description
                     };
                 } else {
                     // Fallback if game data not found
@@ -591,7 +591,7 @@
                         year: '',
                         genre: '',
                         enable_score: true,
-                        announcement_message: ''
+                        description: ''
                     };
                 }
             });
@@ -802,9 +802,9 @@
         }
 
         function getAnnouncement(game) {
-            if (game.announcement_message && game.announcement_message.trim()) {
+            if (game.description && game.description.trim()) {
                 // Escape HTML to prevent XSS
-                const announcementText = game.announcement_message
+                const announcementText = game.description
                     .replace(/&/g, '&amp;')
                     .replace(/</g, '&lt;')
                     .replace(/>/g, '&gt;')

@@ -9,7 +9,7 @@ controls:
   - "↓ + X: Sélection des pouvoirs"
 
 to_start: Z
-announcement_message: "Psychic World sur Master System est l'adaptation Sega de Psycho World, un jeu d'action-aventure culte du MSX2. On y incarne Lucia, une jeune fille dotée de pouvoirs psychiques qui traverse des niveaux labyrinthiques pour sauver sa soeur Cecile, avec des attaques élémentaires, des jauges d'énergie et un système de sélection de pouvoirs étonnamment ambitieux pour la console. Le jeu évoque aussi étrangement Mega Man 2 avec son savant de laboratoire, ses pouvoirs à gérer et sa révélation finale extraterrestre. Attention: pour soumettre un score, le score disparaît très vite après la mort du joueur; prenez rapidement une capture d'écran ou utilisez la fonction de pause générale de l'émulateur."
+description: "Psychic World sur Master System est l'adaptation Sega de Psycho World, un jeu d'action-aventure culte du MSX2. On y incarne Lucia, une jeune fille dotée de pouvoirs psychiques qui traverse des niveaux labyrinthiques pour sauver sa soeur Cecile, avec des attaques élémentaires, des jauges d'énergie et un système de sélection de pouvoirs étonnamment ambitieux pour la console. Le jeu évoque aussi étrangement Mega Man 2 avec son savant de laboratoire, ses pouvoirs à gérer et sa révélation finale extraterrestre. Attention: pour soumettre un score, le score disparaît très vite après la mort du joueur; prenez rapidement une capture d'écran ou utilisez la fonction de pause générale de l'émulateur."
 
 enable_score: true
 hide: yes

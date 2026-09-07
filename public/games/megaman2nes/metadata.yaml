@@ -9,7 +9,7 @@ controls:
 
 to_start: Enter
 
-announcement_message: "Après avoir vaincu les six robots du Dr Light, reprogrammés par le maléfique Dr Wily dans Mega Man, le monde semblait sauvé. Mais il n'en fut rien. Le Dr Wily s'est échappé de prison et, plus furieux que jamais, il a créé huit nouveaux Robot Masters pour conquérir le monde et anéantir Mega Man ! Le monde est-il condamné ?"
+description: "Après avoir vaincu les six robots du Dr Light, reprogrammés par le maléfique Dr Wily dans Mega Man, le monde semblait sauvé. Mais il n'en fut rien. Le Dr Wily s'est échappé de prison et, plus furieux que jamais, il a créé huit nouveaux Robot Masters pour conquérir le monde et anéantir Mega Man ! Le monde est-il condamné ?"
 
 hide: yes
 

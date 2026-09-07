@@ -8,7 +8,7 @@ controls:
   - "X : utiliser un Hyper"
 
 to_start: "Espace puis appuyer sur Start"
-announcement_message: "Plus Alpha est un shoot 'em up vertical de Jaleco sorti en arcade en 1989, dans lequel les guerrières Selia et Rumy partent libérer sept royaumes à bord de leurs chasseurs. Le vaisseau peut adopter trois formes différentes en récupérant des objets, chacune avec son propre type de tir et son propre Hyper. Avec ses graphismes colorés, son univers de fantasy et son système très simple à prendre en main, Plus Alpha est un jeu de tir particulièrement accessible pour son époque, sans pour autant oublier les gros boss, les nuées d'ennemis et la chasse au score."
+description: "Plus Alpha est un shoot 'em up vertical de Jaleco sorti en arcade en 1989, dans lequel les guerrières Selia et Rumy partent libérer sept royaumes à bord de leurs chasseurs. Le vaisseau peut adopter trois formes différentes en récupérant des objets, chacune avec son propre type de tir et son propre Hyper. Avec ses graphismes colorés, son univers de fantasy et son système très simple à prendre en main, Plus Alpha est un jeu de tir particulièrement accessible pour son époque, sans pour autant oublier les gros boss, les nuées d'ennemis et la chasse au score."
 
 enable_score: true
 hide: yes

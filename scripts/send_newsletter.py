@@ -7,10 +7,10 @@ to subscribers using ConvertKit API, to one or more webhooks (e.g., Google Chat,
 and optionally to Facebook.
 
 The announcement message is automatically read from the game's metadata.yaml file
-under the 'announcement_message' field. You can also override it with --custom-message.
+under the 'description' field. You can also override it with --custom-message.
 
 The script requires the game's metadata.yaml to contain:
-- announcement_message: Description of the game for the newsletter
+- description: Description of the game for the newsletter
 - controls: Array of control instructions for the game
 - to_start: Instructions on how to start the game
 
@@ -422,8 +422,8 @@ class NewsletterSender:
         </div>'''
         
         # Get announcement message from metadata, fallback to custom_message if provided
-        announcement_message = meta.get('announcement_message', '') or custom_message or ''
-        
+        announcement_message = meta.get('description', '') or custom_message or ''
+
         # Validate that we have an announcement message
         if not announcement_message.strip():
             raise ValueError("Announcement message is empty. Cannot create email content without an announcement.")
@@ -612,8 +612,8 @@ Les champions du dernier défi : {{b}}{last_week_highlight['game_title']}{{b}}
 {scores_list}"""
         
         # Get announcement message from metadata, fallback to custom_message if provided
-        announcement_message = meta.get('announcement_message', '') or custom_message or ''
-        
+        announcement_message = meta.get('description', '') or custom_message or ''
+
         # Validate that we have an announcement message
         if not announcement_message.strip():
             raise ValueError("Announcement message is empty. Cannot send webhook without an announcement.")
@@ -844,7 +844,7 @@ Bonne semaine ! ☀️
         play_url = f'{BASE_URL}/b/{game_id}'
         leaderboard_url = f'{BASE_URL}/scores/{game_id}'
         title = meta.get('title', game_id)
-        announcement_message = meta.get('announcement_message', '') or custom_message or ''
+        announcement_message = meta.get('description', '') or custom_message or ''
 
         message_parts = []
         if announcement_message.strip():
@@ -1126,16 +1126,16 @@ def main():
             game_id = temp_sender.read_game_of_the_week(args.game_id)
             meta = temp_sender.read_game_metadata(game_id)
             
-            announcement_message = meta.get('announcement_message', '')
+            announcement_message = meta.get('description', '')
             if not announcement_message.strip():
                 print("❌ ERROR: The announcement message for the game of the week is empty!")
-                print("📝 Please add an 'announcement_message' field to the metadata.yaml file")
+                print("📝 Please add a 'description' field to the metadata.yaml file")
                 print(f"   File: public/games/{game_id}/metadata.yaml")
                 print("   Or use --custom-message to provide a message via command line.")
                 print("\n🛑 Aborting newsletter send to allow you to write the announcement.")
                 print(f"\n📋 Current metadata structure for {game_id}:")
                 for key, value in meta.items():
-                    if key == 'announcement_message':
+                    if key == 'description':
                         print(f"   {key}: {'[EMPTY]' if not value else value[:50] + '...' if len(str(value)) > 100 else value}")
                     else:
                         print(f"   {key}: {value}")

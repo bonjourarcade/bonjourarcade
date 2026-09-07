@@ -9,7 +9,7 @@ controls:
 
 to_start: Espace -> Enter
 
-announcement_message: "Borench est un jeu de casse-tête où le joueur doit guider une balle roulante jusqu'au but."
+description: "Borench est un jeu de casse-tête où le joueur doit guider une balle roulante jusqu'au but."
 
 hide: yes
 enable_score: true

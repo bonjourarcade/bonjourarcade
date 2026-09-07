@@ -503,7 +503,7 @@
                                 ${currentGame.year ? `<span>${currentGame.year}</span>` : ''}
                                 ${currentGame.developer ? `<span>${currentGame.developer}</span>` : ''}
                             </div>
-                            <p style="margin-top: 15px; line-height: 1.5; color: #555;">${currentGame.description || currentGame.announcement_message || "Découvrez le jeu en vedette de cette semaine !"}</p>
+                            <p style="margin-top: 15px; line-height: 1.5; color: #555;">${currentGame.description || "Découvrez le jeu en vedette de cette semaine !"}</p>
                             <a href="${currentGame.pageUrl || '/play?game=' + currentGame.id}" class="play-button">JOUER MAINTENANT</a>
                             <div id="current-game-leaderboard-container" class="current-game-leaderboard">
                                 <div class="leaderboard-loading">Chargement des scores...</div>
@@ -539,7 +539,7 @@
                                 <div class="previous-game-meta">
                                      ${game.year ? game.year + ' • ' : ''} ${game.genre || ''}
                                 </div>
-                                <p class="previous-game-announcement">${game.description || game.announcement_message || ""}</p>
+                                <p class="previous-game-announcement">${game.description || ""}</p>
                                 <div id="leaderboard-${game.id}" class="previous-game-leaderboard">
                                     <div class="leaderboard-loading" style="padding: 5px;">Chargement des scores...</div>
                                 </div>

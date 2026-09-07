@@ -8,7 +8,7 @@ controls:
   - "X : utiliser une bombe"
 
 to_start: "Espace puis appuyer sur Entrer"
-announcement_message: "Storm Blade est un shoot 'em up vertical de Visco sorti en arcade en 1996. Le joueur choisit parmi plusieurs avions possédant chacun leurs propres caractéristiques, puis traverse une série de stages remplis d'escadrilles ennemies, de véhicules militaires et de machines de guerre gigantesques. Les améliorations de tir, les missiles secondaires et les bombes permettent d'adapter son arsenal au fil de la partie. Avec son rythme soutenu, ses nombreux effets à l'écran et son style typique des shoot 'em up du milieu des années 90, Storm Blade est un titre assez méconnu mais solide et immédiatement plaisant à prendre en main."
+description: "Storm Blade est un shoot 'em up vertical de Visco sorti en arcade en 1996. Le joueur choisit parmi plusieurs avions possédant chacun leurs propres caractéristiques, puis traverse une série de stages remplis d'escadrilles ennemies, de véhicules militaires et de machines de guerre gigantesques. Les améliorations de tir, les missiles secondaires et les bombes permettent d'adapter son arsenal au fil de la partie. Avec son rythme soutenu, ses nombreux effets à l'écran et son style typique des shoot 'em up du milieu des années 90, Storm Blade est un titre assez méconnu mais solide et immédiatement plaisant à prendre en main."
 
 enable_score: true
 hide: yes

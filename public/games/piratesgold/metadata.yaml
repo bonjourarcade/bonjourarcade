@@ -10,7 +10,7 @@ genre: Strategy, Tactics, Pirates, Real-time, Top-down, Action
 #  - "V: "
 
 #to_start: Espace, puis Enter
-#announcement_message: ""
+#description: ""
 
 enable_score: true
 hide: yes

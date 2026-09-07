@@ -10,7 +10,7 @@ to_start: Espace -> Enter
 
 # Message d'annonce personnalisé pour la newsletter
 # Ce message apparaîtra en haut de l'email et des webhooks
-announcement_message: "Aux commandes d'une jeune fille nommée Alice, le joueur doit
+description: "Aux commandes d'une jeune fille nommée Alice, le joueur doit
   traverser les neuf niveaux du jeu en évitant les ennemis et les chutes. Alice peut
   souffler de puissantes bulles pour repousser ses ennemis et les frapper suffisamment
   de fois pour les faire tomber de la plateforme. Il s'agit de la première adaptation

@@ -10,7 +10,7 @@ genre: Interactive movie, vehicular combat
 #  - "V: "
 
 #to_start: Espace, puis Enter
-#announcement_message: ""
+#description: ""
 #problem: true
 
 enable_score: true

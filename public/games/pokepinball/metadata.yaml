@@ -12,7 +12,7 @@ controls:
   - "Enter: Start"
   - "[Guide visuel (image)](/games/pokepinball/controls.jpg)"
 
-announcement_message: "Découvrez une toute nouvelle façon d'attraper des Pokémon : en jouant au flipper ! Touchez les cibles avec votre Poké Ball pour capturer et faire évoluer des Pokémon. Plus vous êtes performant, plus les Pokémon que vous trouverez seront rares. Chaque Pokémon capturé est automatiquement enregistré dans votre Pokédex. Parviendrez-vous à tous les attraper ?"
+description: "Découvrez une toute nouvelle façon d'attraper des Pokémon : en jouant au flipper ! Touchez les cibles avec votre Poké Ball pour capturer et faire évoluer des Pokémon. Plus vous êtes performant, plus les Pokémon que vous trouverez seront rares. Chaque Pokémon capturé est automatiquement enregistré dans votre Pokédex. Parviendrez-vous à tous les attraper ?"
 
 to_start: Enter
 

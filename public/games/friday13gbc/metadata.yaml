@@ -10,7 +10,7 @@ genre: Horror, Platform, First-person
 #  - "V: "
 
 #to_start: Espace, puis Enter
-#announcement_message: ""
+#description: ""
 
 enable_score: true
 hide: yes

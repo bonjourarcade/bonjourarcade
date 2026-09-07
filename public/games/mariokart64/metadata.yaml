@@ -11,6 +11,6 @@ controls:
 - 'C: Item'
 - 'V: Sauter'
 to_start: Start
-announcement_message: "Trois… Deux… Un… GO ! Le feu passe au vert et c’est parti !
+description: "Trois… Deux… Un… GO ! Le feu passe au vert et c’est parti !
   Affrontez jusqu’à trois amis en écran partagé dans les jeux VS, ou lancez-vous en
   solo dans le Grand Prix Mario. Défiez vos amis dans le mode Bataille ultra-compétitif."

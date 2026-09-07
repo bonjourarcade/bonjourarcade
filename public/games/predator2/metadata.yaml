@@ -9,6 +9,6 @@ controls:
   - "C: Choisir arme"
 to_start: Select -> Start
 hide: yes
-announcement_message: "Dans ce jeu, les joueurs incarnent le lieutenant Mike Harrigan, lancé à la poursuite du Predator à travers sept niveaux inspirés du film. Mike doit se concentrer sur la protection des otages retenus disséminés dans les niveaux et affronter les hordes de membres de gangs assoiffés de sang. Il doit également se mesurer au Predator, à la fois comme boss à la fin de chaque niveau et face à un temps limité : si le joueur tarde trop à secourir un otage, le Predator l'abattra avec son triple laser."
+description: "Dans ce jeu, les joueurs incarnent le lieutenant Mike Harrigan, lancé à la poursuite du Predator à travers sept niveaux inspirés du film. Mike doit se concentrer sur la protection des otages retenus disséminés dans les niveaux et affronter les hordes de membres de gangs assoiffés de sang. Il doit également se mesurer au Predator, à la fois comme boss à la fin de chaque niveau et face à un temps limité : si le joueur tarde trop à secourir un otage, le Predator l'abattra avec son triple laser."
 
 added: 2025-07-26

@@ -10,7 +10,7 @@ genre: Platform, Skateboarding, Sports
 #  - "V: "
 
 #to_start: Espace, puis Enter
-#announcement_message: ""
+#description: ""
 #problem: true
 
 enable_score: true

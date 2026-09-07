@@ -11,7 +11,7 @@ genre: Platform
 
 # Message d'annonce personnalisé pour la newsletter
 # Ce message apparaîtra en haut de l'email et des webhooks
-announcement_message: 🦍 Préparez-vous à affronter le roi des gorilles dans ce 
+description: 🦍 Préparez-vous à affronter le roi des gorilles dans ce 
   classique absolu du jeu d'arcade !
 
 enable_score: true

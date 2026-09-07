@@ -307,7 +307,7 @@ function renderTournament(t) {
           coverImg.style.display = 'none';
         }
         const announcementEl = $('game-announcement');
-        const announcement = g && String(g.announcement_message || '').trim();
+        const announcement = g && String(g.description || '').trim();
         if (announcement) {
           announcementEl.textContent = announcement;
           announcementEl.classList.remove('hidden');

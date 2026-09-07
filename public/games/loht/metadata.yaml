@@ -11,7 +11,7 @@ to_start: Espace, puis Enter
 
 # Message d'annonce personnalisé pour la newsletter
 # Ce message apparaîtra en haut de l'email et des webhooks
-announcement_message: "Un petit héros en cape nommé Tommy doit se frayer un chemin jusqu'au château du boss à travers un monde adorable pour sauver une princesse. Mais plusieurs ennemis tenteront de l'arrêter dans sa mission, et Tommy devra les vaincre en leur lançant de petites boules de feu. Il pourra aussi leur sauter sur la tête pour les étourdir un instant."
+description: "Un petit héros en cape nommé Tommy doit se frayer un chemin jusqu'au château du boss à travers un monde adorable pour sauver une princesse. Mais plusieurs ennemis tenteront de l'arrêter dans sa mission, et Tommy devra les vaincre en leur lançant de petites boules de feu. Il pourra aussi leur sauter sur la tête pour les étourdir un instant."
 
 hide: yes
 

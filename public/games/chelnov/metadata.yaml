@@ -9,7 +9,7 @@ genre: Platform, Shooter, Run 'n gun
 
 #to_start: Select -> Start
 
-announcement_message:
+description:
 
 hide: yes
 

@@ -1,5 +1,5 @@
 /**
- * Shared "game announcement" modal: shows announcement_message + a larger
+ * Shared "game announcement" modal: shows description + a larger
  * cover art for a game. Used from /play (info jeu link) and from game tiles
  * on / and /all (top-right info badge).
  */
@@ -173,7 +173,7 @@
         }
 
         title.textContent = game.title || game.id || '';
-        text.textContent = game.announcement_message || '';
+        text.textContent = game.description || '';
 
         modal.classList.add('is-open');
     }
@@ -185,7 +185,7 @@
     }
 
     function hasAnnouncement(game) {
-        return !!(game && String(game.announcement_message || '').trim());
+        return !!(game && String(game.description || '').trim());
     }
 
     function createAnnouncementBadge(game) {

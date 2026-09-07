@@ -9,7 +9,7 @@ controls:
   - "C: Spin Jump"
 
 to_start: Enter
-announcement_message: "Sautez à pieds joints dans l'univers exigeant du Kaizo avec 2Kaizo2Learn, un hack tutoriel incontournable conçu pour vous enseigner les techniques de base de Super Mario World. À travers une carte entièrement ouverte de 69 sorties et plus de 130 salles d'entraînement (incluant le maniement de la cape et des carapaces), apprenez à votre rythme sans ordre imposé. Idéal pour bâtir des bases solides, relever des défis corsés et progresser sereinement vers les hacks intermédiaires."
+description: "Sautez à pieds joints dans l'univers exigeant du Kaizo avec 2Kaizo2Learn, un hack tutoriel incontournable conçu pour vous enseigner les techniques de base de Super Mario World. À travers une carte entièrement ouverte de 69 sorties et plus de 130 salles d'entraînement (incluant le maniement de la cape et des carapaces), apprenez à votre rythme sans ordre imposé. Idéal pour bâtir des bases solides, relever des défis corsés et progresser sereinement vers les hacks intermédiaires."
 
 enable_score: true
 hide: yes

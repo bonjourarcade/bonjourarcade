@@ -919,9 +919,9 @@
             const title = getDisplayTitle(game);
             const systemName = getSystemName(game.core);
 
-            const hasAnnouncement = game.announcement_message && game.announcement_message.trim();
+            const hasAnnouncement = game.description && game.description.trim();
             const announcementHtml = hasAnnouncement
-                ? `<div class="game-announcement">${escapeHtml(game.announcement_message)}</div>`
+                ? `<div class="game-announcement">${escapeHtml(game.description)}</div>`
                 : '';
 
             const cardContent = document.createElement('div');

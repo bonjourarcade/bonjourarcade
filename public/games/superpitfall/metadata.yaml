@@ -8,7 +8,7 @@ controls:
   - "X: Sauter"
 
 to_start: Enter
-announcement_message: "Pitfall Harry reprend du service dans cette suite « Super » de Pitfall ! et Pitfall II : Les Cavernes Perdues. Sa mission : récupérer le célèbre Diamant Raj et secourir sa nièce Rhonda ainsi que son fidèle lion, Quickclaw."
+description: "Pitfall Harry reprend du service dans cette suite « Super » de Pitfall ! et Pitfall II : Les Cavernes Perdues. Sa mission : récupérer le célèbre Diamant Raj et secourir sa nièce Rhonda ainsi que son fidèle lion, Quickclaw."
 
 enable_score: true
 hide: yes

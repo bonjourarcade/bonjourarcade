@@ -10,7 +10,7 @@ controls:
 - 'Z: Tir bas'
 - 'X: Tir haut'
 - "C: Changer d'arme"
-announcement_message: "Entrez dans le monde mystique d'Elemental Master, un shooter
+description: "Entrez dans le monde mystique d'Elemental Master, un shooter
   captivant de TechnoSoft sorti en 1990 qui vous invite à maîtriser les éléments !
   Parcourez des niveaux enchanteurs en contrôlant un sorcier armé de puissants sorts,
   et déchaînez des attaques dévastatrices contre des ennemis variés dans un univers

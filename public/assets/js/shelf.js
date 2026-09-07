@@ -449,7 +449,7 @@
     var genre = game.genre || '';
     var controls = game.controls || [];
     var toStart = game.to_start || '';
-    var description = game.announcement_message || '';
+    var description = game.description || '';
     var coverUrl = game.coverArt || '';
     var playUrl = game.pageUrl || '/b/' + game.id;
 

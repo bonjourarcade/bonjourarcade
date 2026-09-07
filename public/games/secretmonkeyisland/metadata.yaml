@@ -10,7 +10,7 @@ genre: Point and click
 #  - "V: "
 
 #to_start: Espace, puis Enter
-#announcement_message: ""
+#description: ""
 
 enable_score: true
 

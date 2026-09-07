@@ -9,7 +9,7 @@ controls:
 - 'C: Tir droit'
 to_start: Espace -> Enter
 
-announcement_message: "Des extraterrestres de la planète Krytol attaquent vos villes
+description: "Des extraterrestres de la planète Krytol attaquent vos villes
   ! En tant que commandant d'une base de missiles, il est de votre responsabilité
   de les défendre. Diverses armes et avions ennemis tenteront de détruire les six
   villes situées en bas de l'écran. Vous devez tirer des missiles pour anéantir ces

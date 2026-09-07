@@ -9,7 +9,7 @@ to_start: Select -> Start
 
 # Message d'annonce personnalisé pour la newsletter
 # Ce message apparaîtra en haut de l'email et des webhooks
-announcement_message: "Plongez dans l'univers enchanteur de Go Go! Mile Smile, un
+description: "Plongez dans l'univers enchanteur de Go Go! Mile Smile, un
   jeu de puzzle captivant développé par Fuuki en 1995 qui vous fera sourire à coup
   sûr ! Ce titre unique vous invite à résoudre des énigmes tout en interagissant avec
   des personnages adorables dans un monde coloré, où la créativité est votre meilleur

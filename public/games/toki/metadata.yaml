@@ -8,7 +8,7 @@ controls:
 - 'X: Sauter'
 to_start: Select -> Start
 
-announcement_message: "Plongez dans l'univers décalé de Toki, un jeu de plateforme
+description: "Plongez dans l'univers décalé de Toki, un jeu de plateforme
   et de tir incontournable développé par Tad en 1989 ! Incarnez un homme transformé
   en singe courageux, armé d'une incroyable capacité à cracher des boules de feu,
   et partez à la rescousse de votre bien-aimée en naviguant à travers des niveaux

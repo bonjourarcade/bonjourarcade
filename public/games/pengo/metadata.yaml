@@ -9,7 +9,7 @@ to_start: Select -> Start
 
 # Message d'annonce personnalisé pour la newsletter
 # Ce message apparaîtra en haut de l'email et des webhooks
-announcement_message: "Dans Pengo, vous devrez manœuvrer stratégiquement à travers
+description: "Dans Pengo, vous devrez manœuvrer stratégiquement à travers
   des blocs de glaces pour vous défendre contre les méchants SNO-BEES! Ne vous fiez
   pas aux allures mignonnes de Pengo, il vous mettra à l'épreuve!"
 

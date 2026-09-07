@@ -27,6 +27,7 @@
           { type: 'link', href: '/randomgame/', icon: '🎲', label: 'Jeu aléatoire' },
           { type: 'link', href: '/swipe', icon: '🃏', label: 'Swipe' },
           { type: 'link', href: '/all', icon: '🕹️', label: 'Tous les jeux' },
+          { type: 'link', href: '/browse/', icon: '🍿', label: 'Parcourir' },
           { type: 'link', href: '/upcoming', icon: '🔮', label: 'Bientôt en vedette' },
         ]},
         { type: 'link', href: '/ratings', icon: '⭐', label: 'Évaluations' },
@@ -48,6 +49,7 @@
         { type: 'link', href: '/scores', icon: '📋', label: 'Scores' },
         { type: 'link', href: '/profil/', icon: '👤', label: 'Profil', id: 'dropdown-profil-link', hidden: true },
         { type: 'link', href: '/all', icon: '🕹️', label: 'Tous les jeux' },
+        { type: 'link', href: '/browse/', icon: '🍿', label: 'Parcourir' },
         { type: 'link', href: '/daily/?seed=' + getTorontoDailySeed(), icon: '📅', label: 'Jeu du jour', id: 'daily-game-link' },
         { type: 'link', href: '/randomgame/', icon: '🎲', label: 'Jeu aléatoire' },
         { type: 'link', href: '/swipe', icon: '🃏', label: 'Swipe' },
@@ -67,6 +69,7 @@
       items: [
         { type: 'link', href: '/scores', icon: '📋', label: 'Scores' },
         { type: 'link', href: '/all', icon: '🕹️', label: 'Tous les jeux' },
+        { type: 'link', href: '/browse/', icon: '🍿', label: 'Parcourir' },
         { type: 'link', href: '/daily/?seed=' + getTorontoDailySeed(), icon: '📅', label: 'Jeu du jour', id: 'daily-game-link' },
         { type: 'link', href: '/randomgame/', icon: '🎲', label: 'Jeu aléatoire' },
         { type: 'link', href: '/swipe', icon: '🃏', label: 'Swipe' },

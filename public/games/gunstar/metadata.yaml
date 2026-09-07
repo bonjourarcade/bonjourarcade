@@ -11,7 +11,7 @@ controls:
   - "↓ + C = glissade"
 
 to_start: "Entrée"
-announcement_message: "Gunstar Heroes sur Mega Drive est le coup de tonnerre de Treasure, un run and gun coopératif où les armes se combinent, les boss explosent en modules improbables et le score récompense autant la survie propre que la capacité à rester élégant dans un chaos total."
+description: "Gunstar Heroes sur Mega Drive est le coup de tonnerre de Treasure, un run and gun coopératif où les armes se combinent, les boss explosent en modules improbables et le score récompense autant la survie propre que la capacité à rester élégant dans un chaos total."
 
 enable_score: true
 hide: yes

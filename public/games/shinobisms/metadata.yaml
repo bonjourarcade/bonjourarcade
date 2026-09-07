@@ -17,7 +17,7 @@ controls:
   - "Ronde bonus : ← → ↑ ↓ = viser"
   - "Ronde bonus : Z ou X = lancer un shuriken"
 to_start: "Z ou X"
-announcement_message: "Adaptation Master System du classique arcade de SEGA, Shinobi place Joe Musashi dans une série de missions courtes, tendues et très lisibles, où il faut avancer méthodiquement, éliminer les ennemis, libérer les otages et atteindre le chef de chaque zone. Le jeu conserve l'identité de l'arcade tout en l'organisant comme une version maison solide: cinq missions, des armes améliorées au fil des otages sauvés, des rondes bonus à la shuriken et une magie ninja précieuse lorsqu'elle est disponible. C'est un jeu d'action précis, plus tactique qu'il n'en a l'air, où le score vient autant de l'exécution que de la capacité à survivre proprement jusqu'aux stages avancés."
+description: "Adaptation Master System du classique arcade de SEGA, Shinobi place Joe Musashi dans une série de missions courtes, tendues et très lisibles, où il faut avancer méthodiquement, éliminer les ennemis, libérer les otages et atteindre le chef de chaque zone. Le jeu conserve l'identité de l'arcade tout en l'organisant comme une version maison solide: cinq missions, des armes améliorées au fil des otages sauvés, des rondes bonus à la shuriken et une magie ninja précieuse lorsqu'elle est disponible. C'est un jeu d'action précis, plus tactique qu'il n'en a l'air, où le score vient autant de l'exécution que de la capacité à survivre proprement jusqu'aux stages avancés."
 enable_score: true
 hide: yes
 

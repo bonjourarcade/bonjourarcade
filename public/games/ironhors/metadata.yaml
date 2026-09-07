@@ -11,7 +11,7 @@ genre: Platform, Adventure
 
 # Message d'annonce personnalisé pour la newsletter
 # Ce message apparaîtra en haut de l'email et des webhooks
-announcement_message:
+description:
 
 hide: yes
 

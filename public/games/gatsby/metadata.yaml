@@ -8,7 +8,7 @@ controls:
   - "X: Sauter"
 
 to_start: Enter
-announcement_message: "Gatsby le Magnifique est un jeu de plateforme inspiré du roman éponyme de F. Scott Fitzgerald, paru en 1925. Reprenant librement personnages et lieux de l'œuvre originale, le jeu propose aux joueurs d'incarner Nick Carraway et de traverser quatre niveaux principaux. On dit, non sans humour, que le jeu serait un portage localisé et inédit du jeu NES japonais Doki Doki Toshokan: Gatsby no Monogatari, et les développeurs ont même créé de fausses publicités, un générique et une photo de cartouche. Il s'agit pourtant d'un jeu par navigateur entièrement original, conçu pour ressembler à un jeu de plateforme NES de l'ère 8 bits."
+description: "Gatsby le Magnifique est un jeu de plateforme inspiré du roman éponyme de F. Scott Fitzgerald, paru en 1925. Reprenant librement personnages et lieux de l'œuvre originale, le jeu propose aux joueurs d'incarner Nick Carraway et de traverser quatre niveaux principaux. On dit, non sans humour, que le jeu serait un portage localisé et inédit du jeu NES japonais Doki Doki Toshokan: Gatsby no Monogatari, et les développeurs ont même créé de fausses publicités, un générique et une photo de cartouche. Il s'agit pourtant d'un jeu par navigateur entièrement original, conçu pour ressembler à un jeu de plateforme NES de l'ère 8 bits."
 
 enable_score: true
 

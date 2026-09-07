@@ -9,5 +9,5 @@ controls:
   - "C: ?"
   - "V: ?"
 to_start: Enter
-announcement_message: "Le Kaptain K. Rool et sa bande de pirates sinistres, les Kremlings, ont enlevé Donkey Kong, et c'est à Diddy Kong qu'il revient de sauver la mise !  Accompagné de sa petite amie Dixie, il devra parcourir l'Île des Crocodiles de fond en comble pour secourir son héros, depuis les ponts du Galion de la Galère jusqu'aux bourbiers sombres du Ravin Ravageur !"
+description: "Le Kaptain K. Rool et sa bande de pirates sinistres, les Kremlings, ont enlevé Donkey Kong, et c'est à Diddy Kong qu'il revient de sauver la mise !  Accompagné de sa petite amie Dixie, il devra parcourir l'Île des Crocodiles de fond en comble pour secourir son héros, depuis les ponts du Galion de la Galère jusqu'aux bourbiers sombres du Ravin Ravageur !"
 added: 2025-07-26

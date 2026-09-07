@@ -8,7 +8,7 @@ controls:
   - "X: Sauter"
 
 to_start: Enter
-announcement_message: "Convoy no nazo, l'un des premiers jeux inspirés des jouets Transformers, met le joueur dans la peau d'Ultra Magnus, qui doit percer le secret de Convoy (mieux connu sous le nom d'Optimus Prime). Pour ce faire, Ultra Magnus doit traverser différents niveaux de plateforme et affronter une multitude de boss, allant de Megatron aux Combiners, en passant par un emblème Decepticon volant !"
+description: "Convoy no nazo, l'un des premiers jeux inspirés des jouets Transformers, met le joueur dans la peau d'Ultra Magnus, qui doit percer le secret de Convoy (mieux connu sous le nom d'Optimus Prime). Pour ce faire, Ultra Magnus doit traverser différents niveaux de plateforme et affronter une multitude de boss, allant de Megatron aux Combiners, en passant par un emblème Decepticon volant !"
 
 enable_score: true
 hide: yes

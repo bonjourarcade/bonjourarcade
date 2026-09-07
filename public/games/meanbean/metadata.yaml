@@ -10,7 +10,7 @@ controls:
 
 to_start: Enter
 
-announcement_message: "Le maléfique Dr. Eggman (alias Dr. Robotnik) a construit une machine qui transformera les pauvres habitants de Beanville en machines, mais l'union fait la force ! Dans ce jeu de casse-tête coloré, aidez-les en les regroupant par quatre couleurs identiques afin qu'ils restent unis et échappent à un destin funeste."
+description: "Le maléfique Dr. Eggman (alias Dr. Robotnik) a construit une machine qui transformera les pauvres habitants de Beanville en machines, mais l'union fait la force ! Dans ce jeu de casse-tête coloré, aidez-les en les regroupant par quatre couleurs identiques afin qu'ils restent unis et échappent à un destin funeste."
 
 hide: yes
 

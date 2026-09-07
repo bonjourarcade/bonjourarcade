@@ -10,7 +10,7 @@ controls:
 #  - "V: "
 
 to_start: Skip l'intro avec 0, puis Enter
-announcement_message: "Le comte Dracula, le seigneur vampire transylvanien maléfique, ressuscite en 1792, un siècle après avoir été vaincu par le courageux chasseur de vampires Simon Belmont. Son serviteur démoniaque, Shaft, est envoyé dans un village voisin pour tuer les hommes, enlever les femmes et incendier le village. Richter Belmont, descendant de Simon, jure de libérer les femmes, parmi lesquelles se trouve sa fiancée Annette. Il s'empare du Tueur de Vampires, un puissant fouet hérité de son ancêtre, et pénètre dans le château, espérant mettre fin au règne du Seigneur des Ténèbres."
+description: "Le comte Dracula, le seigneur vampire transylvanien maléfique, ressuscite en 1792, un siècle après avoir été vaincu par le courageux chasseur de vampires Simon Belmont. Son serviteur démoniaque, Shaft, est envoyé dans un village voisin pour tuer les hommes, enlever les femmes et incendier le village. Richter Belmont, descendant de Simon, jure de libérer les femmes, parmi lesquelles se trouve sa fiancée Annette. Il s'empare du Tueur de Vampires, un puissant fouet hérité de son ancêtre, et pénètre dans le château, espérant mettre fin au règne du Seigneur des Ténèbres."
 
 enable_score: true
 

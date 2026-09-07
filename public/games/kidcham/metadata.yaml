@@ -9,7 +9,7 @@ controls:
   - "C: Spécial"
 
 to_start: Enter
-announcement_message: "Kid Chameleon est un jeu de plateforme à défilement horizontal où le personnage principal pénètre dans un jeu de réalité virtuelle appelé « Wild Side » afin de libérer d'autres enfants prisonniers. Capable de se métamorphoser en de nombreuses formes, il possède des capacités spéciales qui lui permettent de progresser à travers plus de 100 niveaux."
+description: "Kid Chameleon est un jeu de plateforme à défilement horizontal où le personnage principal pénètre dans un jeu de réalité virtuelle appelé « Wild Side » afin de libérer d'autres enfants prisonniers. Capable de se métamorphoser en de nombreuses formes, il possède des capacités spéciales qui lui permettent de progresser à travers plus de 100 niveaux."
 
 enable_score: true
 hide: yes

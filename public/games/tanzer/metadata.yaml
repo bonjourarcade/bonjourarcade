@@ -9,7 +9,7 @@ controls:
   - "C: Spécial"
   - "Enter: Choisir spécial"
 to_start: Select -> Start
-announcement_message: "Tänzer est un jeu vidéo d'action-plateforme de type hack and slash sorti en 2019, développé par Mikael Tillander et initialement édité par Mega Cat Studios sur Sega Genesis. Dans ce jeu, le joueur incarne une ballerine dont le corps a été transformé pour combattre des ennemis dans un monde post-apocalyptique."
+description: "Tänzer est un jeu vidéo d'action-plateforme de type hack and slash sorti en 2019, développé par Mikael Tillander et initialement édité par Mega Cat Studios sur Sega Genesis. Dans ce jeu, le joueur incarne une ballerine dont le corps a été transformé pour combattre des ennemis dans un monde post-apocalyptique."
 hide: yes
 
 added: 2025-07-26

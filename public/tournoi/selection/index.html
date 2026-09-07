@@ -247,7 +247,7 @@
     </main>
 
     <script>
-        let games = []; // [{id, title, coverArt, year, genre, announcementMessage, pageUrl}]
+        let games = []; // [{id, title, coverArt, year, genre, description, pageUrl}]
 
         // ----------- URL parsing -----------
         function getGameIdsFromUrl() {
@@ -276,14 +276,14 @@
 
             return ids.map((id) => {
                 const g = byId[id];
-                if (!g) return { id, title: id, coverArt: null, year: '', genre: '', announcementMessage: '', pageUrl: `/play/?game=${id}` };
+                if (!g) return { id, title: id, coverArt: null, year: '', genre: '', description: '', pageUrl: `/play/?game=${id}` };
                 return {
                     id: g.id,
                     title: g.title || id,
                     coverArt: g.coverArt || null,
                     year: g.year || '',
                     genre: g.genre || '',
-                    announcementMessage: g.announcement_message || '',
+                    description: g.description || '',
                     pageUrl: `/play/?game=${g.id}`,
                 };
             }).sort((a, b) => a.title.localeCompare(b.title, 'fr', { sensitivity: 'base' }));
@@ -316,11 +316,11 @@
                     </div>
                 `;
 
-                if (g.announcementMessage && g.announcementMessage.trim()) {
-                    const description = document.createElement('div');
-                    description.className = 'game-description';
-                    description.textContent = g.announcementMessage.trim();
-                    card.appendChild(description);
+                if (g.description && g.description.trim()) {
+                    const descriptionEl = document.createElement('div');
+                    descriptionEl.className = 'game-description';
+                    descriptionEl.textContent = g.description.trim();
+                    card.appendChild(descriptionEl);
                 }
 
                 list.appendChild(card);

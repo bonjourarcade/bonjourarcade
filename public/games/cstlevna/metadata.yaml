@@ -8,7 +8,7 @@ controls:
 - 'X: Sauter'
 to_start: Espace -> Enter
 
-announcement_message: "Tous les cent ans, le comte Dracula revient semer la terreur.
+description: "Tous les cent ans, le comte Dracula revient semer la terreur.
   Simon Belmont, héritier d'une célèbre lignée de chasseurs de vampires, pénètre dans
   le vaste château du comte pour briser la malédiction et mettre fin à ses ravages.
   La forteresse est un labyrinthe de salles, de tours, de catacombes et de mécanismes,

@@ -2948,6 +2948,32 @@
                     }
                 }
 
+                // Step 9.5: Default the autofire interval to 20ms.
+                // EmulatorJS hardcodes its "Autofire Interval" setting's own default (100ms)
+                // in its bundled code - unlike RetroArch core options, it never reads
+                // EJS_defaultOptions for it. So we set it ourselves once the emulator is
+                // ready, via the same public API its own settings menu uses - but only if
+                // the player hasn't already picked their own value for this game, so this
+                // stays a *default* rather than overriding an explicit prior choice.
+                window.EJS_onGameStart = function () {
+                    try {
+                        const emu = window.EJS_emulator;
+                        if (!emu || typeof emu.getLocalStorageKey !== 'function' ||
+                            typeof emu.changeSettingOption !== 'function') return;
+
+                        let alreadyChosen = false;
+                        try {
+                            const saved = JSON.parse(localStorage.getItem(emu.getLocalStorageKey()));
+                            alreadyChosen = !!(saved && saved.settings &&
+                                Object.prototype.hasOwnProperty.call(saved.settings, 'autofireInterval'));
+                        } catch (e) { /* nothing saved yet, or malformed - treat as unset */ }
+
+                        if (!alreadyChosen) emu.changeSettingOption('autofireInterval', '20');
+                    } catch (e) {
+                        console.warn('Could not set default autofire interval:', e);
+                    }
+                };
+
                 // Step 10: Load the main EmulatorJS engine (loader.js)
                 // This now happens sequentially after successfully fetching/setting up everything else
                 if (window.EJS_pathtodata) {

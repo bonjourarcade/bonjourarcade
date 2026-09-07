@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Jouer une ROM perso - BonjourArcade</title>
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <script src="../assets/js/analytics.js"></script>
+    <style>
+        * {
+            box-sizing: border-box !important;
+        }
+
+        html,
+        body {
+            margin: 0 !important;
+            padding: 0 !important;
+            height: 100% !important;
+            width: 100% !important;
+            background-color: #111 !important;
+            color: #eee !important;
+        }
+
+        body {
+            font-family: sans-serif;
+        }
+
+        /* --- Setup screen --- */
+        #setup-screen {
+            min-height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 16px;
+        }
+
+        #setup-logo {
+            height: 42px;
+            margin-bottom: 24px;
+        }
+
+        #setup-card {
+            background: #1a1a1a;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 12px;
+            padding: 24px 22px;
+            width: min(92vw, 440px);
+            box-shadow: 0 10px 36px rgba(0, 0, 0, 0.45);
+        }
+
+        #setup-card h1 {
+            margin: 0 0 6px 0;
+            font-size: 1.25rem;
+            color: #ffd700;
+            text-align: center;
+        }
+
+        #setup-card p.subtitle {
+            margin: 0 0 20px 0;
+            font-size: 0.85rem;
+            color: #aaa;
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        .field-label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #ccc;
+            margin-bottom: 6px;
+        }
+
+        #rom-file-input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 6px;
+            border-radius: 8px;
+            border: 1px dashed rgba(255, 255, 255, 0.3);
+            background: #222;
+            color: #eee;
+            font-size: 0.85rem;
+        }
+
+        #file-hint {
+            font-size: 0.78rem;
+            color: #888;
+            min-height: 1.2em;
+            margin-bottom: 16px;
+        }
+
+        #file-hint.detected {
+            color: #7ee08a;
+        }
+
+        #console-select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: #222;
+            color: #eee;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+
+        #launch-button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: #ffd700;
+            color: #1a1a1a;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-bottom: 14px;
+        }
+
+        #launch-button:disabled {
+            background: #555;
+            color: #999;
+            cursor: not-allowed;
+        }
+
+        #htgdb-link {
+            display: block;
+            text-align: center;
+            font-size: 0.85rem;
+            color: #ffd700;
+            text-decoration: none;
+            border: 1px solid rgba(255, 215, 0, 0.35);
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        #htgdb-link:hover {
+            background: rgba(255, 215, 0, 0.08);
+        }
+
+        #privacy-note {
+            margin-top: 16px;
+            font-size: 0.75rem;
+            color: #777;
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        #back-home-link {
+            margin-top: 18px;
+            font-size: 0.8rem;
+            color: #888;
+            text-decoration: none;
+        }
+
+        #back-home-link:hover {
+            color: #ccc;
+        }
+
+        /* --- Game screen (mirrors /play) --- */
+        #game-screen {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+
+        #game-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50px;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 12px;
+            z-index: 2000;
+        }
+
+        #game-header-title {
+            font-size: 13px;
+            color: #ffd700;
+            font-weight: 600;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 60vw;
+        }
+
+        #back-button {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            font-size: 12px;
+        }
+
+        #back-button:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        #game-container {
+            position: fixed;
+            top: 50px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #game {
+            width: 100%;
+            height: 100%;
+        }
+
+        .error-message {
+            font-family: sans-serif;
+            padding: 20px;
+            text-align: center;
+            color: #ffdddd;
+            background-color: #330000;
+            border: 1px solid red;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="setup-screen">
+        <img id="setup-logo" src="../assets/images/bonjourarcade-logo.png" alt="BonjourArcade">
+        <div id="setup-card">
+            <h1>Jouer avec ta propre ROM</h1>
+            <p class="subtitle">Choisis un fichier ROM sur ton appareil. Il reste dans ton navigateur et n'est
+                jamais envoyé sur nos serveurs.</p>
+
+            <label class="field-label" for="rom-file-input">Fichier ROM</label>
+            <input type="file" id="rom-file-input">
+            <div id="file-hint">Aucun fichier sélectionné</div>
+
+            <label class="field-label" for="console-select">Console</label>
+            <select id="console-select">
+                <option value="" disabled selected>Choisis une console</option>
+            </select>
+
+            <button id="launch-button" disabled>▶ Jouer</button>
+
+            <a id="htgdb-link" href="#" target="_blank" rel="noopener">Pas de ROM sous la main ? Cherche-la sur HTGDB</a>
+
+            <p id="privacy-note">Aucun fichier n'est téléversé : tout se passe localement, dans ton navigateur.</p>
+        </div>
+        <a id="back-home-link" href="/">← Retour à l'accueil</a>
+    </div>
+
+    <div id="game-screen">
+        <header id="game-header">
+            <span id="game-header-title"></span>
+            <button id="back-button" type="button">← Choisir un autre jeu</button>
+        </header>
+        <div id="game-container">
+            <div id="loading-overlay" class="loading-overlay"></div>
+            <div id="game"></div>
+        </div>
+    </div>
+
+    <script src="../assets/js/loading.js"></script>
+    <script>
+        // Systems this site's EmulatorJS setup supports (mirrors scripts/generate_gamelist.rb's CORE_BY_DIR).
+        // `exts` is a best-effort guess list used to pre-select a console from the file extension;
+        // the user can always override it manually.
+        const SYSTEMS = [
+            { core: 'nes', label: 'Nintendo (NES)', exts: ['nes'] },
+            { core: 'snes', label: 'Super Nintendo (SNES)', exts: ['sfc', 'smc', 'swc'] },
+            { core: 'gb', label: 'Game Boy / Game Boy Color', exts: ['gb', 'gbc', 'sgb'] },
+            { core: 'gba', label: 'Game Boy Advance', exts: ['gba'] },
+            { core: 'n64', label: 'Nintendo 64', exts: ['n64', 'z64', 'v64'] },
+            { core: 'nds', label: 'Nintendo DS', exts: ['nds'] },
+            { core: 'psx', label: 'PlayStation', exts: ['cue', 'pbp', 'chd', 'bin', 'iso'] },
+            { core: 'segaMD', label: 'Sega Genesis / Mega Drive', exts: ['md', 'gen', 'smd'] },
+            { core: 'segaCD', label: 'Sega CD', exts: [] },
+            { core: 'segaGG', label: 'Sega Game Gear', exts: ['gg'] },
+            { core: 'segaMS', label: 'Sega Master System', exts: ['sms'] },
+            { core: 'segaSaturn', label: 'Sega Saturn', exts: [] },
+            { core: 'sega32x', label: 'Sega 32X', exts: ['32x'] },
+            { core: 'atari2600', label: 'Atari 2600', exts: ['a26'] },
+            { core: 'jaguar', label: 'Atari Jaguar', exts: ['j64', 'jag'] },
+            { core: 'lynx', label: 'Atari Lynx', exts: ['lnx'] },
+            { core: 'pce', label: 'PC Engine / TurboGrafx-16', exts: ['pce'] },
+            { core: 'vb', label: 'Virtual Boy', exts: ['vb'] },
+            { core: 'ws', label: 'WonderSwan', exts: ['ws', 'wsc'] },
+            { core: 'arcade', label: 'Arcade (FBNeo)', exts: [] },
+            { core: 'mame2003_plus', label: 'Arcade (MAME)', exts: ['zip'] },
+        ];
+
+        const HTGDB_SEARCH_URL = 'https://archive.org/download/htgdb-gamepacks';
+
+        const fileInput = document.getElementById('rom-file-input');
+        const fileHint = document.getElementById('file-hint');
+        const consoleSelect = document.getElementById('console-select');
+        const launchButton = document.getElementById('launch-button');
+        const htgdbLink = document.getElementById('htgdb-link');
+
+        if (HTGDB_SEARCH_URL) {
+            htgdbLink.href = HTGDB_SEARCH_URL;
+        } else {
+            htgdbLink.style.display = 'none';
+        }
+
+        for (const system of SYSTEMS) {
+            const option = document.createElement('option');
+            option.value = system.core;
+            option.textContent = system.label;
+            consoleSelect.appendChild(option);
+        }
+
+        function guessCoreFromFilename(filename) {
+            const match = /\.([^.]+)$/.exec(filename || '');
+            if (!match) return null;
+            const ext = match[1].toLowerCase();
+            const system = SYSTEMS.find((s) => s.exts.includes(ext));
+            return system ? system.core : null;
+        }
+
+        function updateLaunchButtonState() {
+            launchButton.disabled = !(fileInput.files.length > 0 && consoleSelect.value);
+        }
+
+        fileInput.addEventListener('change', () => {
+            const file = fileInput.files[0];
+            if (!file) {
+                fileHint.textContent = 'Aucun fichier sélectionné';
+                fileHint.classList.remove('detected');
+                updateLaunchButtonState();
+                return;
+            }
+
+            const guessedCore = guessCoreFromFilename(file.name);
+            if (guessedCore) {
+                consoleSelect.value = guessedCore;
+                const system = SYSTEMS.find((s) => s.core === guessedCore);
+                fileHint.textContent = `${file.name} — console détectée : ${system.label}`;
+                fileHint.classList.add('detected');
+            } else {
+                fileHint.textContent = `${file.name} — impossible de détecter la console automatiquement, choisis-la manuellement.`;
+                fileHint.classList.remove('detected');
+            }
+            updateLaunchButtonState();
+        });
+
+        consoleSelect.addEventListener('change', updateLaunchButtonState);
+
+        launchButton.addEventListener('click', () => {
+            const file = fileInput.files[0];
+            const core = consoleSelect.value;
+            if (!file || !core) return;
+            launchGame(file, core);
+        });
+
+        document.getElementById('back-button').addEventListener('click', () => {
+            window.location.reload();
+        });
+
+        function showLauncherError(message) {
+            const gameContainer = document.getElementById('game-container');
+            if (gameContainer) {
+                gameContainer.innerHTML = `<p class="error-message">Erreur : ${message}</p>`;
+            }
+        }
+
+        async function launchGame(file, core) {
+            document.getElementById('setup-screen').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'block';
+            document.getElementById('game-header-title').textContent = file.name;
+
+            initLoading({
+                createOverlay: true,
+                containerSelector: '#game',
+                footerSelector: null,
+                delay: 0,
+                hideOnLoad: false,
+            });
+
+            try {
+                const settingsResponse = await fetch('/config/emulator_settings.json');
+                if (!settingsResponse.ok) {
+                    throw new Error(`Impossible de charger la config de l'émulateur (statut ${settingsResponse.status})`);
+                }
+                const settings = await settingsResponse.json();
+                for (const [key, value] of Object.entries(settings)) {
+                    window[key] = value;
+                }
+
+                window.EJS_FORCE_SRC = true;
+                window.EJS_player = '#game';
+                window.EJS_core = core;
+                window.EJS_gameName = file.name.replace(/\.[^.]+$/, '');
+                window.EJS_gameID = 'custom-rom';
+                window.EJS_gameUrl = URL.createObjectURL(file);
+                window.EJS_loadStateURL = undefined;
+
+                if (typeof window.EJS_biosUrl === 'undefined' && window.EJS_biosByCore && typeof window.EJS_biosByCore === 'object') {
+                    window.EJS_biosUrl = window.EJS_biosByCore[core];
+                }
+
+                try {
+                    const controlsResponse = await fetch(`/config/controls_${core}.json`);
+                    if (controlsResponse.ok) {
+                        window.EJS_defaultControls = await controlsResponse.json();
+                    } else {
+                        window.EJS_defaultControls = { '0': {}, '1': {}, '2': {}, '3': {} };
+                    }
+                } catch (controlsError) {
+                    console.warn('Impossible de charger les contrôles, utilisation des contrôles par défaut:', controlsError);
+                    window.EJS_defaultControls = { '0': {}, '1': {}, '2': {}, '3': {} };
+                }
+
+                if (!window.EJS_pathtodata) {
+                    throw new Error("EJS_pathtodata n'est pas défini dans la config de l'émulateur.");
+                }
+
+                const loaderScript = document.createElement('script');
+                loaderScript.src = `${window.EJS_pathtodata}loader.js`;
+                loaderScript.onerror = () => {
+                    showLauncherError("Impossible de charger le moteur de l'émulateur.");
+                    hideLoading({ containerSelector: '#game' });
+                };
+                loaderScript.onload = () => {
+                    setTimeout(() => hideLoading({ containerSelector: '#game' }), 500);
+                };
+                document.body.appendChild(loaderScript);
+            } catch (error) {
+                console.error('Erreur au lancement de la ROM personnalisée:', error);
+                showLauncherError(error.message || "Une erreur inattendue est survenue.");
+                hideLoading({ containerSelector: '#game' });
+            }
+        }
+    </script>
+</body>
+
+</html>

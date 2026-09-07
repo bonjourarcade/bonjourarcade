@@ -1107,6 +1107,10 @@
   // restore them - renderRows() itself is also used for the single expanded
   // category, so its own currentCategories can't double as this.
   var homeCategories = [];
+  // Whichever category's title was clicked to open the focus view, so
+  // "back to home" can scroll back to that same row instead of dumping the
+  // user at the very top of the page.
+  var lastFocusedCategory = null;
 
   function setHeroHidden(hidden) {
     var hero = document.getElementById('browse-hero');
@@ -1122,9 +1126,22 @@
   }
 
   function restoreHomeView() {
+    var container = document.getElementById('browse-rows');
+    var rowIndex = lastFocusedCategory ? homeCategories.indexOf(lastFocusedCategory) : -1;
+    lastFocusedCategory = null;
+
     setHeroHidden(false);
     renderRows(homeCategories);
-    window.scrollTo({ top: 0, behavior: 'auto' });
+
+    var rowEl = rowIndex !== -1 ? container.children[rowIndex] : null;
+    if (rowEl) {
+      var header = document.getElementById('browse-header');
+      var headerH = header ? header.offsetHeight : 0;
+      var targetY = rowEl.getBoundingClientRect().top + window.scrollY - headerH - 12;
+      window.scrollTo({ top: Math.max(targetY, 0), behavior: 'auto' });
+    } else {
+      window.scrollTo({ top: 0, behavior: 'auto' });
+    }
   }
 
   function focusCategory(category) {
@@ -1133,6 +1150,7 @@
     if (searchInput) searchInput.value = '';
     if (searchWrap) searchWrap.classList.remove('open');
 
+    lastFocusedCategory = category;
     setHeroHidden(true);
     renderRows([{
       title: category.title,

@@ -428,6 +428,7 @@
     container.appendChild(makeRow({
       title: 'Résultats pour « ' + query.trim() + ' »',
       games: matches,
+      grid: true,
       clearLabel: '✕ Effacer',
       onClear: function () {
         var input = document.getElementById('browse-search-input');
@@ -918,7 +919,7 @@
   var kbCol = 0;
 
   function getNavTracks() {
-    return Array.prototype.slice.call(document.querySelectorAll('.browse-row-track'));
+    return Array.prototype.slice.call(document.querySelectorAll('.browse-row-track, .browse-row-grid'));
   }
 
   // Picks the row closest to vertical screen-center, then within that row
@@ -1108,6 +1109,19 @@
     bar.className = 'browse-row-title-bar';
     titleWrap.appendChild(bar);
     row.appendChild(titleWrap);
+
+    // Search results aren't a browsable carousel of a handful of picks -
+    // they're the whole match list, so lay them out as a wrapping grid the
+    // user scrolls down the page instead of a horizontally-scrolled row.
+    if (category.grid) {
+      var grid = document.createElement('div');
+      grid.className = 'browse-row-grid';
+      category.games.forEach(function (game) {
+        grid.appendChild(makeCard(game));
+      });
+      row.appendChild(grid);
+      return row;
+    }
 
     var wrap = document.createElement('div');
     wrap.className = 'browse-row-track-wrap';

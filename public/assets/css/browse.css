@@ -822,6 +822,18 @@ a {
   padding: 14px 5% 6px 5%;
 }
 
+/* Search results: the full match list laid out as a wrapping grid, in normal
+   page flow, so the user scrolls the page itself instead of a horizontally
+   scrolled carousel or a height-capped panel. */
+.browse-row-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 4px 5% 10px 5%;
+  padding-left: 5cqw;
+  padding-right: 5cqw;
+}
+
 .browse-card {
   position: relative;
   flex: 0 0 auto;

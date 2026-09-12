@@ -863,10 +863,10 @@
       .map(function (id) { return allGamesById[id]; })
       .filter(Boolean);
     if (!games.length) return null;
-    return { title: 'Continuer?', typeLabel: '', games: games.slice(0, MAX_GAMES_PER_ROW), clearable: true };
+    return { title: 'Continuer?', typeLabel: '', games: games.slice(0, MAX_GAMES_PER_ROW), clearable: true, directPlay: true };
   }
 
-  function makeCard(game) {
+  function makeCard(game, directPlay) {
     var a = document.createElement('a');
     a.className = 'browse-card';
     a.href = game.pageUrl || ('/b/' + game.id);
@@ -887,6 +887,9 @@
     a.addEventListener('click', function (e) {
       // Let modifier-clicks / middle-click open in a new tab natively.
       if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      // "Continuer?" cards skip the description modal - the anchor's own
+      // href (set above) already points straight at the game.
+      if (directPlay) return;
       e.preventDefault();
       openModal(game);
     });
@@ -1074,7 +1077,7 @@
         title.setAttribute('aria-label', (opening ? 'Fermer' : 'Voir tous les jeux : ') + category.title);
         if (opening && !expandBuilt) {
           expandBuilt = true;
-          extraGames.forEach(function (game) { expandGrid.appendChild(makeCard(game)); });
+          extraGames.forEach(function (game) { expandGrid.appendChild(makeCard(game, category.directPlay)); });
         }
         expandPanel.classList.toggle('open', opening);
       };
@@ -1117,7 +1120,7 @@
       var grid = document.createElement('div');
       grid.className = 'browse-row-grid';
       category.games.forEach(function (game) {
-        grid.appendChild(makeCard(game));
+        grid.appendChild(makeCard(game, category.directPlay));
       });
       row.appendChild(grid);
       return row;
@@ -1129,7 +1132,7 @@
     track = document.createElement('div');
     track.className = 'browse-row-track';
     category.games.forEach(function (game) {
-      track.appendChild(makeCard(game));
+      track.appendChild(makeCard(game, category.directPlay));
     });
     // Chrome tries to restore each scrollable element's previous scroll
     // position on reload/back-navigation, which made rows start mid-scroll

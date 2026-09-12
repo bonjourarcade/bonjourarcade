@@ -3041,9 +3041,27 @@
                         }
                     };
 
-                    // Called from EJS_onGameStart below. Only auto-restores when permission
-                    // is already granted from a previous visit - never prompts on its own,
-                    // since that would require a user gesture we don't have at game start.
+                    // Chrome never lets a page silently re-request file permission
+                    // without a user gesture, even for a handle it granted before - a
+                    // fresh page load always starts back at 'prompt'. So the closest
+                    // we can get to "automatic" is a single click, not zero clicks.
+                    const showLocalSaveResumeButton = (onClick) => {
+                        const btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.textContent = '💾 Reprendre ma sauvegarde locale';
+                        btn.style.cssText = 'position:fixed;top:16px;right:16px;z-index:9999;' +
+                            'padding:10px 16px;background:#222;color:#fff;border:1px solid #666;' +
+                            'border-radius:8px;cursor:pointer;font-size:14px;';
+                        btn.addEventListener('click', function () {
+                            btn.remove();
+                            onClick();
+                        });
+                        document.body.appendChild(btn);
+                    };
+
+                    // Called from EJS_onGameStart below. Restores silently when
+                    // permission already happens to be granted; otherwise shows a
+                    // one-click button instead of failing without any feedback.
                     window.EJS_localSaveAutoLoad = async () => {
                         try {
                             if (window.EJS_Buttons && window.EJS_Buttons.loadState === false) return;
@@ -3051,12 +3069,27 @@
                             const key = window.EJS_gameID;
                             const handle = await getLocalSaveHandle(key);
                             if (!handle) return;
-                            if ((await handle.queryPermission({ mode: 'read' })) !== 'granted') return;
 
-                            const file = await handle.getFile();
-                            const bytes = new Uint8Array(await file.arrayBuffer());
-                            window.EJS_emulator.gameManager.loadState(bytes);
-                            console.log('Local save file auto-loaded for', key);
+                            const loadFromHandle = async () => {
+                                const file = await handle.getFile();
+                                const bytes = new Uint8Array(await file.arrayBuffer());
+                                window.EJS_emulator.gameManager.loadState(bytes);
+                            };
+
+                            if ((await handle.queryPermission({ mode: 'read' })) === 'granted') {
+                                await loadFromHandle();
+                                console.log('Local save file auto-loaded for', key);
+                                return;
+                            }
+
+                            showLocalSaveResumeButton(async () => {
+                                try {
+                                    if (!(await ensureLocalSavePermission(handle, 'read'))) return;
+                                    await loadFromHandle();
+                                } catch (e) {
+                                    console.warn('Local save resume failed:', e);
+                                }
+                            });
                         } catch (e) {
                             console.warn('Local save auto-load failed:', e);
                         }

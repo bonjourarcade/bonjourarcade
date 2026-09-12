@@ -3046,17 +3046,33 @@
                     // fresh page load always starts back at 'prompt'. So the closest
                     // we can get to "automatic" is a single click, not zero clicks.
                     const showLocalSaveResumeButton = (onClick) => {
+                        const wrap = document.createElement('div');
+                        wrap.style.cssText = 'position:fixed;top:16px;right:16px;z-index:9999;' +
+                            'display:flex;align-items:center;gap:6px;';
+
                         const btn = document.createElement('button');
                         btn.type = 'button';
                         btn.textContent = '💾 Reprendre ma sauvegarde locale';
-                        btn.style.cssText = 'position:fixed;top:16px;right:16px;z-index:9999;' +
-                            'padding:10px 16px;background:#222;color:#fff;border:1px solid #666;' +
-                            'border-radius:8px;cursor:pointer;font-size:14px;';
+                        btn.style.cssText = 'padding:10px 16px;background:#222;color:#fff;' +
+                            'border:1px solid #666;border-radius:8px;cursor:pointer;font-size:14px;';
                         btn.addEventListener('click', function () {
-                            btn.remove();
+                            wrap.remove();
                             onClick();
                         });
-                        document.body.appendChild(btn);
+
+                        const dismissBtn = document.createElement('button');
+                        dismissBtn.type = 'button';
+                        dismissBtn.textContent = '✕';
+                        dismissBtn.setAttribute('aria-label', 'Ne pas reprendre la sauvegarde locale');
+                        dismissBtn.style.cssText = 'padding:10px 12px;background:#222;color:#fff;' +
+                            'border:1px solid #666;border-radius:8px;cursor:pointer;font-size:14px;';
+                        dismissBtn.addEventListener('click', function () {
+                            wrap.remove();
+                        });
+
+                        wrap.appendChild(btn);
+                        wrap.appendChild(dismissBtn);
+                        document.body.appendChild(wrap);
                     };
 
                     // Called from EJS_onGameStart below. Restores silently when

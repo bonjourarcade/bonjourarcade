@@ -2948,6 +2948,121 @@
                     }
                 }
 
+                // --- Local file "pseudo-cloud" save states (File System Access API) ---
+                // Lets a player pick a file on their own machine once; we remember the
+                // FileSystemFileHandle and reuse it silently afterwards. This survives
+                // clearing site data / IndexedDB eviction since the save lives in a real
+                // file the player chose, not in browser storage. Chromium-only feature
+                // (Chrome/Edge/Opera) - on other browsers EmulatorJS's own IndexedDB-backed
+                // save states are left completely untouched.
+                if (window.showSaveFilePicker) {
+                    const LOCAL_SAVE_DB = 'BA_localSaveHandles';
+                    const LOCAL_SAVE_STORE = 'handles';
+
+                    const openLocalSaveDb = () => new Promise((resolve, reject) => {
+                        const req = indexedDB.open(LOCAL_SAVE_DB, 1);
+                        req.onupgradeneeded = () => req.result.createObjectStore(LOCAL_SAVE_STORE);
+                        req.onsuccess = () => resolve(req.result);
+                        req.onerror = () => reject(req.error);
+                    });
+
+                    const getLocalSaveHandle = async (key) => {
+                        const db = await openLocalSaveDb();
+                        return new Promise((resolve, reject) => {
+                            const tx = db.transaction(LOCAL_SAVE_STORE, 'readonly');
+                            const req = tx.objectStore(LOCAL_SAVE_STORE).get(key);
+                            req.onsuccess = () => resolve(req.result || null);
+                            req.onerror = () => reject(req.error);
+                        });
+                    };
+
+                    const setLocalSaveHandle = async (key, handle) => {
+                        const db = await openLocalSaveDb();
+                        return new Promise((resolve, reject) => {
+                            const tx = db.transaction(LOCAL_SAVE_STORE, 'readwrite');
+                            tx.objectStore(LOCAL_SAVE_STORE).put(handle, key);
+                            tx.oncomplete = () => resolve();
+                            tx.onerror = () => reject(tx.error);
+                        });
+                    };
+
+                    // mode: 'read' or 'readwrite'. Only call requestPermission (which can
+                    // prompt) from within a user gesture - e.g. a Save State/Load State click.
+                    const ensureLocalSavePermission = async (handle, mode) => {
+                        const opts = { mode };
+                        if ((await handle.queryPermission(opts)) === 'granted') return true;
+                        if ((await handle.requestPermission(opts)) === 'granted') return true;
+                        return false;
+                    };
+
+                    window.EJS_onSaveState = async ({ state }) => {
+                        try {
+                            const key = window.EJS_gameID;
+                            let handle = await getLocalSaveHandle(key);
+
+                            if (handle && !(await ensureLocalSavePermission(handle, 'readwrite'))) {
+                                handle = null; // permission revoked - re-pick a file below
+                            }
+
+                            if (!handle) {
+                                handle = await window.showSaveFilePicker({
+                                    suggestedName: `${key}.state`,
+                                    types: [{
+                                        description: 'Sauvegarde BonjourArcade',
+                                        accept: { 'application/octet-stream': ['.state'] }
+                                    }]
+                                });
+                                await setLocalSaveHandle(key, handle);
+                            }
+
+                            const writable = await handle.createWritable();
+                            await writable.write(state);
+                            await writable.close();
+                        } catch (e) {
+                            console.warn('Local save-to-file failed:', e);
+                        }
+                    };
+
+                    window.EJS_onLoadState = async () => {
+                        try {
+                            const key = window.EJS_gameID;
+                            const handle = await getLocalSaveHandle(key);
+                            if (!handle) {
+                                console.warn('No local save file associated with this game yet. Use Save State first.');
+                                return;
+                            }
+                            if (!(await ensureLocalSavePermission(handle, 'read'))) return;
+
+                            const file = await handle.getFile();
+                            const bytes = new Uint8Array(await file.arrayBuffer());
+                            window.EJS_emulator.gameManager.loadState(bytes);
+                        } catch (e) {
+                            console.warn('Local load-from-file failed:', e);
+                        }
+                    };
+
+                    // Called from EJS_onGameStart below. Only auto-restores when permission
+                    // is already granted from a previous visit - never prompts on its own,
+                    // since that would require a user gesture we don't have at game start.
+                    window.EJS_localSaveAutoLoad = async () => {
+                        try {
+                            if (window.EJS_Buttons && window.EJS_Buttons.loadState === false) return;
+
+                            const key = window.EJS_gameID;
+                            const handle = await getLocalSaveHandle(key);
+                            if (!handle) return;
+                            if ((await handle.queryPermission({ mode: 'read' })) !== 'granted') return;
+
+                            const file = await handle.getFile();
+                            const bytes = new Uint8Array(await file.arrayBuffer());
+                            window.EJS_emulator.gameManager.loadState(bytes);
+                            console.log('Local save file auto-loaded for', key);
+                        } catch (e) {
+                            console.warn('Local save auto-load failed:', e);
+                        }
+                    };
+                }
+
                 // Step 9.5: Default the autofire interval to 20ms.
                 // EmulatorJS hardcodes its "Autofire Interval" setting's own default (100ms)
                 // in its bundled code - unlike RetroArch core options, it never reads
@@ -2956,6 +3071,10 @@
                 // the player hasn't already picked their own value for this game, so this
                 // stays a *default* rather than overriding an explicit prior choice.
                 window.EJS_onGameStart = function () {
+                    if (typeof window.EJS_localSaveAutoLoad === 'function') {
+                        window.EJS_localSaveAutoLoad();
+                    }
+
                     try {
                         const emu = window.EJS_emulator;
                         if (!emu || typeof emu.getLocalStorageKey !== 'function' ||

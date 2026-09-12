@@ -31,6 +31,13 @@
     return div.innerHTML;
   }
 
+  // escapeHtml doesn't encode quotes (they're only special inside an
+  // attribute value, not in text content) - use this instead whenever
+  // untrusted text is interpolated into a "..."-quoted HTML attribute.
+  function escapeAttr(str) {
+    return escapeHtml(str).replace(/"/g, '&quot;');
+  }
+
   function capitalize(str) {
     if (!str) return '';
     return str.charAt(0).toUpperCase() + str.slice(1);
@@ -1551,8 +1558,7 @@
       TournoiUtils.callFunction('getPublicTournaments', {}).then(function (result) {
         var tournaments = (result && result.success && result.tournaments) || [];
 
-        updateCompetitifBadge(tournaments);
-        renderActiveTournamentLinks(tournaments);
+        renderTournamentSection(tournaments);
 
         if (!tournaments.length) return;
 
@@ -1597,25 +1603,86 @@
     });
   }
 
-  function updateCompetitifBadge(tournaments) {
-    var badge = document.getElementById('browse-competitif-badge');
-    if (!badge) return;
-    var activeCount = tournaments.filter(function (t) { return t.status === 'active'; }).length;
-    if (activeCount > 0) {
-      badge.textContent = activeCount;
-      badge.style.display = 'inline-block';
-    } else {
-      badge.style.display = 'none';
+  /* ---------- Tournament section (persistent cards + live round countdown) ---------- */
+
+  var tournamentTimerInterval = null;
+  var activeTournamentTimers = [];
+
+  function renderTournamentSection(tournaments) {
+    var section = document.getElementById('browse-tournaments');
+    var list = document.getElementById('browse-tournaments-list');
+    if (!section || !list) return;
+
+    var visible = tournaments.filter(function (t) {
+      return t.status === 'active' || t.status === 'registration';
+    });
+
+    if (tournamentTimerInterval) { clearInterval(tournamentTimerInterval); tournamentTimerInterval = null; }
+    activeTournamentTimers = [];
+
+    if (!visible.length) {
+      section.style.display = 'none';
+      list.innerHTML = '';
+      return;
     }
+
+    list.innerHTML = visible.map(function (t, idx) {
+      var isActive = t.status === 'active';
+      var roundInfo = isActive
+        ? 'Ronde ' + ((t.currentRoundIndex || 0) + 1) + '/' + (t.games ? t.games.length : '?')
+        : 'Inscriptions ouvertes';
+      var currentGameId = isActive ? (t.currentGame || (t.games && t.games[t.currentRoundIndex || 0])) : null;
+      var g = currentGameId ? allGamesById[currentGameId] : null;
+      var gameName = g ? getDisplayTitle(g) : currentGameId;
+      var hasTimer = isActive && t.roundStartTime && t.roundDurationSec;
+      var timerId = 'browse-tournament-timer-' + idx;
+
+      var leaderHtml = t.leader ? (
+        '<div class="browse-tournament-leader">' +
+        '<span>👑</span>' +
+        '<img src="' + escapeAttr(t.leader.photoURL || '/assets/default-avatar.png') + '" alt="">' +
+        '<span class="browse-tournament-leader-name">' + escapeHtml(t.leader.displayName || '?') + '</span>' +
+        '<span class="browse-tournament-leader-score">' + escapeHtml(Number(t.leader.score || 0).toLocaleString()) + '</span>' +
+        '</div>'
+      ) : '';
+
+      return '<a href="/tournoi/play/?t=' + encodeURIComponent(t.id) + '" class="browse-tournament-card">' +
+        '<div class="browse-tournament-card-top">' +
+        '<span class="browse-tournament-name">' + escapeHtml(t.name || 'Tournoi') + '</span>' +
+        '<span class="browse-tournament-status ' + (isActive ? 'is-active' : 'is-registration') + '">' +
+        (isActive ? 'En cours' : 'Inscription') + '</span>' +
+        '</div>' +
+        (t.description ? '<div class="browse-tournament-desc">' + escapeHtml(t.description) + '</div>' : '') +
+        '<div class="browse-tournament-meta">' +
+        '<span>' + escapeHtml(roundInfo) + '</span>' +
+        (hasTimer ? '<span class="browse-tournament-timer" id="' + timerId + '"></span>' : '') +
+        '</div>' +
+        (gameName ? '<div class="browse-tournament-game">🎮 ' + escapeHtml(gameName) + '</div>' : '') +
+        leaderHtml +
+        '</a>';
+    }).join('');
+
+    visible.forEach(function (t, idx) {
+      if (t.status === 'active' && t.roundStartTime && t.roundDurationSec) {
+        var el = document.getElementById('browse-tournament-timer-' + idx);
+        if (el) activeTournamentTimers.push({ el: el, tournament: t });
+      }
+    });
+
+    if (activeTournamentTimers.length) {
+      updateTournamentTimers();
+      tournamentTimerInterval = setInterval(updateTournamentTimers, 1000);
+    }
+
+    section.style.display = 'block';
   }
 
-  function renderActiveTournamentLinks(tournaments) {
-    var container = document.getElementById('browse-active-tournaments');
-    if (!container) return;
-    var active = tournaments.filter(function (t) { return t.status === 'active'; });
-    container.innerHTML = active.map(function (t) {
-      return '<a href="/tournoi/play/?t=' + encodeURIComponent(t.id) + '">🟢 ' + escapeHtml(t.name || 'Tournoi') + '</a>';
-    }).join('');
+  function updateTournamentTimers() {
+    activeTournamentTimers.forEach(function (entry) {
+      var remaining = TournoiUtils.getRemainingSeconds(entry.tournament.roundStartTime, entry.tournament.roundDurationSec);
+      entry.el.textContent = '⏱ ' + TournoiUtils.formatTimer(remaining);
+      entry.el.classList.toggle('timer-warning', remaining <= 60);
+    });
   }
 
   /* ---------- Idle auto-screensaver ---------- */

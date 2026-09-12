@@ -190,7 +190,7 @@ a {
   border: 1px solid var(--browse-border);
 }
 
-/* ---------- Nav dropdowns (Découvrir / Compétitif) ---------- */
+/* ---------- Nav dropdowns (Découvrir / Compétition) ---------- */
 
 .browse-dropdown { position: relative; }
 
@@ -610,6 +610,158 @@ a {
 }
 #browse-modal-fav:hover { background: var(--browse-border); }
 #browse-modal-fav.is-fav { border-color: var(--browse-pink); color: var(--browse-pink); }
+
+/* ---------- Tournaments section ---------- */
+
+/* Floats inside the hero, below the fixed header, on top of the backdrop
+   image - not a normal-flow section - so the hero itself stays the first
+   thing on the page and its backdrop still reaches the very top of the
+   window, exactly like on a page with no tournaments running. */
+.browse-tournaments {
+  position: absolute;
+  top: 76px;
+  left: 0;
+  z-index: 3;
+  width: min(620px, 90vw);
+  padding: 14px 5% 0;
+}
+
+.browse-tournaments-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.browse-tournaments-title {
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--browse-hero-text);
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.6);
+}
+
+.browse-tournaments-viewall {
+  color: var(--browse-hero-text);
+  font-size: 0.85rem;
+  text-decoration: none;
+  font-weight: 600;
+  white-space: nowrap;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.6);
+}
+.browse-tournaments-viewall:hover { text-decoration: underline; }
+
+.browse-tournaments-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+.browse-tournament-card {
+  display: block;
+  padding: 12px 14px;
+  background: var(--browse-surface);
+  border: 1px solid var(--browse-border);
+  border-radius: 10px;
+  text-decoration: none;
+  color: var(--browse-text);
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+.browse-tournament-card:hover {
+  border-color: var(--browse-amber);
+  transform: translateY(-2px);
+}
+
+.browse-tournament-card-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.browse-tournament-name {
+  flex: 1;
+  min-width: 0;
+  font-weight: 700;
+  color: var(--browse-amber);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.browse-tournament-status {
+  font-size: 0.72rem;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-weight: 700;
+  white-space: nowrap;
+  color: #fff;
+}
+.browse-tournament-status.is-active { background: #28a745; }
+.browse-tournament-status.is-registration { background: #ffc107; color: #1a1a2e; }
+
+.browse-tournament-desc {
+  font-size: 0.78rem;
+  color: var(--browse-text-dim);
+  margin-top: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.browse-tournament-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 6px;
+  font-size: 0.78rem;
+  color: var(--browse-text-dim);
+}
+
+.browse-tournament-game {
+  font-size: 0.8rem;
+  color: var(--browse-blue);
+  margin-top: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.browse-tournament-timer {
+  font-family: 'Courier New', monospace;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--browse-text-dim);
+  white-space: nowrap;
+}
+.browse-tournament-timer.timer-warning { color: #dc3545; }
+
+.browse-tournament-leader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--browse-border);
+  font-size: 0.8rem;
+}
+.browse-tournament-leader img {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.browse-tournament-leader-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.browse-tournament-leader-score {
+  font-weight: 700;
+  color: var(--browse-amber);
+}
 
 /* ---------- Rows ---------- */
 
@@ -1248,16 +1400,6 @@ a {
   .browse-dropdown.open .browse-dropdown-menu { display: block; }
   .browse-dropdown-menu a { padding: 7px 0; }
 
-  /* The dropdown button is full-width here, so the badge's normal
-     corner-of-the-button absolute position (top/right: -4px) leaves it
-     stranded far to the right of "Compétitif" instead of next to it. */
-  .browse-nav-dropbtn #browse-competitif-badge {
-    position: static;
-    margin-left: 6px;
-    top: auto;
-    right: auto;
-  }
-
   .browse-user-name { display: none; }
 
   /* "Retour à v1" and "Supporter" share one row instead of stacking. */
@@ -1321,4 +1463,5 @@ a {
   /* Paired rows only make sense side by side where there's room - stack
      them like any other row on narrow screens. */
   .browse-row-pair { display: block; }
+  .browse-tournaments-list { grid-template-columns: 1fr; }
 }

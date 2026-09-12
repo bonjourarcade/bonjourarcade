@@ -37,11 +37,10 @@
         </div>
         <div class="browse-dropdown" data-browse-dropdown>
           <button type="button" class="browse-nav-dropbtn browse-nav-dropbtn-competitif">
-            Compétitif <span id="browse-competitif-badge" class="browse-admin-badge" style="display:none;"></span>
+            Compétition
           </button>
           <div class="browse-dropdown-menu">
-            <div id="browse-active-tournaments"></div>
-            <a href="/tournoi/">🏅 Plus de tournois</a>
+            <a href="/tournoi/">🏅 Tournois</a>
             <a href="/scores">📋 Scores</a>
           </div>
         </div>
@@ -71,6 +70,15 @@
     <section id="browse-hero" class="browse-hero">
       <div class="browse-hero-backdrop" id="browse-hero-backdrop"></div>
       <div class="browse-hero-fade"></div>
+
+      <section id="browse-tournaments" class="browse-tournaments" style="display:none;">
+        <div class="browse-tournaments-header">
+          <span class="browse-tournaments-title">🏆 Tournois publics</span>
+          <a href="/tournoi/" class="browse-tournaments-viewall">Voir tout →</a>
+        </div>
+        <div id="browse-tournaments-list" class="browse-tournaments-list"></div>
+      </section>
+
       <div class="browse-hero-content">
         <div class="browse-hero-top-row">
           <a id="browse-hero-poster" class="browse-hero-poster" href="#" aria-label="Jouer">

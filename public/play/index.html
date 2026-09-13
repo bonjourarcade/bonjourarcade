@@ -2995,6 +2995,13 @@
                         return false;
                     };
 
+                    // Tracks whether the player has progress since the last write to
+                    // their local save file, so we know whether to warn before they
+                    // navigate away or close the tab (see the beforeunload listener
+                    // below). Only ever true once a local save file actually exists
+                    // for this game - there's nothing file-based at risk otherwise.
+                    let localSaveIsDirty = false;
+
                     window.EJS_onSaveState = async ({ state }) => {
                         try {
                             const key = window.EJS_gameID;
@@ -3018,6 +3025,7 @@
                             const writable = await handle.createWritable();
                             await writable.write(state);
                             await writable.close();
+                            localSaveIsDirty = false;
                         } catch (e) {
                             console.warn('Local save-to-file failed:', e);
                         }
@@ -3086,6 +3094,11 @@
                             const handle = await getLocalSaveHandle(key);
                             if (!handle) return;
 
+                            // A local save file exists for this game, so from here on
+                            // playing without re-saving risks losing progress - warn
+                            // before the player navigates away or closes the tab.
+                            localSaveIsDirty = true;
+
                             const loadFromHandle = async () => {
                                 const file = await handle.getFile();
                                 const bytes = new Uint8Array(await file.arrayBuffer());
@@ -3110,6 +3123,17 @@
                             console.warn('Local save auto-load failed:', e);
                         }
                     };
+
+                    // Browsers ignore any custom message here and always show their
+                    // own generic "leave site? changes may be lost" prompt - there's
+                    // no way to offer a "save first" button from this handler. This
+                    // just gives the player a chance to cancel and hit Save State
+                    // themselves before actually leaving.
+                    window.addEventListener('beforeunload', (e) => {
+                        if (!localSaveIsDirty) return;
+                        e.preventDefault();
+                        e.returnValue = '';
+                    });
                 }
 
                 // Step 9.5: Default the autofire interval to 20ms.

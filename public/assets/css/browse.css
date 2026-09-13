@@ -285,23 +285,14 @@ a {
 
 /* ---------- Account / admin ---------- */
 
-.browse-nav-admin-link {
+.browse-nav a.browse-nav-admin-link {
   position: relative;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: #d32f3d;
-  color: #fff !important;
-  font-size: 0.85rem;
+  color: #ff4d4d;
   font-weight: 700;
-  text-decoration: none;
-  padding: 6px 14px;
-  border-radius: 20px;
-  border-bottom: none !important;
-  white-space: nowrap;
 }
-.browse-nav-admin-link:hover { background: #ef4b5a; color: #fff !important; }
-.browse-header.browse-header-solid .browse-nav-admin-link { color: #fff !important; }
+.browse-header.browse-header-solid .browse-nav a.browse-nav-admin-link { color: #d3273a; }
+.browse-nav a.browse-nav-admin-link:hover { color: #ff7a7a; }
+.browse-header.browse-header-solid .browse-nav a.browse-nav-admin-link:hover { color: #ff4d4d; }
 
 .browse-admin-badge {
   position: absolute;
@@ -1485,24 +1476,15 @@ a {
     content: 'Thème';
   }
 
-  /* The red admin button already carries its own label + badge; it just
-     needs to become a full-width row like the other nav items here.
-     (Selector specificity is bumped with the extra "a" type + class so
-     this wins over the generic ".browse-nav a" rule above, which also
-     uses !important on color/border-bottom-color.) */
+  /* Keep the admin link's red text here too (it otherwise falls back to
+     the generic ".browse-nav a" color, which uses !important). Selector
+     specificity is bumped with the extra "a" type + class to win over it. */
   .browse-nav a.browse-nav-admin-link {
-    display: inline-flex;
-    align-items: center;
-    width: 100%;
-    box-sizing: border-box;
-    border-radius: 8px;
-    margin: 4px 0;
-    color: #fff !important;
-    border-bottom: none !important;
+    color: #ff4d4d !important;
   }
   .browse-nav a.browse-nav-admin-link .browse-admin-badge {
     position: static;
-    margin-left: auto;
+    margin-left: 8px;
   }
 }
 

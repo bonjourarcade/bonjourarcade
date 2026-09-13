@@ -1724,20 +1724,24 @@
   }
 
   // The tournaments bar floats over the hero, full width, right where the
-  // showcase poster would otherwise be vertically centered - so push the
-  // poster down to start right below it instead of letting the two
-  // overlap. Reverts to the poster's normal centered position (the CSS
+  // showcase poster and the badge/title/description block would otherwise
+  // sit (both are bottom-aligned in the hero via align-items: flex-end) -
+  // so push them down to start right below the bar instead of letting them
+  // overlap. Reverts to their normal bottom-aligned position (the CSS
   // default) once there's nothing to clear.
   function updateHeroPosterOffset() {
     var poster = document.getElementById('browse-hero-poster-large');
+    var content = document.querySelector('.browse-hero-content');
     var bar = document.getElementById('browse-tournaments');
-    if (!poster) return;
-    if (bar && bar.style.display === 'block') {
-      poster.style.alignSelf = 'flex-start';
-      poster.style.marginTop = (bar.getBoundingClientRect().height + 16) + 'px';
-    } else {
-      poster.style.alignSelf = '';
-      poster.style.marginTop = '';
+    var showBar = bar && bar.style.display === 'block';
+    var offset = showBar ? (bar.getBoundingClientRect().height + 16) + 'px' : '';
+    if (poster) {
+      poster.style.alignSelf = showBar ? 'flex-start' : '';
+      poster.style.marginTop = offset;
+    }
+    if (content) {
+      content.style.alignSelf = showBar ? 'flex-start' : '';
+      content.style.marginTop = offset;
     }
   }
 

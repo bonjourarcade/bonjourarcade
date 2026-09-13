@@ -621,8 +621,8 @@ a {
   position: absolute;
   top: 76px;
   left: 0;
+  right: 0;
   z-index: 3;
-  width: min(620px, 90vw);
   padding: 14px 5% 0;
 }
 
@@ -651,14 +651,24 @@ a {
 }
 .browse-tournaments-viewall:hover { text-decoration: underline; }
 
+/* Always a single row, regardless of how many public tournaments there
+   are - it floats over the hero, so letting it wrap to more rows would
+   grow tall enough to cover the featured game's own title beneath it.
+   Extra tournaments scroll horizontally instead. */
 .browse-tournaments-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  display: flex;
   gap: 12px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  padding-bottom: 2px;
 }
+.browse-tournaments-list::-webkit-scrollbar { display: none; }
 
 .browse-tournament-card {
   display: block;
+  flex: 0 0 260px;
   padding: 12px 14px;
   background: var(--browse-surface);
   border: 1px solid var(--browse-border);
@@ -1463,5 +1473,5 @@ a {
   /* Paired rows only make sense side by side where there's room - stack
      them like any other row on narrow screens. */
   .browse-row-pair { display: block; }
-  .browse-tournaments-list { grid-template-columns: 1fr; }
+  .browse-tournament-card { flex-basis: 220px; }
 }

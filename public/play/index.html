@@ -2986,6 +2986,20 @@
                         });
                     };
 
+                    // Forgets this game's association with its local save file (the
+                    // "trash" button below) - only removes our own IndexedDB record of
+                    // it, not the actual file on the player's disk, so re-picking the
+                    // same file later (or a different one) still works.
+                    const deleteLocalSaveHandle = async (key) => {
+                        const db = await openLocalSaveDb();
+                        return new Promise((resolve, reject) => {
+                            const tx = db.transaction(LOCAL_SAVE_STORE, 'readwrite');
+                            tx.objectStore(LOCAL_SAVE_STORE).delete(key);
+                            tx.oncomplete = () => resolve();
+                            tx.onerror = () => reject(tx.error);
+                        });
+                    };
+
                     // mode: 'read' or 'readwrite'. Only call requestPermission (which can
                     // prompt) from within a user gesture - e.g. a Save State/Load State click.
                     const ensureLocalSavePermission = async (handle, mode) => {
@@ -3049,37 +3063,61 @@
                         }
                     };
 
-                    // Chrome never lets a page silently re-request file permission
-                    // without a user gesture, even for a handle it granted before - a
-                    // fresh page load always starts back at 'prompt'. So the closest
-                    // we can get to "automatic" is a single click, not zero clicks.
-                    const showLocalSaveResumeButton = (onClick) => {
+                    // Small pill-button factory shared by the controls below.
+                    const makeLocalSaveButton = (label, ariaLabel) => {
+                        const btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.textContent = label;
+                        if (ariaLabel) btn.setAttribute('aria-label', ariaLabel);
+                        btn.style.cssText = 'padding:10px 12px;background:#222;color:#fff;' +
+                            'border:1px solid #666;border-radius:8px;cursor:pointer;font-size:14px;';
+                        return btn;
+                    };
+
+                    // Shows the local-save controls for this game: a trash button to
+                    // forget the association (always), plus - only when we can't
+                    // silently reload it ourselves (see the comment at its call site
+                    // below) - a one-click "resume" button and a dismiss ("not now")
+                    // button next to it.
+                    const showLocalSaveControls = ({ resumeAction }) => {
                         const wrap = document.createElement('div');
                         wrap.style.cssText = 'position:fixed;top:16px;right:16px;z-index:9999;' +
                             'display:flex;align-items:center;gap:6px;';
 
-                        const btn = document.createElement('button');
-                        btn.type = 'button';
-                        btn.textContent = '💾 Reprendre ma sauvegarde locale';
-                        btn.style.cssText = 'padding:10px 16px;background:#222;color:#fff;' +
-                            'border:1px solid #666;border-radius:8px;cursor:pointer;font-size:14px;';
-                        btn.addEventListener('click', function () {
-                            wrap.remove();
-                            onClick();
-                        });
+                        if (resumeAction) {
+                            const resumeBtn = makeLocalSaveButton('💾 Reprendre ma sauvegarde locale');
+                            resumeBtn.style.padding = '10px 16px';
+                            resumeBtn.addEventListener('click', function () {
+                                wrap.remove();
+                                resumeAction();
+                            });
+                            wrap.appendChild(resumeBtn);
+                        }
 
-                        const dismissBtn = document.createElement('button');
-                        dismissBtn.type = 'button';
-                        dismissBtn.textContent = '✕';
-                        dismissBtn.setAttribute('aria-label', 'Ne pas reprendre la sauvegarde locale');
-                        dismissBtn.style.cssText = 'padding:10px 12px;background:#222;color:#fff;' +
-                            'border:1px solid #666;border-radius:8px;cursor:pointer;font-size:14px;';
-                        dismissBtn.addEventListener('click', function () {
+                        const deleteBtn = makeLocalSaveButton('🗑️', 'Supprimer ma sauvegarde locale pour ce jeu');
+                        deleteBtn.title = 'Supprimer ma sauvegarde locale pour ce jeu';
+                        deleteBtn.addEventListener('click', async function () {
+                            if (!confirm('Oublier la sauvegarde locale associée à ce jeu ? ' +
+                                'Le fichier lui-même n\'est pas supprimé de ton ordinateur, ' +
+                                'seul le lien avec BonjourArcade est retiré.')) return;
+                            try {
+                                await deleteLocalSaveHandle(window.EJS_gameID);
+                                localSaveIsDirty = false;
+                            } catch (e) {
+                                console.warn('Local save delete failed:', e);
+                            }
                             wrap.remove();
                         });
+                        wrap.appendChild(deleteBtn);
 
-                        wrap.appendChild(btn);
-                        wrap.appendChild(dismissBtn);
+                        if (resumeAction) {
+                            const dismissBtn = makeLocalSaveButton('✕', 'Ne pas reprendre la sauvegarde locale');
+                            dismissBtn.addEventListener('click', function () {
+                                wrap.remove();
+                            });
+                            wrap.appendChild(dismissBtn);
+                        }
+
                         document.body.appendChild(wrap);
                     };
 
@@ -3108,15 +3146,18 @@
                             if ((await handle.queryPermission({ mode: 'read' })) === 'granted') {
                                 await loadFromHandle();
                                 console.log('Local save file auto-loaded for', key);
+                                showLocalSaveControls({ resumeAction: null });
                                 return;
                             }
 
-                            showLocalSaveResumeButton(async () => {
-                                try {
-                                    if (!(await ensureLocalSavePermission(handle, 'read'))) return;
-                                    await loadFromHandle();
-                                } catch (e) {
-                                    console.warn('Local save resume failed:', e);
+                            showLocalSaveControls({
+                                resumeAction: async () => {
+                                    try {
+                                        if (!(await ensureLocalSavePermission(handle, 'read'))) return;
+                                        await loadFromHandle();
+                                    } catch (e) {
+                                        console.warn('Local save resume failed:', e);
+                                    }
                                 }
                             });
                         } catch (e) {

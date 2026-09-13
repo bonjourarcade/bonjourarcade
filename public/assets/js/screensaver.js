@@ -389,8 +389,8 @@ document.addEventListener('DOMContentLoaded', () => {
         return; // Exit if essential elements are missing
     }
 
-    // Initialize interval and event listeners
-    setInterval(timerIncrement, 1000); // 1 second
+    // Auto-launch on idle disabled by request; screensaver is now manual-only ('é' key or /screensaver/ page).
+    // setInterval(timerIncrement, 1000); // 1 second
 
     document.addEventListener('mousemove', resetIdleTime);
     document.addEventListener('touchstart', resetIdleTime); // For touch devices

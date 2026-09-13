@@ -1675,6 +1675,30 @@
     }
 
     section.style.display = 'block';
+    updateTournamentsScrollFade();
+    if (!tournamentsScrollListenersAdded) {
+      tournamentsScrollListenersAdded = true;
+      var resizeTimeout = null;
+      window.addEventListener('resize', function () {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(updateTournamentsScrollFade, 150);
+      });
+      list.addEventListener('scroll', updateTournamentsScrollFade, { passive: true });
+    }
+  }
+
+  var tournamentsScrollListenersAdded = false;
+
+  // Only fades the trailing edge (see .is-scrollable in browse.css) while
+  // there's actually more content past the visible width still to the
+  // right - not once already scrolled to the end, and never when
+  // everything fits - so it always reads as "scroll for more", never as
+  // a stray fade on the genuinely last card.
+  function updateTournamentsScrollFade() {
+    var list = document.getElementById('browse-tournaments-list');
+    if (!list) return;
+    var hasMoreToTheRight = list.scrollWidth - list.clientWidth - list.scrollLeft > 1;
+    list.classList.toggle('is-scrollable', hasMoreToTheRight);
   }
 
   function updateTournamentTimers() {

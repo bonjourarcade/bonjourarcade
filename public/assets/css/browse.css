@@ -668,6 +668,14 @@ a {
 }
 .browse-tournaments-list::-webkit-scrollbar { display: none; }
 
+/* Set via JS only when there's actually more to scroll to - fades the
+   trailing edge so a partially-visible card reads as "scroll for more"
+   instead of looking like a rendering glitch. */
+.browse-tournaments-list.is-scrollable {
+  mask-image: linear-gradient(to right, black calc(100% - 36px), transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, black calc(100% - 36px), transparent 100%);
+}
+
 .browse-tournament-card {
   display: block;
   flex: 0 0 260px;

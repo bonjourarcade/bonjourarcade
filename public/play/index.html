@@ -3074,11 +3074,14 @@
                         return btn;
                     };
 
-                    // Shows the local-save controls for this game: a trash button to
-                    // forget the association (always), plus - only when we can't
-                    // silently reload it ourselves (see the comment at its call site
-                    // below) - a one-click "resume" button and a dismiss ("not now")
-                    // button next to it.
+                    // Shows the local-save controls for this game: a one-click
+                    // "resume" button and a dismiss ("not now") button - only when we
+                    // can't silently reload it ourselves (see the comment at its call
+                    // site below) - plus a trash button to forget the association
+                    // (always). The trash button sits last, with a visual gap, and
+                    // never in between resume/dismiss - anyone used to "the last
+                    // button dismisses this" from before it existed must not land on
+                    // a destructive action instead.
                     const showLocalSaveControls = ({ resumeAction }) => {
                         const wrap = document.createElement('div');
                         wrap.style.cssText = 'position:fixed;top:16px;right:16px;z-index:9999;' +
@@ -3092,10 +3095,17 @@
                                 resumeAction();
                             });
                             wrap.appendChild(resumeBtn);
+
+                            const dismissBtn = makeLocalSaveButton('✕', 'Ne pas reprendre la sauvegarde locale');
+                            dismissBtn.addEventListener('click', function () {
+                                wrap.remove();
+                            });
+                            wrap.appendChild(dismissBtn);
                         }
 
                         const deleteBtn = makeLocalSaveButton('🗑️', 'Supprimer ma sauvegarde locale pour ce jeu');
                         deleteBtn.title = 'Supprimer ma sauvegarde locale pour ce jeu';
+                        deleteBtn.style.marginLeft = '10px';
                         deleteBtn.addEventListener('click', async function () {
                             if (!confirm('Oublier la sauvegarde locale associée à ce jeu ? ' +
                                 'Le fichier lui-même n\'est pas supprimé de ton ordinateur, ' +
@@ -3109,14 +3119,6 @@
                             wrap.remove();
                         });
                         wrap.appendChild(deleteBtn);
-
-                        if (resumeAction) {
-                            const dismissBtn = makeLocalSaveButton('✕', 'Ne pas reprendre la sauvegarde locale');
-                            dismissBtn.addEventListener('click', function () {
-                                wrap.remove();
-                            });
-                            wrap.appendChild(dismissBtn);
-                        }
 
                         document.body.appendChild(wrap);
                     };

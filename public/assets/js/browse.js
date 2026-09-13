@@ -362,7 +362,7 @@
   }
 
   var SYSTEM_NAMES = {
-    'arcade': 'Arcade (borne)', 'mame2003_plus': 'Arcade (borne)', 'atari2600': 'Atari 2600',
+    'arcade': 'Coin-Op', 'mame2003_plus': 'Coin-Op', 'atari2600': 'Atari 2600',
     'gb': 'Game Boy', 'gba': 'Game Boy Advance', 'gbc': 'Game Boy Color',
     'segaMD': 'Sega Genesis/Mega Drive', 'segaGG': 'Sega Game Gear', 'segaMS': 'Sega Master System',
     'segaSaturn': 'Sega Saturn', 'sega32x': 'Sega 32X', 'nds': 'Nintendo DS', 'jaguar': 'Atari Jaguar',

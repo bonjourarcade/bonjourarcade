@@ -231,29 +231,25 @@
     nav.addEventListener('click', function (e) { e.stopPropagation(); });
   }
 
-  // On narrow viewports, everything except search and the profile/login
-  // control moves into the hamburger dropdown instead of staying in the
-  // header bar. Reparent the real nodes (rather than duplicating them) so
-  // existing getElementById lookups and event listeners keep working no
-  // matter where they currently sit in the DOM.
+  // On narrow viewports, the theme toggle moves into the hamburger dropdown
+  // instead of staying in the header bar. Reparent the real node (rather
+  // than duplicating it) so existing getElementById lookups and event
+  // listeners keep working no matter where it currently sits in the DOM.
+  // (The admin link already lives in the nav itself, so it needs no
+  // reparenting - see index.html.)
   function initMobileHeaderMenu() {
     var nav = document.querySelector('[data-browse-menu]');
-    var admin = document.getElementById('browse-admin-link');
     var theme = document.getElementById('browse-theme-toggle');
-    if (!nav || !admin || !theme) return;
+    if (!nav || !theme) return;
 
-    var adminAnchor = document.createComment('browse-admin-link-anchor');
     var themeAnchor = document.createComment('browse-theme-toggle-anchor');
-    admin.parentNode.insertBefore(adminAnchor, admin);
     theme.parentNode.insertBefore(themeAnchor, theme);
 
     var mq = window.matchMedia('(max-width: 900px)');
     function apply(isMobile) {
       if (isMobile) {
-        nav.appendChild(admin);
         nav.appendChild(theme);
       } else {
-        adminAnchor.parentNode.insertBefore(admin, adminAnchor);
         themeAnchor.parentNode.insertBefore(theme, themeAnchor);
       }
     }
@@ -511,8 +507,7 @@
           if (!isModerator) { adminLink.style.display = 'none'; adminBadge.style.display = 'none'; return; }
           adminLink.style.display = 'inline-flex';
           if (!window.getPendingScoresCount) return;
-          window.getPendingScoresCount().then(function (result) {
-            var count = result && result.count;
+          window.getPendingScoresCount().then(function (count) {
             if (count > 0) {
               adminBadge.textContent = count;
               adminBadge.style.display = 'inline-block';

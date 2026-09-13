@@ -285,20 +285,30 @@ a {
 
 /* ---------- Account / admin ---------- */
 
-.browse-admin-link {
+.browse-nav-admin-link {
   position: relative;
-  font-size: 1.05rem;
-  text-decoration: none;
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
+  gap: 6px;
+  background: #d32f3d;
+  color: #fff !important;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-decoration: none;
+  padding: 6px 14px;
+  border-radius: 20px;
+  border-bottom: none !important;
+  white-space: nowrap;
 }
+.browse-nav-admin-link:hover { background: #ef4b5a; color: #fff !important; }
+.browse-header.browse-header-solid .browse-nav-admin-link { color: #fff !important; }
 
 .browse-admin-badge {
   position: absolute;
-  top: -4px;
-  right: -4px;
-  background: #ff4444;
-  color: #fff;
+  top: -8px;
+  right: -8px;
+  background: var(--browse-amber);
+  color: #1a140c;
   border-radius: 10px;
   padding: 0 5px;
   font-size: 0.65rem;
@@ -1454,10 +1464,9 @@ a {
   .browse-nav-row { width: 100%; }
   .browse-nav-row a { width: auto; padding: 9px 0; }
 
-  /* Admin link + theme toggle get reparented into this nav on mobile
-     (see initMobileHeaderMenu in browse.js) - restyle them from icon-only
-     circular buttons into full-width labeled rows like the other links. */
-  .browse-nav #browse-admin-link,
+  /* Theme toggle gets reparented into this nav on mobile (see
+     initMobileHeaderMenu in browse.js) - restyle it from an icon-only
+     circular button into a full-width labeled row like the other links. */
   .browse-nav #browse-theme-toggle {
     display: flex;
     align-items: center;
@@ -1471,16 +1480,29 @@ a {
     color: var(--browse-text) !important;
     border-top: 1px solid var(--browse-border);
   }
-  .browse-nav #browse-admin-link::after,
   .browse-nav #browse-theme-toggle::after {
     order: 1;
+    content: 'Thème';
   }
-  .browse-nav #browse-admin-link::after { content: 'Administration'; }
-  .browse-nav #browse-theme-toggle::after { content: 'Thème'; }
-  .browse-nav #browse-admin-badge {
-    order: 2;
-    margin-left: auto;
+
+  /* The red admin button already carries its own label + badge; it just
+     needs to become a full-width row like the other nav items here.
+     (Selector specificity is bumped with the extra "a" type + class so
+     this wins over the generic ".browse-nav a" rule above, which also
+     uses !important on color/border-bottom-color.) */
+  .browse-nav a.browse-nav-admin-link {
+    display: inline-flex;
+    align-items: center;
+    width: 100%;
+    box-sizing: border-box;
+    border-radius: 8px;
+    margin: 4px 0;
+    color: #fff !important;
+    border-bottom: none !important;
+  }
+  .browse-nav a.browse-nav-admin-link .browse-admin-badge {
     position: static;
+    margin-left: auto;
   }
 }
 

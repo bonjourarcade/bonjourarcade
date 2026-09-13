@@ -24,6 +24,9 @@
       <button type="button" id="browse-menu-toggle" class="browse-icon-btn browse-menu-toggle" aria-label="Menu">☰</button>
       <nav class="browse-nav" data-browse-menu>
         <a href="/" class="active">Accueil</a>
+        <a href="/admin/" id="browse-admin-link" class="browse-nav-admin-link" aria-label="Administration" title="Administration" style="display:none;">
+          Administration<span id="browse-admin-badge" class="browse-admin-badge" style="display:none;"></span>
+        </a>
         <div class="browse-dropdown" data-browse-dropdown>
           <button type="button" class="browse-nav-dropbtn">Découvrir</button>
           <div class="browse-dropdown-menu">
@@ -55,9 +58,6 @@
           <button type="button" id="browse-search-toggle" class="browse-icon-btn" aria-label="Rechercher">🔍</button>
           <input type="text" id="browse-search-input" class="browse-search-input" placeholder="Rechercher un jeu..." autocomplete="off">
         </div>
-        <a href="/admin/" id="browse-admin-link" class="browse-icon-btn browse-admin-link" aria-label="Administration" title="Administration" style="display:none;">
-          🛡️<span id="browse-admin-badge" class="browse-admin-badge" style="display:none;"></span>
-        </a>
         <a href="/profil/" id="browse-user-indicator" class="browse-user-indicator" style="display:none;">
           <img id="browse-user-avatar" src="" alt="">
           <span id="browse-user-name"></span>

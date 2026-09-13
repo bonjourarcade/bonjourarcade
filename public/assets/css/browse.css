@@ -617,12 +617,14 @@ a {
    image - not a normal-flow section - so the hero itself stays the first
    thing on the page and its backdrop still reaches the very top of the
    window, exactly like on a page with no tournaments running. */
+/* Capped to the same width as .browse-hero-content (not right:0) so it
+   never reaches over into the showcase poster's column on the right. */
 .browse-tournaments {
   position: absolute;
   top: 76px;
   left: 0;
-  right: 0;
   z-index: 3;
+  width: min(720px, 90vw);
   padding: 14px 5% 0;
 }
 

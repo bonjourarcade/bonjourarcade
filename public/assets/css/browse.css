@@ -664,7 +664,11 @@ a {
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-x: contain;
   scrollbar-width: none;
-  padding-bottom: 2px;
+  /* overflow-x: auto forces overflow-y to clip too (per spec, "visible"
+     computes to "auto" once the other axis isn't visible) - so without
+     this top padding, :hover's translateY(-2px) lift gets its top edge
+     sheared off flush against the container's own top edge. */
+  padding: 4px 0 2px;
 }
 .browse-tournaments-list::-webkit-scrollbar { display: none; }
 

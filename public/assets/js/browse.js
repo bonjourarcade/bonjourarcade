@@ -1623,6 +1623,7 @@
     if (!visible.length) {
       section.style.display = 'none';
       list.innerHTML = '';
+      updateHeroPosterOffset();
       return;
     }
 
@@ -1676,12 +1677,16 @@
 
     section.style.display = 'block';
     updateTournamentsScrollFade();
+    updateHeroPosterOffset();
     if (!tournamentsScrollListenersAdded) {
       tournamentsScrollListenersAdded = true;
       var resizeTimeout = null;
       window.addEventListener('resize', function () {
         clearTimeout(resizeTimeout);
-        resizeTimeout = setTimeout(updateTournamentsScrollFade, 150);
+        resizeTimeout = setTimeout(function () {
+          updateTournamentsScrollFade();
+          updateHeroPosterOffset();
+        }, 150);
       });
       list.addEventListener('scroll', updateTournamentsScrollFade, { passive: true });
     }
@@ -1699,6 +1704,24 @@
     if (!list) return;
     var hasMoreToTheRight = list.scrollWidth - list.clientWidth - list.scrollLeft > 1;
     list.classList.toggle('is-scrollable', hasMoreToTheRight);
+  }
+
+  // The tournaments bar floats over the hero, full width, right where the
+  // showcase poster would otherwise be vertically centered - so push the
+  // poster down to start right below it instead of letting the two
+  // overlap. Reverts to the poster's normal centered position (the CSS
+  // default) once there's nothing to clear.
+  function updateHeroPosterOffset() {
+    var poster = document.getElementById('browse-hero-poster-large');
+    var bar = document.getElementById('browse-tournaments');
+    if (!poster) return;
+    if (bar && bar.style.display === 'block') {
+      poster.style.alignSelf = 'flex-start';
+      poster.style.marginTop = (bar.getBoundingClientRect().height + 16) + 'px';
+    } else {
+      poster.style.alignSelf = '';
+      poster.style.marginTop = '';
+    }
   }
 
   function updateTournamentTimers() {

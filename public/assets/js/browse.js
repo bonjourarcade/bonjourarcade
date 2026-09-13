@@ -1627,7 +1627,15 @@
       return;
     }
 
-    list.innerHTML = visible.map(function (t, idx) {
+    // Never more than MAX_SHOWN real tournament cards - a would-be 4th one
+    // is replaced by a single "Voir tout" card instead of just being the
+    // next tournament, so the row never needs to fit more than that to
+    // let people reach the rest.
+    var MAX_SHOWN = 3;
+    var shown = visible.slice(0, MAX_SHOWN);
+    var hiddenCount = visible.length - shown.length;
+
+    var cardsHtml = shown.map(function (t, idx) {
       var isActive = t.status === 'active';
       var roundInfo = isActive
         ? 'Ronde ' + ((t.currentRoundIndex || 0) + 1) + '/' + (t.games ? t.games.length : '?')
@@ -1663,7 +1671,16 @@
         '</a>';
     }).join('');
 
-    visible.forEach(function (t, idx) {
+    var viewAllHtml = hiddenCount > 0
+      ? '<a href="/tournoi/" class="browse-tournament-card browse-tournament-viewall-card">' +
+        '<span class="browse-tournament-viewall-count">+' + hiddenCount + '</span>' +
+        '<span class="browse-tournament-viewall-label">Voir tout →</span>' +
+        '</a>'
+      : '';
+
+    list.innerHTML = cardsHtml + viewAllHtml;
+
+    shown.forEach(function (t, idx) {
       if (t.status === 'active' && t.roundStartTime && t.roundDurationSec) {
         var el = document.getElementById('browse-tournament-timer-' + idx);
         if (el) activeTournamentTimers.push({ el: el, tournament: t });

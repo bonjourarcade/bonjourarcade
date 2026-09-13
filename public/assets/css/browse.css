@@ -687,6 +687,30 @@ a {
   color: var(--browse-text);
   transition: border-color 0.15s ease, transform 0.15s ease;
 }
+
+/* Stands in for a would-be 4th tournament card once there are more than
+   MAX_SHOWN (browse.js) - so reaching the rest is always one tap away
+   instead of relying on horizontal scrolling. */
+.browse-tournament-viewall-card {
+  flex-basis: 140px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  text-align: center;
+}
+.browse-tournament-viewall-count {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--browse-amber);
+}
+.browse-tournament-viewall-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--browse-text-dim);
+}
+.browse-tournament-viewall-card:hover .browse-tournament-viewall-label { color: var(--browse-text); }
 .browse-tournament-card:hover {
   border-color: var(--browse-amber);
   transform: translateY(-2px);
@@ -1484,4 +1508,5 @@ a {
      them like any other row on narrow screens. */
   .browse-row-pair { display: block; }
   .browse-tournament-card { flex-basis: 220px; }
+  .browse-tournament-viewall-card { flex-basis: 110px; }
 }

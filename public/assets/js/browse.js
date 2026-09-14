@@ -1828,7 +1828,8 @@
     initFavoritesTracking();
     initAccountUI();
     initLeaderboardTooltip();
-    initIdleScreensaver();
+    // Auto-launch on idle disabled by request; screensaver is now manual-only ('é' key or /screensaver/ page).
+    // initIdleScreensaver();
 
     fetchCurrentGameId()
       .then(function (currentGameId) {

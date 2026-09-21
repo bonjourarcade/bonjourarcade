@@ -1394,6 +1394,8 @@
 
     var metaParts = [];
     if (game.year) metaParts.push(game.year);
+    var systemLabel = SYSTEM_NAMES[game.core] || game.core;
+    if (systemLabel) metaParts.push(systemLabel);
     getGenres(game).forEach(function (g) { metaParts.push(g); });
     if (game.developer) metaParts.push(game.developer);
     document.getElementById('browse-modal-meta').innerHTML =

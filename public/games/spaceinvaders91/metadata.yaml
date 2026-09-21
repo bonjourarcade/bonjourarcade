@@ -1,8 +1,8 @@
 title: Space Invaders '91
 developer: Taito
 year: 1990
-genre: Taito
-controls:
+genre: Shooter
+#controls:
 #  - "←↓↑→: Déplacer"
 #  - "Z: Tirer"
 #  - "X: Bombe"

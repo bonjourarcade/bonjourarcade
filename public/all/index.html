@@ -663,6 +663,9 @@
 
         let gameHistory = [];
         const FILTERS_STORAGE_KEY = 'bonjourarcade_all_filters_v1';
+        // Cores combined under the "Coin-Op" system filter (MAME + FBNeo arcade cores)
+        const COIN_OP_CORES = ['mame2003_plus', 'arcade'];
+        const COIN_OP_LABEL = 'Coin-Op';
 
         function getFiltersState() {
             return {
@@ -984,11 +987,14 @@
                     // Use accent-insensitive search
                     return removeAccents(displayTitle).includes(removeAccents(term));
                 } else if (searchType === 'genre') {
-                    // Search only by genre (exact match from dropdown, case insensitive)
-                    // Check if any of the comma-separated genres match
+                    // Substring match (accent-insensitive) so a broader genre like "action"
+                    // also matches more specific variants such as "action-platformer" or
+                    // "action-platformer ninja", and so typing a keyword works as a free
+                    // search alternative to picking an exact value from the genre list.
                     if (game.genre) {
-                        const individualGenres = game.genre.split(',').map(g => g.trim().toLowerCase());
-                        return individualGenres.includes(term.toLowerCase());
+                        const individualGenres = game.genre.split(',').map(g => removeAccents(g.trim()));
+                        const normTerm = removeAccents(term);
+                        return individualGenres.some(g => g.includes(normTerm));
                     }
                     return false;
                 } else if (searchType === 'developer') {
@@ -1000,6 +1006,10 @@
                     }
                     return false;
                 } else if (searchType === 'system') {
+                    // "Coin-Op" is a virtual system combining the MAME and FBNeo arcade cores
+                    if (term.toLowerCase() === COIN_OP_LABEL.toLowerCase()) {
+                        return COIN_OP_CORES.includes(game.core);
+                    }
                     // Search only by system (exact match from dropdown, case insensitive)
                     if (game.core) {
                         const systemName = getSystemName(game.core);
@@ -2238,6 +2248,11 @@
                     }
                 });
                 const uniqueSystems = Array.from(systemMap.values()).sort();
+                // "Coin-Op" combines the MAME and FBNeo arcade cores into a single filter
+                const hasCoinOpGames = gamesData.some(game => COIN_OP_CORES.includes(game.core));
+                if (hasCoinOpGames) {
+                    uniqueSystems.unshift(COIN_OP_LABEL);
+                }
                 systemSelect.innerHTML = '<option value="">Sélectionner un système...</option>';
                 uniqueSystems.forEach(system => {
                     const option = document.createElement('option');

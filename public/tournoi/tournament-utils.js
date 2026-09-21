@@ -74,6 +74,10 @@ const TournoiUtils = {
     return `/b/${gameId}`;
   },
 
+  escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  },
+
   // Renders the combined per-round scoreboard/results table (columns: #, Joueur, R1..Rn, Total %).
   // Used both for the live in-progress round view (pass roundIdx) and the finished-results view
   // (omit roundIdx — every non-eliminated player is treated as having reached the last round).
@@ -86,7 +90,7 @@ const TournoiUtils = {
   //    status. Use this for 'percentage'-type tournaments, where nobody is ever eliminated and the
   //    accumulated % across rounds is what decides the standings.
   renderCombinedTableHtml(rows, totalRounds, opts = {}) {
-    const { roundIdx = null, highlightUid = null, cutoff = 0, bestEntryByRound = {}, rankBy = 'survival' } = opts;
+    const { roundIdx = null, highlightUid = null, cutoff = 0, bestEntryByRound = {}, rankBy = 'survival', games = null, gamelist = null } = opts;
     const referenceRound = roundIdx != null ? roundIdx : totalRounds - 1;
 
     const sorted = [...rows].sort((a, b) => {
@@ -101,7 +105,17 @@ const TournoiUtils = {
 
     let html = '<table class="combined-table"><thead><tr><th>#</th><th>Joueur</th>';
     for (let r = 0; r < totalRounds; r++) {
-      html += `<th>R${r + 1}</th>`;
+      const gameId = games ? games[r] : null;
+      const game = gameId && gamelist ? gamelist.find(g => g.id === gameId) : null;
+      if (game) {
+        const title = TournoiUtils.escapeHtml(game.title || gameId);
+        html += `<th class="round-header">R${r + 1}` +
+          `<div class="round-header-tooltip">` +
+          (game.coverArt ? `<img src="${TournoiUtils.escapeHtml(game.coverArt)}" alt="" loading="lazy">` : '') +
+          `<span>${title}</span></div></th>`;
+      } else {
+        html += `<th>R${r + 1}</th>`;
+      }
     }
     html += '<th>Total %</th></tr></thead><tbody>';
 

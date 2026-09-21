@@ -17,6 +17,7 @@ let unsubscribeParticipants = null;
 let unsubscribeRoundScores = null;
 let timerInterval = null;
 let gamelist = [];
+let currentGames = [];
 
 document.addEventListener('DOMContentLoaded', async () => {
   const params = new URLSearchParams(window.location.search);
@@ -103,6 +104,7 @@ async function checkParticipation() {
     }
 
     const t = tournamentSnap.data();
+    currentGames = t.games || [];
     $('tournament-title').textContent = t.name || `🎮 Tournoi`;
     const descEl = $('play-description');
     if (t.description) { descEl.textContent = t.description; descEl.classList.remove('hidden'); }
@@ -270,6 +272,7 @@ function renderFormatInfo(t) {
 
 function renderTournament(t) {
   currentTournamentType = t.type === 'percentage' ? 'percentage' : 'elimination';
+  currentGames = t.games || [];
   $('play-participant-count').textContent = '...';
   $('play-round-info').textContent = t.currentRoundIndex >= 0 ? `Ronde ${t.currentRoundIndex + 1}/${t.games.length}` : 'Pas commencé';
   $('play-status').textContent = t.status === 'registration' ? 'Inscription' : t.status === 'active' ? 'En cours' : 'Terminé';
@@ -431,7 +434,7 @@ function renderCombinedTable(participants, me, allScores, roundIdx, totalRounds)
   const rankBy = currentTournamentType === 'percentage' ? 'totalPct' : 'survival';
 
   $('scoreboard-entries').innerHTML = TournoiUtils.renderCombinedTableHtml(scoredRows, totalRounds, {
-    roundIdx, highlightUid: myUid, cutoff, bestEntryByRound, rankBy,
+    roundIdx, highlightUid: myUid, cutoff, bestEntryByRound, rankBy, games: currentGames, gamelist,
   });
 
   // Enrich
@@ -604,7 +607,7 @@ function renderFinishedResults(results) {
     html += '<div style="margin-top:20px;">';
     html += '<div class="section-title">Classement final</div>';
     const rankBy = results.type === 'percentage' ? 'totalPct' : 'survival';
-    html += TournoiUtils.renderCombinedTableHtml(results.cumulativeScoresTable, results.totalRounds, { highlightUid: myUid, rankBy });
+    html += TournoiUtils.renderCombinedTableHtml(results.cumulativeScoresTable, results.totalRounds, { highlightUid: myUid, rankBy, games: currentGames, gamelist });
     html += '</div>';
   }
 

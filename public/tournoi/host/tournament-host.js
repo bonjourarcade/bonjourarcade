@@ -88,6 +88,14 @@ function syncPrivateCodeSection() {
 document.getElementById('is-public').addEventListener('change', syncPrivateCodeSection);
 syncPrivateCodeSection();
 
+function syncTimingModeFields() {
+  const isEndTime = document.querySelector('input[name="timing-mode"]:checked')?.value === 'endtime';
+  document.getElementById('timing-duration-fields').classList.toggle('hidden', isEndTime);
+  document.getElementById('timing-endtime-fields').classList.toggle('hidden', !isEndTime);
+}
+document.querySelectorAll('input[name="timing-mode"]').forEach(el => el.addEventListener('change', syncTimingModeFields));
+syncTimingModeFields();
+
 let isCreating = false;
 $('create-tournament-btn').addEventListener('click', async () => {
   if (isCreating) return;
@@ -97,12 +105,22 @@ $('create-tournament-btn').addEventListener('click', async () => {
   try {
     const gameIds = $('game-ids').value.split('\n').map(id => id.trim()).filter(id => id);
     if (gameIds.length === 0) { throw new Error('Entre au moins un ID de jeu.'); }
-    const durUnits = { minutes: 60, heures: 3600, jours: 86400 };
-    const roundDurationSec = parseFloat($('round-duration').value) * durUnits[$('round-duration-unit').value];
+    const timingMode = document.querySelector('input[name="timing-mode"]:checked')?.value || 'duration';
+    let roundDurationSec = null;
+    let plannedEndTime = null;
+    if (timingMode === 'endtime') {
+      const endTimeValue = $('tournament-end-time').value;
+      if (!endTimeValue) { throw new Error('Choisis une date et heure de fin.'); }
+      plannedEndTime = new Date(endTimeValue).toISOString();
+    } else {
+      const durUnits = { minutes: 60, heures: 3600, jours: 86400 };
+      roundDurationSec = parseFloat($('round-duration').value) * durUnits[$('round-duration-unit').value];
+    }
     const name = $('tournament-name').value.trim() || undefined;
     const description = $('tournament-description').value.trim() || undefined;
     const stakes = $('tournament-stakes').value.trim() || undefined;
     const isPublic = document.getElementById('is-public').checked;
+    const allowLateSubmissions = document.getElementById('allow-late-submissions').checked;
     const type = document.querySelector('input[name="tournament-type"]:checked')?.value || 'elimination';
     const shareCode = $('share-code').value.trim().toUpperCase() || undefined;
     const autoDestroyInput = $('auto-destroy-days').value.trim();
@@ -111,7 +129,7 @@ $('create-tournament-btn').addEventListener('click', async () => {
     const fn = window.httpsCallable
       ? window.httpsCallable(window.firebaseFunctions, 'createTournament')
       : (await import('https://www.gstatic.com/firebasejs/11.0.1/firebase-functions.js')).httpsCallable(window.firebaseFunctions, 'createTournament');
-    const result = (await fn({ gameIds, roundDurationSec, pauseDurationSec: 0, name, description, stakes, isPublic, shareCode, autoDestroyDays, type })).data;
+    const result = (await fn({ gameIds, roundDurationSec, plannedEndTime, pauseDurationSec: 0, name, description, stakes, isPublic, allowLateSubmissions, shareCode, autoDestroyDays, type })).data;
     tournamentId = result.tournamentId;
     window.history.replaceState({}, '', `?t=${tournamentId}`);
     hide('setup-view');

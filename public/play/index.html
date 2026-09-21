@@ -5206,8 +5206,8 @@
                 const timerEl = document.getElementById('tb-timer');
                 const statusEl = document.getElementById('tb-status');
 
-                // Detect round advance → redirect to new game
-                if (t.status === 'active' && t.currentRoundIndex !== roundNum) {
+                // Detect round advance → redirect to new game (unless late submissions are allowed for this tournament)
+                if (t.status === 'active' && t.currentRoundIndex !== roundNum && !t.allowLateSubmissions) {
                     const newGameId = t.games[t.currentRoundIndex];
                     if (newGameId) {
                         const base = window.TournoiUtils ? window.TournoiUtils.getGameUrl(newGameId) : `/b/${newGameId}`;
@@ -5216,7 +5216,14 @@
                     }
                 }
 
-                if (t.status === 'active') {
+                if (t.status === 'active' && t.currentRoundIndex !== roundNum) {
+                    // Late-submission mode: this round is over but the tournament allows submitting to it anyway.
+                    statusEl.textContent = 'Ronde terminée — soumission tardive possible';
+                    statusEl.style.color = '#ffc107';
+                    timerEl.textContent = '--:--';
+                    timerEl.classList.remove('timer-warning');
+                    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+                } else if (t.status === 'active') {
                     statusEl.textContent = 'En cours';
                     statusEl.style.color = '#28a745';
 

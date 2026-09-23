@@ -1551,9 +1551,18 @@
       setTimeout(function () { waitForFunctions(cb, attempts + 1); }, 200);
     }
 
-    waitForFunctions(function () {
-      TournoiUtils.callFunction('getPublicTournaments', {}).then(function (result) {
-        var tournaments = (result && result.success && result.tournaments) || [];
+    function loadAndRenderTournaments(user) {
+      var calls = [TournoiUtils.callFunction('getPublicTournaments', {}).catch(function () { return null; })];
+      if (user) {
+        calls.push(TournoiUtils.callFunction('getJoinedPrivateTournaments', {}).catch(function () { return null; }));
+      }
+
+      Promise.all(calls).then(function (results) {
+        var publicResult = results[0];
+        var privateResult = results[1];
+        var publicTournaments = (publicResult && publicResult.success && publicResult.tournaments) || [];
+        var privateTournaments = (privateResult && privateResult.success && privateResult.tournaments) || [];
+        var tournaments = publicTournaments.concat(privateTournaments);
 
         renderTournamentSection(tournaments);
 
@@ -1596,7 +1605,17 @@
 
         toast.classList.add('open');
         scheduleHide(TOAST_VISIBLE_MS);
-      }).catch(function () { /* silently skip on error */ });
+      });
+    }
+
+    waitForFunctions(function () {
+      if (window.onFirebaseAuthStateChanged) {
+        window.onFirebaseAuthStateChanged(function (user) {
+          loadAndRenderTournaments(user);
+        });
+      } else {
+        loadAndRenderTournaments(null);
+      }
     });
   }
 
@@ -1655,6 +1674,7 @@
       return '<a href="/tournoi/play/?t=' + encodeURIComponent(t.id) + '" class="browse-tournament-card">' +
         '<div class="browse-tournament-card-top">' +
         '<span class="browse-tournament-name">' + escapeHtml(t.name || 'Tournoi') + '</span>' +
+        (t.isPublic === false ? '<span class="browse-tournament-private-badge">🔒 Privé</span>' : '') +
         '<span class="browse-tournament-status ' + (isActive ? 'is-active' : 'is-registration') + '">' +
         (isActive ? 'En cours' : 'Inscription') + '</span>' +
         '</div>' +

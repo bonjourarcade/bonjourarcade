@@ -748,6 +748,16 @@ a {
 .browse-tournament-status.is-active { background: #28a745; }
 .browse-tournament-status.is-registration { background: #ffc107; color: #1a1a2e; }
 
+.browse-tournament-private-badge {
+  font-size: 0.72rem;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-weight: 700;
+  white-space: nowrap;
+  background: var(--browse-bg-alt);
+  color: var(--browse-text-dim);
+}
+
 .browse-tournament-desc {
   font-size: 0.78rem;
   color: var(--browse-text-dim);

@@ -419,6 +419,25 @@
             <button id="copy-link-btn" class="btn-primary btn-sm" style="white-space:nowrap;">Copier</button>
           </div>
 
+        <div class="card">
+          <div class="flex-between" style="cursor:pointer;" id="webhook-settings-toggle">
+            <div class="section-title" style="margin:0;">🔔 Notifications de scores approuvés</div>
+            <span id="webhook-settings-toggle-icon" style="color:#888;font-size:1.2rem;">▼</span>
+          </div>
+          <div id="webhook-settings-form" class="hidden" style="margin-top:12px;">
+            <p style="font-size:0.85rem;color:var(--muted);margin:0 0 12px;">Reçois un message Discord et/ou Google Chat chaque fois qu'un score de ce tournoi est approuvé.</p>
+            <label>Webhook Discord (optionnel)</label>
+            <input type="text" id="webhook-discord-url" placeholder="https://discord.com/api/webhooks/...">
+            <label>Webhook Google Chat (optionnel)</label>
+            <input type="text" id="webhook-googlechat-url" placeholder="https://chat.googleapis.com/v1/spaces/...">
+            <div class="flex">
+              <button id="save-webhook-btn" class="btn-primary btn-sm">Enregistrer</button>
+              <button id="test-webhook-btn" class="btn-secondary btn-sm">Tester</button>
+            </div>
+            <div id="webhook-settings-error" class="hidden" style="color:#dc3545;margin-top:8px;"></div>
+          </div>
+        </div>
+
         <div id="setup-phase" class="card hidden">
           <h2>Participants inscrits</h2>
           <div id="participant-list-setup"></div>

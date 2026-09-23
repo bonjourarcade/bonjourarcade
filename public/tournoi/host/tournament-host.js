@@ -331,6 +331,7 @@ function loadDashboard(id) {
   show('dashboard-view');
   editGamePoolLoadedFor = null;
   $('player-view-btn').href = `/tournoi/play/?t=${id}`;
+  loadWebhookConfig(id);
   const db = window.firebaseDb;
   const tournamentRef = doc(db, 'tournaments', id);
 
@@ -1009,6 +1010,58 @@ document.getElementById('create-toggle').addEventListener('click', () => {
   const icon = document.getElementById('create-toggle-icon');
   const isHidden = form.classList.toggle('hidden');
   icon.textContent = isHidden ? '▶' : '▼';
+});
+
+// Collapsible webhook settings section
+document.getElementById('webhook-settings-toggle').addEventListener('click', () => {
+  const form = document.getElementById('webhook-settings-form');
+  const icon = document.getElementById('webhook-settings-toggle-icon');
+  const isHidden = form.classList.toggle('hidden');
+  icon.textContent = isHidden ? '▶' : '▼';
+});
+
+async function loadWebhookConfig(id) {
+  try {
+    const config = await TournoiUtils.callFunction('getTournamentWebhookConfig', { tournamentId: id });
+    $('webhook-discord-url').value = config.discordWebhookUrl || '';
+    $('webhook-googlechat-url').value = config.googleChatWebhookUrl || '';
+  } catch (e) {
+    console.error('Error loading webhook config:', e);
+  }
+}
+
+$('save-webhook-btn').addEventListener('click', async () => {
+  $('webhook-settings-error').classList.add('hidden');
+  const btn = $('save-webhook-btn');
+  btn.disabled = true;
+  try {
+    await TournoiUtils.callFunction('updateTournamentWebhook', {
+      tournamentId,
+      discordWebhookUrl: $('webhook-discord-url').value.trim() || null,
+      googleChatWebhookUrl: $('webhook-googlechat-url').value.trim() || null,
+    });
+    showToast('Webhooks enregistrés ✓');
+  } catch (e) {
+    $('webhook-settings-error').textContent = e.message || 'Erreur';
+    $('webhook-settings-error').classList.remove('hidden');
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+$('test-webhook-btn').addEventListener('click', async () => {
+  $('webhook-settings-error').classList.add('hidden');
+  const btn = $('test-webhook-btn');
+  btn.disabled = true;
+  try {
+    await TournoiUtils.callFunction('testTournamentWebhook', { tournamentId });
+    showToast('Message de test envoyé ✓');
+  } catch (e) {
+    $('webhook-settings-error').textContent = e.message || 'Erreur';
+    $('webhook-settings-error').classList.remove('hidden');
+  } finally {
+    btn.disabled = false;
+  }
 });
 
 async function verifyPendingScore(scoreId, notifyWebhooks = false) {

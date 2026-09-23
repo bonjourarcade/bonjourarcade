@@ -107,8 +107,9 @@ async function checkParticipation() {
     currentGames = t.games || [];
     $('tournament-title').textContent = t.name || `🎮 Tournoi`;
     const descEl = $('play-description');
-    if (t.description) { descEl.textContent = t.description; descEl.classList.remove('hidden'); }
-    else { descEl.classList.add('hidden'); }
+    const descWrap = $('play-description-wrap');
+    if (t.description) { descEl.textContent = t.description; descWrap.classList.remove('hidden'); }
+    else { descWrap.classList.add('hidden'); }
     $('play-sharecode').textContent = t.shareCode;
 
     if (t.status === 'finished') {

@@ -103,6 +103,14 @@
                 </div>
             </div>
 
+            <div id="my-private-section" class="card hidden">
+                <div class="flex-between">
+                    <h2>🔒 Mes tournois privés</h2>
+                    <span id="my-private-count" style="color:var(--muted);font-size:0.9rem;"></span>
+                </div>
+                <div id="my-private-tournaments"></div>
+            </div>
+
             <div class="card">
                 <h2>🔑 Rejoindre avec un code</h2>
                 <p>Si tu as un code d'invitation, entre-le ici.</p>
@@ -116,11 +124,12 @@
             <div id="admin-view" class="hidden">
                 <div class="card">
                     <div class="flex-between">
-                        <h2>🔒 Tournois privés en cours</h2>
+                        <h2>🔒 Autres tournois privés en cours</h2>
                         <a href="host/" class="btn-secondary btn-sm" style="text-decoration:none;">🎬 Créer</a>
                     </div>
+                    <p style="font-size:0.85rem;margin-top:-4px;">Vue admin — tournois privés du site auxquels tu ne participes pas (ceux-là sont dans « Mes tournois privés » ci-dessus).</p>
                     <div id="private-tournaments">
-                        <div class="empty-state">Aucun tournoi privé en cours.</div>
+                        <div class="empty-state">Aucun autre tournoi privé en cours.</div>
                     </div>
                 </div>
 
@@ -144,6 +153,7 @@
         let currentUser = null;
         let currentGamelist = [];
         let isAdmin = false;
+        let myPrivateTournamentIds = new Set();
 
         async function fetchGamelist() {
             try {
@@ -200,6 +210,33 @@
             }
         }
 
+        function tournamentCardHtml(t, opts) {
+            opts = opts || {};
+            const roundInfo = t.status === 'active' ? `· Ronde ${(t.currentRoundIndex || 0) + 1}/${t.games?.length || '?'}` : '';
+            const tagClass = t.status === 'registration' ? 'tag-registration' : 'tag-active';
+            const tagLabel = t.status === 'registration' ? 'Inscription' : 'En cours';
+            const currentGameId = t.currentGame || (t.games && t.games[t.currentRoundIndex || 0]);
+            const gameName = currentGameId ? getGameName(currentGameId) : null;
+            return `<div class="tournament-item">
+                <div class="info">
+                    <div class="name">${t.name}</div>
+                    ${t.description ? `<div style="font-size:0.85rem;color:var(--muted);margin:2px 0;">${t.description}</div>` : ''}
+                    ${t.stakes ? `<div class="accent-text" style="font-size:0.85rem;margin:2px 0;display:inline-block;">🎁 ${t.stakes}</div>` : ''}
+                    <div class="meta">${opts.showPrivateTag ? '<span class="tag tag-private">Privé</span> ' : ''}<span class="tag ${tagClass}">${tagLabel}</span> ${roundInfo} · ${t.gamePoolLength} jeux${gameName && t.status === 'active' ? ` · 🎮 ${gameName}` : ''}</div>
+                    ${t.leader ? `<div style="display:flex;align-items:center;gap:6px;margin-top:6px;padding-top:6px;border-top:1px solid var(--border);font-size:0.85rem;">
+                        <span>👑</span>
+                        <img src="${t.leader.photoURL || '../assets/default-avatar.png'}" style="width:18px;height:18px;border-radius:50%;object-fit:cover;">
+                        <span style="color:var(--text);">${t.leader.displayName}</span>
+                        <span class="accent-text" style="font-weight:700;margin-left:auto;">${t.leader.score.toLocaleString()}</span>
+                    </div>` : ''}
+                </div>
+                <div class="actions">
+                    <a href="/tournoi/play/?t=${t.id}" class="join-link">Jouer</a>
+                    ${isAdmin ? `<a href="/tournoi/host/?t=${t.id}" class="host-link">Host</a>` : ''}
+                </div>
+            </div>`;
+        }
+
         async function renderPublic() {
             try {
                 const fn = window.httpsCallable
@@ -213,33 +250,32 @@
                     container.innerHTML = '<div class="empty-state">Aucun tournoi public en ce moment.</div>';
                     return;
                 }
-                container.innerHTML = tournaments.map(t => {
-                    const roundInfo = t.status === 'active' ? `· Ronde ${(t.currentRoundIndex || 0) + 1}/${t.games?.length || '?'}` : '';
-                    const tagClass = t.status === 'registration' ? 'tag-registration' : 'tag-active';
-                    const tagLabel = t.status === 'registration' ? 'Inscription' : 'En cours';
-                    const currentGameId = t.currentGame || (t.games && t.games[t.currentRoundIndex || 0]);
-                    const gameName = currentGameId ? getGameName(currentGameId) : null;
-                    return `<div class="tournament-item">
-                        <div class="info">
-                            <div class="name">${t.name}</div>
-                            ${t.description ? `<div style="font-size:0.85rem;color:var(--muted);margin:2px 0;">${t.description}</div>` : ''}
-                            ${t.stakes ? `<div class="accent-text" style="font-size:0.85rem;margin:2px 0;display:inline-block;">🎁 ${t.stakes}</div>` : ''}
-                            <div class="meta"><span class="tag ${tagClass}">${tagLabel}</span> ${roundInfo} · ${t.gamePoolLength} jeux${gameName && t.status === 'active' ? ` · 🎮 ${gameName}` : ''}</div>
-                            ${t.leader ? `<div style="display:flex;align-items:center;gap:6px;margin-top:6px;padding-top:6px;border-top:1px solid var(--border);font-size:0.85rem;">
-                                <span>👑</span>
-                                <img src="${t.leader.photoURL || '../assets/default-avatar.png'}" style="width:18px;height:18px;border-radius:50%;object-fit:cover;">
-                                <span style="color:var(--text);">${t.leader.displayName}</span>
-                                <span class="accent-text" style="font-weight:700;margin-left:auto;">${t.leader.score.toLocaleString()}</span>
-                            </div>` : ''}
-                        </div>
-                        <div class="actions">
-                            <a href="/tournoi/play/?t=${t.id}" class="join-link">Jouer</a>
-                            ${isAdmin ? `<a href="/tournoi/host/?t=${t.id}" class="host-link">Host</a>` : ''}
-                        </div>
-                    </div>`;
-                }).join('');
+                container.innerHTML = tournaments.map(t => tournamentCardHtml(t)).join('');
             } catch (e) {
                 $('public-tournaments').innerHTML = '<div class="empty-state">Erreur de chargement.</div>';
+            }
+        }
+
+        async function renderMyPrivateTournaments() {
+            const section = $('my-private-section');
+            try {
+                const fn = window.httpsCallable
+                    ? window.httpsCallable(window.firebaseFunctions, 'getJoinedPrivateTournaments')
+                    : (await import('https://www.gstatic.com/firebasejs/11.0.1/firebase-functions.js')).httpsCallable(window.firebaseFunctions, 'getJoinedPrivateTournaments');
+                const result = (await fn({})).data;
+                const tournaments = result.tournaments || [];
+                myPrivateTournamentIds = new Set(tournaments.map(t => t.id));
+
+                if (tournaments.length === 0) {
+                    section.classList.add('hidden');
+                    return;
+                }
+                section.classList.remove('hidden');
+                $('my-private-count').textContent = tournaments.length + ' rejoint' + (tournaments.length > 1 ? 's' : '');
+                $('my-private-tournaments').innerHTML = tournaments.map(t => tournamentCardHtml(t, {showPrivateTag: true})).join('');
+            } catch (e) {
+                myPrivateTournamentIds = new Set();
+                section.classList.add('hidden');
             }
         }
 
@@ -254,11 +290,12 @@
                 where('isPublic', '==', false),
                 where('status', 'in', ['registration', 'active'])
             ));
+            const otherPrivateDocs = privateSnap.docs.filter(d => !myPrivateTournamentIds.has(d.id));
             const privateContainer = $('private-tournaments');
-            if (privateSnap.empty) {
-                privateContainer.innerHTML = '<div class="empty-state">Aucun tournoi privé en cours.</div>';
+            if (otherPrivateDocs.length === 0) {
+                privateContainer.innerHTML = '<div class="empty-state">Aucun autre tournoi privé en cours.</div>';
             } else {
-                privateContainer.innerHTML = privateSnap.docs.map(d => {
+                privateContainer.innerHTML = otherPrivateDocs.map(d => {
                     const t = d.data();
                     const statusLabel = t.status === 'registration' ? 'Inscription' : 'En cours';
                     const roundInfo = t.status === 'active' ? `· Ronde ${(t.currentRoundIndex || 0) + 1}/${t.games?.length || '?'}` : '';
@@ -319,6 +356,7 @@
                 isAdmin = await window.checkFirebaseTournamentHostAccess();
                 await fetchGamelist();
                 await renderPublic();
+                await renderMyPrivateTournaments();
                 await renderAdmin();
             } else {
                 $('login-prompt').classList.remove('hidden');

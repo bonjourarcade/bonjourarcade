@@ -2,11 +2,10 @@ title: The Simpsons
 developer: Konami
 year: 1991
 genre: Beat 'em up, co-op
-#controls:
-#  - "←↓↑→: Déplacer"
-#  - "Z: Tirer"
-#  - "X: Bombe"
-#to_start: Select -> Start
-#added: 
+controls:
+  - "←↓↑→: Déplacer"
+  - "Z: Frapper"
+  - "X: Sauter"
+to_start: Espace -> Enter
 hide: yes
 added: 2025-07-27

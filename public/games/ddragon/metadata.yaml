@@ -2,12 +2,13 @@ title: Double Dragon
 developer: Technōs Japan
 year: 1987
 genre: Beat 'em up, co-op
-#controls:
-#  - "←↓↑→: Déplacer"
-#  - "Z: Tirer"
-#  - "X: Bombe"
+controls:
+  - "←↓↑→: Déplacer"
+  - "Z: Coup de pied"
+  - "X: Sauter"
+  - "C: Coup de poing"
 
-#to_start: Select -> Start
+to_start: Espace -> Enter
 
 enable_score: true
 hide: yes

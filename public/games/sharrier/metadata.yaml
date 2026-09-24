@@ -2,12 +2,11 @@ title: Space Harrier
 developer: Sega
 year: 1985
 genre: Shooter
-#controls:
-#  - "←↓↑→: Déplacer"
-#  - "Z: Tirer"
-#  - "X: Bombe"
+controls:
+  - "←↓↑→: Déplacer"
+  - "Z: Tirer"
 
-#to_start: Select -> Start
+to_start: Espace -> Enter
 
 hide: yes
 

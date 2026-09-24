@@ -2,12 +2,11 @@ title: Indiana Jones and the Temple of Doom
 developer: Atari
 year: 1985
 genre: Action
-#controls:
-#  - "←↓↑→: Déplacer"
-#  - "Z: Tirer"
-#  - "X: Bombe"
+controls:
+  - "←↓↑→: Déplacer"
+  - "Z: Fouet"
 
-#to_start: Select -> Start
+to_start: Espace -> Enter
 
 enable_score: true
 hide: yes

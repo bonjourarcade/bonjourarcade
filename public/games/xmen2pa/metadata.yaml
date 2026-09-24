@@ -2,12 +2,13 @@ title: X-Men Arcade
 developer: Konami
 year: 1992
 genre: Beat 'em up
-#controls:
-#  - "←↓↑→: Déplacer"
-#  - "Z: Tirer"
-#  - "X: Bombe"
+controls:
+  - "←↓↑→: Déplacer"
+  - "Z: Frapper"
+  - "X: Sauter"
+  - "C: Spécial"
 
-#to_start: Select -> Start
+to_start: Espace -> Enter
 
 # Message d'annonce personnalisé pour la newsletter
 # Ce message apparaîtra en haut de l'email et des webhooks

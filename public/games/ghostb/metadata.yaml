@@ -2,14 +2,12 @@ title: The Real Ghostbusters
 year: 1987
 developer: Data East
 genre: Action, Shooter
-#controls:
-#  - "← ↓ ↑ →: Mouvement"
-#  - "Z: "
-#  - "X: "
-#  - "C: "
-#  - "V: "
+controls:
+  - "← ↓ ↑ →: Mouvement"
+  - "Z: Tirer"
+  - "X: Proton beam"
 
-#to_start: Espace, puis Enter
+to_start: Espace, puis Enter
 #description: ""
 
 # Pour les jeux qui coopèrent pas bien

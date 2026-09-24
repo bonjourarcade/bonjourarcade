@@ -113,7 +113,10 @@ a {
 
 @keyframes browse-root-in {
   from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  /* "none", not translateY(0): with fill-mode forwards, any leftover
+     transform makes .browse-root the containing block of the fixed header,
+     which would then scroll away with the page instead of staying put. */
+  to { opacity: 1; transform: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -122,7 +125,7 @@ a {
   .browse-root { animation: none; opacity: 1; }
 }
 
-/* ---------- Header (always dark scrim - sits over the hero image) ---------- */
+/* ---------- Header (dark scrim over the hero in dark mode; always solid in light mode, see initHeaderScroll) ---------- */
 
 .browse-header {
   position: fixed;
@@ -602,6 +605,61 @@ a {
 .browse-fav-btn:hover { background: rgba(253, 246, 232, 0.22); }
 .browse-fav-btn.is-fav { border-color: var(--browse-pink); }
 .browse-fav-icon { font-size: 1.15rem; line-height: 1; }
+
+/* ---------- Hero, light theme ---------- */
+/* In light mode the hero uses a cream scrim (the page background) instead
+   of a dark one, so the page doesn't look like it's in dark mode - its text
+   and controls flip to dark accordingly. Scoped to .browse-hero so the
+   fixed header (outside it) keeps its own light-on-dark styling. */
+
+body:not(.browse-dark) .browse-hero {
+  --browse-hero-text: #221c14;
+  --browse-hero-text-dim: rgba(34, 28, 20, 0.72);
+}
+body:not(.browse-dark) .browse-hero-backdrop {
+  filter: brightness(1) saturate(0.9);
+}
+body:not(.browse-dark) .browse-hero-fade {
+  background:
+    linear-gradient(to top, var(--browse-bg) 2%, rgba(246, 240, 227, 0.2) 40%, rgba(246, 240, 227, 0.4) 60%),
+    linear-gradient(to right, rgba(246, 240, 227, 0.94) 0%, rgba(246, 240, 227, 0.55) 55%, rgba(246, 240, 227, 0.2) 100%);
+}
+body:not(.browse-dark) .browse-hero-title {
+  background: linear-gradient(90deg, var(--browse-hero-text) 60%, #c2410c 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  text-shadow: 0 1px 10px rgba(246, 240, 227, 0.8);
+}
+body:not(.browse-dark) .browse-hero-desc,
+body:not(.browse-dark) .browse-hero-leaderboard-title,
+body:not(.browse-dark) .browse-tournaments-title,
+body:not(.browse-dark) .browse-tournaments-viewall {
+  text-shadow: 0 1px 8px rgba(246, 240, 227, 0.9);
+}
+body:not(.browse-dark) .browse-hero-badge {
+  background: rgba(34, 28, 20, 0.08);
+  border-color: rgba(34, 28, 20, 0.25);
+}
+body:not(.browse-dark) .browse-hero-poster,
+body:not(.browse-dark) .browse-hero-poster-large {
+  border-color: rgba(34, 28, 20, 0.18);
+  box-shadow: 0 24px 60px rgba(34, 28, 20, 0.35);
+}
+body:not(.browse-dark) .browse-hero .browse-btn-play { background: #221c14; color: #fdf6e8; }
+body:not(.browse-dark) .browse-hero .browse-btn-play:hover { background: #000; }
+body:not(.browse-dark) .browse-hero .browse-btn-info,
+body:not(.browse-dark) .browse-hero .browse-fav-btn {
+  background: rgba(255, 252, 245, 0.6);
+  border-color: rgba(34, 28, 20, 0.3);
+}
+body:not(.browse-dark) .browse-hero .browse-btn-info:hover,
+body:not(.browse-dark) .browse-hero .browse-fav-btn:hover { background: rgba(255, 252, 245, 0.9); }
+body:not(.browse-dark) .browse-hero .browse-fav-btn.is-fav { border-color: var(--browse-pink); }
+body:not(.browse-dark) .browse-hero-leaderboard-row {
+  background: rgba(255, 252, 245, 0.7);
+  border-color: rgba(34, 28, 20, 0.14);
+}
+body:not(.browse-dark) .browse-hero-leaderboard-rank { color: #c2410c; }
 
 /* Modal reuses this button but sits on the page surface, not the hero scrim */
 #browse-modal-fav {

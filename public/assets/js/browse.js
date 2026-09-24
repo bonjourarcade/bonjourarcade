@@ -114,18 +114,23 @@
       document.body.classList.toggle('browse-dark', nowDark);
       toggle.textContent = nowDark ? '☀️' : '🌙';
       try { localStorage.setItem('theme', nowDark ? 'dark' : 'light'); } catch (e) { /* ignore */ }
+      updateHeaderSolid();
     });
   }
 
   var searchHeroHidden = false;
   var updateHeaderSolid = function () {};
 
+  // The transparent, dark-scrim header only suits dark mode - in light mode
+  // the header is always the solid light bar, even over the hero.
   function initHeaderScroll() {
     var header = document.getElementById('browse-header');
     updateHeaderSolid = function () {
-      header.classList.toggle('browse-header-solid', window.scrollY > 80 || searchHeroHidden);
+      var isLight = !document.body.classList.contains('browse-dark');
+      header.classList.toggle('browse-header-solid', isLight || window.scrollY > 80 || searchHeroHidden);
     };
     window.addEventListener('scroll', updateHeaderSolid, { passive: true });
+    updateHeaderSolid();
   }
 
   /* ---------- Logo spin toy ---------- */

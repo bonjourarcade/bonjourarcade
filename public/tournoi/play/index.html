@@ -179,6 +179,16 @@
     .upcoming-game .upcoming-img-wrap img { width: 100%; height: 100%; object-fit: cover; filter: blur(2px); -webkit-filter: blur(2px); transform: scale(1.05); pointer-events: none; user-select: none; -webkit-user-drag: none; }
     .upcoming-game .upcoming-img-wrap .upcoming-label { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #ffd700; font-size: 0.65rem; font-weight: 700; text-shadow: 0 1px 4px rgba(0,0,0,0.8); pointer-events: none; }
 
+    .past-games { display: flex; gap: 12px; margin: 16px 0; overflow-x: auto; padding-bottom: 8px; justify-content: center; flex-wrap: wrap; }
+    .past-game { flex: 0 0 90px; text-align: center; position: relative; }
+    .past-game a.past-game-link { display: block; text-decoration: none; }
+    .past-game .past-img-wrap { position: relative; width: 90px; height: 90px; border-radius: 8px; overflow: hidden; margin: 0 auto 4px; }
+    .past-game .past-img-wrap img { width: 100%; height: 100%; object-fit: cover; user-select: none; -webkit-user-drag: none; }
+    .past-game.is-locked .past-img-wrap img { filter: grayscale(1) brightness(0.5); }
+    .past-game .past-img-wrap .past-lock { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; font-size: 1.6rem; text-shadow: 0 1px 4px rgba(0,0,0,0.8); pointer-events: none; }
+    .past-game.is-locked .past-img-wrap .past-lock { display: flex; }
+    .past-game .past-label { font-size: 0.7rem; color: var(--muted); }
+
 
     .break-info { text-align: center; padding: 20px; }
     .break-info h2 { color: var(--accent-text); background: var(--accent-bg); padding: var(--accent-pad); border-radius: var(--accent-radius); }
@@ -303,6 +313,8 @@
           <div class="section-title">Classement</div>
           <div id="scoreboard-entries"></div>
         </div>
+
+        <div id="past-games" class="past-games hidden" oncontextmenu="return false"></div>
 
         <div id="upcoming-games" class="upcoming-games hidden" oncontextmenu="return false"></div>
 

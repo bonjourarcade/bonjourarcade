@@ -324,6 +324,29 @@ function renderTournament(t) {
         $('game-announcement').classList.add('hidden');
       }
 
+      const pastGameIds = t.games.slice(0, round);
+      const pastContainer = $('past-games');
+      if (pastGameIds.length > 0) {
+        pastContainer.classList.remove('hidden');
+        pastContainer.innerHTML = pastGameIds.map((gid, i) => {
+          const g = gamelist.find(gg => gg.id === gid);
+          const title = g ? g.title : gid;
+          const label = `Ronde ${i + 1}`;
+          const locked = !t.allowLateSubmissions;
+          const imgHtml = `<div class="past-img-wrap">
+              <img src="/games/${gid}/cover.png" alt="" loading="lazy" draggable="false" onerror="this.style.display='none'">
+              <div class="past-lock">🔒</div>
+            </div>
+            <div class="past-label">${label}</div>`;
+          if (locked) {
+            return `<div class="past-game is-locked" title="${title} — soumissions tardives désactivées">${imgHtml}</div>`;
+          }
+          return `<div class="past-game"><a class="past-game-link" href="${TournoiUtils.getGameUrl(gid)}?t=${tournamentId}&r=${i}" title="${title}">${imgHtml}</a></div>`;
+        }).join('');
+      } else {
+        pastContainer.classList.add('hidden');
+      }
+
       const upcomingGameIds = t.games.slice(round + 1);
       const upcomingContainer = $('upcoming-games');
       if (upcomingGameIds.length > 0) {

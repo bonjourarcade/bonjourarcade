@@ -205,7 +205,8 @@
     .dim { display: block; font-size: 0.75em; color: #888; }
     .num { display: block; }
 
-    #results-content { overflow-x: auto; }
+    /* Sections qui s'élargissent au-delà du conteneur pour afficher toutes les colonnes du classement ; scroll seulement si l'écran est trop étroit */
+    .wide-section { box-sizing: border-box; width: max-content; min-width: 100%; max-width: calc(100vw - 32px); position: relative; left: 50%; transform: translateX(-50%); overflow-x: auto; }
     .combined-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
     .combined-table th, .combined-table td { padding: 6px 8px; text-align: center; border-bottom: 1px solid var(--table-border); }
     .combined-table th { color: var(--accent-text); background: var(--accent-bg); padding: var(--accent-pad); border-radius: var(--accent-radius); font-size: 0.75rem; text-transform: uppercase; vertical-align: bottom; white-space: nowrap; }
@@ -490,19 +491,19 @@
             <div id="pending-scores-list"></div>
           </div>
 
-          <div id="scoreboard-section">
+          <div id="scoreboard-section" class="wide-section">
             <div class="section-title">Classement de la ronde</div>
             <div id="scoreboard-entries"></div>
           </div>
 
-          <div id="cumulative-section" class="hidden">
+          <div id="cumulative-section" class="wide-section hidden">
             <div class="section-title">Classement cumulatif</div>
             <div id="cumulative-entries"></div>
           </div>
         </div>
 
         <div id="finished-phase" class="hidden">
-          <div id="results-content"></div>
+          <div id="results-content" class="wide-section"></div>
         </div>
 
         <div id="cancel-finished-view" class="hidden" style="text-align:center;padding:40px;">

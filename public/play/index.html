@@ -1765,14 +1765,30 @@
 
 
 
+        // Feature flag : soumission de score via QR code, désactivée temporairement.
+        // Le code est conservé intact pour pouvoir être réactivé facilement.
+        // TODO: pourrait éventuellement être piloté depuis public/config/bonjourarcade.yaml.
+        const QR_SCORE_SUBMISSION_ENABLED = false;
+
         function setupLeaderboardSubmitQrCode(gameId, gameDetails) {
-            if (isMobileDevice() || typeof QRCode === 'undefined' || !gameId) {
+            if (isMobileDevice() || !gameId) {
                 return;
             }
 
             const qrDrawer = document.getElementById('qr-drawer');
             const qrCodeMount = document.getElementById('leaderboard-submit-qr-code');
-            if (!qrDrawer || !qrCodeMount) {
+            if (!qrDrawer) {
+                return;
+            }
+
+            // Le drawer reste utile pour la note du jeu et les meilleurs scores
+            // même quand la soumission par QR code est désactivée.
+            qrDrawer.style.display = 'block';
+
+            if (!QR_SCORE_SUBMISSION_ENABLED || typeof QRCode === 'undefined' || !qrCodeMount) {
+                if (qrCodeMount) {
+                    qrCodeMount.style.display = 'none';
+                }
                 return;
             }
 
@@ -1792,7 +1808,6 @@
                 correctLevel: QRCode.CorrectLevel.H
             });
 
-            qrDrawer.style.display = 'block';
             qrDrawer.onclick = function (event) {
                 if (event.target.closest('#qr-drawer-toggle-handle')) {
                     return;

@@ -1676,6 +1676,70 @@
             });
         }
 
+        // Tournament safety net: a player registered in an active tournament can land on one
+        // of that tournament's round games without `?t=...&r=...` (shelf link, bookmark, browser
+        // history, an old /b/<id> link) — anything other than clicking the round link on the
+        // tournament page itself. Without this, their score submission never gets tagged with
+        // tournamentId/roundIndex, so it silently never counts toward the tournament, and
+        // save/load states aren't disabled for what should be a competitive run.
+        document.addEventListener('DOMContentLoaded', function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('t') !== null) {
+                return; // already tournament-scoped
+            }
+
+            const gameId = getCurrentGameId();
+            if (!gameId || typeof window.onFirebaseAuthStateChanged !== 'function') {
+                return;
+            }
+
+            const unsubscribe = window.onFirebaseAuthStateChanged(async function (user) {
+                if (typeof unsubscribe === 'function') {
+                    unsubscribe();
+                }
+                if (!user) {
+                    return;
+                }
+
+                try {
+                    const db = window.firebaseDb;
+                    const { collection, query, where, getDocs, doc, getDoc } = window.Firestore;
+                    const q = query(
+                        collection(db, 'tournaments'),
+                        where('status', '==', 'active'),
+                        where('games', 'array-contains', gameId)
+                    );
+                    const snap = await getDocs(q);
+
+                    for (const tournamentDoc of snap.docs) {
+                        const participantRef = doc(db, 'tournaments', tournamentDoc.id, 'participants', user.uid);
+                        const participantSnap = await getDoc(participantRef);
+                        if (!participantSnap.exists()) {
+                            continue;
+                        }
+
+                        const games = tournamentDoc.data().games || [];
+                        const roundIndex = games.indexOf(gameId);
+                        if (roundIndex === -1) {
+                            continue;
+                        }
+
+                        console.log('Tournament participant detected without URL params, redirecting into tournament context.', {
+                            tournamentId: tournamentDoc.id,
+                            roundIndex,
+                        });
+                        const redirectParams = new URLSearchParams(window.location.search);
+                        redirectParams.set('t', tournamentDoc.id);
+                        redirectParams.set('r', String(roundIndex));
+                        window.location.replace(window.location.pathname + '?' + redirectParams.toString());
+                        return;
+                    }
+                } catch (error) {
+                    console.warn('Tournament auto-redirect check failed:', error);
+                }
+            });
+        });
+
         (function bindEmulatorStateAnalytics() {
             if (window.__BA_EJS_STATE_ANALYTICS_BOUND__ === true) {
                 return;

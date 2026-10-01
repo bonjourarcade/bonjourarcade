@@ -645,6 +645,38 @@
         #tb-header .tb-timer.timer-warning { color: #dc3545; animation: pulse-warning 0.5s ease-in-out infinite alternate; }
         #tb-header .tb-status { color: #4a9eff; font-size: 11px; }
 
+        #tb-join-banner {
+            display: none;
+            position: fixed;
+            top: 50px;
+            left: 0;
+            right: 0;
+            z-index: 1999;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 8px 16px;
+            background: rgba(20, 20, 20, 0.95);
+            border-bottom: 1px solid rgba(255, 215, 0, 0.3);
+            font-family: sans-serif;
+            font-size: 13px;
+            color: #eee;
+            text-align: center;
+        }
+        #tb-join-banner.visible { display: flex; }
+        #tb-join-banner #tb-join-btn {
+            background: #ffd700;
+            color: #000;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 14px;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        #tb-join-banner #tb-join-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        #tb-join-banner #tb-join-btn:hover:not(:disabled) { background: #ffe44d; }
+
         #play-header-right {
             display: flex;
             align-items: center;
@@ -1456,6 +1488,13 @@
         </div>
     </header>
 
+    <!-- Shown when a signed-in player who isn't a tournament participant lands on one of its
+         round games (typically via a Discord/Google Chat webhook link) -->
+    <div id="tb-join-banner">
+        <span id="tb-join-text"></span>
+        <button id="tb-join-btn">Rejoindre le tournoi</button>
+    </div>
+
     <!-- Controls Overlay (desktop as sidebar) -->
     <div id="controls-overlay">
         <div id="controls-content"></div>
@@ -1675,70 +1714,6 @@
                 ...(data || {})
             });
         }
-
-        // Tournament safety net: a player registered in an active tournament can land on one
-        // of that tournament's round games without `?t=...&r=...` (shelf link, bookmark, browser
-        // history, an old /b/<id> link) — anything other than clicking the round link on the
-        // tournament page itself. Without this, their score submission never gets tagged with
-        // tournamentId/roundIndex, so it silently never counts toward the tournament, and
-        // save/load states aren't disabled for what should be a competitive run.
-        document.addEventListener('DOMContentLoaded', function () {
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('t') !== null) {
-                return; // already tournament-scoped
-            }
-
-            const gameId = getCurrentGameId();
-            if (!gameId || typeof window.onFirebaseAuthStateChanged !== 'function') {
-                return;
-            }
-
-            const unsubscribe = window.onFirebaseAuthStateChanged(async function (user) {
-                if (typeof unsubscribe === 'function') {
-                    unsubscribe();
-                }
-                if (!user) {
-                    return;
-                }
-
-                try {
-                    const db = window.firebaseDb;
-                    const { collection, query, where, getDocs, doc, getDoc } = window.Firestore;
-                    const q = query(
-                        collection(db, 'tournaments'),
-                        where('status', '==', 'active'),
-                        where('games', 'array-contains', gameId)
-                    );
-                    const snap = await getDocs(q);
-
-                    for (const tournamentDoc of snap.docs) {
-                        const participantRef = doc(db, 'tournaments', tournamentDoc.id, 'participants', user.uid);
-                        const participantSnap = await getDoc(participantRef);
-                        if (!participantSnap.exists()) {
-                            continue;
-                        }
-
-                        const games = tournamentDoc.data().games || [];
-                        const roundIndex = games.indexOf(gameId);
-                        if (roundIndex === -1) {
-                            continue;
-                        }
-
-                        console.log('Tournament participant detected without URL params, redirecting into tournament context.', {
-                            tournamentId: tournamentDoc.id,
-                            roundIndex,
-                        });
-                        const redirectParams = new URLSearchParams(window.location.search);
-                        redirectParams.set('t', tournamentDoc.id);
-                        redirectParams.set('r', String(roundIndex));
-                        window.location.replace(window.location.pathname + '?' + redirectParams.toString());
-                        return;
-                    }
-                } catch (error) {
-                    console.warn('Tournament auto-redirect check failed:', error);
-                }
-            });
-        });
 
         (function bindEmulatorStateAnalytics() {
             if (window.__BA_EJS_STATE_ANALYTICS_BOUND__ === true) {
@@ -2997,25 +2972,31 @@
                         try {
                             const result = await TournoiUtils.callFunction('getUserActiveTournaments');
                             if (result && Array.isArray(result.tournaments)) {
-                                const matches = result.tournaments.filter(t =>
-                                    t.status === 'active' &&
-                                    t.currentRoundIndex >= 0 &&
-                                    t.games &&
-                                    t.games[t.currentRoundIndex] === gameId
-                                );
+                                // Match this game against the tournament's current round, or an
+                                // earlier one if it still accepts late submissions — mirrors the
+                                // server-side gate in linkScoreToTournament exactly, so we never
+                                // redirect into a round whose submission would be rejected anyway
+                                // (a future round, or a closed past round).
+                                const matches = result.tournaments
+                                    .filter(t => t.status === 'active' && Array.isArray(t.games))
+                                    .map(t => ({ t, roundIndex: t.games.indexOf(gameId) }))
+                                    .filter(m => m.roundIndex !== -1 && (
+                                        m.roundIndex === m.t.currentRoundIndex ||
+                                        (m.roundIndex < m.t.currentRoundIndex && m.t.allowLateSubmissions)
+                                    ));
                                 if (matches.length === 1) {
-                                    const t = matches[0];
-                                    window.location.href = `/b/${gameId}?t=${t.id}&r=${t.currentRoundIndex}`;
+                                    const { t, roundIndex } = matches[0];
+                                    window.location.href = `/b/${gameId}?t=${t.id}&r=${roundIndex}`;
                                     return;
                                 } else if (matches.length > 1) {
                                     const choice = prompt(
                                         'Vous participez à plusieurs tournois sur ce jeu. Entrez le code du tournoi auquel vous voulez jouer :\n' +
-                                        matches.map(t => `  #${t.shareCode}`).join('\n')
+                                        matches.map(m => `  #${m.t.shareCode}`).join('\n')
                                     );
                                     if (choice) {
-                                        const found = matches.find(t => String(t.shareCode) === choice);
+                                        const found = matches.find(m => String(m.t.shareCode) === choice);
                                         if (found) {
-                                            window.location.href = `/b/${gameId}?t=${found.id}&r=${found.currentRoundIndex}`;
+                                            window.location.href = `/b/${gameId}?t=${found.t.id}&r=${found.roundIndex}`;
                                             return;
                                         }
                                     }
@@ -5268,12 +5249,15 @@
             let unsubScores = null;
             let timerInterval = null;
             let warningPlayed = false;
+            let latestTournament = null;
 
             const tournamentRef = doc(db, 'tournaments', tId);
 
             unsubTournament = onSnapshot(tournamentRef, (snap) => {
                 if (!snap.exists) return;
                 const t = snap.data();
+                latestTournament = t;
+                renderJoinBanner();
 
                 const codeEl = document.getElementById('tb-code');
                 codeEl.textContent = `Tournoi #${t.shareCode}`;
@@ -5379,12 +5363,56 @@
                 leaderEl.style.display = 'flex';
             });
 
-            // Listen for player elimination
+            // Listen for player elimination, and whether the current user is even a participant
             const auth = window.firebaseAuth;
             let unsubParticipant = null;
+            let isParticipant = null; // null = unknown yet, to avoid a flash of the banner before the first snapshot
+            let joining = false;
+
+            function renderJoinBanner() {
+                const banner = document.getElementById('tb-join-banner');
+                const textEl = document.getElementById('tb-join-text');
+                const btn = document.getElementById('tb-join-btn');
+                if (!banner || !textEl || !btn) return;
+
+                if (isParticipant !== false || !latestTournament) {
+                    banner.classList.remove('visible');
+                    return;
+                }
+
+                const t = latestTournament;
+                const joinable = window.TournoiUtils ? window.TournoiUtils.isJoinable(t) : false;
+                textEl.textContent = joinable ?
+                    `Tu n'es pas inscrit(e) au tournoi « ${t.name || '#' + t.shareCode} ».` :
+                    `Ce jeu fait partie du tournoi « ${t.name || '#' + t.shareCode} », mais il n'accepte plus de nouvelles inscriptions.`;
+                btn.style.display = joinable ? '' : 'none';
+                btn.disabled = joining;
+                banner.classList.add('visible');
+            }
+
+            document.getElementById('tb-join-btn').addEventListener('click', async () => {
+                if (joining || !latestTournament) return;
+                joining = true;
+                renderJoinBanner();
+                try {
+                    const fn = window.httpsCallable
+                        ? window.httpsCallable(window.firebaseFunctions, 'joinTournament')
+                        : (await import('https://www.gstatic.com/firebasejs/11.0.1/firebase-functions.js')).httpsCallable(window.firebaseFunctions, 'joinTournament');
+                    await fn({ tournamentId: tId });
+                    // The participants onSnapshot listener below will fire and hide the banner.
+                } catch (e) {
+                    console.warn('Failed to join tournament from game page:', e);
+                    joining = false;
+                    renderJoinBanner();
+                }
+            });
+
             if (auth && auth.currentUser) {
                 const uid = auth.currentUser.uid;
                 unsubParticipant = onSnapshot(doc(db, 'tournaments', tId, 'participants', uid), (pSnap) => {
+                    isParticipant = !!pSnap.exists;
+                    renderJoinBanner();
+
                     const sEl = document.getElementById('tb-status');
                     if (pSnap.exists && pSnap.data().eliminated) {
                         window._eliminated = true;

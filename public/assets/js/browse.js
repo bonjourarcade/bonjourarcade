@@ -370,7 +370,7 @@
     'arcade': 'Coin-Op', 'mame2003_plus': 'Coin-Op', 'atari2600': 'Atari 2600',
     'gb': 'Game Boy', 'gba': 'Game Boy Advance', 'gbc': 'Game Boy Color',
     'segaMD': 'Sega Genesis/Mega Drive', 'segaGG': 'Sega Game Gear', 'segaMS': 'Sega Master System',
-    'segaSaturn': 'Sega Saturn', 'sega32x': 'Sega 32X', 'nds': 'Nintendo DS', 'jaguar': 'Atari Jaguar',
+    'segaSaturn': 'Sega Saturn', 'sega32x': 'Sega 32X', 'segacd': 'Sega CD', 'nds': 'Nintendo DS', 'jaguar': 'Atari Jaguar',
     'n64': 'Nintendo 64', 'nes': 'Nintendo Entertainment System', 'pce': 'PC Engine/TurboGrafx-16',
     'psx': 'PlayStation', 'snes': 'Super Nintendo', 'vb': 'Virtual Boy', 'ws': 'WonderSwan',
     'neogeo': 'Neo Geo', 'neogeocd': 'Neo Geo CD', 'ngp': 'Neo Geo Pocket', 'ngpc': 'Neo Geo Pocket Color',
@@ -1054,44 +1054,68 @@
     title.className = 'browse-row-title';
     title.textContent = category.title;
 
-    var track, expandPanel, expandGrid, expandBuilt;
-    // Only the games beyond what the carousel itself already previews -
-    // otherwise a category with few enough games would open a panel that
-    // just repeats the exact same cards the carousel already shows.
-    var extraGames = category.allGames ? category.allGames.slice(category.games.length) : [];
-
+    var track, wrap, expandPanel, expandGrid, expandBuilt;
+    var isExpandable = false;
+    var isExpanded = false;
     // Rows built from a genre/system/year/decade/developer grouping carry
-    // their full game list separately (see buildCategories) - clicking the
-    // title slides open a panel with the rest of that category's games in a
-    // grid below the carousel, so browsing all of it doesn't mean fighting
-    // a cramped horizontal scroller. Clicking again slides it back shut.
-    if (extraGames.length) {
-      title.classList.add('browse-row-title-clickable');
-      title.tabIndex = 0;
-      title.setAttribute('role', 'button');
-      title.setAttribute('aria-expanded', 'false');
-      title.setAttribute('aria-label', 'Voir tous les jeux : ' + category.title);
+    // their full game list separately (see buildCategories). Whether the
+    // title can be clicked isn't a fixed game count - it's whether the
+    // carousel actually overflows its own width right now (measured after
+    // layout below), so it adapts to any screen size, including mobile's
+    // narrower cards, and to window resizes.
+    var supportsExpand = !!category.allGames;
+    var toggleExpand, updateExpandable;
 
+    function setExpandable(expandable) {
+      if (expandable === isExpandable) return;
+      isExpandable = expandable;
+      title.classList.toggle('browse-row-title-clickable', expandable);
+      if (expandable) {
+        title.tabIndex = 0;
+        title.setAttribute('role', 'button');
+        title.setAttribute('aria-expanded', String(isExpanded));
+        title.setAttribute('aria-label', (isExpanded ? 'Fermer' : 'Voir tous les jeux : ') + category.title);
+      } else {
+        title.removeAttribute('tabindex');
+        title.removeAttribute('role');
+        title.removeAttribute('aria-expanded');
+        title.removeAttribute('aria-label');
+      }
+    }
+
+    if (supportsExpand) {
       var chevron = document.createElement('span');
       chevron.className = 'browse-row-chevron';
       chevron.textContent = '▸';
       chevron.setAttribute('aria-hidden', 'true');
       title.appendChild(chevron);
 
-      var toggleExpand = function () {
-        var opening = title.getAttribute('aria-expanded') !== 'true';
+      // Clicking the title slides open a panel with EVERY matching game in
+      // a wrapping grid, replacing the carousel entirely (not appending
+      // below it) so browsing all of it never means scrolling a cramped
+      // horizontal strip. Clicking again slides it back shut.
+      toggleExpand = function () {
+        if (!isExpandable) return;
+        var opening = !isExpanded;
+        isExpanded = opening;
         title.setAttribute('aria-expanded', String(opening));
         title.setAttribute('aria-label', (opening ? 'Fermer' : 'Voir tous les jeux : ') + category.title);
         if (opening && !expandBuilt) {
           expandBuilt = true;
-          extraGames.forEach(function (game) { expandGrid.appendChild(makeCard(game, category.directPlay)); });
+          category.allGames.forEach(function (game) { expandGrid.appendChild(makeCard(game, category.directPlay)); });
         }
         expandPanel.classList.toggle('open', opening);
+        wrap.classList.toggle('browse-row-track-wrap-hidden', opening);
       };
       title.addEventListener('click', toggleExpand);
       title.addEventListener('keydown', function (e) {
         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleExpand(); }
       });
+
+      updateExpandable = function () {
+        if (!track) return;
+        setExpandable(track.scrollWidth > track.clientWidth + 1);
+      };
     }
     titleWrap.appendChild(title);
     if (category.typeLabel) {
@@ -1133,7 +1157,7 @@
       return row;
     }
 
-    var wrap = document.createElement('div');
+    wrap = document.createElement('div');
     wrap.className = 'browse-row-track-wrap';
 
     track = document.createElement('div');
@@ -1176,12 +1200,17 @@
     // as 0 - measure once the browser has actually laid it out.
     requestAnimationFrame(updateNavButtons);
 
+    if (supportsExpand) {
+      window.addEventListener('resize', updateExpandable, { passive: true });
+      requestAnimationFrame(updateExpandable);
+    }
+
     wrap.appendChild(track);
     wrap.appendChild(prevBtn);
     wrap.appendChild(nextBtn);
     row.appendChild(wrap);
 
-    if (extraGames.length) {
+    if (supportsExpand) {
       // Collapsed to zero height via the grid-template-rows trick (see the
       // CSS) so opening/closing it animates smoothly without having to
       // measure and animate an actual pixel height in JS.
@@ -1199,25 +1228,27 @@
     return row;
   }
 
-  // How many category rows show up front - the rest stay behind a "load
-  // more" button so a fresh visit doesn't have to load/render every row's
-  // covers at once.
+  // How many rows show up front - the rest stay behind a "load more" button
+  // so a fresh visit doesn't have to load/render every row's covers at once.
+  // Counts rendered row UNITS (a solo row or a paired row counts as one),
+  // not raw categories, so pagination tracks actual vertical page length.
   var HOME_ROW_PAGE_SIZE = 12;
 
   // Consecutive categories with few enough games are paired side by side
   // (desktop only - see .browse-row-pair) instead of each claiming a full
   // row's width; a small category with no small neighbor just renders alone.
-  function appendCategoryRows(container, categories) {
-    // Don't just pair a small category with whichever one happens to be
-    // immediately next - look ahead through the rest of this batch for any
-    // other small category to fill the space with, pulling it forward out
-    // of its original spot. Only a small category with no small partner
-    // left anywhere later in the batch renders alone.
+  // This runs over the WHOLE category list up front (before pagination), so
+  // a small category's partner is found wherever it is in the list, not just
+  // within whichever page of rows happens to be visible yet - otherwise a
+  // page boundary can strand a small category alone with a partner just one
+  // "load more" click away.
+  function buildRowUnits(categories) {
     var list = categories.slice();
+    var units = [];
     for (var i = 0; i < list.length; i++) {
       var category = list[i];
       if (category.games.length >= PAIRED_ROW_MAX_GAMES) {
-        container.appendChild(makeRow(category));
+        units.push({ type: 'solo', category: category });
         continue;
       }
       var partnerIndex = -1;
@@ -1225,16 +1256,59 @@
         if (list[j].games.length < PAIRED_ROW_MAX_GAMES) { partnerIndex = j; break; }
       }
       if (partnerIndex === -1) {
-        container.appendChild(makeRow(category));
+        units.push({ type: 'solo', category: category });
         continue;
       }
       var partner = list.splice(partnerIndex, 1)[0];
-      var pair = document.createElement('div');
-      pair.className = 'browse-row-pair';
-      pair.appendChild(makeRow(category));
-      pair.appendChild(makeRow(partner));
-      container.appendChild(pair);
+      units.push({ type: 'pair', a: category, b: partner });
     }
+    return units;
+  }
+
+  function trackOverflows(rowEl) {
+    var track = rowEl.querySelector('.browse-row-track');
+    return !!track && track.scrollWidth > track.clientWidth + 1;
+  }
+
+  function appendRowUnit(container, unit) {
+    if (unit.type === 'solo') {
+      container.appendChild(makeRow(unit.category));
+      return;
+    }
+
+    var pair = document.createElement('div');
+    pair.className = 'browse-row-pair';
+    var rowA = makeRow(unit.a);
+    var rowB = makeRow(unit.b);
+    pair.appendChild(rowA);
+    pair.appendChild(rowB);
+    container.appendChild(pair);
+
+    // Even a handful of games can overflow a half-width column on desktop -
+    // if either side doesn't actually fit at this width, break the pair
+    // apart into two normal full-width rows instead of letting one spill
+    // past its column. Checked on resize too
+    // (not just once at creation, like the rest of this row's own
+    // measurements - see updateNavButtons/updateExpandable) so a window
+    // that's resized after load still gets this right.
+    function checkPairOverflow() {
+      if (!pair.isConnected) return;
+      if (!trackOverflows(rowA) && !trackOverflows(rowB)) return;
+      var parent = pair.parentNode;
+      parent.insertBefore(rowA, pair);
+      parent.insertBefore(rowB, pair);
+      parent.removeChild(pair);
+      window.removeEventListener('resize', checkPairOverflow);
+      // rowA/rowB's own nav-button/expand measurements ran at half-width;
+      // now that they're full-width, make them re-measure.
+      window.dispatchEvent(new Event('resize'));
+    }
+    window.addEventListener('resize', checkPairOverflow, { passive: true });
+    requestAnimationFrame(checkPairOverflow);
+  }
+
+  function appendRowUnits(container, units) {
+    units.forEach(function (unit) { appendRowUnit(container, unit); });
   }
 
   function renderRows(categories) {
@@ -1250,9 +1324,10 @@
       return;
     }
 
-    var visible = categories.slice(0, HOME_ROW_PAGE_SIZE);
-    var rest = categories.slice(HOME_ROW_PAGE_SIZE);
-    appendCategoryRows(container, visible);
+    var units = buildRowUnits(categories);
+    var visible = units.slice(0, HOME_ROW_PAGE_SIZE);
+    var rest = units.slice(HOME_ROW_PAGE_SIZE);
+    appendRowUnits(container, visible);
 
     if (rest.length) {
       var loadMoreWrap = document.createElement('div');
@@ -1263,7 +1338,7 @@
       loadMoreBtn.textContent = 'Charger plus de jeux';
       loadMoreBtn.addEventListener('click', function () {
         loadMoreWrap.remove();
-        appendCategoryRows(container, rest);
+        appendRowUnits(container, rest);
       });
       loadMoreWrap.appendChild(loadMoreBtn);
       container.appendChild(loadMoreWrap);

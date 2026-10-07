@@ -937,7 +937,12 @@ body:not(.browse-dark) .browse-hero-leaderboard-rank { color: #c2410c; }
    row width to itself, so they share one row side by side on desktop. */
 .browse-row-pair {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  /* minmax(0, 1fr), not a bare 1fr - a bare 1fr track's automatic minimum
+     size is its content's min-content width, which a carousel's
+     non-shrinking fixed-width cards can exceed. That pushes the whole page
+     wider than the viewport instead of overflowing (and being caught, see
+     trackOverflows in browse.js) inside the row's own track. */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   column-gap: 24px;
 }
 
@@ -1015,6 +1020,13 @@ body:not(.browse-dark) .browse-hero-leaderboard-rank { color: #c2410c; }
   position: relative;
 }
 
+/* The expand panel is the full game list - while it's open the (now
+   redundant, partial) scrolling carousel it replaces is hidden instead of
+   sitting above it. */
+.browse-row-track-wrap-hidden {
+  display: none;
+}
+
 .browse-row-track {
   display: flex;
   gap: 8px;
@@ -1067,9 +1079,10 @@ body:not(.browse-dark) .browse-hero-leaderboard-rank { color: #c2410c; }
 .browse-row-nav.next { right: 6px; }
 .browse-row-nav.disabled { opacity: 0 !important; pointer-events: none; }
 
-/* Expand panel (a row title was clicked): slides open below the row's own
-   carousel to reveal every matching game as a wrapping grid. Animated with
-   the CSS grid-template-rows 0fr/1fr trick instead of measuring a pixel
+/* Expand panel (a row title was clicked): slides open in place of the row's
+   own carousel (see .browse-row-track-wrap-hidden) to reveal every matching
+   game as a wrapping grid, so nothing needs scrolling to be seen. Animated
+   with the CSS grid-template-rows 0fr/1fr trick instead of measuring a pixel
    height in JS - the 0fr track has no height to transition from/to, so the
    panel just grows/shrinks smoothly with its content. */
 .browse-row-expand-panel {

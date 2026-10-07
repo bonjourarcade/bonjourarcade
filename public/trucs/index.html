@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trucs & astuces - BonjourArcade</title>
+    <meta name="description" content="Trucs et astuces pour profiter de BonjourArcade - les mêmes conseils affichés au hasard pendant le chargement des jeux.">
+    <link rel="icon" href="../favicon.ico">
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/trucs.css">
+    <script async src="/assets/js/analytics.js"></script>
+</head>
+<body>
+    <header class="trucs-header">
+        <div class="trucs-header-inner">
+            <a class="trucs-logo" href="/" aria-label="Retour a l'accueil BonjourArcade">
+                <img src="/assets/images/bonjourarcade-logo.png" alt="BonjourArcade" class="header-logo">
+            </a>
+            <nav class="trucs-nav" aria-label="Navigation principale">
+                <a href="/">Accueil</a>
+                <a href="/all/">Tous les jeux</a>
+                <a href="/scores/">Scores</a>
+            </nav>
+            <div class="trucs-header-actions">
+                <button id="theme-toggle" class="theme-btn" aria-label="Changer le theme" type="button">
+                    <span id="theme-toggle-icon">🌓</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="trucs-main">
+        <div class="page-hero">
+            <h1>💡 Trucs & astuces</h1>
+            <p>Les mêmes conseils qui s'affichent au hasard pendant le chargement d'une partie, réunis ici au même endroit.</p>
+        </div>
+
+        <section class="section-card">
+            <div id="trucs-state" class="section-state loading">Chargement des trucs...</div>
+            <div id="trucs-list" class="trucs-list"></div>
+        </section>
+    </main>
+
+    <script src="../assets/js/trucs.js"></script>
+</body>
+</html>

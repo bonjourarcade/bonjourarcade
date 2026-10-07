@@ -1,0 +1,23 @@
+Ajoute des jeux à tes favoris en cliquant sur le cœur dans la page de jeu.
+Un nouveau jeu en vedette apparaît sur la page d'accueil le 1er et le 15 de chaque mois.
+Consulte https://bonjourarcade.com/all pour filtrer et trier tous les jeux par système ou développeur.
+Inscris-toi à un tournoi pour affronter d'autres joueurs et grimper au classement.
+Connecte-toi avec Google pour sauvegarder tes favoris et tes scores.
+Tu peux changer ton nom de joueur et ton avatar sur ta page de profil.
+La page Profil regroupe tes jeux favoris et ton historique de scores.
+Passe en plein écran depuis la page de jeu pour une meilleure expérience.
+Chaque jeu affiche ses contrôles spécifiques : consulte-les avant de commencer.
+Tu peux choisir un jeu la page d'accueil à l'aide du clavier (flèches, enter).
+Tu peux modifier les contrôles d'un jeu et même activer "autofire" sur les touches de ton choix.
+BonjourArcade a vu le jour en avril 2025.
+BonjourArcade est fièrement disponible en français seulement.
+Tu peux soumettre un score rapidement grâce à la touche F1.
+BonjourArcade fonctionne aussi sur mobile, Steam Deck, etc.
+Vous pouvez supporter BonjourArcade monétairement sur https://ko-fi.com/bonjourarcade
+BonjourArcade ne pourrait pas fonctionner sans le projet EmulatorJS.
+Trouve le jeu qui match avec toi sur https://bonjourarcade.com/swipe
+Découvre le jeu du jour : https://bonjourarcade.com/daily
+Tu ne sais pas à quoi jouer? Fais confiance au hasard: https://bonjourarcade.com/randomgame
+Parcours les jeux les mieux notés sur https://bonjourarcade.com/ratings
+BonjourArcade a son écran de veille: https://bonjourarcade.com/screensaver
+Tu peux découvrir des trucs sur https://bonjourarcade.com/trucs

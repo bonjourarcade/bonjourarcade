@@ -1658,6 +1658,13 @@
     <!-- The type="module" is handled inside firebase-setup.js to allow async await -->
     <script type="module" src="../assets/js/firebase-setup.js"></script>
     <script src="../assets/js/favorites.js"></script>
+    <script>
+        // This page calls initLoading() itself once the game is actually ready to
+        // start (see EJS_onGameStart below) - skip loading.js's own default auto-hide,
+        // which would otherwise race it and hide the overlay as soon as the page
+        // shell loads, long before the game does.
+        window.BA_LOADING_MANUAL_INIT = true;
+    </script>
     <script src="../assets/js/loading.js"></script>
     <script src="../assets/js/banner.js"></script>
     <script src="../assets/js/game-history.js"></script>
@@ -3348,6 +3355,17 @@
                     }
                 };
 
+                // EmulatorJS calls this ~20ms after it constructs itself (new EmulatorJS(...)),
+                // regardless of whether the core/BIOS/ROM download that follows succeeds -
+                // this is "EmulatorJS has initialized", not "the game is playable". That's
+                // the signal we want: it's the earliest point our own overlay can hand off to
+                // EmulatorJS's own box art/loading UI.
+                window.EJS_ready = function () {
+                    hideLoading({
+                        containerSelector: '#game'
+                    });
+                };
+
                 // Step 10: Load the main EmulatorJS engine (loader.js)
                 // This now happens sequentially after successfully fetching/setting up everything else
                 if (window.EJS_pathtodata) {
@@ -3369,18 +3387,8 @@
 
                         ;
 
-                    // Hide loading when the script loads successfully
                     loaderScript.onload = () => {
                         console.log("EmulatorJS 'loader.js' loaded successfully.");
-
-                        // Wait a bit for EmulatorJS to initialize, then hide loading
-                        setTimeout(() => {
-                            hideLoading({
-                                containerSelector: '#game'
-                            });
-                        }
-
-                            , 500);
                     }
 
                         ;

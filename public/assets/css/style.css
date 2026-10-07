@@ -2675,9 +2675,21 @@ body.theme-light .game-external {
 
 .loading-text {
     color: #666;
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     font-weight: 500;
     text-align: center;
+    max-width: 420px;
+    line-height: 1.5;
+    padding: 0 20px;
+}
+
+.loading-text a {
+    color: #4CAF50;
+    text-decoration: underline;
+}
+
+.loading-text a:hover {
+    text-decoration: none;
 }
 
 /* Couleur lisible dans les deux thèmes */

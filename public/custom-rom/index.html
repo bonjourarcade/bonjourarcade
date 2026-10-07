@@ -272,6 +272,12 @@
         </div>
     </div>
 
+    <script>
+        // This page calls initLoading() itself once the user launches a game (see
+        // launchGame() below) - skip loading.js's own default auto-hide, which would
+        // otherwise race it and hide the overlay as soon as the page shell loads.
+        window.BA_LOADING_MANUAL_INIT = true;
+    </script>
     <script src="../assets/js/loading.js"></script>
     <script>
         // Systems this site's EmulatorJS setup supports (mirrors scripts/generate_gamelist.rb's CORE_BY_DIR).

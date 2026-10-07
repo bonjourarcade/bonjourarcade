@@ -73,6 +73,55 @@
         </svg>
     `;
 
+    // Astuces d'utilisation de la plateforme, une par ligne dans ce fichier texte.
+    const LOADING_TIPS_URL = '/config/loading-tips.txt';
+
+    function escapeHtml(str) {
+        return str.replace(/[&<>"']/g, (ch) => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;'
+        }[ch]));
+    }
+
+    // Escapes the tip text, then turns any http(s) URL into a real clickable link.
+    function linkify(text) {
+        return escapeHtml(text).replace(/https?:\/\/[^\s]+/g, (url) => {
+            let trailing = '';
+            const trailingMatch = url.match(/[.,;:!?)\]]+$/);
+            if (trailingMatch) {
+                trailing = trailingMatch[0];
+                url = url.slice(0, -trailing.length);
+            }
+            return `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>${trailing}`;
+        });
+    }
+
+    /**
+     * Fetches the tips file and fills the loading-text element with a random line.
+     * @param {HTMLElement} overlay
+     */
+    function showRandomTip(overlay) {
+        const textEl = overlay.querySelector('.loading-text');
+        if (!textEl) return;
+        fetch(LOADING_TIPS_URL)
+            .then((response) => (response.ok ? response.text() : ''))
+            .then((text) => {
+                const tips = text
+                    .split('\n')
+                    .map((line) => line.trim())
+                    .filter((line) => line.length > 0);
+                if (tips.length > 0) {
+                    textEl.innerHTML = linkify(tips[Math.floor(Math.random() * tips.length)]);
+                }
+            })
+            .catch(() => {
+                // Garde le texte par défaut si le fichier est introuvable
+            });
+    }
+
     /**
      * Creates the loading overlay if it doesn't exist or populates it if empty
      * @returns {HTMLElement} The loading overlay element
@@ -97,11 +146,10 @@
                     <div class="loading-animation-container">
                         ${PACMAN_SVG}
                     </div>
-                    <div class="loading-text">
-                        Un instant...
-                    </div>
+                    <div class="loading-text"></div>
                 </div>
             `;
+            showRandomTip(overlay);
         }
         return overlay;
     }
@@ -214,8 +262,15 @@
         if (overlay) {
             // Create/populate overlay content
             createLoadingOverlay();
-            // Initialize loading
-            initLoading();
+            // Pages that call initLoading() themselves (to control exactly when the
+            // overlay hides, e.g. /play waiting for the game to actually start) set
+            // window.BA_LOADING_MANUAL_INIT before this script runs. Without this guard,
+            // this default initLoading() call registers its own window "load" listener
+            // (hideOnLoad: true) that races the page's own listener and hides the
+            // overlay as soon as the page shell has loaded - long before the game has.
+            if (!window.BA_LOADING_MANUAL_INIT) {
+                initLoading();
+            }
         }
     }
 

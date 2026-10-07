@@ -1035,7 +1035,13 @@ body:not(.browse-dark) .browse-hero-leaderboard-rank { color: #c2410c; }
      regardless of overflow) - this just blocks direct wheel/trackpad/drag. */
   overflow-x: hidden;
   scroll-behavior: smooth;
-  padding: 4px 5% 10px 5%;
+  /* Top and bottom padding are taller than usual: overflow-x:hidden here
+     forces overflow-y to compute as 'auto' (per spec, mismatched x/y
+     overflow visibility isn't allowed), so the kbfocus card's lift (needs
+     headroom above) and its triangle marker (sits below, pointing up at the
+     card) need real room in the box or they get clipped instead of just
+     "not scrolled to". */
+  padding: 18px 5% 24px 5%;
   padding-left: 5cqw;
   padding-right: 5cqw;
 }
@@ -1121,7 +1127,6 @@ body:not(.browse-dark) .browse-hero-leaderboard-rank { color: #c2410c; }
   flex: 0 0 auto;
   width: 170px;
   border-radius: 6px;
-  overflow: hidden;
   cursor: pointer;
   background: var(--browse-surface);
   border: 1px solid var(--browse-border);
@@ -1140,6 +1145,7 @@ body:not(.browse-dark) .browse-hero-leaderboard-rank { color: #c2410c; }
   object-fit: cover;
   display: block;
   background: var(--browse-surface);
+  border-radius: 6px;
 }
 
 .browse-card-overlay {
@@ -1153,10 +1159,86 @@ body:not(.browse-dark) .browse-hero-leaderboard-rank { color: #c2410c; }
   font-weight: 600;
   opacity: 1;
   color: #fff;
+  border-radius: 0 0 6px 6px;
 }
 
 .browse-card.kbfocus {
-  box-shadow: 0 0 0 3px var(--browse-amber), var(--browse-shadow);
+  transform: translateY(-12px);
+  box-shadow:
+    0 0 0 4px var(--browse-pink),
+    var(--browse-shadow);
+  perspective: 300px;
+}
+
+body.browse-dark .browse-card.kbfocus {
+  box-shadow:
+    0 0 0 4px var(--browse-amber),
+    var(--browse-shadow);
+}
+
+/* Small rotating triangle marker, apex always up, sitting below the card and
+   pointing up at it: the card lifts up off the shelf on selection, opening a
+   gap beneath it, while the triangle stays pinned (via a counter-translate)
+   to the row's normal bottom line, flush with the neighboring covers' feet.
+   A second, slightly larger triangle behind it in the opposite tone acts as
+   an outline so it stays legible against whatever's behind it. Spins lazily
+   at rest, bursts into a few fast laps when the selection moves, then eases
+   back down. */
+.browse-card.kbfocus::before,
+.browse-card.kbfocus::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  transform-origin: 50% 62%;
+  animation: browse-kbfocus-spin 5.5s linear infinite;
+  pointer-events: none;
+}
+
+.browse-card.kbfocus::after {
+  border-left: 9px solid transparent;
+  border-right: 9px solid transparent;
+  border-bottom: 14px solid #fdf6e8;
+  z-index: 1;
+}
+
+.browse-card.kbfocus::before {
+  border-left: 7px solid transparent;
+  border-right: 7px solid transparent;
+  border-bottom: 11px solid #15110b;
+  z-index: 2;
+}
+
+body.browse-dark .browse-card.kbfocus::after {
+  border-bottom-color: #15110b;
+}
+
+body.browse-dark .browse-card.kbfocus::before {
+  border-bottom-color: #fdf6e8;
+}
+
+.browse-card.kbfocus.kbfocus-burst::before,
+.browse-card.kbfocus.kbfocus-burst::after {
+  /* forwards: once the 3 laps finish, hold that pose instead of snapping
+     back to an untransformed (uncentered, unlifted) default - otherwise the
+     triangle jumps out of place for the instant before the decel class
+     lands. */
+  animation: browse-kbfocus-spin 0.45s linear 3 forwards;
+}
+
+.browse-card.kbfocus.kbfocus-decel::before,
+.browse-card.kbfocus.kbfocus-decel::after {
+  animation: browse-kbfocus-spin 0.9s ease-out 1 forwards;
+}
+
+@keyframes browse-kbfocus-spin {
+  /* 'from' stays 0deg on purpose (not just reversed via animation-direction)
+     so every phase - base, burst, decel - starts from the same neutral,
+     un-rotated pose instead of picking up mid-turn. */
+  from { transform: translateX(-50%) translateY(12px) rotateY(0deg); }
+  to { transform: translateX(-50%) translateY(12px) rotateY(-360deg); }
 }
 
 /* ---------- Click / activate burst transition ---------- */

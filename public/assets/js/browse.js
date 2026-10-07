@@ -961,9 +961,15 @@
     return { row: bestRow, col: bestCol };
   }
 
+  var KB_BURST_LAPS = 3;
+  var KB_BURST_LAP_MS = 450;
+  var KB_DECEL_MS = 900;
+  var kbFocusBurstTimeout = null;
+  var kbFocusDecelTimeout = null;
+
   function clearKbFocus() {
     var current = document.querySelector('.browse-card.kbfocus');
-    if (current) current.classList.remove('kbfocus');
+    if (current) current.classList.remove('kbfocus', 'kbfocus-burst', 'kbfocus-decel');
   }
 
   function setKbFocus(track, colIndex) {
@@ -972,8 +978,50 @@
     if (!cards.length) return;
     kbCol = Math.max(0, Math.min(colIndex, cards.length - 1));
     var card = cards[kbCol];
-    card.classList.add('kbfocus');
-    card.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' });
+    card.classList.add('kbfocus', 'kbfocus-burst');
+    clearTimeout(kbFocusBurstTimeout);
+    clearTimeout(kbFocusDecelTimeout);
+    kbFocusBurstTimeout = setTimeout(function () {
+      card.classList.remove('kbfocus-burst');
+      card.classList.add('kbfocus-decel');
+      kbFocusDecelTimeout = setTimeout(function () {
+        card.classList.remove('kbfocus-decel');
+      }, KB_DECEL_MS);
+    }, KB_BURST_LAPS * KB_BURST_LAP_MS);
+    if (track.classList.contains('browse-row-track')) {
+      scrollCardClearOfRowNav(track, card);
+    } else {
+      card.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' });
+    }
+  }
+
+  // Scrolls a card into the track's visible area, stopping short of the
+  // edges so it doesn't end up hidden behind the overlay prev/next arrows,
+  // and also keeps the row itself vertically in view (scrollIntoView's
+  // block:'nearest' used to handle this before the horizontal-clearance
+  // logic replaced it for tracks with nav arrows).
+  function scrollCardClearOfRowNav(track, card) {
+    var wrap = track.closest('.browse-row-track-wrap');
+    var nav = wrap && wrap.querySelector('.browse-row-nav');
+    var reserve = nav ? nav.getBoundingClientRect().width + 6 : 0;
+    var trackRect = track.getBoundingClientRect();
+    var cardRect = card.getBoundingClientRect();
+    var deltaX = 0;
+    if (cardRect.left < trackRect.left + reserve) {
+      deltaX = cardRect.left - (trackRect.left + reserve);
+    } else if (cardRect.right > trackRect.right - reserve) {
+      deltaX = cardRect.right - (trackRect.right - reserve);
+    }
+    if (deltaX !== 0) {
+      track.scrollBy({ left: deltaX, behavior: 'smooth' });
+    }
+
+    var margin = 16;
+    if (cardRect.top < margin) {
+      window.scrollBy({ top: cardRect.top - margin, behavior: 'smooth' });
+    } else if (cardRect.bottom > window.innerHeight - margin) {
+      window.scrollBy({ top: cardRect.bottom - (window.innerHeight - margin), behavior: 'smooth' });
+    }
   }
 
   function isTypingTarget(el) {

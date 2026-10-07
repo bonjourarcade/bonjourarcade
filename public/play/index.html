@@ -1667,6 +1667,21 @@
     <script src="../tournoi/tournament-utils.js"></script>
     <script src="../assets/js/announcement-modal.js"></script>
     <script>
+        // Restores keyboard focus to the emulator canvas after a UI
+        // interaction (e.g. toggling an info panel) would otherwise steal it.
+        function refocusGame() {
+            const gameElement = document.getElementById('game');
+            if (!gameElement) return;
+            const target = gameElement.querySelector('canvas') || gameElement;
+            if (target && target.focus) {
+                try {
+                    target.focus({ preventScroll: true });
+                } catch (e) {
+                    // Element might not be focusable, that's okay
+                }
+            }
+        }
+
         // Helper to navigate even if in iframe
         function navigate(url) {
             if (window.parent !== window) {
@@ -2668,6 +2683,7 @@
                                 const currentlyCollapsed = controlsOverlay.classList.contains('collapsed');
                                 localStorage.setItem('controls_collapsed', currentlyCollapsed);
                                 updateGameInfoOverlayPosition();
+                                refocusGame();
                             });
                             toggleHandle.dataset.listenerAdded = 'true';
                         }
@@ -2739,6 +2755,7 @@
                                 gameInfoOverlay.classList.toggle('collapsed');
                                 const currentlyCollapsed = gameInfoOverlay.classList.contains('collapsed');
                                 localStorage.setItem('game_info_collapsed', currentlyCollapsed);
+                                refocusGame();
                             });
                             gameInfoToggleHandle.dataset.listenerAdded = 'true';
                         }
@@ -5162,6 +5179,7 @@
                 qrToggle.addEventListener('click', function (e) {
                     e.stopPropagation();
                     qrDrawer.classList.toggle('collapsed');
+                    refocusGame();
                 });
             }
         });

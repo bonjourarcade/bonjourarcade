@@ -13,6 +13,19 @@
   var PAIRED_ROW_MAX_GAMES = 5;
   var PLACEHOLDER_COVER = '/assets/images/placeholder_thumb.png';
 
+  // Preloaded nav sound effects. Cloning the node on each play lets rapid
+  // key-repeat overlap instead of cutting the previous play short.
+  var NAV_SOUNDS = {
+    move: new Audio('/assets/sounds/tk.wav'),
+    select: new Audio('/assets/sounds/ok.wav'),
+    back: new Audio('/assets/sounds/toc.wav')
+  };
+  function playNavSound(name) {
+    var base = NAV_SOUNDS[name];
+    if (!base) return;
+    base.cloneNode(true).play().catch(function () {});
+  }
+
   var allGamesById = {};
   var allGamesList = [];
   var currentCategories = [];
@@ -1040,6 +1053,7 @@
           e.preventDefault();
           kbRow = -1;
           clearKbFocus();
+          playNavSound('back');
         }
         return;
       }
@@ -1055,6 +1069,7 @@
         var startPos = findCenterPosition(tracks);
         kbRow = startPos ? startPos.row : 0;
         setKbFocus(tracks[kbRow], startPos ? startPos.col : 0);
+        playNavSound('move');
         return;
       }
 
@@ -1064,17 +1079,19 @@
 
       if (e.key === 'ArrowRight') {
         setKbFocus(track, kbCol + 1);
+        playNavSound('move');
       } else if (e.key === 'ArrowLeft') {
         setKbFocus(track, kbCol - 1);
+        playNavSound('move');
       } else if (e.key === 'ArrowDown') {
-        if (kbRow < tracks.length - 1) { kbRow++; setKbFocus(tracks[kbRow], kbCol); }
+        if (kbRow < tracks.length - 1) { kbRow++; setKbFocus(tracks[kbRow], kbCol); playNavSound('move'); }
       } else if (e.key === 'ArrowUp') {
-        if (kbRow > 0) { kbRow--; setKbFocus(tracks[kbRow], kbCol); }
-        else { kbRow = -1; clearKbFocus(); }
+        if (kbRow > 0) { kbRow--; setKbFocus(tracks[kbRow], kbCol); playNavSound('move'); }
+        else { kbRow = -1; clearKbFocus(); playNavSound('back'); }
       } else if (e.key === 'Enter') {
         var focused = document.querySelector('.browse-card.kbfocus');
         var game = focused && allGamesById[focused.getAttribute('data-gameid')];
-        if (game) openModal(game);
+        if (game) { openModal(game); playNavSound('select'); }
       }
     });
   }
@@ -1419,6 +1436,7 @@
       if (active && active.tagName === 'BUTTON') return;
       e.preventDefault();
       activateCard(document.getElementById('browse-modal-play'));
+      playNavSound('select');
     });
 
     document.getElementById('browse-modal-fav').addEventListener('click', function () {

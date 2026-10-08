@@ -18,7 +18,9 @@
   var NAV_SOUNDS = {
     move: new Audio('/assets/sounds/tk.wav'),
     select: new Audio('/assets/sounds/ok.wav'),
-    back: new Audio('/assets/sounds/toc.wav')
+    back: new Audio('/assets/sounds/toc.wav'),
+    expand: new Audio('/assets/sounds/whoosh.wav'),
+    collapse: new Audio('/assets/sounds/shoow.wav')
   };
   function playNavSound(name) {
     var base = NAV_SOUNDS[name];
@@ -34,6 +36,8 @@
   var favoritesUnsub = null;
   var BURST_DELAY = 320;
   var TOAST_VISIBLE_MS = 9000;
+  var KBNAV_TOAST_VISIBLE_MS = 8000;
+  var kbNavToastHideTimeout = null;
   var IDLE_TIMEOUT_MS = 10 * 60 * 1000;
   var IDLE_COUNTDOWN_SECONDS = 15;
 
@@ -140,7 +144,10 @@
     var header = document.getElementById('browse-header');
     updateHeaderSolid = function () {
       var isLight = !document.body.classList.contains('browse-dark');
-      header.classList.toggle('browse-header-solid', isLight || window.scrollY > 80 || searchHeroHidden);
+      // Forced solid while keyboard nav is active (kbRow/kbOnHero, defined
+      // further down but hoisted) so the header stays legible instead of
+      // flickering transparent/solid as the selector moves.
+      header.classList.toggle('browse-header-solid', isLight || window.scrollY > 80 || searchHeroHidden || kbRow !== -1 || kbOnHero);
     };
     window.addEventListener('scroll', updateHeaderSolid, { passive: true });
     updateHeaderSolid();
@@ -940,9 +947,60 @@
 
   var kbRow = -1;
   var kbCol = 0;
+  var kbOnHero = false;
+  // Caps arrow-key repeat at 10Hz - held-down keys fire much faster than
+  // that natively, which made the selector (and its scroll/sound) blow
+  // past cards instead of stepping through them.
+  var ARROW_KEY_THROTTLE_MS = 100;
+  var lastArrowKeyTime = 0;
 
+  // One nav "track" per .browse-row, in document order - but a row whose
+  // expand panel ("Voir tous les jeux") is open swaps in that panel's own
+  // grid instead of its now-hidden carousel track, so Up/Down/Left/Right
+  // actually reach the fold you just opened instead of a hidden, zero-size
+  // element (which otherwise still occupied this row's slot and produced
+  // nonsensical scroll targets).
   function getNavTracks() {
-    return Array.prototype.slice.call(document.querySelectorAll('.browse-row-track, .browse-row-grid'));
+    var tracks = [];
+    Array.prototype.forEach.call(document.querySelectorAll('.browse-row'), function (row) {
+      var openPanel = row.querySelector('.browse-row-expand-panel.open');
+      if (openPanel) {
+        var expandGrid = openPanel.querySelector('.browse-row-expand-grid');
+        if (expandGrid) tracks.push(expandGrid);
+        return;
+      }
+      var track = row.querySelector('.browse-row-track');
+      if (track) { tracks.push(track); return; }
+      var grid = row.querySelector('.browse-row-grid');
+      if (grid) tracks.push(grid);
+    });
+    return tracks;
+  }
+
+  // How many cards share the first card's vertical position - i.e. how wide
+  // one visual line is. For a single-row carousel (.browse-row-track) every
+  // card shares that top, so this returns the whole card count, which makes
+  // the Up/Down math below fall through to the next/previous track
+  // immediately, same as before this function existed. For a wrapping grid
+  // (.browse-row-grid / .browse-row-expand-grid) it stops at the first card
+  // that starts a new line, giving the actual column count so Up/Down can
+  // move within the grid instead of always jumping to another category.
+  function getGridRowSize(track) {
+    var cards = track.querySelectorAll('.browse-card');
+    if (!cards.length) return 1;
+    // offsetTop (layout position), not getBoundingClientRect (rendered,
+    // post-transform position) - the focused card itself is shifted up via
+    // "transform: translateY(-12px)" for the lift effect (see .kbfocus in
+    // browse.css), which otherwise threw this off by looking like a new
+    // line started right at the focused card, however many columns the
+    // track actually has.
+    var firstTop = cards[0].offsetTop;
+    var count = 0;
+    for (var i = 0; i < cards.length; i++) {
+      if (cards[i].offsetTop === firstTop) count++;
+      else break;
+    }
+    return count || 1;
   }
 
   // Picks the row closest to vertical screen-center, then within that row
@@ -1004,7 +1062,7 @@
     if (track.classList.contains('browse-row-track')) {
       scrollCardClearOfRowNav(track, card);
     } else {
-      card.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' });
+      scrollCardVerticallyClearOfHeader(card);
     }
   }
 
@@ -1013,6 +1071,25 @@
   // and also keeps the row itself vertically in view (scrollIntoView's
   // block:'nearest' used to handle this before the horizontal-clearance
   // logic replaced it for tracks with nav arrows).
+  // The header is fixed and sits on top of the page, so a card scrolled up
+  // near the top must stop clear of its height, not just an arbitrary
+  // margin, or the (now-forced-solid) header during keyboard nav would cover
+  // the highlighted card's cover. Shared by carousel rows and wrapping grids
+  // (fold/search) alike - scrollIntoView has no idea a fixed header is
+  // sitting on top of the viewport, so it was leaving grid cards' tops
+  // tucked under it.
+  function scrollCardVerticallyClearOfHeader(card) {
+    var header = document.getElementById('browse-header');
+    var margin = 16;
+    var topMargin = (header ? header.offsetHeight : 0) + margin;
+    var cardRect = card.getBoundingClientRect();
+    if (cardRect.top < topMargin) {
+      window.scrollBy({ top: cardRect.top - topMargin, behavior: 'smooth' });
+    } else if (cardRect.bottom > window.innerHeight - margin) {
+      window.scrollBy({ top: cardRect.bottom - (window.innerHeight - margin), behavior: 'smooth' });
+    }
+  }
+
   function scrollCardClearOfRowNav(track, card) {
     var wrap = track.closest('.browse-row-track-wrap');
     var nav = wrap && wrap.querySelector('.browse-row-nav');
@@ -1029,52 +1106,135 @@
       track.scrollBy({ left: deltaX, behavior: 'smooth' });
     }
 
-    var margin = 16;
-    if (cardRect.top < margin) {
-      window.scrollBy({ top: cardRect.top - margin, behavior: 'smooth' });
-    } else if (cardRect.bottom > window.innerHeight - margin) {
-      window.scrollBy({ top: cardRect.bottom - (window.innerHeight - margin), behavior: 'smooth' });
-    }
+    scrollCardVerticallyClearOfHeader(card);
+  }
+
+  // Featured-game (hero) focus: reachable by pressing Up from the top row,
+  // since the hero isn't one of getNavTracks()'s rows.
+  function clearHeroFocus() {
+    var hero = document.getElementById('browse-hero');
+    if (hero) hero.classList.remove('kbfocus');
+  }
+
+  function focusHero() {
+    clearKbFocus();
+    kbOnHero = true;
+    kbRow = -1;
+    var hero = document.getElementById('browse-hero');
+    if (hero) hero.classList.add('kbfocus');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    updateHeaderSolid();
+  }
+
+  function unfocusHero(tracks) {
+    kbOnHero = false;
+    clearHeroFocus();
+    kbRow = 0;
+    setKbFocus(tracks[0], kbCol);
+    updateHeaderSolid();
+  }
+
+  // Drops keyboard-nav focus entirely (used both by Escape while navigating,
+  // and by Escape closing a modal that Enter opened - otherwise the selector
+  // was left lit on that card, as if still navigating, once the modal closed).
+  function exitKbNav() {
+    kbRow = -1;
+    kbOnHero = false;
+    clearKbFocus();
+    clearHeroFocus();
+    updateHeaderSolid();
   }
 
   function isTypingTarget(el) {
     return el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable);
   }
 
+  // Shown once per session the first time keyboard nav kicks in, so first-
+  // time keyboard users learn the controls without it nagging on every move.
+  function showKbNavHintToast() {
+    var shownKey = 'browseKbNavToastShown';
+    try { if (sessionStorage.getItem(shownKey) === '1') return; } catch (e) { /* ignore */ }
+    var toast = document.getElementById('browse-kbnav-toast');
+    if (!toast) return;
+    try { sessionStorage.setItem(shownKey, '1'); } catch (e) { /* ignore */ }
+    toast.classList.add('open');
+    clearTimeout(kbNavToastHideTimeout);
+    kbNavToastHideTimeout = setTimeout(function () { toast.classList.remove('open'); }, KBNAV_TOAST_VISIBLE_MS);
+  }
+
   function initKeyboardNav() {
+    var kbNavToastCloseBtn = document.getElementById('browse-kbnav-toast-close');
+    if (kbNavToastCloseBtn) {
+      kbNavToastCloseBtn.addEventListener('click', function () {
+        document.getElementById('browse-kbnav-toast').classList.remove('open');
+        clearTimeout(kbNavToastHideTimeout);
+      });
+    }
+
     document.addEventListener('keydown', function (e) {
       if (isTypingTarget(document.activeElement)) return;
       if (document.getElementById('browse-modal-overlay').classList.contains('open')) return;
 
       if (e.key === 'Escape') {
-        // Focused on a game via keyboard nav: Escape's only job here is to
-        // drop that focus, not to also close the search or anything else.
-        if (kbRow !== -1) {
+        // Focused on a game (or the hero) via keyboard nav: Escape's only
+        // job here is to drop that focus, not to also close the search or
+        // anything else.
+        if (kbRow !== -1 || kbOnHero) {
           e.preventDefault();
-          kbRow = -1;
-          clearKbFocus();
+          exitKbNav();
           playNavSound('back');
         }
         return;
       }
 
-      if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Enter'].indexOf(e.key) === -1) return;
+      var isSpace = e.key === ' ' || e.key === 'Spacebar';
+      var isArrow = e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'ArrowUp' || e.key === 'ArrowDown';
+      if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Enter'].indexOf(e.key) === -1 && !isSpace) return;
+
+      if (isArrow) {
+        var nowTime = Date.now();
+        if (nowTime - lastArrowKeyTime < ARROW_KEY_THROTTLE_MS) {
+          e.preventDefault();
+          return;
+        }
+        lastArrowKeyTime = nowTime;
+      }
 
       var tracks = getNavTracks();
       if (!tracks.length) return;
 
-      if (kbRow === -1) {
+      if (kbRow === -1 && !kbOnHero) {
+        // Space only acts on an already-focused game's category - it never
+        // starts keyboard nav on its own.
+        if (isSpace) return;
         e.preventDefault();
         document.body.classList.add('browse-hide-cursor');
         var startPos = findCenterPosition(tracks);
         kbRow = startPos ? startPos.row : 0;
         setKbFocus(tracks[kbRow], startPos ? startPos.col : 0);
+        updateHeaderSolid();
         playNavSound('move');
+        showKbNavHintToast();
         return;
       }
 
       e.preventDefault();
       document.body.classList.add('browse-hide-cursor');
+
+      if (kbOnHero) {
+        // Only Down (into the grid) and Enter (open the featured game's
+        // info) do anything from the hero - Left/Right/Up/Space are no-ops.
+        if (e.key === 'ArrowDown') {
+          unfocusHero(tracks);
+          playNavSound('move');
+        } else if (e.key === 'Enter') {
+          var heroInfo = document.getElementById('browse-hero-info');
+          if (heroInfo) heroInfo.click();
+          playNavSound('select');
+        }
+        return;
+      }
+
       var track = tracks[kbRow];
 
       if (e.key === 'ArrowRight') {
@@ -1084,14 +1244,65 @@
         setKbFocus(track, kbCol - 1);
         playNavSound('move');
       } else if (e.key === 'ArrowDown') {
-        if (kbRow < tracks.length - 1) { kbRow++; setKbFocus(tracks[kbRow], kbCol); playNavSound('move'); }
+        var rowSizeDown = getGridRowSize(track);
+        var downIndex = kbCol + rowSizeDown;
+        if (downIndex < track.querySelectorAll('.browse-card').length) {
+          // Still a line below within this same grid/fold.
+          setKbFocus(track, downIndex);
+          playNavSound('move');
+        } else if (kbRow < tracks.length - 1) {
+          kbRow++;
+          setKbFocus(tracks[kbRow], kbCol);
+          playNavSound('move');
+        } else {
+          // Last row: pull in the next page of rows (if any) instead of
+          // dead-ending, and land the selector on the first newly loaded
+          // card so navigation keeps going without an extra keypress.
+          var loadMoreBtn = document.querySelector('.browse-load-more-btn');
+          if (loadMoreBtn) {
+            loadMoreBtn.click();
+            var newTracks = getNavTracks();
+            if (kbRow + 1 < newTracks.length) {
+              kbRow++;
+              setKbFocus(newTracks[kbRow], 0);
+              playNavSound('move');
+            }
+          }
+        }
       } else if (e.key === 'ArrowUp') {
-        if (kbRow > 0) { kbRow--; setKbFocus(tracks[kbRow], kbCol); playNavSound('move'); }
-        else { kbRow = -1; clearKbFocus(); playNavSound('back'); }
+        var upIndex = kbCol - getGridRowSize(track);
+        if (upIndex >= 0) {
+          // Still a line above within this same grid/fold.
+          setKbFocus(track, upIndex);
+          playNavSound('move');
+        } else if (kbRow > 0) {
+          kbRow--;
+          setKbFocus(tracks[kbRow], kbCol);
+          playNavSound('move');
+        } else {
+          // Top row: hand off to the featured game instead of dropping
+          // focus, and scroll back up so it's actually visible.
+          focusHero();
+          playNavSound('move');
+        }
       } else if (e.key === 'Enter') {
         var focused = document.querySelector('.browse-card.kbfocus');
         var game = focused && allGamesById[focused.getAttribute('data-gameid')];
         if (game) { openModal(game); playNavSound('select'); }
+      } else if (isSpace) {
+        var focusedCard = document.querySelector('.browse-card.kbfocus');
+        var rowEl = focusedCard && focusedCard.closest('.browse-row');
+        var rowTitle = rowEl && rowEl.querySelector('.browse-row-title.browse-row-title-clickable');
+        if (rowTitle) {
+          rowTitle.click();
+          // The row's nav track just swapped (carousel <-> expand grid) -
+          // move the selector onto whatever it now shows instead of leaving
+          // it stuck on the old, now-hidden element.
+          var refreshedTracks = getNavTracks();
+          if (kbRow > -1 && kbRow < refreshedTracks.length) {
+            setKbFocus(refreshedTracks[kbRow], kbCol);
+          }
+        }
       }
     });
   }
@@ -1165,6 +1376,7 @@
         isExpanded = opening;
         title.setAttribute('aria-expanded', String(opening));
         title.setAttribute('aria-label', (opening ? 'Fermer' : 'Voir tous les jeux : ') + category.title);
+        playNavSound(opening ? 'expand' : 'collapse');
         if (opening && !expandBuilt) {
           expandBuilt = true;
           category.allGames.forEach(function (game) { expandGrid.appendChild(makeCard(game, category.directPlay)); });
@@ -1379,7 +1591,9 @@
   function renderRows(categories) {
     currentCategories = categories;
     kbRow = -1;
+    kbOnHero = false;
     clearKbFocus();
+    clearHeroFocus();
 
     var container = document.getElementById('browse-rows');
     container.innerHTML = '';
@@ -1420,7 +1634,18 @@
     document.addEventListener('keydown', function (e) {
       var overlay = document.getElementById('browse-modal-overlay');
       if (!overlay.classList.contains('open')) return;
-      if (e.key === 'Escape') { closeModal(); return; }
+      if (e.key === 'Escape') {
+        closeModal();
+        // Enter (keyboard nav) opens this modal without ever reaching the
+        // nav's own Escape handling below, since it bails out early while
+        // the modal is open - so closing it here must also drop the
+        // selector, or it's left lit on that card as if still navigating.
+        if (kbRow !== -1 || kbOnHero) {
+          exitKbNav();
+          playNavSound('back');
+        }
+        return;
+      }
 
       if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
         // Scroll the modal's own content instead of the page behind it.

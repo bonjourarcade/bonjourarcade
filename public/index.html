@@ -182,6 +182,18 @@
     <div class="browse-toast-progress"><div id="browse-toast-progress-bar" class="browse-toast-progress-bar"></div></div>
   </div>
 
+  <!-- Keyboard-nav hint toast (auto-dismissing, shown once per session the first time arrow keys are used) -->
+  <div id="browse-kbnav-toast" class="browse-toast browse-kbnav-toast">
+    <button id="browse-kbnav-toast-close" class="browse-toast-close" type="button" aria-label="Fermer">&times;</button>
+    <div class="browse-toast-header">⌨️ Navigation clavier</div>
+    <ul class="browse-kbnav-toast-list">
+      <li><kbd>↑ ↓ ← →</kbd><span>Naviguer</span></li>
+      <li><kbd>Entrée</kbd><span>Infos du jeu</span></li>
+      <li><kbd>Espace</kbd><span>Ouvrir/fermer une catégorie</span></li>
+      <li><kbd>Échap</kbd><span>Quitter</span></li>
+    </ul>
+  </div>
+
   <!-- Idle warning (shown after a few minutes of no interaction, before auto-launching the screensaver) -->
   <div id="browse-idle-overlay" class="browse-modal-overlay browse-idle-overlay">
     <div class="browse-modal browse-idle-modal" role="dialog" aria-modal="true">

@@ -1103,11 +1103,18 @@ body:not(.browse-dark) .browse-hero-leaderboard-rank { color: #c2410c; }
   overflow: hidden;
   min-height: 0;
 }
+/* Grid, not flex-wrap: fixed-width flex items leave up to a whole column's
+   worth of dead space on the right of each row (however much doesn't
+   divide evenly into the row's actual width) - 1fr columns stretch to
+   close that gap instead of abandoning it as unused whitespace. */
 .browse-row-expand-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 16px;
   padding: 14px 5% 6px 5%;
+}
+.browse-row-expand-grid .browse-card {
+  width: auto;
 }
 
 /* Search results: the full match list laid out as a wrapping grid, in normal
@@ -1165,15 +1172,34 @@ body:not(.browse-dark) .browse-hero-leaderboard-rank { color: #c2410c; }
 .browse-card.kbfocus {
   transform: translateY(-12px);
   box-shadow:
-    0 0 0 4px var(--browse-pink),
+    0 0 0 8px var(--browse-pink),
     var(--browse-shadow);
   perspective: 300px;
 }
 
 body.browse-dark .browse-card.kbfocus {
   box-shadow:
-    0 0 0 4px var(--browse-amber),
+    0 0 0 8px var(--browse-amber),
     var(--browse-shadow);
+}
+
+/* Featured game (hero), reachable via Up from the top row - the ring goes
+   on its cover art (whichever poster is visible at this width), same idea
+   as a card's own ring, layered over each poster's existing drop shadow. */
+.browse-hero.kbfocus .browse-hero-poster {
+  box-shadow: 0 0 0 8px var(--browse-pink), 0 18px 40px rgba(0, 0, 0, 0.55);
+}
+
+.browse-hero.kbfocus .browse-hero-poster-large {
+  box-shadow: 0 0 0 8px var(--browse-pink), 0 30px 80px rgba(0, 0, 0, 0.6);
+}
+
+body.browse-dark .browse-hero.kbfocus .browse-hero-poster {
+  box-shadow: 0 0 0 8px var(--browse-amber), 0 18px 40px rgba(0, 0, 0, 0.55);
+}
+
+body.browse-dark .browse-hero.kbfocus .browse-hero-poster-large {
+  box-shadow: 0 0 0 8px var(--browse-amber), 0 30px 80px rgba(0, 0, 0, 0.6);
 }
 
 /* Small rotating triangle marker, apex always up, sitting below the card and
@@ -1471,6 +1497,44 @@ body.browse-dark .browse-card.kbfocus::before {
   transition: transform 0.35s ease;
 }
 .browse-toast.open { transform: translateY(0); }
+
+/* Opposite corner from the tournament toast, so the two never overlap if
+   both happen to be triggered in the same session. */
+.browse-kbnav-toast {
+  left: 20px;
+  right: auto;
+}
+
+.browse-kbnav-toast-list {
+  list-style: none;
+  margin: 0 0 10px 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.browse-kbnav-toast-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.85rem;
+}
+.browse-kbnav-toast-list kbd {
+  flex: 0 0 auto;
+  min-width: 60px;
+  text-align: center;
+  padding: 2px 6px;
+  border-radius: 5px;
+  border: 1px solid var(--browse-border);
+  background: var(--browse-bg-alt);
+  color: var(--browse-text);
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+.browse-kbnav-toast-list span {
+  color: var(--browse-text-dim);
+}
 
 .browse-toast-close {
   position: absolute;

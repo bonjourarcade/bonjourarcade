@@ -145,6 +145,220 @@
             color: var(--background);
         }
 
+        .view-toggle {
+            display: flex;
+            border: 2px solid var(--text-color);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .view-toggle-btn {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            padding: 0.5rem 0.75rem;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.2s, color 0.2s;
+        }
+
+        .view-toggle-btn+.view-toggle-btn {
+            border-left: 2px solid var(--text-color);
+        }
+
+        .view-toggle-btn.active {
+            background: var(--text-color);
+            color: var(--background);
+        }
+
+        .view-toggle-btn:hover:not(.active) {
+            background: rgba(128, 128, 128, 0.2);
+        }
+
+        .list-columns-btn {
+            background: none;
+            border: 2px solid var(--text-color);
+            color: var(--text-color);
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .list-columns-btn:hover {
+            background: var(--text-color);
+            color: var(--background);
+        }
+
+        .list-columns-panel {
+            position: fixed;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: var(--card-shadow);
+            padding: 0.75rem;
+            min-width: 220px;
+            z-index: 200;
+        }
+
+        .list-columns-panel-title {
+            font-size: 0.8rem;
+            font-weight: bold;
+            opacity: 0.7;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .list-columns-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .list-columns-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.35rem 0.25rem;
+            border-radius: 4px;
+            cursor: grab;
+        }
+
+        .list-columns-item.dragging {
+            opacity: 0.4;
+        }
+
+        .list-columns-item:hover {
+            background: rgba(128, 128, 128, 0.12);
+        }
+
+        .list-columns-handle {
+            opacity: 0.5;
+        }
+
+        .list-columns-label {
+            flex: 1;
+            font-size: 0.9rem;
+        }
+
+        .list-columns-reset {
+            margin-top: 0.5rem;
+            width: 100%;
+            padding: 0.4rem;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            color: var(--text-color);
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .list-columns-reset:hover {
+            background: rgba(128, 128, 128, 0.12);
+        }
+
+        .list-view-wrapper {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .game-list-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .game-list-table th {
+            text-align: left;
+            padding: 0.6rem 0.9rem;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            opacity: 0.75;
+            border-bottom: 2px solid var(--border-color);
+            white-space: nowrap;
+        }
+
+        .game-list-table th.sortable {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .game-list-table th.sortable:hover {
+            opacity: 1;
+        }
+
+        .game-list-table td {
+            padding: 0.5rem 0.9rem;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.95rem;
+            vertical-align: middle;
+        }
+
+        .game-list-table tr.list-row {
+            cursor: pointer;
+            transition: background-color 0.15s;
+        }
+
+        .game-list-table tr.list-row:hover,
+        .game-list-table tr.list-row:focus {
+            background: rgba(76, 175, 80, 0.12);
+            outline: none;
+        }
+
+        .game-list-table tr.list-row-new td.list-col-title {
+            font-weight: bold;
+        }
+
+        .list-new-badge {
+            display: inline-block;
+            margin-left: 0.4rem;
+            padding: 1px 6px;
+            font-size: 0.65rem;
+            font-weight: bold;
+            background: #ff6b6b;
+            color: white;
+            border-radius: 3px;
+            vertical-align: middle;
+        }
+
+        .game-list-table td.list-col-cover,
+        .game-list-table th[data-col="cover"] {
+            width: 56px;
+            min-width: 56px;
+        }
+
+        .list-cover {
+            width: 56px;
+            height: 78px;
+            max-width: none;
+            object-fit: cover;
+            border-radius: 3px;
+            display: block;
+            background: #ddd;
+        }
+
+        body.theme-dark .list-cover {
+            background: #333;
+        }
+
+        @media (max-width: 768px) {
+            .list-columns-btn {
+                font-size: 0.8rem;
+                padding: 0.5rem 0.7rem;
+            }
+
+            .game-list-table th,
+            .game-list-table td {
+                padding: 0.4rem 0.5rem;
+                font-size: 0.85rem;
+            }
+        }
+
         .random-game-btn {
             background-color: #4CAF50;
             color: white;
@@ -583,6 +797,18 @@
 
         <div id="header-buttons" style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
             <button id="theme-toggle" class="theme-toggle" style="margin-right: 0;">🌙</button>
+            <div id="view-toggle" class="view-toggle" role="group" aria-label="Mode d'affichage">
+                <button id="view-grid-btn" class="view-toggle-btn active" title="Vue grille" aria-pressed="true">🔳 Grille</button>
+                <button id="view-list-btn" class="view-toggle-btn" title="Vue liste" aria-pressed="false">☰ Liste</button>
+            </div>
+            <div style="position: relative;">
+                <button id="list-columns-btn" class="list-columns-btn" style="display: none;" title="Choisir et réordonner les colonnes" type="button">⚙️ Colonnes</button>
+                <div id="list-columns-panel" class="list-columns-panel" style="display: none;">
+                    <div class="list-columns-panel-title">Colonnes affichées</div>
+                    <ul id="list-columns-list" class="list-columns-list"></ul>
+                    <button id="list-columns-reset" class="list-columns-reset" type="button">Réinitialiser</button>
+                </div>
+            </div>
             <button id="random-game-btn" class="random-game-btn">🎲 Jeu aléatoire (avec filtres)</button>
             <button id="screensaver-btn" class="screensaver-btn"
                 style="padding: 0.6rem 1.2rem; font-size: 1rem; border-radius: 6px; border: none; background: linear-gradient(45deg, #ff6b6b, #ee5a24); color: #fff; cursor: pointer; font-family: sans-serif; box-shadow: 0 2px 6px rgba(0,0,0,0.2);">🌠
@@ -666,6 +892,330 @@
         // Cores combined under the "Coin-Op" system filter (MAME + FBNeo arcade cores)
         const COIN_OP_CORES = ['mame2003_plus', 'arcade'];
         const COIN_OP_LABEL = 'Coin-Op';
+
+        // --- List view (grid/list toggle + configurable columns) ---
+        const VIEW_MODE_KEY = 'bonjourarcade_all_view_mode';
+        const LIST_COLUMNS_KEY = 'bonjourarcade_all_list_columns_v1';
+        const LIST_SORT_KEY = 'bonjourarcade_all_list_sort_v1';
+
+        const LIST_COLUMN_DEFS = {
+            cover: { label: '(Couverture)', sortable: false },
+            title: { label: 'Titre', sortable: true },
+            system: { label: 'Système', sortable: true },
+            developer: { label: 'Développeur', sortable: true },
+            genre: { label: 'Genre', sortable: true },
+            year: { label: 'Année', sortable: true },
+            added: { label: 'Ajouté', sortable: true }
+        };
+        const DEFAULT_LIST_COLUMN_ORDER = ['cover', 'title', 'system', 'developer', 'genre', 'year', 'added'];
+
+        function formatAddedDate(game) {
+            const t = getAddedTimestamp(game);
+            if (t === -Infinity) return '';
+            return new Date(t).toLocaleDateString('fr-FR');
+        }
+
+        let currentViewMode = 'grid';
+        let listColumnOrder = DEFAULT_LIST_COLUMN_ORDER.slice();
+        let listHiddenColumns = new Set();
+        let listSort = { col: 'added', dir: 'desc' };
+        let lastGamesForRender = [];
+
+        function loadViewMode() {
+            try { return localStorage.getItem(VIEW_MODE_KEY) === 'list' ? 'list' : 'grid'; } catch (e) { return 'grid'; }
+        }
+
+        function saveViewMode(mode) {
+            try { localStorage.setItem(VIEW_MODE_KEY, mode); } catch (e) { /* ignore */ }
+        }
+
+        function loadListColumnsState() {
+            try {
+                const raw = localStorage.getItem(LIST_COLUMNS_KEY);
+                if (!raw) return;
+                const parsed = JSON.parse(raw);
+                if (Array.isArray(parsed.order)) {
+                    const known = parsed.order.filter(id => LIST_COLUMN_DEFS[id]);
+                    const missing = DEFAULT_LIST_COLUMN_ORDER.filter(id => known.indexOf(id) === -1);
+                    listColumnOrder = known.concat(missing);
+                }
+                if (Array.isArray(parsed.hidden)) {
+                    listHiddenColumns = new Set(parsed.hidden.filter(id => LIST_COLUMN_DEFS[id]));
+                }
+            } catch (e) { /* ignore */ }
+            listHiddenColumns.delete('title');
+        }
+
+        function saveListColumnsState() {
+            try {
+                localStorage.setItem(LIST_COLUMNS_KEY, JSON.stringify({
+                    order: listColumnOrder,
+                    hidden: Array.from(listHiddenColumns)
+                }));
+            } catch (e) { /* ignore */ }
+        }
+
+        function loadListSortState() {
+            try {
+                const raw = localStorage.getItem(LIST_SORT_KEY);
+                if (!raw) return;
+                const parsed = JSON.parse(raw);
+                if (parsed && LIST_COLUMN_DEFS[parsed.col] && (parsed.dir === 'asc' || parsed.dir === 'desc')) {
+                    listSort = parsed;
+                }
+            } catch (e) { /* ignore */ }
+        }
+
+        function saveListSortState() {
+            try { localStorage.setItem(LIST_SORT_KEY, JSON.stringify(listSort)); } catch (e) { /* ignore */ }
+        }
+
+        function initViewMode() {
+            currentViewMode = loadViewMode();
+            loadListColumnsState();
+            loadListSortState();
+            applyViewModeUI();
+        }
+
+        function applyViewModeUI() {
+            const gridBtn = document.getElementById('view-grid-btn');
+            const listBtn = document.getElementById('view-list-btn');
+            const columnsBtn = document.getElementById('list-columns-btn');
+            const sortSelect = document.getElementById('sort-select');
+            const isList = currentViewMode === 'list';
+
+            if (gridBtn) {
+                gridBtn.classList.toggle('active', !isList);
+                gridBtn.setAttribute('aria-pressed', String(!isList));
+            }
+            if (listBtn) {
+                listBtn.classList.toggle('active', isList);
+                listBtn.setAttribute('aria-pressed', String(isList));
+            }
+            if (columnsBtn) columnsBtn.style.display = isList ? '' : 'none';
+            if (sortSelect) sortSelect.style.display = isList ? 'none' : '';
+
+            const panel = document.getElementById('list-columns-panel');
+            if (panel) panel.style.display = 'none';
+        }
+
+        function setViewMode(mode) {
+            if (mode === currentViewMode) return;
+            currentViewMode = mode;
+            saveViewMode(mode);
+            applyViewModeUI();
+            renderGames(lastGamesForRender);
+        }
+
+        function rerenderCurrentList() {
+            renderGamesAsList(lastGamesForRender);
+        }
+
+        function getListColumnSortValue(game, colId) {
+            switch (colId) {
+                case 'title': return normalizeTitleForSorting(getDisplayTitle(game)).toLowerCase();
+                case 'system': return getSystemName(game.core).toLowerCase();
+                case 'developer': return (game.developer || '').toLowerCase();
+                case 'genre': return (game.genre || '').toLowerCase();
+                case 'year': return getGameYear(game);
+                case 'added': {
+                    const t = getAddedTimestamp(game);
+                    return t === -Infinity ? null : t;
+                }
+                default: return '';
+            }
+        }
+
+        function sortGamesForList(games) {
+            const col = listSort.col;
+            const dir = listSort.dir === 'desc' ? -1 : 1;
+            const withIndex = games.map((g, i) => [g, i]);
+            withIndex.sort((a, b) => {
+                const va = getListColumnSortValue(a[0], col);
+                const vb = getListColumnSortValue(b[0], col);
+                const aEmpty = (va === null || va === undefined || va === '');
+                const bEmpty = (vb === null || vb === undefined || vb === '');
+                if (aEmpty && bEmpty) return a[1] - b[1];
+                if (aEmpty) return 1;
+                if (bEmpty) return -1;
+                let cmp;
+                if (typeof va === 'number' && typeof vb === 'number') {
+                    cmp = va - vb;
+                } else {
+                    cmp = String(va).localeCompare(String(vb), 'fr');
+                }
+                if (cmp !== 0) return cmp * dir;
+                return a[1] - b[1];
+            });
+            return withIndex.map(x => x[0]);
+        }
+
+        function renderColumnsPanel() {
+            const list = document.getElementById('list-columns-list');
+            if (!list) return;
+            list.innerHTML = '';
+
+            listColumnOrder.forEach(colId => {
+                const def = LIST_COLUMN_DEFS[colId];
+                const li = document.createElement('li');
+                li.className = 'list-columns-item';
+                li.draggable = true;
+                li.dataset.col = colId;
+
+                const handle = document.createElement('span');
+                handle.className = 'list-columns-handle';
+                handle.textContent = '⠿';
+                li.appendChild(handle);
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.checked = !listHiddenColumns.has(colId);
+                checkbox.disabled = colId === 'title';
+                checkbox.addEventListener('change', () => {
+                    if (checkbox.checked) listHiddenColumns.delete(colId);
+                    else listHiddenColumns.add(colId);
+                    saveListColumnsState();
+                    rerenderCurrentList();
+                });
+                li.appendChild(checkbox);
+
+                const label = document.createElement('span');
+                label.className = 'list-columns-label';
+                label.textContent = def.label;
+                li.appendChild(label);
+
+                li.addEventListener('dragstart', (e) => {
+                    li.classList.add('dragging');
+                    e.dataTransfer.effectAllowed = 'move';
+                    e.dataTransfer.setData('text/plain', colId);
+                });
+                li.addEventListener('dragend', () => {
+                    li.classList.remove('dragging');
+                });
+                li.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    const dragging = list.querySelector('.dragging');
+                    if (!dragging || dragging === li) return;
+                    const rect = li.getBoundingClientRect();
+                    const before = (e.clientY - rect.top) < rect.height / 2;
+                    list.insertBefore(dragging, before ? li : li.nextSibling);
+                });
+                li.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    listColumnOrder = Array.from(list.querySelectorAll('.list-columns-item')).map(el => el.dataset.col);
+                    saveListColumnsState();
+                    rerenderCurrentList();
+                });
+
+                list.appendChild(li);
+            });
+        }
+
+        function renderGamesAsList(games) {
+            const container = document.getElementById('gameGrid');
+            container.className = 'list-container';
+            container.innerHTML = '';
+
+            if (games.length === 0) {
+                container.innerHTML = '<div class="no-results">Aucun jeu ne correspond à votre recherche</div>';
+                return;
+            }
+
+            function isGameNewInList(game) {
+                if (window.currentGameId && game.id === window.currentGameId) return true;
+                return game.new_flag === 'true';
+            }
+
+            const sorted = sortGamesForList(games.slice());
+            const visibleColumns = listColumnOrder.filter(id => !listHiddenColumns.has(id));
+
+            const wrapper = document.createElement('div');
+            wrapper.className = 'list-view-wrapper';
+            const table = document.createElement('table');
+            table.className = 'game-list-table';
+
+            const thead = document.createElement('thead');
+            const headRow = document.createElement('tr');
+            visibleColumns.forEach(colId => {
+                const def = LIST_COLUMN_DEFS[colId];
+                const th = document.createElement('th');
+                th.dataset.col = colId;
+                if (def.sortable) {
+                    th.classList.add('sortable');
+                    let arrow = '';
+                    if (listSort.col === colId) arrow = listSort.dir === 'asc' ? ' ▲' : ' ▼';
+                    th.textContent = def.label + arrow;
+                    th.addEventListener('click', () => {
+                        if (listSort.col === colId) {
+                            listSort = { col: colId, dir: listSort.dir === 'asc' ? 'desc' : 'asc' };
+                        } else {
+                            listSort = { col: colId, dir: 'asc' };
+                        }
+                        saveListSortState();
+                        renderGamesAsList(games);
+                    });
+                } else {
+                    th.textContent = '';
+                }
+                headRow.appendChild(th);
+            });
+            thead.appendChild(headRow);
+            table.appendChild(thead);
+
+            const tbody = document.createElement('tbody');
+            sorted.forEach(game => {
+                const tr = document.createElement('tr');
+                tr.className = 'list-row';
+                tr._gameData = game;
+                if (isGameNewInList(game)) tr.classList.add('list-row-new');
+                tr.tabIndex = 0;
+                tr.setAttribute('role', 'link');
+                tr.setAttribute('aria-label', getDisplayTitle(game));
+
+                function navigateToGame() {
+                    sessionStorage.setItem('referrerAllGames', '1');
+                    sessionStorage.setItem('lastPlayedGame', game.id);
+                    addGameToHistory(game.id);
+                    window.location.href = game.pageUrl;
+                }
+
+                tr.addEventListener('click', navigateToGame);
+                tr.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        navigateToGame();
+                    }
+                });
+
+                visibleColumns.forEach(colId => {
+                    const td = document.createElement('td');
+                    td.className = 'list-col-' + colId;
+                    const coverSrc = game.coverArt || '/assets/images/placeholder_thumb.png';
+                    if (colId === 'cover') {
+                        td.innerHTML = `<img class="list-cover" src="${coverSrc}" alt="" loading="lazy">`;
+                    } else if (colId === 'title') {
+                        td.innerHTML = getDisplayTitle(game) + (isGameNewInList(game) ? ' <span class="list-new-badge">NOUVEAU</span>' : '');
+                    } else if (colId === 'system') {
+                        td.textContent = getSystemName(game.core);
+                    } else if (colId === 'developer') {
+                        td.textContent = game.developer || '';
+                    } else if (colId === 'genre') {
+                        td.textContent = game.genre || '';
+                    } else if (colId === 'year') {
+                        td.textContent = game.year || '';
+                    } else if (colId === 'added') {
+                        td.textContent = formatAddedDate(game);
+                    }
+                    tr.appendChild(td);
+                });
+
+                tbody.appendChild(tr);
+            });
+            table.appendChild(tbody);
+
+            wrapper.appendChild(table);
+            container.appendChild(wrapper);
+        }
 
         function getFiltersState() {
             return {
@@ -1130,7 +1680,15 @@
         }
 
         function renderGames(games) {
+            lastGamesForRender = games;
             const container = document.getElementById('gameGrid');
+
+            if (currentViewMode === 'list') {
+                renderGamesAsList(games);
+                return;
+            }
+
+            container.className = 'grid';
             container.innerHTML = '';
 
             if (games.length === 0) {
@@ -2047,6 +2605,36 @@
         // Add event listeners
         document.getElementById('random-game-btn').addEventListener('click', playRandomGame);
         document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+        document.getElementById('view-grid-btn').addEventListener('click', () => setViewMode('grid'));
+        document.getElementById('view-list-btn').addEventListener('click', () => setViewMode('list'));
+        document.getElementById('list-columns-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            const panel = document.getElementById('list-columns-panel');
+            const isOpen = panel.style.display !== 'none';
+            if (isOpen) {
+                panel.style.display = 'none';
+            } else {
+                renderColumnsPanel();
+                const btnRect = e.currentTarget.getBoundingClientRect();
+                panel.style.top = (btnRect.bottom + 6) + 'px';
+                panel.style.left = btnRect.left + 'px';
+                panel.style.display = 'block';
+            }
+        });
+        document.getElementById('list-columns-reset').addEventListener('click', () => {
+            listColumnOrder = DEFAULT_LIST_COLUMN_ORDER.slice();
+            listHiddenColumns = new Set();
+            saveListColumnsState();
+            renderColumnsPanel();
+            rerenderCurrentList();
+        });
+        document.addEventListener('click', (e) => {
+            const panel = document.getElementById('list-columns-panel');
+            if (!panel || panel.style.display === 'none') return;
+            if (!panel.contains(e.target) && e.target.id !== 'list-columns-btn') {
+                panel.style.display = 'none';
+            }
+        });
         document.getElementById('screensaver-btn').addEventListener('click', function () {
             // Check if there are active filters
             const searchInput = document.getElementById('search-input');
@@ -2637,6 +3225,7 @@
         // Initialize theme and check browser when page loads
         window.addEventListener('DOMContentLoaded', () => {
             initTheme();
+            initViewMode();
             loadGameHistory();
 
             // Check if we should scroll to a specific game (from URL parameter or session storage)

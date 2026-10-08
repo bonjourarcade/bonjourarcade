@@ -1536,6 +1536,38 @@ body.browse-dark .browse-card.kbfocus::before {
   color: var(--browse-text-dim);
 }
 
+.browse-kbnav-toast-dismiss-opt {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: var(--browse-text-dim);
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.browse-kbnav-toast-dismiss-opt input {
+  margin: 0;
+  cursor: pointer;
+}
+
+.browse-kbnav-toast-ok {
+  display: block;
+  width: 100%;
+  text-align: center;
+  padding: 7px 0;
+  border-radius: 6px;
+  border: 1px solid var(--browse-border);
+  background: var(--browse-bg-alt);
+  color: var(--browse-text);
+  font-weight: 700;
+  font-size: 0.88rem;
+  cursor: pointer;
+  margin-bottom: 0;
+}
+.browse-kbnav-toast-ok:hover {
+  background: var(--browse-border);
+}
+
 .browse-toast-close {
   position: absolute;
   top: 8px;

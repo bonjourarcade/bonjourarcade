@@ -182,7 +182,7 @@
     <div class="browse-toast-progress"><div id="browse-toast-progress-bar" class="browse-toast-progress-bar"></div></div>
   </div>
 
-  <!-- Keyboard-nav hint toast (auto-dismissing, shown once per session the first time arrow keys are used) -->
+  <!-- Keyboard-nav hint toast (shown once per session the first time arrow keys are used, stays open until dismissed) -->
   <div id="browse-kbnav-toast" class="browse-toast browse-kbnav-toast">
     <button id="browse-kbnav-toast-close" class="browse-toast-close" type="button" aria-label="Fermer">&times;</button>
     <div class="browse-toast-header">⌨️ Navigation clavier</div>
@@ -192,6 +192,11 @@
       <li><kbd>Espace</kbd><span>Ouvrir/fermer une catégorie</span></li>
       <li><kbd>Échap</kbd><span>Quitter</span></li>
     </ul>
+    <label class="browse-kbnav-toast-dismiss-opt">
+      <input type="checkbox" id="browse-kbnav-toast-dontshow">
+      <span>Ne plus afficher</span>
+    </label>
+    <button id="browse-kbnav-toast-ok" class="browse-kbnav-toast-ok" type="button">OK</button>
   </div>
 
   <!-- Idle warning (shown after a few minutes of no interaction, before auto-launching the screensaver) -->

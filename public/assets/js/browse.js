@@ -36,8 +36,6 @@
   var favoritesUnsub = null;
   var BURST_DELAY = 320;
   var TOAST_VISIBLE_MS = 9000;
-  var KBNAV_TOAST_VISIBLE_MS = 8000;
-  var kbNavToastHideTimeout = null;
   var IDLE_TIMEOUT_MS = 10 * 60 * 1000;
   var IDLE_COUNTDOWN_SECONDS = 15;
 
@@ -1151,25 +1149,32 @@
 
   // Shown once per session the first time keyboard nav kicks in, so first-
   // time keyboard users learn the controls without it nagging on every move.
+  // Stays open until explicitly dismissed (OK or the close button) - no
+  // auto-hide timer - and "Ne plus afficher" persists across sessions too.
   function showKbNavHintToast() {
+    try { if (localStorage.getItem('browseKbNavToastDisabled') === '1') return; } catch (e) { /* ignore */ }
     var shownKey = 'browseKbNavToastShown';
     try { if (sessionStorage.getItem(shownKey) === '1') return; } catch (e) { /* ignore */ }
     var toast = document.getElementById('browse-kbnav-toast');
     if (!toast) return;
     try { sessionStorage.setItem(shownKey, '1'); } catch (e) { /* ignore */ }
     toast.classList.add('open');
-    clearTimeout(kbNavToastHideTimeout);
-    kbNavToastHideTimeout = setTimeout(function () { toast.classList.remove('open'); }, KBNAV_TOAST_VISIBLE_MS);
+  }
+
+  function dismissKbNavToast() {
+    var toast = document.getElementById('browse-kbnav-toast');
+    if (toast) toast.classList.remove('open');
+    var dontShow = document.getElementById('browse-kbnav-toast-dontshow');
+    if (dontShow && dontShow.checked) {
+      try { localStorage.setItem('browseKbNavToastDisabled', '1'); } catch (e) { /* ignore */ }
+    }
   }
 
   function initKeyboardNav() {
     var kbNavToastCloseBtn = document.getElementById('browse-kbnav-toast-close');
-    if (kbNavToastCloseBtn) {
-      kbNavToastCloseBtn.addEventListener('click', function () {
-        document.getElementById('browse-kbnav-toast').classList.remove('open');
-        clearTimeout(kbNavToastHideTimeout);
-      });
-    }
+    if (kbNavToastCloseBtn) kbNavToastCloseBtn.addEventListener('click', dismissKbNavToast);
+    var kbNavToastOkBtn = document.getElementById('browse-kbnav-toast-ok');
+    if (kbNavToastOkBtn) kbNavToastOkBtn.addEventListener('click', dismissKbNavToast);
 
     document.addEventListener('keydown', function (e) {
       if (isTypingTarget(document.activeElement)) return;

@@ -1,0 +1,16 @@
+title: Halloween
+year: 1983
+developer: VSS
+genre: Action, Horror, Licensed
+controls:
+  - "← ↓ ↑ →: Mouvement"
+  - "Z: Guider enfant / Utiliser arme"
+
+to_start: Enter
+description: "Chargés de garder un groupe d'enfants dans une grande maison à deux étages, les joueurs incarnent Laurie Strode alors que le psychopathe Michael Myers, évadé de l'asile, est revenu pour se venger. Ils doivent conduire les enfants vers des pièces sûres tout en évitant Michael Myers et son couteau. Pour passer au niveau suivant, les joueurs doivent soit poignarder Michael Myers à deux reprises, soit sauver cinq des enfants."
+
+# Pour les jeux qui coopèrent pas bien
+#problem: true
+#enable_score: false
+
+added: 2026-10-09

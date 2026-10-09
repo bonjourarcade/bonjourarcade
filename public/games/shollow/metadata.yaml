@@ -2,10 +2,10 @@ title: Satan's Hollow
 developer: Bally Midway
 year: 1981
 genre: Shooter
-#controls:
-#  - "←↓↑→: Déplacer"
-#  - "Z: Tirer"
-#  - "X: Bombe"
+controls:
+  - "← ↓ ↑ →: Déplacer"
+  - "Z: Bouclier"
+  - "X: Tirer"
 
 #to_start: Select -> Start
 

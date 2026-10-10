@@ -2,16 +2,17 @@ title: Demon's World
 developer: Toaplan
 year: 1989
 genre: Platform, Action
-#controls:
-#  - "←↓↑→: Déplacer"
-#  - "Z: Tirer"
-#  - "X: Bombe"
+controls:
+  - "← ↓ ↑ →: Déplacer"
+  - "Z: Tir"
+  - "X: Saut"
+  - "C (maintenu): Tir automatique"
 
-#to_start: Select -> Start
+to_start: Espace -> Ente
 
 # Message d'annonce personnalisé pour la newsletter
 # Ce message apparaîtra en haut de l'email et des webhooks
-description:
+description: "Demon's World est un jeu d'action-plateforme à défilement latéral de style « à l'ancienne ». Le principe de base est très simple : il faut tirer et sauter pour se frayer un chemin à travers des hordes de monstres, vaincre le boss et passer au niveau suivant. Le jeu ne comporte aucune narration ni cinématique ; le héros est un personnage à l'allure robuste, ressemblant à Duke Nukem et armé d'armes à feu."
 
 hide: yes
 

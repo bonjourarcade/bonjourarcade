@@ -107,7 +107,8 @@ const TournoiUtils = {
     for (let r = 0; r < totalRounds; r++) {
       const gameId = games ? games[r] : null;
       const game = gameId && gamelist ? gamelist.find(g => g.id === gameId) : null;
-      if (game) {
+      const roundStarted = roundIdx == null || r <= roundIdx;
+      if (game && roundStarted) {
         const title = TournoiUtils.escapeHtml(game.title || gameId);
         const cover = game.coverArt ? TournoiUtils.escapeHtml(game.coverArt) : '';
         const url = tournamentId != null

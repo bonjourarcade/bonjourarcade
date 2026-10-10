@@ -90,7 +90,7 @@ const TournoiUtils = {
   //    status. Use this for 'percentage'-type tournaments, where nobody is ever eliminated and the
   //    accumulated % across rounds is what decides the standings.
   renderCombinedTableHtml(rows, totalRounds, opts = {}) {
-    const { roundIdx = null, highlightUid = null, cutoff = 0, bestEntryByRound = {}, rankBy = 'survival', games = null, gamelist = null } = opts;
+    const { roundIdx = null, highlightUid = null, cutoff = 0, bestEntryByRound = {}, rankBy = 'survival', games = null, gamelist = null, tournamentId = null } = opts;
     const referenceRound = roundIdx != null ? roundIdx : totalRounds - 1;
 
     const sorted = [...rows].sort((a, b) => {
@@ -109,10 +109,11 @@ const TournoiUtils = {
       const game = gameId && gamelist ? gamelist.find(g => g.id === gameId) : null;
       if (game) {
         const title = TournoiUtils.escapeHtml(game.title || gameId);
-        html += `<th class="round-header">R${r + 1}` +
-          `<div class="round-header-tooltip">` +
-          (game.coverArt ? `<img src="${TournoiUtils.escapeHtml(game.coverArt)}" alt="" loading="lazy">` : '') +
-          `<span>${title}</span></div></th>`;
+        const cover = game.coverArt ? TournoiUtils.escapeHtml(game.coverArt) : '';
+        const url = tournamentId != null
+          ? `${TournoiUtils.getGameUrl(gameId)}?t=${tournamentId}&r=${r}`
+          : TournoiUtils.getGameUrl(gameId);
+        html += `<th class="round-header" data-game-url="${TournoiUtils.escapeHtml(url)}" data-game-title="${title}" data-game-cover="${cover}">R${r + 1}</th>`;
       } else {
         html += `<th>R${r + 1}</th>`;
       }
@@ -296,6 +297,69 @@ const TournoiUtils = {
     }));
 
     ids.forEach(id => applyToCell(id, cache[id]));
+  },
+
+  // Hover/tap popover for round-header cells (shows the round's game cover + title,
+  // clickable to launch the game). Rendered as a single floating element appended to
+  // <body> instead of living inside the table, so it can never affect the table's
+  // layout/sizing (an absolutely-positioned element inside a <th> can otherwise make
+  // the whole table resize on hover in some browsers' auto table-layout algorithm).
+  _roundHeaderPopover: null,
+  _roundHeaderHideTimer: null,
+
+  _ensureRoundHeaderPopover() {
+    if (TournoiUtils._roundHeaderPopover) return TournoiUtils._roundHeaderPopover;
+    const pop = document.createElement('a');
+    pop.className = 'round-header-popover';
+    pop.target = '_blank';
+    pop.rel = 'noopener';
+    pop.innerHTML = '<img alt="" loading="lazy"><span></span>';
+    pop.addEventListener('mouseenter', () => clearTimeout(TournoiUtils._roundHeaderHideTimer));
+    pop.addEventListener('mouseleave', () => TournoiUtils._hideRoundHeaderPopover());
+    document.body.appendChild(pop);
+    window.addEventListener('scroll', () => TournoiUtils._hideRoundHeaderPopover(true), true);
+    window.addEventListener('resize', () => TournoiUtils._hideRoundHeaderPopover(true));
+    TournoiUtils._roundHeaderPopover = pop;
+    return pop;
+  },
+
+  _hideRoundHeaderPopover(immediate = false) {
+    clearTimeout(TournoiUtils._roundHeaderHideTimer);
+    const pop = TournoiUtils._roundHeaderPopover;
+    if (!pop) return;
+    if (immediate) { pop.classList.remove('is-visible'); return; }
+    TournoiUtils._roundHeaderHideTimer = setTimeout(() => pop.classList.remove('is-visible'), 150);
+  },
+
+  // Call once after injecting combined-table HTML (built with opts.games/opts.gamelist)
+  // into `containerId`, to make the round headers' cover-art popover interactive.
+  initRoundHeaderTooltips(containerId) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    const pop = TournoiUtils._ensureRoundHeaderPopover();
+
+    container.querySelectorAll('th.round-header[data-game-url]').forEach(th => {
+      const show = () => {
+        clearTimeout(TournoiUtils._roundHeaderHideTimer);
+        pop.href = th.dataset.gameUrl;
+        const img = pop.querySelector('img');
+        const label = pop.querySelector('span');
+        if (th.dataset.gameCover) { img.src = th.dataset.gameCover; img.style.display = 'block'; }
+        else { img.removeAttribute('src'); img.style.display = 'none'; }
+        label.textContent = th.dataset.gameTitle || '';
+
+        pop.classList.add('is-visible');
+        const rect = th.getBoundingClientRect();
+        const popRect = pop.getBoundingClientRect();
+        const half = popRect.width / 2;
+        const left = Math.max(half + 8, Math.min(rect.left + rect.width / 2, window.innerWidth - half - 8));
+        pop.style.left = `${left}px`;
+        pop.style.top = `${rect.bottom + 6}px`;
+      };
+      th.addEventListener('mouseenter', show);
+      th.addEventListener('mouseleave', () => TournoiUtils._hideRoundHeaderPopover());
+      th.addEventListener('click', show);
+    });
   },
 
   openScreenshotModal(url) {

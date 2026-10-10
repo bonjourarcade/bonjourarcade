@@ -458,11 +458,12 @@ function renderCombinedTable(participants, me, allScores, roundIdx, totalRounds)
   const rankBy = currentTournamentType === 'percentage' ? 'totalPct' : 'survival';
 
   $('scoreboard-entries').innerHTML = TournoiUtils.renderCombinedTableHtml(scoredRows, totalRounds, {
-    roundIdx, highlightUid: myUid, cutoff, bestEntryByRound, rankBy, games: currentGames, gamelist,
+    roundIdx, highlightUid: myUid, cutoff, bestEntryByRound, rankBy, games: currentGames, gamelist, tournamentId,
   });
 
   // Enrich
   TournoiUtils.enrichScoreboardEntries('scoreboard-entries');
+  TournoiUtils.initRoundHeaderTooltips('scoreboard-entries');
 }
 
 function setupRoundScoresListener(t) {
@@ -631,11 +632,12 @@ function renderFinishedResults(results) {
     html += '<div style="margin-top:20px;">';
     html += '<div class="section-title">Classement final</div>';
     const rankBy = results.type === 'percentage' ? 'totalPct' : 'survival';
-    html += TournoiUtils.renderCombinedTableHtml(results.cumulativeScoresTable, results.totalRounds, { highlightUid: myUid, rankBy, games: currentGames, gamelist });
+    html += TournoiUtils.renderCombinedTableHtml(results.cumulativeScoresTable, results.totalRounds, { highlightUid: myUid, rankBy, games: currentGames, gamelist, tournamentId });
     html += '</div>';
   }
 
   $('play-results').innerHTML = html;
+  TournoiUtils.initRoundHeaderTooltips('play-results');
 }
 
 function playWarningBeep() {

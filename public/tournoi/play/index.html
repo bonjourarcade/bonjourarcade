@@ -134,30 +134,33 @@
     }
     .combined-table .score-cell.has-screenshot { cursor: pointer; }
     .combined-table .score-cell.has-screenshot:hover { background: rgba(255,255,255,0.05); }
-    .combined-table th.round-header { position: relative; cursor: help; }
-    .combined-table th.round-header .round-header-tooltip { display: none; }
-    .combined-table th.round-header:hover .round-header-tooltip {
-      display: flex;
+    .combined-table th.round-header { cursor: pointer; }
+    /* Floating popover for round headers: appended to <body>, positioned with JS via
+       getBoundingClientRect, so it never lives inside the table and can never affect
+       its layout/sizing when shown on hover. */
+    .round-header-popover {
+      display: none;
       flex-direction: column;
       align-items: center;
       gap: 6px;
-      position: absolute;
-      top: calc(100% + 6px);
-      left: 50%;
+      position: fixed;
       transform: translateX(-50%);
       background: #222;
       color: #fff;
       padding: 8px 10px;
       border-radius: 8px;
-      z-index: 30;
+      z-index: 1000;
       white-space: nowrap;
       box-shadow: 0 3px 10px rgba(0,0,0,0.4);
       font-family: system-ui, sans-serif;
       font-weight: 400;
+      font-size: 0.8rem;
       text-transform: none;
+      text-decoration: none;
+      cursor: pointer;
     }
-    .combined-table th.round-header .round-header-tooltip img { width: 80px; height: auto; border-radius: 4px; display: block; }
-    .combined-table th.round-header .round-header-tooltip span { font-size: 0.8rem; }
+    .round-header-popover.is-visible { display: flex; }
+    .round-header-popover img { width: 80px; height: auto; border-radius: 4px; display: block; }
     .combined-table .total-cell { font-family: monospace; font-weight: 700; color: var(--accent-text); background: var(--accent-bg); padding: var(--accent-pad); border-radius: var(--accent-radius); }
     .combined-table .danger-row { background: rgba(230, 126, 34, 0.2); }
     .combined-table .danger-row .player-cell { color: #f39c12; }
@@ -311,14 +314,14 @@
           </div>
         </div>
 
+        <div id="past-games" class="past-games hidden" oncontextmenu="return false"></div>
+
+        <div id="upcoming-games" class="upcoming-games hidden" oncontextmenu="return false"></div>
+
         <div class="card card-wide">
           <div class="section-title">Classement</div>
           <div id="scoreboard-entries"></div>
         </div>
-
-        <div id="past-games" class="past-games hidden" oncontextmenu="return false"></div>
-
-        <div id="upcoming-games" class="upcoming-games hidden" oncontextmenu="return false"></div>
 
         <div id="format-card" class="card hidden">
           <div class="section-title">Format du tournoi</div>

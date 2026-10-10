@@ -7,7 +7,8 @@ genre: Horror, Beat 'em up
 #  - "Z: Tirer"
 #  - "X: Bombe"
 
-#to_start: Select -> Start
+to_start: Espace -> Enter
+description: Rick et sa petite amie Jennifer pénètrent dans le manoir West (surnommé « Splatterhouse ») pour étudier les travaux du Dr West sur la parapsychologie dans le cadre d'un projet scolaire. Après un éclair et un cri, Jennifer disparaît ; Rick se retrouve alors affublé du « Masque de la Terreur », un artefact conférant une force surhumaine à celui qui le porte. Rick doit survivre à sept niveaux baignés de sang et peuplés de cadavres, de démons et d'autres créatures cauchemardesques. Il peut utiliser diverses armes trouvées dans le manoir, telles qu'un couperet à viande, une planche de bois ou un fusil à pompe. S'il espère retrouver Jennifer en vie, Rick doit progresser rapidement à travers les étages de la demeure... car rien ne garantit que leurs retrouvailles seront heureuses.
 
 hide: yes
 

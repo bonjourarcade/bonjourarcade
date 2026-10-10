@@ -7,9 +7,9 @@ controls:
   - "Z: Bouclier"
   - "X: Tirer"
 
-#to_start: Select -> Start
+to_start: Espace -> Enter
 
-description:
+description: Le diable ne retient rien et lance tous ses serviteurs maléfiques à vos trousses. Affrontez ptérodactyles et démons. Tentez de bâtir un pont au-dessus du fossé de lave pour pénétrer dans l'Antre de Satan. Dix schémas d'attaque variés corsent ce défi héroïque. Une fois le pont traversé, c'est Satan en personne qui vous attend. Pour survivre, vous devrez alors esquiver des fourches mortelles et des boules de feu tourbillonnantes. L'intensité de l'arcade, alliée à des graphismes et une bande-son exceptionnels, font de ce jeu une véritable réussite!
 
 hide: yes
 

@@ -1,0 +1,19 @@
+title: Rampage World Tour
+year: 1997
+developer: Game Refuge
+genre: Action, Destroy
+#controls:
+#  - "← ↓ ↑ →: Mouvement"
+#  - "Z: "
+#  - "X: "
+#  - "C: "
+#  - "V: "
+
+to_start: Espace, puis Enter
+description: "Tout commence par une journée apparemment banale au siège mondial de Scum Labs. Les expériences génétiques démentes du Dr Eustas DeMonic ont lamentablement dérapé, transformant trois de ses employés les plus doux en monstres furieux de 15 mètres de haut. Ralph, technicien de laboratoire devenu un loup-garou géant, prend un malin plaisir à démolir les bâtiments. Lizzie, autrefois scientifique timide, ne fait plus dans la dentelle lorsqu'il s'agit d'écraser des chars de l'armée sous sa forme de tyrannosaure. Quant à George, il est devenu totalement incontrôlable depuis sa métamorphose en gorille géant à crête iroquoise. Tous n'ont qu'une seule idée en tête : détruire les 16 sites de Scum Labs répartis à travers le monde."
+
+# Pour les jeux qui coopèrent pas bien
+#problem: true
+#enable_score: false
+
+added: 2026-10-09

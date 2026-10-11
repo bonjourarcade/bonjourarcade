@@ -1,0 +1,19 @@
+title: Lunar Rescue
+year: 1979
+developer: Taito
+genre: Action, Shooter, Sci-fi
+#controls:
+#  - "← ↓ ↑ →: Mouvement"
+#  - "Z: "
+#  - "X: "
+#  - "C: "
+#  - "V: "
+
+#to_start: Espace, puis Enter
+#description: ""
+
+# Pour les jeux qui coopèrent pas bien
+#problem: true
+#enable_score: false
+
+added: 2026-10-11

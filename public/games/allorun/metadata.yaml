@@ -8,7 +8,7 @@ controls:
   - "X: "
 
 to_start: Appuie sur Z deux fois.
-description: "Aide notre ami (Flo?) à ramasser des losanges. Saute par-dessus les murs. Chante ta propre chanson pour te garder motivé. C'est ALLORUN!"
+description: "Aide notre ami (Flo?) à ramasser des losanges. Saute par-dessus les murs. Chante ta propre chanson pour te garder motivé. C'est ALLORUN! Une production originale de BonjourArcade."
 
 # Pour les jeux qui coopèrent pas bien
 #problem: true

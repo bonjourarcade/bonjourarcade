@@ -2676,9 +2676,11 @@
             document.getElementById('developer-select').value = '';
             document.getElementById('system-select').value = '';
             document.getElementById('sort-select').value = 'random';
+            userHasChangedSort = false;
             filteredGamesData = gamesData;
             renderGames(gamesData);
             updateSearchInfo();
+            window.history.replaceState({}, '', window.location.pathname);
         });
 
         // Track if user has manually changed the sort

@@ -1,0 +1,17 @@
+title: AlloRun
+year: 2026
+developer: BonjourArcade
+genre: Réflexes
+controls:
+  - "← ↓ ↑ →: Mouvement"
+  - "Z: Sauter"
+  - "X: "
+
+to_start: Appuie sur Z deux fois.
+description: "Aide notre ami (Flo?) à ramasser des losanges. Saute par-dessus les murs. Chante ta propre chanson pour te garder motivé. C'est ALLORUN!"
+
+# Pour les jeux qui coopèrent pas bien
+#problem: true
+#enable_score: false
+
+added: 2026-10-10

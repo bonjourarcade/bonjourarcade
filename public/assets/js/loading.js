@@ -114,7 +114,8 @@
                     .map((line) => line.trim())
                     .filter((line) => line.length > 0);
                 if (tips.length > 0) {
-                    textEl.innerHTML = linkify(tips[Math.floor(Math.random() * tips.length)]);
+                    const index = Math.floor(Math.random() * tips.length);
+                    textEl.innerHTML = `(Truc #${index + 1}) ${linkify(tips[index])}`;
                 }
             })
             .catch(() => {

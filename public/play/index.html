@@ -7,6 +7,48 @@
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>BonjourArcade</title>
 
+    <script>
+        // EmulatorJS's own mute/volume slider only adjusts gain on OpenAL
+        // sources under Module.AL.currentCtx - some libretro cores never
+        // populate that (confirmed in Module.AL.contexts staying empty for
+        // both arcade/fbneo and NES cores), leaving the UI responsive but
+        // silently a no-op on actual audio output. Patching AudioContext
+        // itself routes every context any core creates through a GainNode
+        // we control, independent of whatever audio backend the core uses.
+        // Must run before loader.js/the core create their AudioContext.
+        (function () {
+            const NativeAudioContext = window.AudioContext || window.webkitAudioContext;
+            if (!NativeAudioContext) return;
+
+            window.__baNativeAudioContext = NativeAudioContext;
+            window.__baMasterGainNodes = [];
+            window.__baMasterVolume = 1;
+            window.__baSetMasterVolume = function (volume) {
+                window.__baMasterVolume = volume;
+                window.__baMasterGainNodes.forEach(function (gain) {
+                    try { gain.gain.value = volume; } catch (e) { /* context closed */ }
+                });
+            };
+
+            function PatchedAudioContext(...args) {
+                const ctx = new NativeAudioContext(...args);
+                const masterGain = ctx.createGain();
+                masterGain.gain.value = window.__baMasterVolume;
+                masterGain.connect(ctx.destination);
+                Object.defineProperty(ctx, 'destination', {
+                    get: function () { return masterGain; },
+                    configurable: true
+                });
+                window.__baMasterGainNodes.push(masterGain);
+                return ctx;
+            }
+            PatchedAudioContext.prototype = NativeAudioContext.prototype;
+
+            window.AudioContext = PatchedAudioContext;
+            if (window.webkitAudioContext) window.webkitAudioContext = PatchedAudioContext;
+        })();
+    </script>
+
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:title" content="Play now!">
@@ -3961,6 +4003,29 @@
                     hideLoading({
                         containerSelector: '#game'
                     });
+
+                    // Keep our master Web Audio gain (see the AudioContext
+                    // patch at the top of <head>) in sync with EmulatorJS's
+                    // own volume/mute state, since its built-in slider can't
+                    // reliably reach the actual audio output by itself.
+                    try {
+                        const emu = window.EJS_emulator;
+                        if (emu && typeof emu.setVolume === 'function' && !emu.__baVolumePatched) {
+                            emu.__baVolumePatched = true;
+                            const originalSetVolume = emu.setVolume.bind(emu);
+                            emu.setVolume = function (volume) {
+                                originalSetVolume(volume);
+                                if (typeof window.__baSetMasterVolume === 'function') {
+                                    window.__baSetMasterVolume(volume);
+                                }
+                            };
+                            if (typeof window.__baSetMasterVolume === 'function') {
+                                window.__baSetMasterVolume(emu.muted ? 0 : emu.volume);
+                            }
+                        }
+                    } catch (e) {
+                        console.warn('Could not patch EJS_emulator.setVolume for master volume fallback:', e);
+                    }
                 };
 
                 // Step 10: Load the main EmulatorJS engine (loader.js)
@@ -6234,7 +6299,10 @@
 
         function playTbBeep() {
             try {
-                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                // Uses the real AudioContext directly (bypassing the game's
+                // master-volume patch above) so this UI beep isn't silenced
+                // by muting the emulated game's audio.
+                const ctx = new (window.__baNativeAudioContext || window.AudioContext || window.webkitAudioContext)();
                 const osc = ctx.createOscillator();
                 const gain = ctx.createGain();
                 osc.connect(gain); gain.connect(ctx.destination);

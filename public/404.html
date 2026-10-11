@@ -13,6 +13,7 @@
             const path = window.location.pathname;
             const playMatch = path.match(/^\/b\/([^\/]+)$/);
             const scoresMatch = path.match(/^\/scores\/([^\/]+)$/);
+            const infoMatch = path.match(/^\/jeu\/([^\/]+)$/);
 
             if (playMatch) {
                 // Use a capitalized version of the gameId as a much better fallback than "Redirection..."
@@ -23,6 +24,10 @@
                 const gameId = scoresMatch[1];
                 const fallbackTitle = gameId.charAt(0).toUpperCase() + gameId.slice(1).replace(/[-_]/g, ' ');
                 document.title = 'Scores - ' + fallbackTitle + ' - BonjourArcade';
+            } else if (infoMatch) {
+                const gameId = infoMatch[1];
+                const fallbackTitle = gameId.charAt(0).toUpperCase() + gameId.slice(1).replace(/[-_]/g, ' ');
+                document.title = fallbackTitle + ' - BonjourArcade';
             } else {
                 document.title = '404 - Page non trouvée';
             }
@@ -347,6 +352,7 @@
             // Check if the path matches /b/game_id pattern
             const playMatch = path.match(/^\/b\/([^\/]+)$/);
             const scoresMatch = path.match(/^\/scores\/([^\/]+)$/);
+            const infoMatch = path.match(/^\/jeu\/([^\/]+)$/);
 
             if (playMatch) {
                 // Extract the game_id from the path
@@ -406,6 +412,14 @@
                 if (errorOverlay) errorOverlay.style.display = 'none';
 
                 window.location.replace(`/scores/?game=${encodeURIComponent(gameId)}`);
+                return;
+            } else if (infoMatch) {
+                const gameId = infoMatch[1];
+
+                const errorOverlay = document.getElementById('errorOverlay');
+                if (errorOverlay) errorOverlay.style.display = 'none';
+
+                window.location.replace(`/?game=${encodeURIComponent(gameId)}`);
                 return;
             } else {
                 // Not a redirect - show 404 content
@@ -798,8 +812,9 @@
             const path = window.location.pathname;
             const playMatch = path.match(/^\/b\/([^\/]+)$/);
             const scoresMatch = path.match(/^\/scores\/([^\/]+)$/);
+            const infoMatch = path.match(/^\/jeu\/([^\/]+)$/);
 
-            if (playMatch || scoresMatch) {
+            if (playMatch || scoresMatch || infoMatch) {
                 // We're redirecting, don't initialize 404 content
                 return;
             }

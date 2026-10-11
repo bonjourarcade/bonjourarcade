@@ -1684,6 +1684,15 @@
         });
       });
     });
+
+    window.addEventListener('popstate', function () {
+      var gameId = new URLSearchParams(window.location.search).get('game');
+      if (gameId && allGamesById[gameId]) {
+        openModal(allGamesById[gameId], { skipHistory: true });
+      } else if (document.getElementById('browse-modal-overlay').classList.contains('open')) {
+        closeModal({ skipHistory: true });
+      }
+    });
   }
 
   /* ---------- Auto-fetched description (Wikipedia, free/no-key) ---------- */
@@ -1756,8 +1765,11 @@
     });
   }
 
-  function openModal(game) {
+  function openModal(game, opts) {
+    opts = opts || {};
     var modal = document.getElementById('browse-modal');
+    var overlay = document.getElementById('browse-modal-overlay');
+    var wasOpen = overlay.classList.contains('open');
     modal.setAttribute('data-gameid', game.id);
 
     document.getElementById('browse-modal-img').src = game.coverArt || PLACEHOLDER_COVER;
@@ -1807,11 +1819,21 @@
 
     document.getElementById('browse-modal-score').innerHTML = 'Chargement du classement...';
 
-    document.getElementById('browse-modal-overlay').classList.add('open');
+    overlay.classList.add('open');
     document.body.style.overflow = 'hidden';
 
     refreshModalRating(game.id);
     loadTopScore(game.id);
+
+    if (!opts.skipHistory) {
+      var url = new URL(window.location.href);
+      url.searchParams.set('game', game.id);
+      if (wasOpen) {
+        history.replaceState(history.state, '', url);
+      } else {
+        history.pushState({ browseModalGame: game.id }, '', url);
+      }
+    }
   }
 
   function refreshModalRating(gameId) {
@@ -1870,9 +1892,16 @@
     });
   }
 
-  function closeModal() {
+  function closeModal(opts) {
+    opts = opts || {};
     document.getElementById('browse-modal-overlay').classList.remove('open');
     document.body.style.overflow = '';
+
+    if (!opts.skipHistory && new URLSearchParams(window.location.search).has('game')) {
+      var url = new URL(window.location.href);
+      url.searchParams.delete('game');
+      history.pushState(null, '', url);
+    }
   }
 
   /* ---------- Tournament toast ---------- */
@@ -2245,6 +2274,11 @@
 
         allGamesList = allGames;
         allGames.forEach(function (g) { allGamesById[g.id] = g; });
+
+        var sharedGameId = new URLSearchParams(window.location.search).get('game');
+        if (sharedGameId && allGamesById[sharedGameId]) {
+          openModal(allGamesById[sharedGameId], { skipHistory: true });
+        }
 
         var heroGame = pickHeroGame(allGames, result.currentGameId);
         renderHero(heroGame);

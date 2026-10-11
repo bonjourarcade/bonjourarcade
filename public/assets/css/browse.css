@@ -217,12 +217,6 @@ a {
 .browse-header.browse-header-solid .browse-nav-dropbtn:hover { color: var(--browse-text); }
 .browse-dropdown.open .browse-nav-dropbtn { color: var(--browse-hero-text); border-bottom-color: var(--browse-amber); }
 .browse-header.browse-header-solid .browse-dropdown.open .browse-nav-dropbtn { color: var(--browse-text); }
-.browse-nav-dropbtn-competitif { color: #2fbf5f; }
-.browse-header.browse-header-solid .browse-nav-dropbtn-competitif { color: #1f9d4a; }
-.browse-nav-dropbtn-competitif:hover,
-.browse-dropdown.open .browse-nav-dropbtn-competitif { color: #4ee587; }
-.browse-header.browse-header-solid .browse-nav-dropbtn-competitif:hover,
-.browse-header.browse-header-solid .browse-dropdown.open .browse-nav-dropbtn-competitif { color: #2fbf5f; }
 
 .browse-dropdown-menu {
   display: none;
@@ -1353,9 +1347,54 @@ body.browse-dark .browse-card.kbfocus::before {
   inset: 0;
   background: linear-gradient(to top, var(--browse-bg) 4%, rgba(10, 8, 6, 0.1) 45%, rgba(10, 8, 6, 0.35) 100%);
 }
-.browse-modal-title {
+/* The undistorted box art, shown over the cropped/blurred backdrop
+   behind it - same "poster over backdrop" pairing as .browse-hero-poster. */
+.browse-modal-poster {
   position: absolute;
   left: 24px;
+  bottom: 20px;
+  z-index: 2;
+  width: 96px;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid rgba(253, 246, 232, 0.2);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.55);
+  background: var(--browse-surface);
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+.browse-modal-poster:hover,
+.browse-modal-poster:focus-visible { transform: scale(1.05); }
+
+.browse-poster-lightbox {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  background: rgba(5, 4, 3, 0.9);
+  align-items: center;
+  justify-content: center;
+  cursor: zoom-out;
+}
+.browse-poster-lightbox.open { display: flex; }
+/* Desktop screens are wider than they are tall, so the box is sized by
+   height (90vh, i.e. 5% margin top/bottom) - width just follows the aspect
+   ratio. Below the 700px breakpoint it's flipped: the viewport itself is
+   narrow, so the box is sized by width (90vw) instead. Explicit width/height
+   (not max-*) so small source covers are scaled up to fill this box, not
+   just capped at their native pixel size. */
+.browse-poster-lightbox-img {
+  width: 95vw;
+  height: 90vh;
+  object-fit: contain;
+  border-radius: 10px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7);
+}
+.browse-modal-title {
+  position: absolute;
+  left: 136px;
+  right: 24px;
   bottom: 20px;
   z-index: 2;
   margin: 0;
@@ -1364,7 +1403,6 @@ body.browse-dark .browse-card.kbfocus::before {
   font-size: 1.8rem;
   color: var(--browse-hero-text);
   text-shadow: 0 2px 12px rgba(0, 0, 0, 0.7);
-  max-width: 90%;
 }
 
 .browse-modal-body {
@@ -1776,4 +1814,5 @@ body.browse-dark .browse-card.kbfocus::before {
   .browse-row-pair { display: block; }
   .browse-tournament-card { flex-basis: 220px; }
   .browse-tournament-viewall-card { flex-basis: 110px; }
+  .browse-poster-lightbox-img { width: 90vw; height: 95vh; }
 }

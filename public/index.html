@@ -40,7 +40,7 @@
           </div>
         </div>
         <div class="browse-dropdown" data-browse-dropdown>
-          <button type="button" class="browse-nav-dropbtn browse-nav-dropbtn-competitif">
+          <button type="button" class="browse-nav-dropbtn">
             Compétition
           </button>
           <div class="browse-dropdown-menu">
@@ -50,7 +50,6 @@
         </div>
         <a href="/screensaver">Écran de veille</a>
         <div class="browse-nav-row">
-          <a href="/v1/" data-umami-event="v1-return-click">Retour à v1</a>
           <a href="https://ko-fi.com/bonjourarcade" target="_blank" rel="noopener" class="browse-support-link">❤️ Supporter</a>
         </div>
       </nav>
@@ -142,6 +141,7 @@
       <div class="browse-modal-hero">
         <img id="browse-modal-img" class="browse-modal-img" alt="">
         <div class="browse-modal-hero-fade"></div>
+        <img id="browse-modal-poster" class="browse-modal-poster" alt="" role="button" tabindex="0" aria-label="Agrandir la pochette">
         <h2 id="browse-modal-title" class="browse-modal-title"></h2>
       </div>
       <div class="browse-modal-body">
@@ -171,6 +171,11 @@
         <div id="browse-modal-score" class="browse-modal-score"></div>
       </div>
     </div>
+  </div>
+
+  <!-- Full-size preview of the modal's cover art, opened by clicking the poster -->
+  <div id="browse-poster-lightbox" class="browse-poster-lightbox">
+    <img id="browse-poster-lightbox-img" class="browse-poster-lightbox-img" alt="">
   </div>
 
   <!-- Tournament toast (auto-dismissing, shown once per session when a tournament is live/joinable) -->

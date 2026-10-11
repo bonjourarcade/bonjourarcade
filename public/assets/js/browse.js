@@ -1636,7 +1636,35 @@
     document.getElementById('browse-modal-overlay').addEventListener('click', function (e) {
       if (e.target === this) closeModal();
     });
+
+    var posterImg = document.getElementById('browse-modal-poster');
+    var lightbox = document.getElementById('browse-poster-lightbox');
+    var lightboxImg = document.getElementById('browse-poster-lightbox-img');
+
+    function openLightbox() {
+      lightboxImg.src = posterImg.src;
+      lightboxImg.alt = posterImg.alt;
+      lightbox.classList.add('open');
+    }
+    function closeLightbox() {
+      lightbox.classList.remove('open');
+    }
+
+    posterImg.addEventListener('click', openLightbox);
+    posterImg.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        e.stopPropagation();
+        openLightbox();
+      }
+    });
+    lightbox.addEventListener('click', closeLightbox);
+
     document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && lightbox.classList.contains('open')) {
+        closeLightbox();
+        return;
+      }
       var overlay = document.getElementById('browse-modal-overlay');
       if (!overlay.classList.contains('open')) return;
       if (e.key === 'Escape') {
@@ -1662,8 +1690,8 @@
       if (e.key !== 'Enter') return;
       var active = document.activeElement;
       // Don't hijack Enter on a genuinely focused control inside the modal
-      // (rating thumbs, the favorite button) - let it activate normally.
-      if (active && active.tagName === 'BUTTON') return;
+      // (rating thumbs, the favorite button, the poster) - let it activate normally.
+      if (active && (active.tagName === 'BUTTON' || active.id === 'browse-modal-poster')) return;
       e.preventDefault();
       activateCard(document.getElementById('browse-modal-play'));
       playNavSound('select');
@@ -1773,6 +1801,9 @@
     modal.setAttribute('data-gameid', game.id);
 
     document.getElementById('browse-modal-img').src = game.coverArt || PLACEHOLDER_COVER;
+    var posterImg = document.getElementById('browse-modal-poster');
+    posterImg.src = game.coverArt || PLACEHOLDER_COVER;
+    posterImg.alt = getDisplayTitle(game);
     document.getElementById('browse-modal-title').textContent = getDisplayTitle(game);
     document.getElementById('browse-modal-play').href = game.pageUrl || ('/b/' + game.id);
 

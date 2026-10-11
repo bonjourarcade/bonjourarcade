@@ -93,6 +93,7 @@ extract_metadata_fields() {
         .added // "",
         .hide // "",
         (.enable_score // true | tostring),
+        (.enable_speedrun // true | tostring),
         .to_start // "",
         .problem // "",
         (.controls // null | tojson),
@@ -278,6 +279,7 @@ for i in $(seq 1 $BATCH_WORKERS); do
                         added=""
                         hide="yes"
                         enable_score="true"
+                        enable_speedrun="true"
                         to_start=""
                         problem=""
 
@@ -288,7 +290,7 @@ for i in $(seq 1 $BATCH_WORKERS); do
 
                         if [ -f "$metadata_file" ]; then
                             metadata_json=$(yq '.' "$metadata_file" 2>/dev/null || true)
-                            if [ -n "$metadata_json" ] && IFS=$'\x1f' read -r title developer year genre recommended added hide enable_score to_start problem controls_json new_flag description < <(extract_metadata_fields "$metadata_json"); then
+                            if [ -n "$metadata_json" ] && IFS=$'\x1f' read -r title developer year genre recommended added hide enable_score enable_speedrun to_start problem controls_json new_flag description < <(extract_metadata_fields "$metadata_json"); then
                                 :
                             else
                                 new_flag=""
@@ -352,11 +354,12 @@ for i in $(seq 1 $BATCH_WORKERS); do
                             --arg romPath "${rom_path:-null}" \
                             --arg saveState "${save_state:-}" \
                             --argjson enable_score "$enable_score" \
+                            --argjson enable_speedrun "$enable_speedrun" \
                             --argjson controls "$controls_json" \
                             --arg to_start "$to_start" \
                             --arg new_flag "$new_flag" \
                             --arg description "$description" \
-                            '{id: $id, title: $title, problem: $json_problem, developer: $developer, year: $year, genre: $genre, recommended: $recommended, added: $added, hide: $hide, coverArt: $coverArt, pageUrl: $pageUrl, core: $core, romPath: $romPath, saveState: $saveState, enable_score: $enable_score, controls: $controls, to_start: $to_start, new_flag: $new_flag, description: $description}' 2>/dev/null || echo "{}")
+                            '{id: $id, title: $title, problem: $json_problem, developer: $developer, year: $year, genre: $genre, recommended: $recommended, added: $added, hide: $hide, coverArt: $coverArt, pageUrl: $pageUrl, core: $core, romPath: $romPath, saveState: $saveState, enable_score: $enable_score, enable_speedrun: $enable_speedrun, controls: $controls, to_start: $to_start, new_flag: $new_flag, description: $description}' 2>/dev/null || echo "{}")
 
                         # Only output valid JSON
                         if echo "$game_json" | jq -e . >/dev/null 2>&1; then
@@ -458,6 +461,7 @@ for game_dir in "$GAMES_DIR"/external-*; do
         added=$(echo "$metadata_json" | jq -r '.added // ""')
         hide=$(echo "$metadata_json" | jq -r '.hide // ""')
         enable_score=$(echo "$metadata_json" | jq -r '.enable_score // false')
+        enable_speedrun=$(echo "$metadata_json" | jq -r '.enable_speedrun // true')
         to_start=$(echo "$metadata_json" | jq -r '.to_start // ""')
         problem=$(echo "$metadata_json" | jq -r '.problem // ""')
         controls_json=$(echo "$metadata_json" | jq -c '.controls // null')
@@ -528,6 +532,7 @@ for game_dir in "$GAMES_DIR"/external-*; do
             --arg romPath "" \
             --arg saveState "" \
             --argjson enable_score "$enable_score" \
+            --argjson enable_speedrun "$enable_speedrun" \
             --argjson controls "$controls_json" \
             --arg to_start "$to_start" \
             --arg new_flag "$new_flag" \
@@ -536,7 +541,7 @@ for game_dir in "$GAMES_DIR"/external-*; do
             --arg launch_button_text "$launch_button_text" \
             --arg launch_button_url "$launch_button_url" \
             --arg game_type "$game_type" \
-            '{id: $id, title: $title, problem: $json_problem, developer: $developer, year: $year, genre: $genre, recommended: $recommended, added: $added, hide: $hide, coverArt: $coverArt, pageUrl: $pageUrl, core: $core, romPath: $romPath, saveState: $saveState, enable_score: $enable_score, controls: $controls, to_start: $to_start, new_flag: $new_flag, description: $description, external_url: $external_url, launch_button_text: $launch_button_text, launch_button_url: $launch_button_url, game_type: $game_type}' 2>/dev/null || echo "{}")
+            '{id: $id, title: $title, problem: $json_problem, developer: $developer, year: $year, genre: $genre, recommended: $recommended, added: $added, hide: $hide, coverArt: $coverArt, pageUrl: $pageUrl, core: $core, romPath: $romPath, saveState: $saveState, enable_score: $enable_score, enable_speedrun: $enable_speedrun, controls: $controls, to_start: $to_start, new_flag: $new_flag, description: $description, external_url: $external_url, launch_button_text: $launch_button_text, launch_button_url: $launch_button_url, game_type: $game_type}' 2>/dev/null || echo "{}")
         
         # Add to the games array
         if echo "$game_json" | jq -e . >/dev/null 2>&1 && [ "$game_json" != "{}" ] && [ "$game_json" != "null" ]; then

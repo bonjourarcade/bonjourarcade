@@ -23,6 +23,28 @@ const permissionsView = document.getElementById('permissions-view');
 
 const scoreDrafts = new Map();
 
+function formatSpeedrunTime(ms) {
+    const totalCentis = Math.max(0, Math.round(Number(ms || 0) / 10));
+    const centis = totalCentis % 100;
+    const totalSeconds = Math.floor(totalCentis / 100);
+    const seconds = totalSeconds % 60;
+    const minutes = Math.floor(totalSeconds / 60);
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${pad(minutes)}:${pad(seconds)}.${pad(centis)}`;
+}
+
+// Accepts "mm:ss", "mm:ss.c" or "mm:ss.cc" and returns milliseconds, or null if invalid.
+function parseSpeedrunTimeInput(str) {
+    const match = /^(\d+):([0-5]\d)(?:\.(\d{1,2}))?$/.exec(String(str || '').trim());
+    if (!match) {
+        return null;
+    }
+    const minutes = parseInt(match[1], 10);
+    const seconds = parseInt(match[2], 10);
+    const centis = match[3] ? parseInt(match[3].padEnd(2, '0'), 10) : 0;
+    return (minutes * 60 + seconds) * 1000 + centis * 10;
+}
+
 function switchTab(tab) {
     const isScores = tab === 'scores';
     tabScores.classList.toggle('active', isScores);
@@ -119,6 +141,7 @@ function createScoreElement(score) {
     const div = document.createElement('div');
     div.className = 'score-card';
     div.id = `score-${score.id}`;
+    div.dataset.scoreType = score.scoreType || 'points';
 
     // Formatting the date. Cloud function returns createdAt as an object, but usually it's passed as ISO string or object with _seconds
     let dateStr = 'Inconnue';
@@ -141,17 +164,25 @@ function createScoreElement(score) {
     const commentHtml = score.comment ? `<p><strong>Commentaire Original:</strong> ${score.comment}</p>` : '';
     const userDisplay = score.user ? score.user.displayName : score.userId;
     const gameDisplay = score.game ? score.game.title : score.gameId;
+    const isSpeedrun = score.scoreType === 'speedrun';
+    const speedrunBadge = isSpeedrun ? ' | <strong style="color:#ffd700;">⏱ Speedrun</strong>' : '';
+    const pointsScoreHtml = (isSpeedrun && typeof score.pointsScore === 'number')
+        ? ` | Score associé: ${score.pointsScore.toLocaleString('fr-FR')}`
+        : '';
+    const scoreInputHtml = isSpeedrun
+        ? `<input type="text" id="edit-score-${score.id}" value="${formatSpeedrunTime(score.score)}" placeholder="mm:ss.cc">`
+        : `<input type="number" id="edit-score-${score.id}" value="${score.score}" placeholder="Score">`;
 
     div.innerHTML = `
         <div class="score-meta">
-            User: ${userDisplay} (${score.userId}) | Game: ${gameDisplay} (${score.gameId}) | Date: ${dateStr}
+            User: ${userDisplay} (${score.userId}) | Game: ${gameDisplay} (${score.gameId}) | Date: ${dateStr}${speedrunBadge}${pointsScoreHtml}
         </div>
         ${screenshotHtml}
         ${commentHtml}
         <div style="margin-top: 10px;">
             Contenu modifiable avant validation:
             <input type="text" id="edit-game-${score.id}" value="${score.gameId}" placeholder="Game ID">
-            <input type="number" id="edit-score-${score.id}" value="${score.score}" placeholder="Score">
+            ${scoreInputHtml}
             <textarea id="edit-comment-${score.id}" placeholder="Commentaire">${score.comment || ''}</textarea>
             <label style="display:flex; align-items:center; gap:8px; margin-top:6px; color:#ddd; font-size:13px; cursor:pointer;">
                 <input type="checkbox" id="notify-webhooks-${score.id}" checked style="width:auto; margin:0;">
@@ -194,10 +225,14 @@ function captureScoreDraft(scoreId) {
         return null;
     }
 
+    const scoreType = card.dataset.scoreType || 'points';
+    const rawScoreValue = document.getElementById(`edit-score-${scoreId}`).value;
+
     return {
         scoreId,
+        scoreType,
         gameId: document.getElementById(`edit-game-${scoreId}`).value,
-        score: parseInt(document.getElementById(`edit-score-${scoreId}`).value, 10),
+        score: scoreType === 'speedrun' ? parseSpeedrunTimeInput(rawScoreValue) : parseInt(rawScoreValue, 10),
         comment: document.getElementById(`edit-comment-${scoreId}`).value,
         notifyWebhooks: document.getElementById(`notify-webhooks-${scoreId}`)?.checked ?? true,
         parent,
@@ -222,7 +257,12 @@ function restoreScoreCard(draft) {
 
     draft.parent.insertBefore(draft.card, draft.nextSibling);
     document.getElementById(`edit-game-${draft.scoreId}`).value = draft.gameId;
-    document.getElementById(`edit-score-${draft.scoreId}`).value = Number.isNaN(draft.score) ? '' : draft.score;
+    const scoreInput = document.getElementById(`edit-score-${draft.scoreId}`);
+    if (draft.score === null || Number.isNaN(draft.score)) {
+        scoreInput.value = '';
+    } else {
+        scoreInput.value = draft.scoreType === 'speedrun' ? formatSpeedrunTime(draft.score) : draft.score;
+    }
     document.getElementById(`edit-comment-${draft.scoreId}`).value = draft.comment;
     const notifyCheckbox = document.getElementById(`notify-webhooks-${draft.scoreId}`);
     if (notifyCheckbox) {
@@ -252,6 +292,13 @@ window.approveScore = async (scoreId) => {
         return;
     }
 
+    if (draft.score === null || Number.isNaN(draft.score)) {
+        alert(draft.scoreType === 'speedrun'
+            ? 'Format de temps invalide (attendu: mm:ss ou mm:ss.cc).'
+            : 'Score invalide.');
+        return;
+    }
+
     scoreDrafts.set(scoreId, draft);
     removeScoreCard(scoreId);
 
@@ -265,6 +312,9 @@ window.approveScore = async (scoreId) => {
                 comment: draft.comment || null
             }
         });
+        // Players on /play or /scores may have the empty/pre-approval leaderboard
+        // cached (5 min TTL) - clear it so the newly-approved score shows up right away.
+        if (window.invalidateLeaderboardAll) window.invalidateLeaderboardAll();
         scoreDrafts.delete(scoreId);
     } catch (e) {
         console.error("Erreur de validation:", e);
@@ -287,6 +337,7 @@ window.rejectScore = async (scoreId) => {
 
         try {
             await deleteScoreFn({ scoreId: scoreId });
+            if (window.invalidateLeaderboardAll) window.invalidateLeaderboardAll();
             scoreDrafts.delete(scoreId);
         } catch (e) {
             console.error("Erreur de suppression:", e);

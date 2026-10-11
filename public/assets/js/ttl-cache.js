@@ -65,11 +65,11 @@
         return host === 'localhost' || host === '127.0.0.1' || host.includes('localhost') || host.startsWith('192.168.');
     }
 
-    async function defaultLocalFetcher(gameId) {
+    async function defaultLocalFetcher(gameId, scoreType) {
         if (typeof window.listGameScores !== 'function') {
             throw new Error('window.listGameScores is not available yet');
         }
-        const localResultRaw = await window.listGameScores(gameId);
+        const localResultRaw = await window.listGameScores(gameId, scoreType);
         const localResult = localResultRaw && localResultRaw.result ? localResultRaw.result : localResultRaw;
         if (!localResult || localResult.success !== true || !Array.isArray(localResult.scores)) {
             throw new Error('Invalid emulator leaderboard response format');
@@ -77,14 +77,14 @@
         return { result: localResult };
     }
 
-    async function prodFetcher(gameId) {
+    async function prodFetcher(gameId, scoreType) {
         const response = await fetch('https://us-central1-alloarcade.cloudfunctions.net/listGameScores', {
             method: 'POST',
             headers: {
                 'accept': '*/*',
                 'content-type': 'application/json'
             },
-            body: JSON.stringify({ data: { timeRange: 'all', gameId: gameId } })
+            body: JSON.stringify({ data: { timeRange: 'all', gameId: gameId, scoreType: scoreType === 'speedrun' ? 'speedrun' : undefined } })
         });
         if (!response.ok) {
             throw new Error('HTTP error! status: ' + response.status);
@@ -130,9 +130,10 @@
 
     async function fetchLeaderboardScores(gameId, opts) {
         const options = opts || {};
+        const scoreType = options.scoreType === 'speedrun' ? 'speedrun' : 'points';
         const ttlMs = typeof options.ttlMs === 'number' ? options.ttlMs : 5 * 60 * 1000;
         const localFetcher = options.localFetcher || defaultLocalFetcher;
-        const key = 'listGameScores_' + gameId;
+        const key = 'listGameScores_' + gameId + '_' + scoreType;
 
         if (!options.force) {
             const cached = get(key);
@@ -142,13 +143,13 @@
         let data;
         if (isLocalhost()) {
             try {
-                data = await localFetcher(gameId);
+                data = await localFetcher(gameId, scoreType);
             } catch (e) {
                 console.warn('Local leaderboard fetch failed, using mock scores:', e);
                 data = { result: { success: true, scores: generateMockScores(gameId) } };
             }
         } else {
-            data = await prodFetcher(gameId);
+            data = await prodFetcher(gameId, scoreType);
         }
 
         set(key, data, ttlMs);
@@ -156,7 +157,7 @@
     }
 
     window.fetchLeaderboardScores = fetchLeaderboardScores;
-    window.invalidateLeaderboard = function (gameId) { invalidate('listGameScores_' + gameId); };
+    window.invalidateLeaderboard = function (gameId) { invalidateWithPrefix('listGameScores_' + gameId); };
     window.invalidateLeaderboardAll = function () { invalidateWithPrefix('listGameScores_'); };
 
     // --- gamelist.json fetch with cache (GCS/static hosting) ---

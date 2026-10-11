@@ -211,6 +211,7 @@ def build_rom_game(rom_entry, use_local_paths, now_date, missing_covers)
     romPath: rom_path,
     saveState: File.file?(save_state_path) ? "/games/#{game_id}/save.state" : '',
     enable_score: bool_or_default(metadata, 'enable_score', true),
+    enable_speedrun: bool_or_default(metadata, 'enable_speedrun', true),
     controls: metadata_value(metadata, 'controls'),
     to_start: string_field(metadata, 'to_start'),
     new_flag: new_flag,

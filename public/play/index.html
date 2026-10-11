@@ -1000,6 +1000,155 @@
             transform: rotate(180deg);
         }
 
+        .leaderboard-type-toggle {
+            display: flex;
+            gap: 6px;
+            margin: 6px 0 10px;
+        }
+
+        .leaderboard-toggle-btn {
+            flex: 1;
+            padding: 6px 10px;
+            background: #222;
+            color: #aaa;
+            border: 1px solid #555;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .leaderboard-toggle-btn.is-active {
+            background: #ffd700;
+            color: #111;
+            border-color: #ffd700;
+        }
+
+        .leaderboard-score-secondary {
+            font-size: 0.8em;
+            color: #999;
+            font-weight: normal;
+        }
+
+        #speedrun-overlay {
+            position: fixed !important;
+            right: 0 !important;
+            z-index: 1997 !important;
+            display: none;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), top 0.2s ease;
+            pointer-events: none;
+        }
+
+        #speedrun-overlay.collapsed {
+            transform: translateX(100%);
+        }
+
+        #speedrun-content {
+            background: rgba(45, 45, 45, 0.95);
+            color: #fff;
+            padding: 10px;
+            border-radius: 6px 0 0 6px;
+            font-size: 14px;
+            font-family: sans-serif;
+            box-shadow: -2px 2px 10px rgba(0, 0, 0, 0.5);
+            min-width: 160px;
+            max-width: 220px;
+            line-height: 1.4;
+            pointer-events: auto;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-right: none;
+        }
+
+        #speedrun-time-display {
+            font-size: 22px;
+            font-weight: bold;
+            color: #ffd700;
+            text-align: center;
+            margin-bottom: 10px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        #speedrun-content button {
+            display: block;
+            width: 100%;
+            padding: 8px 10px;
+            margin-bottom: 6px;
+            background: #222;
+            color: #fff;
+            border: 1px solid #666;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        #speedrun-content button:last-child {
+            margin-bottom: 0;
+        }
+
+        #speedrun-content button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        #speedrun-invalid-message {
+            display: none;
+            color: #ff6b6b;
+            font-size: 12px;
+            margin-top: 8px;
+            line-height: 1.3;
+        }
+
+        #speedrun-toggle-handle {
+            position: absolute;
+            right: 100%;
+            top: 0;
+            width: 32px;
+            height: auto;
+            min-height: 120px;
+            background: rgba(45, 45, 45, 0.95);
+            color: #ffd700;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 6px 0 0 6px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-right: none;
+            box-shadow: -2px 2px 8px rgba(0, 0, 0, 0.3);
+            pointer-events: auto;
+            padding: 15px 0;
+            transition: background-color 0.2s;
+        }
+
+        #speedrun-toggle-handle:hover {
+            background: rgba(30, 30, 30, 0.95);
+        }
+
+        #speedrun-toggle-handle .handle-label {
+            writing-mode: vertical-rl;
+            white-space: nowrap;
+            font-size: 13px;
+            font-weight: bold;
+            font-family: sans-serif;
+            user-select: none;
+            margin-top: 10px;
+        }
+
+        #speedrun-toggle-handle .icon-arrow {
+            font-size: 18px;
+            transition: transform 0.3s ease;
+        }
+
+        #speedrun-overlay.collapsed #speedrun-toggle-handle {
+            box-shadow: 4px 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        #speedrun-overlay.collapsed #speedrun-toggle-handle .icon-arrow {
+            transform: rotate(180deg);
+        }
+
         .game-info-title {
             font-weight: bold;
             font-size: 15px;
@@ -1512,6 +1661,19 @@
         </div>
     </div>
 
+    <div id="speedrun-overlay">
+        <div id="speedrun-content">
+            <div id="speedrun-time-display">00:00.00</div>
+            <button type="button" id="speedrun-start-btn">▶ Démarrer le chrono</button>
+            <button type="button" id="speedrun-stop-btn" disabled>⏹ Arrêter le chrono</button>
+            <div id="speedrun-invalid-message">Chrono invalidé (sauvegarde chargée ou avance rapide utilisée) — recharge la page pour retenter un run valide.</div>
+        </div>
+        <div id="speedrun-toggle-handle" title="Afficher/Masquer le speedrun">
+            <span class="icon-arrow">◂</span>
+            <span class="handle-label">Speedrun</span>
+        </div>
+    </div>
+
     <div id="game-container">
         <!-- Loading overlay (sera rempli par loading.js) -->
         <div id="loading-overlay" class="loading-overlay"></div>
@@ -1553,6 +1715,10 @@
                     <div id="rating-login-prompt">Connecte-toi pour noter</div>
                 </div>
                 <h3>🏆 Meilleurs Scores</h3>
+                <div class="leaderboard-type-toggle" id="leaderboard-type-toggle" style="display:none;">
+                    <button class="leaderboard-toggle-btn is-active" type="button" data-score-type="points">Points</button>
+                    <button class="leaderboard-toggle-btn" type="button" data-score-type="speedrun">Speedrun</button>
+                </div>
                 <div id="leaderboard-content">
                     <div class="leaderboard-loading">Chargement...</div>
                 </div>
@@ -1571,6 +1737,10 @@
         <div id="mobile-leaderboard-content">
             <button id="mobile-leaderboard-close">×</button>
             <h3>🏆 Meilleurs Scores</h3>
+            <div class="leaderboard-type-toggle" id="mobile-leaderboard-type-toggle" style="display:none;">
+                <button class="leaderboard-toggle-btn is-active" type="button" data-score-type="points">Points</button>
+                <button class="leaderboard-toggle-btn" type="button" data-score-type="speedrun">Speedrun</button>
+            </div>
             <div id="mobile-leaderboard-content-data">
                 <div class="leaderboard-loading">Chargement...</div>
             </div>
@@ -1630,6 +1800,8 @@
             </div>
 
             <div id="score-form-section" style="display:none;">
+                <div id="score-speedrun-time" style="display:none; width:100%; padding:12px; margin-bottom:10px; border-radius:6px; border:1px solid #555; background:#222; color:#ffd700; box-sizing:border-box; font-size:32px; text-align:center; font-weight:bold; font-variant-numeric:tabular-nums;"></div>
+                <input type="text" id="score-speedrun-points-input" placeholder="Score atteint (optionnel)" style="display:none; width:100%; padding:10px; margin-bottom:10px; border-radius:6px; border:1px solid #555; background:#222; color:white; box-sizing:border-box; font-size:18px; text-align:center;" inputmode="numeric" pattern="[0-9 ]*" autocomplete="off">
                 <input type="text" id="score-input" placeholder="Ton score" required inputmode="numeric" pattern="[0-9 ]*" autocomplete="off"
                     style="width:100%; padding:12px; margin-bottom:10px; border-radius:6px; border:1px solid #555; background:#222; color:white; box-sizing:border-box; font-size:32px; text-align:center; font-weight:bold;">
                 <!-- Comment section hidden as requested -->
@@ -1946,6 +2118,122 @@
             gameInfoOverlay.style.top = `${top}px`;
         }
 
+        // Right-anchored, stacked below the scores drawer (#qr-drawer). A
+        // ResizeObserver (rather than hooking every place the drawer's content
+        // can change - leaderboard load, collapse toggle, rating UI...) keeps
+        // this in sync regardless of why the drawer's height changed.
+        function updateSpeedrunPanelPosition() {
+            const qrDrawer = document.getElementById('qr-drawer');
+            const qrDrawerToggleHandle = document.getElementById('qr-drawer-toggle-handle');
+            const speedrunOverlay = document.getElementById('speedrun-overlay');
+            if (!speedrunOverlay) return;
+
+            let top = 50;
+            if (qrDrawer && qrDrawer.style.display !== 'none') {
+                const drawerHeight = qrDrawer.classList.contains('collapsed') && qrDrawerToggleHandle
+                    ? qrDrawerToggleHandle.offsetHeight
+                    : qrDrawer.offsetHeight;
+                top += drawerHeight + 12;
+            }
+            speedrunOverlay.style.top = `${top}px`;
+        }
+
+        // --- Speedrun timer ---
+        // Anti-cheat: once invalidated (a save state was loaded, or fast-forward was
+        // used, while a run was in progress or already completed this page load),
+        // the run stays invalidated for the rest of this page session - no in-page
+        // reset, only a full reload clears it (see EJS_onGameStart / fastforward
+        // wiring below, which call invalidateSpeedrunRun()).
+        const speedrunState = {
+            startedAt: null,
+            elapsedMs: 0,
+            running: false,
+            invalidated: false,
+            rafId: null,
+        };
+
+        function formatSpeedrunTime(ms) {
+            const totalCentis = Math.max(0, Math.floor(ms / 10));
+            const centis = totalCentis % 100;
+            const totalSeconds = Math.floor(totalCentis / 100);
+            const seconds = totalSeconds % 60;
+            const minutes = Math.floor(totalSeconds / 60);
+            const pad = (n) => String(n).padStart(2, '0');
+            return `${pad(minutes)}:${pad(seconds)}.${pad(centis)}`;
+        }
+
+        function invalidateSpeedrunRun(reason) {
+            if (speedrunState.invalidated) return;
+            speedrunState.invalidated = true;
+            speedrunState.running = false;
+            if (speedrunState.rafId) {
+                cancelAnimationFrame(speedrunState.rafId);
+                speedrunState.rafId = null;
+            }
+            const startBtn = document.getElementById('speedrun-start-btn');
+            const stopBtn = document.getElementById('speedrun-stop-btn');
+            const msgEl = document.getElementById('speedrun-invalid-message');
+            if (startBtn) startBtn.disabled = true;
+            if (stopBtn) stopBtn.disabled = true;
+            if (msgEl) msgEl.style.display = 'block';
+            console.warn('Speedrun run invalidated:', reason);
+        }
+
+        // Catches fast-forward triggered by the real "0" key directly (not just
+        // the on-screen button, which goes through simulateKeyPress below) -
+        // EmulatorJS's own fast-forward binding listens for this key natively,
+        // bypassing simulateKeyPress entirely. Only cheating if it happens while a
+        // run is actually in progress - using fast-forward before starting (or
+        // after stopping) a run doesn't invalidate anything.
+        document.addEventListener('keydown', function (e) {
+            if ((e.key === '0' || e.code === 'Digit0') && speedrunState.running) {
+                invalidateSpeedrunRun('fastforward-key');
+            }
+        });
+
+        function initSpeedrunPanel() {
+            const startBtn = document.getElementById('speedrun-start-btn');
+            const stopBtn = document.getElementById('speedrun-stop-btn');
+            const display = document.getElementById('speedrun-time-display');
+            if (!startBtn || !stopBtn || !display || startBtn.dataset.listenerAdded) return;
+            startBtn.dataset.listenerAdded = 'true';
+
+            function tick() {
+                if (!speedrunState.running) return;
+                display.textContent = formatSpeedrunTime(performance.now() - speedrunState.startedAt);
+                speedrunState.rafId = requestAnimationFrame(tick);
+            }
+
+            startBtn.addEventListener('click', () => {
+                if (speedrunState.invalidated || !window.EJS_emulator || !window.EJS_emulator.gameManager) return;
+
+                window.EJS_emulator.gameManager.restart();
+                window.EJS_emulator.play();
+
+                speedrunState.startedAt = performance.now();
+                speedrunState.elapsedMs = 0;
+                speedrunState.running = true;
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+                tick();
+                refocusGame();
+            });
+
+            stopBtn.addEventListener('click', () => {
+                if (!speedrunState.running) return;
+                speedrunState.elapsedMs = performance.now() - speedrunState.startedAt;
+                speedrunState.running = false;
+                if (speedrunState.rafId) {
+                    cancelAnimationFrame(speedrunState.rafId);
+                    speedrunState.rafId = null;
+                }
+                display.textContent = formatSpeedrunTime(speedrunState.elapsedMs);
+                stopBtn.disabled = true;
+                if (!speedrunState.invalidated) startBtn.disabled = false;
+                openScoreSubmissionModal({ mode: 'speedrun', elapsedMs: speedrunState.elapsedMs });
+            });
+        }
+
         // Summarize controls (same logic as main menu/newsletter)
         function summarizeControls(controls) {
             if (!controls || !Array.isArray(controls)) return '';
@@ -2060,15 +2348,19 @@
 
             setupLeaderboardSubmitQrCode(gameId);
 
+            // Which score type ('points' or 'speedrun') the leaderboard panels (desktop
+            // drawer + mobile popup) currently display - shared by both via this toggle.
+            let activeLeaderboardScoreType = 'points';
+
             // Leaderboard fetching logic with localStorage caching
-            async function fetchLeaderboard(gameId, isRefresh = false) {
+            async function fetchLeaderboard(gameId, isRefresh = false, scoreType = activeLeaderboardScoreType) {
                 const leaderboardContainer = document.getElementById('leaderboard-container');
                 const leaderboardContent = document.getElementById('leaderboard-content');
 
                 if (!leaderboardContainer || !leaderboardContent) return;
 
                 // Cache key for localStorage
-                const cacheKey = `leaderboard_cache_${gameId}`;
+                const cacheKey = `leaderboard_cache_${gameId}_${scoreType}`;
 
                 // Helper function to load from cache
                 function loadFromCache() {
@@ -2127,29 +2419,35 @@
                 try {
                     // fetchLeaderboardScores handles localhost (emulator + mock fallback) and
                     // production API, with a 5-minute TTL cache to avoid repeated calls.
-                    let data = await window.fetchLeaderboardScores(gameId);
+                    let data = await window.fetchLeaderboardScores(gameId, { scoreType });
 
                     if (!data.result || !data.result.success || !data.result.scores) {
                         throw new Error('Invalid response format');
                     }
 
-                    // Get best score for each unique player
+                    const isSpeedrun = scoreType === 'speedrun';
+
+                    // Get best score for each unique player (lowest time for speedrun, highest for points)
                     const playerBestScores = new Map();
                     data.result.scores.forEach(score => {
                         const userId = score.userId;
                         const currentBest = playerBestScores.get(userId);
-                        if (!currentBest || score.score > currentBest.score) {
+                        const isBetter = !currentBest || (isSpeedrun ? score.score < currentBest.score : score.score > currentBest.score);
+                        if (isBetter) {
                             playerBestScores.set(userId, {
                                 player: score.player,
                                 score: score.score,
+                                pointsScore: typeof score.pointsScore === 'number' ? score.pointsScore : null,
                                 rank: score.rank,
                                 comment: score.comment || ''
                             });
                         }
                     });
 
-                    // Convert to array and sort by score (highest first)
-                    const sortedScores = Array.from(playerBestScores.values()).sort((a, b) => b.score - a.score).slice(0, 50); // Show top 50 players
+                    // Convert to array and sort (fastest first for speedrun, highest first for points)
+                    const sortedScores = Array.from(playerBestScores.values())
+                        .sort((a, b) => isSpeedrun ? a.score - b.score : b.score - a.score)
+                        .slice(0, 50); // Show top 50 players
 
                     if (sortedScores.length === 0) {
                         if (!isRefresh) {
@@ -2169,7 +2467,7 @@
                                 const currentPlayer = currentEntries[i]?.querySelector('.leaderboard-player')?.textContent;
                                 const currentScore = currentEntries[i]?.querySelector('.leaderboard-score')?.textContent?.replace(/\s/g, '');
                                 const newPlayer = sortedScores[i].player;
-                                const newScore = sortedScores[i].score.toLocaleString();
+                                const newScore = isSpeedrun ? formatSpeedrunTime(sortedScores[i].score) : sortedScores[i].score.toLocaleString();
                                 if (currentPlayer !== newPlayer || currentScore !== newScore) {
                                     scoresChanged = true;
                                     break;
@@ -2198,9 +2496,13 @@
                         const safeComment = score.comment ? score.comment.substring(0, 100) : '';
                         const commentAttr = safeComment ? ` data-comment="${escapeHtml(safeComment)}"` : '';
                         const commentIndicator = safeComment ? ' <span class="comment-indicator" aria-label="Commentaire disponible">💬</span>' : '';
+                        const scoreDisplay = isSpeedrun ? formatSpeedrunTime(score.score) : score.score.toLocaleString();
+                        const secondary = (isSpeedrun && typeof score.pointsScore === 'number')
+                            ? ` <span class="leaderboard-score-secondary">(${score.pointsScore.toLocaleString()})</span>`
+                            : '';
 
-                        leaderboardHTML += `<div class="leaderboard-entry"${commentAttr}><div class="leaderboard-rank">${rankEmoji}</div><div class="leaderboard-player">${score.player}${commentIndicator}</div><div class="leaderboard-score">${score.score.toLocaleString()}</div></div>`;
-                        mobileLeaderboardHTML += `<div class="mobile-leaderboard-entry"${commentAttr}><div class="mobile-leaderboard-rank">${rankEmoji}</div><div class="mobile-leaderboard-player">${score.player}${commentIndicator}</div><div class="mobile-leaderboard-score">${score.score.toLocaleString()}</div></div>`;
+                        leaderboardHTML += `<div class="leaderboard-entry"${commentAttr}><div class="leaderboard-rank">${rankEmoji}</div><div class="leaderboard-player">${score.player}${commentIndicator}</div><div class="leaderboard-score">${scoreDisplay}${secondary}</div></div>`;
+                        mobileLeaderboardHTML += `<div class="mobile-leaderboard-entry"${commentAttr}><div class="mobile-leaderboard-rank">${rankEmoji}</div><div class="mobile-leaderboard-player">${score.player}${commentIndicator}</div><div class="mobile-leaderboard-score">${scoreDisplay}${secondary}</div></div>`;
                     });
 
                     // Save to cache after successful fetch
@@ -2310,27 +2612,31 @@
             }
 
             // Render leaderboard directly from snapshot data (no HTTP call)
-            function renderLeaderboardFromScores(scores, gameId) {
+            function renderLeaderboardFromScores(scores, gameId, scoreType = activeLeaderboardScoreType) {
                 const leaderboardContent = document.getElementById('leaderboard-content');
                 const leaderboardContainer = document.getElementById('leaderboard-container');
                 if (!leaderboardContent) return;
+
+                const isSpeedrun = scoreType === 'speedrun';
 
                 // Deduplicate: keep best score per player (userId)
                 const playerBest = new Map();
                 scores.forEach(s => {
                     const uid = s.userId || s.id;
                     const existing = playerBest.get(uid);
-                    if (!existing || s.score > existing.score) {
+                    const isBetter = !existing || (isSpeedrun ? s.score < existing.score : s.score > existing.score);
+                    if (isBetter) {
                         playerBest.set(uid, {
                             player: s.player || s.displayName || 'Anonyme',
                             score: s.score,
+                            pointsScore: typeof s.pointsScore === 'number' ? s.pointsScore : null,
                             comment: s.comment || ''
                         });
                     }
                 });
 
                 const sorted = Array.from(playerBest.values())
-                    .sort((a, b) => b.score - a.score)
+                    .sort((a, b) => isSpeedrun ? a.score - b.score : b.score - a.score)
                     .slice(0, 50);
 
                 if (sorted.length === 0) {
@@ -2346,7 +2652,11 @@
                     const safeComment = entry.comment ? entry.comment.substring(0, 100) : '';
                     const commentAttr = safeComment ? ` data-comment="${escapeHtml(safeComment)}"` : '';
                     const commentIndicator = safeComment ? ' <span class="comment-indicator" aria-label="Commentaire disponible">💬</span>' : '';
-                    html += `<div class="leaderboard-entry"${commentAttr}><div class="leaderboard-rank">${rankEmoji}</div><div class="leaderboard-player">${entry.player}${commentIndicator}</div><div class="leaderboard-score">${entry.score.toLocaleString()}</div></div>`;
+                    const scoreDisplay = isSpeedrun ? formatSpeedrunTime(entry.score) : entry.score.toLocaleString();
+                    const secondary = (isSpeedrun && typeof entry.pointsScore === 'number')
+                        ? ` <span class="leaderboard-score-secondary">(${entry.pointsScore.toLocaleString()})</span>`
+                        : '';
+                    html += `<div class="leaderboard-entry"${commentAttr}><div class="leaderboard-rank">${rankEmoji}</div><div class="leaderboard-player">${entry.player}${commentIndicator}</div><div class="leaderboard-score">${scoreDisplay}${secondary}</div></div>`;
                 });
 
                 leaderboardContent.innerHTML = html;
@@ -2361,7 +2671,11 @@
                         const safeComment = entry.comment ? entry.comment.substring(0, 100) : '';
                         const commentAttr = safeComment ? ` data-comment="${escapeHtml(safeComment)}"` : '';
                         const commentIndicator = safeComment ? ' <span class="comment-indicator" aria-label="Commentaire disponible">💬</span>' : '';
-                        mobileHtml += `<div class="mobile-leaderboard-entry"${commentAttr}><div class="mobile-leaderboard-rank">${rankEmoji}</div><div class="mobile-leaderboard-player">${entry.player}${commentIndicator}</div><div class="mobile-leaderboard-score">${entry.score.toLocaleString()}</div></div>`;
+                        const scoreDisplay = isSpeedrun ? formatSpeedrunTime(entry.score) : entry.score.toLocaleString();
+                        const secondary = (isSpeedrun && typeof entry.pointsScore === 'number')
+                            ? ` <span class="leaderboard-score-secondary">(${entry.pointsScore.toLocaleString()})</span>`
+                            : '';
+                        mobileHtml += `<div class="mobile-leaderboard-entry"${commentAttr}><div class="mobile-leaderboard-rank">${rankEmoji}</div><div class="mobile-leaderboard-player">${entry.player}${commentIndicator}</div><div class="mobile-leaderboard-score">${scoreDisplay}${secondary}</div></div>`;
                     });
                     mobileContent.innerHTML = mobileHtml;
                 }
@@ -2531,8 +2845,14 @@
             // Fetch ratings on load
             fetchGameRatings(gameId);
 
-            // Set up real-time leaderboard via onSnapshot on game-scores
-            (function setupLeaderboardRealtime(gameId) {
+            // Set up real-time leaderboard via onSnapshot on game-scores. Re-callable with a
+            // new scoreType (e.g. on toggle switch) - always tears down the previous
+            // subscription first so only one listener is ever active at a time.
+            function subscribeLeaderboardRealtime(scoreType = activeLeaderboardScoreType) {
+                if (typeof window._leaderboardUnsub === 'function') {
+                    window._leaderboardUnsub();
+                    window._leaderboardUnsub = null;
+                }
                 try {
                     const db = window.firebaseDb;
                     if (!db || !window.Firestore) {
@@ -2546,9 +2866,10 @@
                     // resubmit many times can otherwise crowd out the count of *distinct* players within
                     // the limit) while still avoiding a full read of the game's entire score history.
                     const q = query(collection(db, 'game-scores'),
-                        where('game', '==', gameId),
+                        where('gameId', '==', gameId),
                         where('verified', '==', true),
-                        orderBy('score', 'desc'),
+                        where('scoreType', '==', scoreType),
+                        orderBy('score', scoreType === 'speedrun' ? 'asc' : 'desc'),
                         limit(200));
                     let debounceTimer = null;
                     window._leaderboardUnsub = onSnapshot(q, (snap) => {
@@ -2556,7 +2877,7 @@
                         debounceTimer = setTimeout(() => {
                             const scores = [];
                             snap.forEach(d => scores.push({ id: d.id, ...d.data() }));
-                            renderLeaderboardFromScores(scores, gameId);
+                            renderLeaderboardFromScores(scores, gameId, scoreType);
                         }, 300);
                     }, (err) => {
                         console.warn('onSnapshot leaderboard error, falling back to refresh-on-visible:', err);
@@ -2570,7 +2891,8 @@
                         ? window.refreshOnVisible(() => { fetchLeaderboard(gameId, true); })
                         : null;
                 }
-            })(gameId);
+            }
+            subscribeLeaderboardRealtime();
 
             // Refresh ratings when the tab becomes visible again (no polling while open)
             window.ratingRefreshDispose = (typeof window.refreshOnVisible === 'function')
@@ -2741,6 +3063,14 @@
                         gameInfoContent.innerHTML = html;
                         gameInfoOverlay.style.display = 'block';
 
+                        // The cover art loads async, growing this panel's height after
+                        // the layout below (and the speedrun panel it's stacked above)
+                        // already measured it - recompute once it's actually in.
+                        const gameInfoCoverImg = gameInfoContent.querySelector('.game-info-cover');
+                        if (gameInfoCoverImg) {
+                            gameInfoCoverImg.addEventListener('load', updateGameInfoOverlayPosition);
+                        }
+
                         if (hasAnnouncement) {
                             const announcementLink = document.getElementById('game-info-announcement-link');
                             if (announcementLink) {
@@ -2762,6 +3092,7 @@
                                 gameInfoOverlay.classList.toggle('collapsed');
                                 const currentlyCollapsed = gameInfoOverlay.classList.contains('collapsed');
                                 localStorage.setItem('game_info_collapsed', currentlyCollapsed);
+                                updateGameInfoOverlayPosition();
                                 refocusGame();
                             });
                             gameInfoToggleHandle.dataset.listenerAdded = 'true';
@@ -2772,6 +3103,77 @@
                     } else {
                         gameInfoOverlay.style.display = 'none';
                     }
+                }
+
+                // --- Speedrun panel: shown unless the game opts out (enable_speedrun: false)
+                // or it's an external (non-emulated) game, which has no EmulatorJS instance. ---
+                const speedrunOverlay = document.getElementById('speedrun-overlay');
+                const speedrunToggleHandle = document.getElementById('speedrun-toggle-handle');
+                const speedrunEnabled = selectedGame.enable_speedrun !== false && selectedGame.enable_speedrun !== 'false' &&
+                    selectedGame.game_type !== 'external';
+
+                if (speedrunOverlay) {
+                    if (speedrunEnabled) {
+                        speedrunOverlay.style.display = 'block';
+
+                        // Unlike controls/game-info, this one always starts collapsed
+                        // on every page load - no persisted state across reloads.
+                        speedrunOverlay.classList.add('collapsed');
+
+                        if (speedrunToggleHandle && !speedrunToggleHandle.dataset.listenerAdded) {
+                            speedrunToggleHandle.addEventListener('click', () => {
+                                speedrunOverlay.classList.toggle('collapsed');
+                                updateSpeedrunPanelPosition();
+                                refocusGame();
+                            });
+                            speedrunToggleHandle.dataset.listenerAdded = 'true';
+                        }
+
+                        initSpeedrunPanel();
+
+                        // Keep stacked under the scores drawer regardless of why its
+                        // height changes (leaderboard loading, collapse toggle, etc).
+                        const qrDrawerEl = document.getElementById('qr-drawer');
+                        if (qrDrawerEl && window.ResizeObserver && !qrDrawerEl.dataset.speedrunObserverAdded) {
+                            qrDrawerEl.dataset.speedrunObserverAdded = 'true';
+                            new ResizeObserver(updateSpeedrunPanelPosition).observe(qrDrawerEl);
+                        }
+                        window.addEventListener('resize', updateSpeedrunPanelPosition);
+                    } else {
+                        speedrunOverlay.style.display = 'none';
+                    }
+                    updateSpeedrunPanelPosition();
+                }
+
+                // --- Leaderboard Points/Speedrun toggle (desktop drawer + mobile popup,
+                // shared state) - only shown when the game has a speedrun leaderboard. ---
+                const leaderboardToggleGroups = [
+                    document.getElementById('leaderboard-type-toggle'),
+                    document.getElementById('mobile-leaderboard-type-toggle'),
+                ].filter(Boolean);
+
+                if (speedrunEnabled && leaderboardToggleGroups.length) {
+                    leaderboardToggleGroups.forEach(group => group.style.display = 'flex');
+
+                    const allToggleButtons = leaderboardToggleGroups.flatMap(
+                        group => Array.from(group.querySelectorAll('.leaderboard-toggle-btn'))
+                    );
+
+                    allToggleButtons.forEach(btn => {
+                        if (btn.dataset.listenerAdded) return;
+                        btn.dataset.listenerAdded = 'true';
+                        btn.addEventListener('click', (event) => {
+                            // Prevent bubbling to #leaderboard-container's click handler,
+                            // which opens the full /scores page in a new tab.
+                            event.stopPropagation();
+                            const newType = btn.dataset.scoreType === 'speedrun' ? 'speedrun' : 'points';
+                            if (newType === activeLeaderboardScoreType) return;
+                            activeLeaderboardScoreType = newType;
+                            allToggleButtons.forEach(b => b.classList.toggle('is-active', b.dataset.scoreType === newType));
+                            fetchLeaderboard(gameId, false, newType);
+                            subscribeLeaderboardRealtime(newType);
+                        });
+                    });
                 }
 
                 // Step 6: Set the Core EJS Variables Globally (used by EmulatorJS loader)
@@ -3336,6 +3738,35 @@
                     if (typeof window.EJS_localSaveAutoLoad === 'function') {
                         window.EJS_localSaveAutoLoad();
                     }
+
+                    // Anti-cheat: any state load from here on - whether from the "Load
+                    // State"/"Quick Load" menu, or EmulatorJS's own silent auto-restore -
+                    // invalidates speedrun for the rest of this page session (see
+                    // invalidateSpeedrunRun). gameManager.loadState() is the single
+                    // underlying primitive all of those paths call, so patching it
+                    // catches every one of them - but only once armed: both the
+                    // BonjourArcade auto-load just above and EmulatorJS's own
+                    // auto-restore run around game start, and that's a normal resume,
+                    // not a cheat, so the patch is installed just after instead of
+                    // immediately (a deliberate load/quick-load always happens well
+                    // after the player has had time to look at the game).
+                    setTimeout(() => {
+                        try {
+                            const gm = window.EJS_emulator && window.EJS_emulator.gameManager;
+                            if (gm && typeof gm.loadState === 'function' && !gm.__speedrunPatched) {
+                                gm.__speedrunPatched = true;
+                                const originalLoadState = gm.loadState.bind(gm);
+                                gm.loadState = function (...args) {
+                                    if (typeof invalidateSpeedrunRun === 'function') {
+                                        invalidateSpeedrunRun('loadState');
+                                    }
+                                    return originalLoadState(...args);
+                                };
+                            }
+                        } catch (e) {
+                            console.warn('Could not patch gameManager.loadState for speedrun anti-cheat:', e);
+                        }
+                    }, 3000);
 
                     try {
                         const emu = window.EJS_emulator;
@@ -4122,6 +4553,14 @@
 
             // Function to simulate pressing the 0 key
             function simulateKeyPress(keyValue) {
+                // Anti-cheat: fast-forward lets real elapsed time run faster than the
+                // game's actual progress, which would let a speedrun time be cheated -
+                // but only while a run is actually in progress; using it before
+                // starting (or after stopping) a run doesn't invalidate anything.
+                if (typeof invalidateSpeedrunRun === 'function' && typeof speedrunState !== 'undefined' && speedrunState.running) {
+                    invalidateSpeedrunRun('fastforward');
+                }
+
                 const target = getKeyboardTarget();
 
                 // Try to focus the game element if it's focusable
@@ -4386,8 +4825,15 @@
             }, 2500);
         }
 
-        async function openScoreSubmissionModal() {
-            if (window._eliminated) {
+        let activeScoreSubmissionMode = 'points';
+        let activeSpeedrunElapsedMs = 0;
+
+        async function openScoreSubmissionModal(opts) {
+            opts = opts || {};
+            activeScoreSubmissionMode = opts.mode === 'speedrun' ? 'speedrun' : 'points';
+            activeSpeedrunElapsedMs = opts.elapsedMs || 0;
+
+            if (activeScoreSubmissionMode !== 'speedrun' && window._eliminated) {
                 const tParams = new URLSearchParams(window.location.search);
                 if (tParams.get('t')) {
                     showToast('🚫 Tu as été éliminé du tournoi.');
@@ -4401,6 +4847,24 @@
             const noScreenshot = document.getElementById('score-no-screenshot');
             const statusDiv = document.getElementById('score-submission-status');
             const scoreInput = document.getElementById('score-input');
+            const speedrunTimeEl = document.getElementById('score-speedrun-time');
+            const speedrunPointsInput = document.getElementById('score-speedrun-points-input');
+
+            if (speedrunTimeEl) {
+                if (activeScoreSubmissionMode === 'speedrun') {
+                    scoreInput.style.display = 'none';
+                    speedrunTimeEl.style.display = 'block';
+                    speedrunTimeEl.textContent = formatSpeedrunTime(activeSpeedrunElapsedMs);
+                    if (speedrunPointsInput) {
+                        speedrunPointsInput.style.display = 'block';
+                        speedrunPointsInput.value = '';
+                    }
+                } else {
+                    scoreInput.style.display = 'block';
+                    speedrunTimeEl.style.display = 'none';
+                    if (speedrunPointsInput) speedrunPointsInput.style.display = 'none';
+                }
+            }
 
             if (modal && !scoreModalOriginalPlacement.parent) {
                 scoreModalOriginalPlacement.parent = modal.parentNode;
@@ -4439,7 +4903,7 @@
             if (modal) {
                 modal.style.display = 'flex';
                 setTimeout(() => {
-                    if (scoreInput) {
+                    if (scoreInput && activeScoreSubmissionMode !== 'speedrun') {
                         scoreInput.focus();
                         scoreInput.select();
                     }
@@ -4743,14 +5207,20 @@
         if (scoreSubmitBtn) {
             scoreSubmitBtn.addEventListener('click', async () => {
                 const gameId = getCurrentGameId();
-                const scoreInputValue = document.getElementById('score-input').value || '';
-                const scoreValue = parseInt(scoreInputValue.replace(/\D/g, ''), 10);
+                const isSpeedrun = activeScoreSubmissionMode === 'speedrun';
+                const scoreValue = isSpeedrun
+                    ? Math.round(activeSpeedrunElapsedMs)
+                    : parseInt((document.getElementById('score-input').value || '').replace(/\D/g, ''), 10);
                 const commentValue = document.getElementById('score-comment-input').value;
+                const speedrunPointsRaw = isSpeedrun
+                    ? (document.getElementById('score-speedrun-points-input').value || '').replace(/\D/g, '')
+                    : '';
+                const pointsScoreValue = speedrunPointsRaw !== '' ? parseInt(speedrunPointsRaw, 10) : undefined;
                 const screenshotBase64 = sessionStorage.getItem('tempScoreScreenshot');
                 const statusDiv = document.getElementById('score-submission-status');
                 const urlParams = new URLSearchParams(window.location.search);
-                const tournamentId = urlParams.get('t') || window._autoTournamentId || null;
-                const roundIndex = urlParams.get('r') !== null ? parseInt(urlParams.get('r'), 10) : window._autoRoundIndex;
+                const tournamentId = isSpeedrun ? null : (urlParams.get('t') || window._autoTournamentId || null);
+                const roundIndex = isSpeedrun ? null : (urlParams.get('r') !== null ? parseInt(urlParams.get('r'), 10) : window._autoRoundIndex);
 
                 if (window._eliminated && tournamentId) {
                     statusDiv.textContent = "🚫 Tu as été éliminé du tournoi.";
@@ -4770,7 +5240,7 @@
                 scoreSubmitBtn.textContent = 'Envoi...';
 
                 try {
-                    await window.submitGameScore(gameId, scoreValue, commentValue, screenshotBase64, tournamentId, roundIndex);
+                    await window.submitGameScore(gameId, scoreValue, commentValue, screenshotBase64, tournamentId, roundIndex, activeScoreSubmissionMode, pointsScoreValue);
                     statusDiv.textContent = "Score soumis avec succès pour revue !";
                     statusDiv.style.color = "#00C851";
 
@@ -4780,6 +5250,7 @@
                     setTimeout(() => {
                         closeScoreSubmissionModal();
                         document.getElementById('score-input').value = '';
+                        document.getElementById('score-speedrun-points-input').value = '';
                         document.getElementById('score-comment-input').value = '';
                         const commentCounter = document.getElementById('score-comment-counter');
                         if (commentCounter) commentCounter.textContent = '0/100';
@@ -5187,6 +5658,7 @@
                 qrToggle.addEventListener('click', function (e) {
                     e.stopPropagation();
                     qrDrawer.classList.toggle('collapsed');
+                    if (typeof updateSpeedrunPanelPosition === 'function') updateSpeedrunPanelPosition();
                     refocusGame();
                 });
             }

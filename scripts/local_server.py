@@ -4,6 +4,15 @@ import os
 import sys
 
 class RedirectHandler(http.server.SimpleHTTPRequestHandler):
+    def end_headers(self):
+        # Without an explicit Cache-Control, browsers apply heuristic caching based on
+        # Last-Modified (RFC 7234) and can serve a stale JS/HTML file for a long time
+        # without even revalidating - very confusing during local dev when a file was
+        # just edited. Production (GitLab Pages) sets its own headers, so this only
+        # affects local dev.
+        self.send_header('Cache-Control', 'no-store')
+        super().end_headers()
+
     def do_GET(self):
         # First, try to serve the file normally
         path = self.translate_path(self.path)

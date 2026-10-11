@@ -1018,6 +1018,12 @@ body.player-scores-open {
     color: var(--accent-strong);
 }
 
+.col-score-secondary {
+    font-weight: 400;
+    font-size: 0.85em;
+    color: var(--text-secondary, #999);
+}
+
 .player-cell {
     display: inline-flex;
     align-items: center;

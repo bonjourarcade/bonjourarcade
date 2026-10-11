@@ -14,6 +14,7 @@
         filteredScores: [],
         visibleCount: 0,
         currentViewMode: 'all',
+        scoreType: 'points',
         gameId: '',
         observer: null,
         isAdmin: false,
@@ -67,6 +68,9 @@
         gameCover: document.getElementById('leaderboard-game-cover'),
         toggleAll: document.getElementById('toggle-all-scores'),
         toggleBest: document.getElementById('toggle-best-scores'),
+        scoreTypeToggleGroup: document.getElementById('score-type-toggle-group'),
+        toggleTypePoints: document.getElementById('toggle-type-points'),
+        toggleTypeSpeedrun: document.getElementById('toggle-type-speedrun'),
         metricsChartCanvas: document.getElementById('game-metrics-chart'),
         metricsState: document.getElementById('game-metrics-state'),
         toggleMetricCollective: document.getElementById('toggle-metric-collective'),
@@ -214,6 +218,30 @@
 
     function formatScore(value) {
         return Number(value || 0).toLocaleString('fr-FR');
+    }
+
+    function formatSpeedrunTime(ms) {
+        const totalCentis = Math.max(0, Math.round(Number(ms || 0) / 10));
+        const centis = totalCentis % 100;
+        const totalSeconds = Math.floor(totalCentis / 100);
+        const seconds = totalSeconds % 60;
+        const minutes = Math.floor(totalSeconds / 60);
+        const pad = (n) => String(n).padStart(2, '0');
+        return `${pad(minutes)}:${pad(seconds)}.${pad(centis)}`;
+    }
+
+    function formatScoreForType(value, scoreType) {
+        return scoreType === 'speedrun' ? formatSpeedrunTime(value) : formatScore(value);
+    }
+
+    // Speedrun scores can optionally carry a numeric score reached during the run;
+    // it's display-only and never affects the (time-sorted) ranking.
+    function formatScoreCell(score, scoreType) {
+        const main = formatScoreForType(score.score, scoreType);
+        if (scoreType === 'speedrun' && typeof score.pointsScore === 'number') {
+            return main + ' <span class="col-score-secondary">(' + formatScore(score.pointsScore) + ' pts)</span>';
+        }
+        return main;
     }
 
     function escapeHtml(text) {
@@ -407,6 +435,24 @@
         return (params.get('game') || '').trim();
     }
 
+    function getQueryScoreType() {
+        const params = new URLSearchParams(window.location.search);
+        return params.get('type') === 'speedrun' ? 'speedrun' : 'points';
+    }
+
+    function updateScoreTypeQueryParam(scoreType) {
+        if (!window.history || typeof window.history.replaceState !== 'function') {
+            return;
+        }
+        const url = new URL(window.location.href);
+        if (scoreType === 'speedrun') {
+            url.searchParams.set('type', 'speedrun');
+        } else {
+            url.searchParams.delete('type');
+        }
+        window.history.replaceState({}, '', url);
+    }
+
     function getQueryPlayerKey() {
         const params = new URLSearchParams(window.location.search);
         return (params.get('player') || '').trim();
@@ -471,9 +517,10 @@
     }
 
     function sortScores(list) {
+        const ascending = state.scoreType === 'speedrun';
         return list.slice().sort(function (a, b) {
             if (b.score !== a.score) {
-                return b.score - a.score;
+                return ascending ? a.score - b.score : b.score - a.score;
             }
             if (a.createdAtMs !== b.createdAtMs) {
                 return a.createdAtMs - b.createdAtMs;
@@ -1198,7 +1245,7 @@
                 return [
                     '<tr>',
                     '<td><a class="player-score-game" href="', buildGameUrl(score.gameId), '">', gameLabel, '</a></td>',
-                    '<td class="col-score">', formatScore(score.score), '</td>',
+                    '<td class="col-score">', formatScoreCell(score, score.scoreType || 'points'), '</td>',
                     '<td>', window.BonjourArcadeScoresService.formatDate(score.createdAtMs), '</td>',
                     '<td><span class="player-score-status is-', escapeHtml(score.status || 'pending'), '">', escapeHtml(getUserScoreStatusLabel(score.status)), '</span></td>',
                     '<td class="player-score-proof">', proofButton, '</td>',
@@ -1240,7 +1287,7 @@
             return [
                 '<tr>',
                 '<td><a class="player-score-game" href="', buildGameUrl(score.gameId), '">', gameLabel, '</a></td>',
-                '<td class="col-score">', formatScore(score.score), '</td>',
+                '<td class="col-score">', formatScoreCell(score, score.scoreType || 'points'), '</td>',
                 '<td>', window.BonjourArcadeScoresService.formatDate(score.createdAtMs), '</td>',
                 '<td class="player-score-proof">', proofButton, '</td>',
                 '<td class="player-score-comment">', comment, '</td>',
@@ -1629,7 +1676,7 @@
                 '<tr data-score-id="', escapeHtml(score.id), '" data-user-id="', escapeHtml(score.userId), '" data-game-id="', escapeHtml(score.gameId), '">',
                 '<td>', String(score.rank), '</td>',
                 '<td>', playerCell, '</td>',
-                '<td class="col-score">', formatScore(score.score), '</td>',
+                '<td class="col-score">', formatScoreCell(score, state.scoreType), '</td>',
                 '<td>', window.BonjourArcadeScoresService.formatDate(score.createdAtMs), '</td>',
                 '<td>', proofButton, '</td>',
                 '<td class="col-comment">', escapeHtml(score.comment || ''), '</td>',
@@ -1856,6 +1903,18 @@
             elements.gameCover.src = '/assets/images/placeholder_thumb.png';
             elements.gameCover.alt = gameId;
         }
+
+        if (elements.scoreTypeToggleGroup) {
+            const hasSpeedrun = !!(game && game.enable_speedrun !== false && game.enable_speedrun !== 'false');
+            elements.scoreTypeToggleGroup.style.display = hasSpeedrun ? 'inline-flex' : 'none';
+        }
+    }
+
+    function updateScoreTypeTogglesUI() {
+        if (!elements.toggleTypePoints || !elements.toggleTypeSpeedrun) return;
+        const isSpeedrun = state.scoreType === 'speedrun';
+        elements.toggleTypePoints.classList.toggle('is-active', !isSpeedrun);
+        elements.toggleTypeSpeedrun.classList.toggle('is-active', isSpeedrun);
     }
 
     async function loadCatalogView() {
@@ -1909,8 +1968,10 @@
         }
     }
 
-    async function loadGameView(gameId) {
+    async function loadGameView(gameId, scoreType) {
         state.gameId = gameId;
+        state.scoreType = scoreType === 'speedrun' ? 'speedrun' : 'points';
+        updateScoreTypeTogglesUI();
 
         elements.catalogView.style.display = 'none';
         elements.gameView.style.display = 'block';
@@ -1919,7 +1980,7 @@
         setSectionState(elements.leaderboardState, 'Chargement des scores...', 'loading');
 
         try {
-            state.rawScores = await window.BonjourArcadeScoresService.listGameScores(gameId);
+            state.rawScores = await window.BonjourArcadeScoresService.listGameScores(gameId, state.scoreType);
             state.currentViewMode = 'all';
             elements.toggleAll.classList.add('is-active');
             elements.toggleBest.classList.remove('is-active');
@@ -1952,6 +2013,22 @@
             elements.toggleAll.classList.remove('is-active');
             recomputeGameScores();
         });
+
+        if (elements.toggleTypePoints) {
+            elements.toggleTypePoints.addEventListener('click', function () {
+                if (state.scoreType === 'points') return;
+                updateScoreTypeQueryParam('points');
+                loadGameView(state.gameId, 'points');
+            });
+        }
+
+        if (elements.toggleTypeSpeedrun) {
+            elements.toggleTypeSpeedrun.addEventListener('click', function () {
+                if (state.scoreType === 'speedrun') return;
+                updateScoreTypeQueryParam('speedrun');
+                loadGameView(state.gameId, 'speedrun');
+            });
+        }
 
         if (elements.toggleMetricCollective) {
             elements.toggleMetricCollective.addEventListener('click', function () {
@@ -2240,7 +2317,7 @@
         state.selectedPlayerKey = getQueryPlayerKey();
 
         if (requestedGameId) {
-            await loadGameView(requestedGameId);
+            await loadGameView(requestedGameId, getQueryScoreType());
             return;
         }
 

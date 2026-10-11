@@ -30,6 +30,15 @@ if [[ "$START_FIREBASE" -eq 1 ]]; then
 	echo "Starting Firebase emulators from: $FIREBASE_FUNCTIONS_DIR"
 	(
 		cd "$FIREBASE_FUNCTIONS_DIR"
+		# firebase-tools bundles deps (jsonwebtoken -> jwa -> buffer-equal-constant-time)
+		# that crash on very new Node versions (SlowBuffer was removed) - the project's
+		# .nvmrc/engines pin Node 20, but `cd` inside this subshell doesn't trigger a
+		# shell's own nvm auto-use hook, so it's applied explicitly here instead.
+		if [[ -s "$HOME/.nvm/nvm.sh" ]]; then
+			# shellcheck disable=SC1091
+			source "$HOME/.nvm/nvm.sh"
+			nvm use >/dev/null
+		fi
 		npm run dev:all
 	) &
 	FIREBASE_PID=$!

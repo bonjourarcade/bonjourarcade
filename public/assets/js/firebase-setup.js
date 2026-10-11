@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut, connectAuthEmulator, updateProfile } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, onAuthStateChanged, signOut, connectAuthEmulator, updateProfile } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { getFunctions, httpsCallable, connectFunctionsEmulator } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-functions.js";
 import { getFirestore, connectFirestoreEmulator, collection, query, where, orderBy, onSnapshot, doc, getDoc, getDocs, addDoc, updateDoc, setDoc, deleteDoc, serverTimestamp, limit, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 // TODO: Reactiver quand reCAPTCHA Enterprise sera configue
@@ -31,6 +31,18 @@ if (isLocalhost) {
     connectAuthEmulator(auth, "http://127.0.0.1:9099");
     connectFunctionsEmulator(functions, "127.0.0.1", 5001);
     connectFirestoreEmulator(db, "127.0.0.1", 8080);
+
+    // Dev convenience: auto sign-in as the seeded admin account (see
+    // alloarcade-backend/firebase/functions/scripts/seed-emulator.js, run via
+    // `npm run emulator:seed`) so admin-only functions/UI are testable without
+    // clicking through the emulator's fake Google sign-in popup every time.
+    const unsubscribeAutoAdminLogin = onAuthStateChanged(auth, (user) => {
+        unsubscribeAutoAdminLogin();
+        if (user) return;
+        signInWithEmailAndPassword(auth, 'admin@test.com', 'admin123')
+            .then(() => console.log('Auto-logged in as seeded emulator admin (admin@test.com).'))
+            .catch((e) => console.warn('No seeded emulator admin to auto-login as - run `npm run emulator:seed` in alloarcade-backend/firebase/functions.', e.code || e));
+    });
 }
 
 // TODO: Reactiver quand reCAPTCHA Enterprise sera configure
@@ -146,7 +158,7 @@ window.checkFirebaseAnyAdminAccess = async () => {
 };
 
 // Global score submission function
-window.submitGameScore = async (gameId, score, comment, screenshotBase64, tournamentId, roundIndex) => {
+window.submitGameScore = async (gameId, score, comment, screenshotBase64, tournamentId, roundIndex, scoreType, pointsScore) => {
     try {
         if (auth.currentUser) {
             await auth.currentUser.getIdToken(true);
@@ -159,6 +171,8 @@ window.submitGameScore = async (gameId, score, comment, screenshotBase64, tourna
     const body = {
         gameId: gameId,
         score: score,
+        scoreType: scoreType === 'speedrun' ? 'speedrun' : undefined,
+        pointsScore: (scoreType === 'speedrun' && typeof pointsScore === 'number') ? pointsScore : undefined,
         comment: comment || undefined,
         screenshotBase64: screenshotBase64 || undefined,
         tournamentId: tournamentId || undefined,
@@ -193,9 +207,9 @@ window.getLatestScores = async () => {
 };
 
 // Global function to fetch leaderboard scores (optionally filtered by game)
-window.listGameScores = async (gameId) => {
+window.listGameScores = async (gameId, scoreType) => {
     const fn = httpsCallable(functions, 'listGameScores');
-    const result = await fn({ gameId: gameId || 'all' });
+    const result = await fn({ gameId: gameId || 'all', scoreType: scoreType === 'speedrun' ? 'speedrun' : undefined });
     return result.data;
 };
 

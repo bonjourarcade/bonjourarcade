@@ -190,6 +190,7 @@
             userId: score.userId || (score.player && score.player.userId) || '',
             playerPhotoUrl: playerPhotoUrl,
             score: Number.isFinite(scoreValue) ? scoreValue : 0,
+            pointsScore: typeof score.pointsScore === 'number' ? score.pointsScore : null,
             comment: score.comment || '',
             createdAtMs: toTimestampMs(score.date || score.createdAt),
             screenshotUrl: score.screenshotUrl || null,
@@ -204,9 +205,9 @@
         return scores.map(normalizeLatestScore);
     }
 
-    async function listGameScores(gameId) {
+    async function listGameScores(gameId, scoreType) {
         // fetchLeaderboardScores handles localhost + production and caches (5 min TTL)
-        const data = await window.fetchLeaderboardScores(gameId || 'all');
+        const data = await window.fetchLeaderboardScores(gameId || 'all', { scoreType: scoreType });
         const scores = data && data.result && Array.isArray(data.result.scores) ? data.result.scores : [];
         return scores.map(normalizeGameScore);
     }
@@ -227,6 +228,8 @@
                 gameId: score.gameId || '',
                 gameTitle: score.gameTitle || score.gameId || 'Jeu inconnu',
                 score: Number.isFinite(scoreValue) ? scoreValue : 0,
+                scoreType: score.scoreType || 'points',
+                pointsScore: typeof score.pointsScore === 'number' ? score.pointsScore : null,
                 status: score.status || 'pending',
                 comment: score.comment || '',
                 createdAtMs: toTimestampMs(score.createdAt || score.date),

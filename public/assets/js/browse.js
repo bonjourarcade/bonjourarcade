@@ -696,19 +696,27 @@
     var list = document.getElementById('browse-hero-leaderboard-list');
     if (!wrap || !list || typeof window.fetchLeaderboardScores !== 'function') return;
 
-    window.fetchLeaderboardScores(gameId).then(function (data) {
+    Promise.all([
+      window.fetchLeaderboardScores(gameId, { scoreType: 'points' }),
+      window.fetchLeaderboardScores(gameId, { scoreType: 'speedrun' }).catch(function () { return null; })
+    ]).then(function (results) {
+      var data = results[0];
       var scores = data && data.result && data.result.success && data.result.scores;
-      if (!scores || !scores.length) { wrap.style.display = 'none'; return; }
+
+      var speedrunScores = results[1] && results[1].result && results[1].result.scores;
+      var bestTime = speedrunScores && speedrunScores.length ? speedrunScores[0] : null;
+
+      if ((!scores || !scores.length) && !bestTime) { wrap.style.display = 'none'; return; }
 
       var bestByPlayer = new Map();
-      scores.forEach(function (s) {
+      (scores || []).forEach(function (s) {
         var existing = bestByPlayer.get(s.userId);
         if (!existing || s.score > existing.score) bestByPlayer.set(s.userId, s);
       });
       var top = Array.from(bestByPlayer.values()).sort(function (a, b) { return b.score - a.score; }).slice(0, 5);
-      if (!top.length) { wrap.style.display = 'none'; return; }
+      if (!top.length && !bestTime) { wrap.style.display = 'none'; return; }
 
-      list.innerHTML = top.map(function (s, i) {
+      var rowsHtml = top.map(function (s, i) {
         var comment = (s.comment || '').trim().slice(0, 200);
         var commentAttr = comment ? ' data-comment="' + escapeHtml(comment) + '"' : '';
         var commentIcon = comment ? ' <span class="browse-hero-leaderboard-comment-icon" aria-label="Commentaire disponible">💬</span>' : '';
@@ -718,7 +726,17 @@
           commentIcon +
           '<span class="browse-hero-leaderboard-score">' + escapeHtml(String(s.score)) + '</span>' +
           '</div>';
-      }).join('');
+      });
+
+      if (bestTime) {
+        rowsHtml.push('<div class="browse-hero-leaderboard-row">' +
+          '<span class="browse-hero-leaderboard-rank">⏱</span>' +
+          '<span class="browse-hero-leaderboard-name">' + escapeHtml(bestTime.player || '?') + '</span>' +
+          '<span class="browse-hero-leaderboard-score">' + escapeHtml(formatSpeedrunTime(bestTime.score)) + '</span>' +
+          '</div>');
+      }
+
+      list.innerHTML = rowsHtml.join('');
       wrap.style.display = 'block';
     }).catch(function () { wrap.style.display = 'none'; });
   }
@@ -1902,19 +1920,42 @@
     }).catch(function (err) { console.error('Error fetching ratings:', err); });
   }
 
+  function formatSpeedrunTime(ms) {
+    var totalCentis = Math.max(0, Math.round(Number(ms || 0) / 10));
+    var centis = totalCentis % 100;
+    var totalSeconds = Math.floor(totalCentis / 100);
+    var seconds = totalSeconds % 60;
+    var minutes = Math.floor(totalSeconds / 60);
+    function pad(n) { return String(n).padStart(2, '0'); }
+    return pad(minutes) + ':' + pad(seconds) + '.' + pad(centis);
+  }
+
   function loadTopScore(gameId) {
     var el = document.getElementById('browse-modal-score');
     if (typeof window.fetchLeaderboardScores !== 'function') {
       el.innerHTML = '';
       return;
     }
-    window.fetchLeaderboardScores(gameId).then(function (data) {
+    Promise.all([
+      window.fetchLeaderboardScores(gameId, { scoreType: 'points' }).catch(function () { return null; }),
+      window.fetchLeaderboardScores(gameId, { scoreType: 'speedrun' }).catch(function () { return null; })
+    ]).then(function (results) {
       if (document.getElementById('browse-modal').getAttribute('data-gameid') !== gameId) return;
-      var scores = data && data.result && data.result.scores;
-      if (scores && scores.length) {
-        var top = scores[0];
-        el.innerHTML = '🏆 Meilleur score : <strong>' + escapeHtml(top.player || '?') + '</strong> - ' +
-          escapeHtml(String(top.score)) + ' &nbsp;<a href="/scores/' + encodeURIComponent(gameId) + '">Voir le classement complet →</a>';
+      var pointsScores = results[0] && results[0].result && results[0].result.scores;
+      var speedrunScores = results[1] && results[1].result && results[1].result.scores;
+      var lines = [];
+
+      if (pointsScores && pointsScores.length) {
+        var topScore = pointsScores[0];
+        lines.push('🏆 Meilleur score : <strong>' + escapeHtml(topScore.player || '?') + '</strong> - ' + escapeHtml(String(topScore.score)));
+      }
+      if (speedrunScores && speedrunScores.length) {
+        var topTime = speedrunScores[0];
+        lines.push('⏱ Meilleur temps : <strong>' + escapeHtml(topTime.player || '?') + '</strong> - ' + escapeHtml(formatSpeedrunTime(topTime.score)));
+      }
+
+      if (lines.length) {
+        el.innerHTML = lines.join('<br>') + ' &nbsp;<a href="/scores/' + encodeURIComponent(gameId) + '">Voir le classement complet →</a>';
       } else {
         el.innerHTML = '<a href="/scores/' + encodeURIComponent(gameId) + '">Voir le classement →</a>';
       }

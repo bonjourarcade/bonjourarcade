@@ -787,23 +787,179 @@
             }
         }
 
-        /* Clock styling */
-        #play-header-clock {
-            font-family: 'Inter', sans-serif;
-            font-size: 14px;
-            font-weight: 600;
-            color: #ffd700;
+        /* Clock styling - seven-segment digital display (bars) */
+        #play-header-clock-wrapper {
+            position: relative;
             margin-left: 15px;
-            padding: 4px 8px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 4px;
-            letter-spacing: 0.5px;
-            min-width: 45px;
-            text-align: center;
         }
 
-        #play-header-clock .clock-separator {
-            display: inline-block;
+        #play-header-clock {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 5px 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        #play-header-clock:hover {
+            background: rgba(255, 255, 255, 0.18);
+        }
+
+        #play-header-clock.timer-expired-clock {
+            animation: clock-shake 0.6s ease-in-out infinite;
+        }
+
+        #play-header-clock.timer-expired-clock .seg.on {
+            background: #ff3b30;
+            box-shadow: 0 0 6px rgba(255, 59, 48, 0.9);
+        }
+
+        #play-header-clock.timer-expired-clock .ssd-colon .dot {
+            background: #ff3b30;
+            box-shadow: 0 0 6px rgba(255, 59, 48, 0.9);
+        }
+
+        @keyframes clock-shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70% { transform: translateX(-2px) rotate(-1deg); }
+            20%, 40%, 60%, 80% { transform: translateX(2px) rotate(1deg); }
+            90% { transform: translateX(-1px); }
+        }
+
+        /* Timer-set popover */
+        .timer-setter-popover {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            margin-top: 6px;
+            background: #1a1a1a;
+            border: 1px solid #555;
+            border-radius: 6px;
+            padding: 10px;
+            z-index: 9500;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            white-space: nowrap;
+        }
+
+        .timer-setter-popover[hidden] {
+            display: none;
+        }
+
+        .timer-setter-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .timer-setter-row input[type="number"] {
+            width: 50px;
+            padding: 4px 6px;
+            background: #222;
+            color: #fff;
+            border: 1px solid #555;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        .timer-setter-row span {
+            color: #ccc;
+            font-size: 12px;
+        }
+
+        .timer-setter-row button {
+            background: #ffd700;
+            color: #1a1a1a;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            font-weight: 700;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .timer-setter-row button:hover {
+            background: #ffea70;
+        }
+
+        /* Full-page red overlay while the timer alarm is ringing */
+        #timer-alarm-overlay {
+            position: fixed;
+            inset: 0;
+            background: #dc3545;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 9000;
+            transition: opacity 0.4s ease;
+        }
+
+        body.timer-expired #timer-alarm-overlay {
+            opacity: 0.45;
+        }
+
+        .ssd-digit {
+            position: relative;
+            width: 10px;
+            height: 18px;
+            flex: none;
+        }
+
+        .ssd-digit .seg {
+            position: absolute;
+            background: rgba(255, 215, 0, 0.12);
+            border-radius: 1px;
+            transition: background 0.15s, box-shadow 0.15s;
+        }
+
+        .ssd-digit .seg.on {
+            background: #ffd700;
+            box-shadow: 0 0 4px rgba(255, 215, 0, 0.8);
+        }
+
+        .ssd-digit .seg-a,
+        .ssd-digit .seg-g,
+        .ssd-digit .seg-d {
+            left: 1px;
+            width: 8px;
+            height: 2px;
+        }
+
+        .ssd-digit .seg-a { top: 0; }
+        .ssd-digit .seg-g { top: 8px; }
+        .ssd-digit .seg-d { top: 16px; }
+
+        .ssd-digit .seg-f,
+        .ssd-digit .seg-b,
+        .ssd-digit .seg-e,
+        .ssd-digit .seg-c {
+            width: 2px;
+            height: 7px;
+        }
+
+        .ssd-digit .seg-f { left: 0; top: 1px; }
+        .ssd-digit .seg-b { left: 8px; top: 1px; }
+        .ssd-digit .seg-e { left: 0; top: 9px; }
+        .ssd-digit .seg-c { left: 8px; top: 9px; }
+
+        .ssd-colon {
+            display: inline-flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            width: 3px;
+            height: 18px;
+            flex: none;
+            padding: 3px 0;
+            box-sizing: border-box;
+        }
+
+        .ssd-colon .dot {
+            width: 3px;
+            height: 3px;
+            border-radius: 50%;
+            background: #ffd700;
+            box-shadow: 0 0 4px rgba(255, 215, 0, 0.8);
             animation: clock-separator-blink 2s steps(1, end) infinite;
         }
 
@@ -1592,13 +1748,23 @@
 </head>
 
 <body>
+    <div id="timer-alarm-overlay" aria-hidden="true"></div>
     <!-- Header with logo, clock, and action buttons -->
     <header id="play-header">
         <div id="play-header-left">
             <a id="play-header-home" href="/" aria-label="Retour au menu">
                 <img id="play-header-logo" src="../assets/images/bonjourarcade-logo.png" alt="BonjourArcade Logo">
             </a>
-            <div id="play-header-clock">--:--</div>
+            <div id="play-header-clock-wrapper">
+                <div id="play-header-clock" role="button" tabindex="0" aria-label="Horloge, cliquer pour programmer une minuterie">--:--</div>
+                <div id="timer-setter-popover" class="timer-setter-popover" hidden>
+                    <div class="timer-setter-row">
+                        <input type="number" id="timer-minutes-input" min="1" max="180" value="5" inputmode="numeric">
+                        <span>min</span>
+                        <button type="button" id="timer-start-btn">Démarrer</button>
+                    </div>
+                </div>
+            </div>
         </div>
         <div id="play-header-center">
             <div id="tb-header">
@@ -5705,20 +5871,153 @@
             console.log('Mouse auto-hide initialized');
         }
 
-        // Clock functionality
+        // Clock functionality - renders a seven-segment (digital clock) display
+        const SEVEN_SEG_MAP = {
+            '0': ['a', 'b', 'c', 'd', 'e', 'f'],
+            '1': ['b', 'c'],
+            '2': ['a', 'b', 'g', 'e', 'd'],
+            '3': ['a', 'b', 'g', 'c', 'd'],
+            '4': ['f', 'g', 'b', 'c'],
+            '5': ['a', 'f', 'g', 'c', 'd'],
+            '6': ['a', 'f', 'g', 'e', 'c', 'd'],
+            '7': ['a', 'b', 'c'],
+            '8': ['a', 'b', 'c', 'd', 'e', 'f', 'g'],
+            '9': ['a', 'b', 'c', 'd', 'f', 'g']
+        };
+
+        function renderSevenSegDigit(digitChar) {
+            const litSegments = SEVEN_SEG_MAP[digitChar] || [];
+            const allSegments = ['a', 'b', 'c', 'd', 'e', 'f', 'g'];
+            const segmentsHtml = allSegments
+                .map(seg => `<span class="seg seg-${seg}${litSegments.includes(seg) ? ' on' : ''}"></span>`)
+                .join('');
+            return `<span class="ssd-digit">${segmentsHtml}</span>`;
+        }
+
         function initClock() {
             const clockElement = document.getElementById('play-header-clock');
-            if (!clockElement) return;
+            const wrapperElement = document.getElementById('play-header-clock-wrapper');
+            const popoverElement = document.getElementById('timer-setter-popover');
+            const minutesInput = document.getElementById('timer-minutes-input');
+            const startButton = document.getElementById('timer-start-btn');
+            if (!clockElement || !wrapperElement || !popoverElement || !minutesInput || !startButton) return;
 
-            function updateClock() {
+            // 'clock' = shows current time | 'running' = counting down | 'expired' = alarm ringing
+            let timerMode = 'clock';
+            let timerEndAt = null;
+
+            function renderDigits(firstPair, secondPair) {
+                clockElement.innerHTML =
+                    renderSevenSegDigit(firstPair[0]) +
+                    renderSevenSegDigit(firstPair[1]) +
+                    '<span class="ssd-colon"><span class="dot"></span><span class="dot"></span></span>' +
+                    renderSevenSegDigit(secondPair[0]) +
+                    renderSevenSegDigit(secondPair[1]);
+            }
+
+            function renderClockDigits() {
                 const now = new Date();
                 const hours = String(now.getHours()).padStart(2, '0');
                 const minutes = String(now.getMinutes()).padStart(2, '0');
-                clockElement.innerHTML = `${hours}<span class="clock-separator">:</span>${minutes}`;
+                clockElement.setAttribute('aria-label', `Heure actuelle : ${hours}:${minutes}. Cliquer pour programmer une minuterie.`);
+                renderDigits(hours, minutes);
             }
 
-            updateClock();
-            setInterval(updateClock, 1000 * 30); // Update every 30 seconds
+            function renderCountdownDigits(remainingMs) {
+                const totalSeconds = Math.max(0, Math.ceil(remainingMs / 1000));
+                const mm = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+                const ss = String(totalSeconds % 60).padStart(2, '0');
+                clockElement.setAttribute('aria-label', `Minuterie : ${mm} minutes ${ss} secondes restantes. Cliquer pour annuler.`);
+                renderDigits(mm, ss);
+            }
+
+            function showPopover() {
+                popoverElement.hidden = false;
+                minutesInput.focus();
+                minutesInput.select();
+            }
+
+            function hidePopover() {
+                popoverElement.hidden = true;
+            }
+
+            function enterExpiredState() {
+                timerMode = 'expired';
+                timerEndAt = null;
+                clockElement.classList.add('timer-expired-clock');
+                document.body.classList.add('timer-expired');
+                clockElement.setAttribute('aria-label', 'Minuterie terminée. Cliquer pour revenir à l\'heure.');
+                renderCountdownDigits(0);
+            }
+
+            function exitToClockState() {
+                timerMode = 'clock';
+                timerEndAt = null;
+                clockElement.classList.remove('timer-expired-clock');
+                document.body.classList.remove('timer-expired');
+                renderClockDigits();
+            }
+
+            function startTimer(minutes) {
+                const safeMinutes = Math.min(180, Math.max(1, Math.round(minutes) || 5));
+                timerEndAt = Date.now() + safeMinutes * 60 * 1000;
+                timerMode = 'running';
+                clockElement.classList.remove('timer-expired-clock');
+                document.body.classList.remove('timer-expired');
+                renderCountdownDigits(timerEndAt - Date.now());
+                hidePopover();
+            }
+
+            clockElement.addEventListener('click', () => {
+                if (timerMode === 'clock') {
+                    popoverElement.hidden ? showPopover() : hidePopover();
+                } else {
+                    // Running or expired: clicking the clock cancels/dismisses the timer.
+                    exitToClockState();
+                }
+            });
+
+            clockElement.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    clockElement.click();
+                }
+            });
+
+            popoverElement.addEventListener('click', (e) => e.stopPropagation());
+
+            startButton.addEventListener('click', () => startTimer(parseInt(minutesInput.value, 10)));
+
+            minutesInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    startTimer(parseInt(minutesInput.value, 10));
+                } else if (e.key === 'Escape') {
+                    hidePopover();
+                }
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!wrapperElement.contains(e.target)) {
+                    hidePopover();
+                }
+            });
+
+            function tick() {
+                if (timerMode === 'clock') {
+                    renderClockDigits();
+                } else if (timerMode === 'running') {
+                    const remaining = timerEndAt - Date.now();
+                    if (remaining <= 0) {
+                        enterExpiredState();
+                    } else {
+                        renderCountdownDigits(remaining);
+                    }
+                }
+            }
+
+            tick();
+            setInterval(tick, 1000);
         }
 
         document.addEventListener('DOMContentLoaded', () => {

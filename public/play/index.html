@@ -176,6 +176,34 @@
             -webkit-user-select: none;
         }
 
+        /* Speedrun button styling (mobile only; shown via JS when the game has speedrun enabled) */
+        #speedrun-mobile-button {
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 8px 12px !important;
+            border-radius: 8px;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            gap: 6px;
+            font-family: sans-serif;
+            font-size: 12px !important;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: background-color 0.2s;
+            margin: 0 !important;
+            backdrop-filter: blur(10px);
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        #speedrun-mobile-button:hover {
+            background-color: rgba(0, 0, 0, 0.9);
+        }
+
+        #speedrun-mobile-button:active {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
         /* Leaderboard button styling */
         #leaderboard-button,
         #game-scores-button {
@@ -552,6 +580,24 @@
             color: #ffd700;
         }
 
+        #mobile-leaderboard-view-full {
+            display: block;
+            width: 100%;
+            margin-top: 16px;
+            padding: 10px;
+            background: #222;
+            color: #fff;
+            border: 1px solid #666;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-family: sans-serif;
+        }
+
+        #mobile-leaderboard-view-full:hover {
+            background: #333;
+        }
+
         .leaderboard-entry {
             display: flex;
             align-items: center;
@@ -797,6 +843,59 @@
                 /* Hide text on mobile, keep only icon */
             }
 
+            /* On mobile, the "Classement" button's job (viewing the full
+               leaderboard) moves into #mobile-leaderboard-view-full inside the
+               scores modal, so #scores-button alone opens that modal. */
+            #game-scores-button {
+                display: none !important;
+            }
+
+            #speedrun-mobile-button {
+                padding: 6px 8px !important;
+                font-size: 11px !important;
+                gap: 4px;
+            }
+
+            #speedrun-mobile-button span:last-child {
+                display: none;
+                /* Hide "Speedrun" text on mobile, keep only icon */
+            }
+
+        }
+
+        /* Speedrun panel becomes a centered modal on mobile (devices detected via
+           isMobileDevice(), which adds this class - see the speedrun setup in
+           loadSelectedGame()), instead of the desktop drawer stacked under the
+           scores drawer (toggled via #speedrun-toggle-handle). Gated on this
+           class rather than viewport width, so a desktop browser merely
+           resized narrow doesn't lose the toggle handle with no replacement. */
+        #speedrun-overlay.is-mobile-modal {
+            top: 0 !important;
+            left: 0 !important;
+            bottom: 0 !important;
+            background-color: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        #speedrun-overlay.is-mobile-modal.collapsed {
+            transform: none !important;
+        }
+
+        #speedrun-overlay.is-mobile-modal #speedrun-content {
+            width: 100%;
+            max-width: 280px;
+            border-radius: 12px;
+            border-right: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        #speedrun-overlay.is-mobile-modal #speedrun-toggle-handle {
+            display: none !important;
+        }
+
+        #speedrun-overlay.is-mobile-modal #speedrun-mobile-close {
+            display: flex;
         }
 
         @media (max-width: 768px) {
@@ -1287,6 +1386,28 @@
         #speedrun-content button:disabled {
             opacity: 0.4;
             cursor: not-allowed;
+        }
+
+        /* Close button for the mobile modal variant of the speedrun panel
+           (hidden on desktop, where the toggle-handle drawer is used instead). */
+        #speedrun-content #speedrun-mobile-close {
+            display: none;
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 24px;
+            height: 24px;
+            padding: 0;
+            margin: 0;
+            background: #ff4444;
+            border: none;
+            border-radius: 50%;
+            color: #fff;
+            font-size: 14px;
+            font-weight: bold;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
         }
 
         #speedrun-invalid-message {
@@ -1826,6 +1947,10 @@
                 <span>📈</span>
                 <span>Classement</span>
             </button>
+            <button id="speedrun-mobile-button" title="Speedrun">
+                <span>⏱️</span>
+                <span>Speedrun</span>
+            </button>
             <button id="fastforward-button">
                 <span>⏩</span>
                 <span>FF</span>
@@ -1871,6 +1996,7 @@
 
     <div id="speedrun-overlay">
         <div id="speedrun-content">
+            <button type="button" id="speedrun-mobile-close" aria-label="Fermer">×</button>
             <div id="speedrun-time-display">00:00.00</div>
             <button type="button" id="speedrun-start-btn">▶ Démarrer le chrono</button>
             <button type="button" id="speedrun-stop-btn" disabled>⏹ Arrêter le chrono</button>
@@ -1953,6 +2079,7 @@
                 <div class="leaderboard-loading">Chargement...</div>
             </div>
             <div id="mobile-comment-preview"></div>
+            <button id="mobile-leaderboard-view-full" type="button">📈 Voir le classement complet</button>
         </div>
     </div>
 
@@ -2424,6 +2551,12 @@
                 startBtn.disabled = true;
                 stopBtn.disabled = false;
                 tick();
+                // On mobile the panel is a modal overlaying the game - close it so
+                // the run actually starts with a clear screen.
+                if (isMobileDevice()) {
+                    const speedrunOverlay = document.getElementById('speedrun-overlay');
+                    if (speedrunOverlay) speedrunOverlay.style.display = 'none';
+                }
                 refocusGame();
             });
 
@@ -2438,6 +2571,10 @@
                 display.textContent = formatSpeedrunTime(speedrunState.elapsedMs);
                 stopBtn.disabled = true;
                 if (!speedrunState.invalidated) startBtn.disabled = false;
+                if (isMobileDevice()) {
+                    const speedrunOverlay = document.getElementById('speedrun-overlay');
+                    if (speedrunOverlay) speedrunOverlay.style.display = 'none';
+                }
                 openScoreSubmissionModal({ mode: 'speedrun', elapsedMs: speedrunState.elapsedMs });
             });
         }
@@ -3314,43 +3451,83 @@
                 }
 
                 // --- Speedrun panel: shown unless the game opts out (enable_speedrun: false)
-                // or it's an external (non-emulated) game, which has no EmulatorJS instance. ---
+                // or it's an external (non-emulated) game, which has no EmulatorJS instance.
+                // On mobile it's a modal triggered by #speedrun-mobile-button in the header;
+                // on desktop it stays the collapsible drawer stacked under the scores drawer. ---
                 const speedrunOverlay = document.getElementById('speedrun-overlay');
                 const speedrunToggleHandle = document.getElementById('speedrun-toggle-handle');
+                const speedrunMobileButton = document.getElementById('speedrun-mobile-button');
                 const speedrunEnabled = selectedGame.enable_speedrun !== false && selectedGame.enable_speedrun !== 'false' &&
                     selectedGame.game_type !== 'external';
 
                 if (speedrunOverlay) {
                     if (speedrunEnabled) {
-                        speedrunOverlay.style.display = 'block';
-
-                        // Unlike controls/game-info, this one always starts collapsed
-                        // on every page load - no persisted state across reloads.
-                        speedrunOverlay.classList.add('collapsed');
-
-                        if (speedrunToggleHandle && !speedrunToggleHandle.dataset.listenerAdded) {
-                            speedrunToggleHandle.addEventListener('click', () => {
-                                speedrunOverlay.classList.toggle('collapsed');
-                                updateSpeedrunPanelPosition();
-                                refocusGame();
-                            });
-                            speedrunToggleHandle.dataset.listenerAdded = 'true';
-                        }
-
                         initSpeedrunPanel();
 
-                        // Keep stacked under the scores drawer regardless of why its
-                        // height changes (leaderboard loading, collapse toggle, etc).
-                        const qrDrawerEl = document.getElementById('qr-drawer');
-                        if (qrDrawerEl && window.ResizeObserver && !qrDrawerEl.dataset.speedrunObserverAdded) {
-                            qrDrawerEl.dataset.speedrunObserverAdded = 'true';
-                            new ResizeObserver(updateSpeedrunPanelPosition).observe(qrDrawerEl);
+                        if (isMobileDevice()) {
+                            speedrunOverlay.classList.add('is-mobile-modal');
+                            speedrunOverlay.classList.remove('collapsed');
+                            speedrunOverlay.style.display = 'none';
+                            if (speedrunMobileButton) speedrunMobileButton.style.display = 'flex';
+
+                            if (speedrunMobileButton && !speedrunMobileButton.dataset.listenerAdded) {
+                                speedrunMobileButton.addEventListener('click', () => {
+                                    speedrunOverlay.style.display = 'flex';
+                                });
+                                speedrunMobileButton.dataset.listenerAdded = 'true';
+                            }
+
+                            const speedrunMobileClose = document.getElementById('speedrun-mobile-close');
+                            if (speedrunMobileClose && !speedrunMobileClose.dataset.listenerAdded) {
+                                speedrunMobileClose.addEventListener('click', (event) => {
+                                    event.stopPropagation();
+                                    speedrunOverlay.style.display = 'none';
+                                });
+                                speedrunMobileClose.dataset.listenerAdded = 'true';
+                            }
+
+                            // Tap the dimmed backdrop to close, same pattern as #mobile-leaderboard-popup.
+                            if (!speedrunOverlay.dataset.backdropListenerAdded) {
+                                speedrunOverlay.addEventListener('click', () => {
+                                    speedrunOverlay.style.display = 'none';
+                                });
+                                const speedrunContentEl = document.getElementById('speedrun-content');
+                                if (speedrunContentEl) {
+                                    speedrunContentEl.addEventListener('click', (event) => event.stopPropagation());
+                                }
+                                speedrunOverlay.dataset.backdropListenerAdded = 'true';
+                            }
+                        } else {
+                            speedrunOverlay.classList.remove('is-mobile-modal');
+                            speedrunOverlay.style.display = 'block';
+
+                            // Unlike controls/game-info, this one always starts collapsed
+                            // on every page load - no persisted state across reloads.
+                            speedrunOverlay.classList.add('collapsed');
+
+                            if (speedrunToggleHandle && !speedrunToggleHandle.dataset.listenerAdded) {
+                                speedrunToggleHandle.addEventListener('click', () => {
+                                    speedrunOverlay.classList.toggle('collapsed');
+                                    updateSpeedrunPanelPosition();
+                                    refocusGame();
+                                });
+                                speedrunToggleHandle.dataset.listenerAdded = 'true';
+                            }
+
+                            // Keep stacked under the scores drawer regardless of why its
+                            // height changes (leaderboard loading, collapse toggle, etc).
+                            const qrDrawerEl = document.getElementById('qr-drawer');
+                            if (qrDrawerEl && window.ResizeObserver && !qrDrawerEl.dataset.speedrunObserverAdded) {
+                                qrDrawerEl.dataset.speedrunObserverAdded = 'true';
+                                new ResizeObserver(updateSpeedrunPanelPosition).observe(qrDrawerEl);
+                            }
+                            window.addEventListener('resize', updateSpeedrunPanelPosition);
+                            updateSpeedrunPanelPosition();
                         }
-                        window.addEventListener('resize', updateSpeedrunPanelPosition);
                     } else {
                         speedrunOverlay.style.display = 'none';
+                        if (speedrunMobileButton) speedrunMobileButton.style.display = 'none';
                     }
-                    updateSpeedrunPanelPosition();
                 }
 
                 // --- Leaderboard Points/Speedrun toggle (desktop drawer + mobile popup,
@@ -5602,6 +5779,17 @@
                 if (mobileContent) {
                     mobileContent.addEventListener('click', function (e) {
                         e.stopPropagation();
+                    });
+                }
+
+                // "Voir le classement complet" - full detail on the dedicated /scores page
+                const mobileLeaderboardViewFull = document.getElementById('mobile-leaderboard-view-full');
+                if (mobileLeaderboardViewFull) {
+                    mobileLeaderboardViewFull.addEventListener('click', function () {
+                        const gameId = getCurrentGameId();
+                        if (gameId) {
+                            window.open(`/scores/${encodeURIComponent(gameId)}`, '_blank');
+                        }
                     });
                 }
             }

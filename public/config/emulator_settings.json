@@ -3,6 +3,7 @@
     "mame2003-plus_neogeo_bios": "unibios40",
     "mame2003-plus_skip_disclaimer": "enabled",
     "mame2003-plus_skip_warnings": "enabled",
+    "fbneo-allow-patched-romsets": "enabled",
     "smsplus_fm_sound": "disabled",
     "fceumm_nospritelimit": "enabled",
     "ff-ratio": "8.0",

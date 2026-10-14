@@ -13,8 +13,8 @@ BonjourArcade a vu le jour en avril 2025.
 BonjourArcade est fièrement disponible en français seulement.
 Tu peux soumettre un score rapidement grâce à la touche F1.
 BonjourArcade fonctionne aussi sur mobile, Steam Deck, etc.
-Vous pouvez supporter BonjourArcade monétairement sur https://ko-fi.com/bonjourarcade
-BonjourArcade ne pourrait pas fonctionner sans le projet EmulatorJS.
+Tu peux supporter BonjourArcade monétairement sur https://ko-fi.com/bonjourarcade. Merci!
+En terme d'émulation, BonjourArcade utilise EmulatorJS, qui à son tour utilise RetroArch.
 Trouve le jeu qui match avec toi sur https://bonjourarcade.com/swipe
 Découvre le jeu du jour : https://bonjourarcade.com/daily
 Tu ne sais pas à quoi jouer? Fais confiance au hasard: https://bonjourarcade.com/randomgame

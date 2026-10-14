@@ -482,9 +482,11 @@
         favoritesUnsub = window.__favorites.listen(user.uid, function (ids) {
           favoriteIds = new Set(ids);
           refreshFavoriteButtons();
+          applyFavoritesCategory();
         });
       }
       refreshFavoriteButtons();
+      applyFavoritesCategory();
     });
   }
 
@@ -907,6 +909,30 @@
       .filter(Boolean);
     if (!games.length) return null;
     return { title: 'Continuer?', typeLabel: '', games: games.slice(0, MAX_GAMES_PER_ROW), clearable: true, directPlay: true };
+  }
+
+  // "Mes favoris" row: only for signed-in users who have favorites. Placed
+  // third (index 2) so it lands within the first five carousels.
+  var FAVORITES_ROW_INDEX = 2;
+  var favoritesRowSignature = '';
+
+  function buildFavoritesCategory() {
+    if (!favoriteIds.size) return null;
+    var games = [];
+    favoriteIds.forEach(function (id) { if (allGamesById[id]) games.push(allGamesById[id]); });
+    if (!games.length) return null;
+    return { title: '❤️ Mes favoris', typeLabel: '', games: games.slice(0, MAX_GAMES_PER_ROW), allGames: games, isFavorites: true };
+  }
+
+  function applyFavoritesCategory() {
+    if (!currentCategories.length || !Object.keys(allGamesById).length) return;
+    var fav = buildFavoritesCategory();
+    var signature = fav ? fav.allGames.map(function (g) { return g.id; }).sort().join('|') : '';
+    if (signature === favoritesRowSignature) return;
+    favoritesRowSignature = signature;
+    var categories = currentCategories.filter(function (c) { return !c.isFavorites; });
+    if (fav) categories.splice(Math.min(FAVORITES_ROW_INDEX, categories.length), 0, fav);
+    renderRows(categories);
   }
 
   function makeCard(game, directPlay) {
@@ -2363,7 +2389,9 @@
           var insertIndex = (categories.length && categories[0].related) ? 1 : 0;
           categories.splice(insertIndex, 0, recentCategory);
         }
+        favoritesRowSignature = '';
         renderRows(categories);
+        applyFavoritesCategory();
 
         initTournamentToast();
       })

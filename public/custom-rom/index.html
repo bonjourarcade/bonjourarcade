@@ -7,6 +7,42 @@
     <title>Jouer une ROM perso - BonjourArcade</title>
     <link rel="icon" href="/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="../assets/css/style.css">
+    <script>
+        // EmulatorJS's own mute/volume slider only adjusts gain on OpenAL sources
+        // under Module.AL.currentCtx, which some libretro cores never populate.
+        // Route every AudioContext through a GainNode we control (same fix as /play).
+        // Must run before loader.js/the core create their AudioContext.
+        (function () {
+            const NativeAudioContext = window.AudioContext || window.webkitAudioContext;
+            if (!NativeAudioContext) return;
+
+            window.__baMasterGainNodes = [];
+            window.__baMasterVolume = 1;
+            window.__baSetMasterVolume = function (volume) {
+                window.__baMasterVolume = volume;
+                window.__baMasterGainNodes.forEach(function (gain) {
+                    try { gain.gain.value = volume; } catch (e) { /* context closed */ }
+                });
+            };
+
+            function PatchedAudioContext(...args) {
+                const ctx = new NativeAudioContext(...args);
+                const masterGain = ctx.createGain();
+                masterGain.gain.value = window.__baMasterVolume;
+                masterGain.connect(ctx.destination);
+                Object.defineProperty(ctx, 'destination', {
+                    get: function () { return masterGain; },
+                    configurable: true
+                });
+                window.__baMasterGainNodes.push(masterGain);
+                return ctx;
+            }
+            PatchedAudioContext.prototype = NativeAudioContext.prototype;
+
+            window.AudioContext = PatchedAudioContext;
+            if (window.webkitAudioContext) window.webkitAudioContext = PatchedAudioContext;
+        })();
+    </script>
     <script src="../assets/js/analytics.js"></script>
     <style>
         * {
@@ -410,8 +446,31 @@
                 window.EJS_core = core;
                 window.EJS_gameName = file.name.replace(/\.[^.]+$/, '');
                 window.EJS_gameID = 'custom-rom';
-                window.EJS_gameUrl = URL.createObjectURL(file);
+                // Passer le File directement (pas un blob: URL) : avec un blob: URL, EmulatorJS
+                // nomme le fichier d'après un UUID sans extension, ce qui empêche MAME/FBNeo
+                // de retrouver le romset (ex: sfa.zip) et mène à l'écran RetroArch.
+                window.EJS_gameUrl = file;
                 window.EJS_loadStateURL = undefined;
+
+                // Keep our master gain in sync with EmulatorJS's volume/mute state.
+                const previousOnGameStart = window.EJS_onGameStart;
+                window.EJS_onGameStart = function () {
+                    if (typeof previousOnGameStart === 'function') previousOnGameStart.apply(this, arguments);
+                    try {
+                        const emu = window.EJS_emulator;
+                        if (emu && typeof emu.setVolume === 'function' && !emu.__baVolumePatched) {
+                            emu.__baVolumePatched = true;
+                            const originalSetVolume = emu.setVolume.bind(emu);
+                            emu.setVolume = function (volume) {
+                                originalSetVolume(volume);
+                                window.__baSetMasterVolume(volume);
+                            };
+                            window.__baSetMasterVolume(emu.muted ? 0 : emu.volume);
+                        }
+                    } catch (e) {
+                        console.warn('Could not patch EJS_emulator.setVolume:', e);
+                    }
+                };
 
                 if (typeof window.EJS_biosUrl === 'undefined' && window.EJS_biosByCore && typeof window.EJS_biosByCore === 'object') {
                     window.EJS_biosUrl = window.EJS_biosByCore[core];

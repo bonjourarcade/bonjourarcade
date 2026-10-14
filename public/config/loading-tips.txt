@@ -1,7 +1,7 @@
 Ajoute des jeux à tes favoris en cliquant sur le cœur dans la page de jeu.
 Un nouveau jeu en vedette apparaît sur la page d'accueil le 1er et le 15 de chaque mois.
 Consulte https://bonjourarcade.com/all pour filtrer et trier tous les jeux par système ou développeur.
-Inscris-toi à un tournoi pour affronter d'autres joueurs et grimper au classement.
+Inscris-toi à un tournoi pour affronter d'autres joueurs et grimper au classement: https://bonjourarcade.com/tournoi/
 Connecte-toi avec Google pour sauvegarder tes favoris et tes scores.
 Tu peux changer ton nom de joueur et ton avatar sur ta page de profil.
 La page Profil regroupe tes jeux favoris et ton historique de scores.

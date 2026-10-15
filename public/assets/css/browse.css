@@ -247,27 +247,69 @@ a {
 
 /* ---------- Search ---------- */
 
-.browse-search { position: relative; display: flex; align-items: center; }
-.browse-search-input {
-  width: 0;
-  opacity: 0;
-  padding: 0;
+.browse-search { --search-w: 380px; position: relative; display: flex; align-items: center; }
+/* When open, the box overlays the nav (like Netflix) instead of pushing it:
+   the toggle leaves the flow and sits inside the box, at its left. */
+.browse-search.open #browse-search-toggle {
+  position: absolute;
+  right: calc(var(--search-w) - 40px);
+  z-index: 2;
+  background: none;
   border: none;
+}
+.browse-search-input {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 40px;
+  opacity: 0;
+  pointer-events: none;
+  padding: 0;
+  border: 1px solid transparent;
   border-radius: 20px;
-  background: rgba(253, 246, 232, 0.14);
+  background: rgba(10, 8, 6, 0.92);
   color: var(--browse-hero-text);
-  font-size: 0.9rem;
-  transition: width 0.2s ease, opacity 0.2s ease, padding 0.2s ease;
+  font-size: 0.95rem;
+  outline: none;
+  transition: width 0.2s ease, opacity 0.2s ease;
 }
 .browse-search.open .browse-search-input {
-  width: 200px;
+  width: var(--search-w);
   opacity: 1;
-  padding: 7px 14px;
-  margin-right: 6px;
+  pointer-events: auto;
+  padding: 0 40px 0 46px;
+  border-color: rgba(253, 246, 232, 0.45);
+  z-index: 1;
 }
 .browse-search-input::placeholder { color: rgba(253, 246, 232, 0.6); }
-.browse-header.browse-header-solid .browse-search-input { background: var(--browse-bg-alt); color: var(--browse-text); }
+.browse-header.browse-header-solid .browse-search-input { background: var(--browse-bg); color: var(--browse-text); }
+.browse-header.browse-header-solid .browse-search.open .browse-search-input { border-color: var(--browse-border); }
 .browse-header.browse-header-solid .browse-search-input::placeholder { color: var(--browse-text-dim); }
+.browse-header.browse-header-solid .browse-search.open #browse-search-toggle { background: none; border: none; }
+
+.browse-search-clear {
+  display: none;
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 3;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgba(253, 246, 232, 0.2);
+  color: var(--browse-hero-text);
+  font-size: 0.7rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.browse-search-clear:hover { background: rgba(253, 246, 232, 0.35); }
+.browse-search.open.has-value .browse-search-clear { display: block; }
+.browse-header.browse-header-solid .browse-search-clear { background: var(--browse-bg-alt); color: var(--browse-text); }
 
 /* ---------- Support link ---------- */
 
@@ -318,6 +360,7 @@ a {
 }
 .browse-header.browse-header-solid .browse-user-indicator { color: var(--browse-text); }
 .browse-user-indicator:hover { opacity: 0.85; }
+#browse-user-name { display: none; }
 .browse-user-indicator img {
   width: 28px;
   height: 28px;
@@ -1787,7 +1830,7 @@ body.browse-dark .browse-card.kbfocus::before {
 
 @media (max-width: 700px) {
   .browse-toast { left: 12px; right: 12px; width: auto; bottom: 12px; }
-  .browse-search.open .browse-search-input { width: 140px; }
+  .browse-search { --search-w: min(300px, calc(100vw - 150px)); }
   .browse-hero { min-height: 64vh; }
   .browse-hero-title { font-size: 1.8rem; }
   .browse-hero-poster { display: block; width: 92px; border-radius: 6px; }

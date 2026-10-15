@@ -326,7 +326,17 @@
     var wrap = document.querySelector('[data-browse-search]');
     var toggle = document.getElementById('browse-search-toggle');
     var input = document.getElementById('browse-search-input');
+    var clearBtn = document.getElementById('browse-search-clear');
     var debounceTimer = null;
+    var syncHasValue = function () { wrap.classList.toggle('has-value', !!input.value); };
+
+    clearBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      input.value = '';
+      syncHasValue();
+      performSearch('');
+      input.focus();
+    });
 
     // Only auto-close on outside clicks/dropdown switches when the box is
     // empty - a typed query shouldn't vanish just because focus moved
@@ -335,6 +345,7 @@
     closeSearch = function () {
       if (input.value.trim()) return;
       wrap.classList.remove('open');
+      syncHasValue();
     };
 
     toggle.addEventListener('click', function (e) {
@@ -354,6 +365,7 @@
     input.addEventListener('click', function (e) { e.stopPropagation(); });
 
     input.addEventListener('input', function () {
+      syncHasValue();
       clearTimeout(debounceTimer);
       var value = input.value;
       debounceTimer = setTimeout(function () { performSearch(value); }, 150);
@@ -362,6 +374,7 @@
     input.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' || e.key === 'Enter') {
         input.value = '';
+        syncHasValue();
         performSearch('');
         wrap.classList.remove('open');
         input.blur();

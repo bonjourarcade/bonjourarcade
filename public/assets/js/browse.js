@@ -63,10 +63,19 @@
     return capitalize(game.id.replace(/[-_]/g, ' '));
   }
 
+  function isHidden(game) {
+    // `hide` comes from metadata.yaml as a string ("true", "yes", "") or a
+    // boolean; anything truthy except an explicit "false"/"no"/"0" hides it.
+    var hide = game.hide;
+    if (typeof hide === 'string') {
+      var v = hide.trim().toLowerCase();
+      return v !== '' && v !== 'false' && v !== 'no' && v !== '0';
+    }
+    return !!hide;
+  }
+
   function isVisible(game) {
-    // This page ignores the `hide` field entirely - the only reason to
-    // exclude a game here is a known, flagged problem with it.
-    return game.id && game.problem !== 'true';
+    return game.id && game.problem !== 'true' && !isHidden(game);
   }
 
   function shuffleArray(arr) {

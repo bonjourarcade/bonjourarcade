@@ -1,0 +1,20 @@
+title: EarthBound Zero
+year: 1989
+developer: Pax Softnica, Ape
+genre: Role-playing, RPG
+#controls:
+#  - "← ↓ ↑ →: Mouvement"
+#  - "Z: "
+#  - "X: "
+#  - "C: "
+#  - "V: "
+
+#to_start: Espace, puis Enter
+#description: ""
+hide: true
+
+# Pour les jeux qui coopèrent pas bien
+#problem: true
+#enable_score: false
+
+added: 2026-10-15

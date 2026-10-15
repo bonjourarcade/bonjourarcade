@@ -204,7 +204,7 @@ def build_rom_game(rom_entry, use_local_paths, now_date, missing_covers)
     genre: string_field(metadata, 'genre'),
     recommended: string_field(metadata, 'recommended'),
     added: added,
-    hide: string_field(metadata, 'hide', 'yes'),
+    hide: string_field(metadata, 'hide'),
     coverArt: cover_art_for(game_id, game_dir, missing_covers),
     pageUrl: "#{LAUNCHER_PAGE}/#{game_id}",
     core: core_from_dir(rom_subdir),

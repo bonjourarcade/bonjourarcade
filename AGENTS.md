@@ -58,7 +58,7 @@ alloarcade-backend/     # Backend Firebase (Cloud Functions, Firestore, Auth)
 ## Conventions metadata.yaml
 
 - `title`, `developer`, `year`, `genre`, `added` (YYYY-MM-DD)
-- `hide: yes` par défaut (les jeux sont cachés jusqu'à ce qu'on mette `hide: ""`)
+- `hide: yes` pour cacher un jeu (visible par défaut quand la clé est absente)
 - `enable_score: true` pour activer les scores sur un jeu
 - `controls: [...]` — liste de strings pour l'affichage des contrôles
 - `to_start` — instruction pour démarrer (ex: "Espace, puis Enter")

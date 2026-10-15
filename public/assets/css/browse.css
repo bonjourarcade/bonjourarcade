@@ -1748,7 +1748,13 @@ body.browse-dark .browse-card.kbfocus::before {
    it overlap the content below instead of pushing it down - collapse the
    nav into a hamburger-toggled dropdown panel instead. */
 @media (max-width: 900px) {
-  .browse-menu-toggle { display: flex; }
+  .browse-menu-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    line-height: 1;
+  }
 
   .browse-nav {
     display: none;

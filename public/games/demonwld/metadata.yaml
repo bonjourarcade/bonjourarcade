@@ -14,6 +14,5 @@ to_start: Espace -> Ente
 # Ce message apparaîtra en haut de l'email et des webhooks
 description: "Demon's World est un jeu d'action-plateforme à défilement latéral de style « à l'ancienne ». Le principe de base est très simple : il faut tirer et sauter pour se frayer un chemin à travers des hordes de monstres, vaincre le boss et passer au niveau suivant. Le jeu ne comporte aucune narration ni cinématique ; le héros est un personnage à l'allure robuste, ressemblant à Duke Nukem et armé d'armes à feu."
 
-hide: yes
 
 added: 2025-09-01

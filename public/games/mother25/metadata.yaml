@@ -14,5 +14,6 @@ genre: Role-Playing
 #problem: true
 
 enable_score: true
+hide: true
 
 added: 2026-06-24

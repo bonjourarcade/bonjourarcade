@@ -12,7 +12,6 @@ to_start: Select -> Start
 # Ce message apparaîtra en haut de l'email et des webhooks
 
 enable_score: true
-hide: yes
 
 added: 2025-08-24
 description: "Venez découvrir Gunbird, le shooter emblématique de Psikyo

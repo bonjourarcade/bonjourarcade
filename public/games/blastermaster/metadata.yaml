@@ -8,6 +8,5 @@ controls:
 - 'X: Sauter'
 - Select: Sortir du véhicule
 to_start: Select -> Start
-hide: yes
 
 added: 2025-07-27

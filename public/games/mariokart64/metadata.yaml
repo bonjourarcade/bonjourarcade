@@ -3,7 +3,6 @@ developer: Nintendo
 year: 1996
 genre: Racing
 added: 2025-06-17
-hide: yes
 controls:
 - '←↓↑→: Conduire'
 - 'Z: Accélérer'

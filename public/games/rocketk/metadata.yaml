@@ -3,7 +3,6 @@ developer: Konami
 added: 2025-08-31
 year: 1993
 genre: Action
-hide: yes
 enable_score: true
 to_start: Start
 controls:

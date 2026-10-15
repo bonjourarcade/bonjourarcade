@@ -9,4 +9,3 @@ controls:
 - 'C: Tourner ↪️'
 to_start: Select -> Start
 enable_score: true
-hide: ""

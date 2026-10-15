@@ -12,6 +12,7 @@ genre: Role-Playing
 #to_start: Espace, puis Enter
 #description: ""
 #problem: true
+hide: true
 
 enable_score: true
 

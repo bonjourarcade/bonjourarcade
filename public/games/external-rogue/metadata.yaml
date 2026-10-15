@@ -10,6 +10,5 @@ launch_button_url: "https://bonjourarcade.com/dos/?game=rogue.jsdos"
 description: |
   Le jeu qui a défini un nouveau genre : les roguelikes.
 enable_score: true
-hide: yes
 added: 2025-01-15
 new_flag: false

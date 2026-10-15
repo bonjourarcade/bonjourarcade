@@ -3,7 +3,6 @@ developer: TechnoSoft
 year: 1990
 genre: Shooter
 added: 2025-11-17
-hide: yes
 to_start: Start
 controls:
 - '←↓↑→: Déplacer'

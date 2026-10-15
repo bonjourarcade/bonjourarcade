@@ -7,4 +7,3 @@ controls:
 - '←↓↑→: Déplacer'
 - 'X: Tirer'
 to_start: Start
-hide: yes

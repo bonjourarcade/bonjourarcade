@@ -10,7 +10,6 @@ genre: Platform, Puzzle
 #to_start: Select -> Start
 
 enable_score: true
-hide: yes
 problem: true
 
 added: 2025-10-13

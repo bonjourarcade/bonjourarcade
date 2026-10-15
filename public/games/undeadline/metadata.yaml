@@ -3,7 +3,6 @@ developer: T&E Soft
 year: 1991
 added: 2025-11-10
 genre: Shooter
-hide: yes
 to_start: Start
 controls:
 - '←↓↑→: Déplacer'

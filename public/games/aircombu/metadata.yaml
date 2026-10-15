@@ -13,7 +13,6 @@ genre: Shooter, Flight Simulator
 # Ce message apparaîtra en haut de l'email et des webhooks
 description:
 
-hide: yes
 problem: true
 
 added: 2025-09-04

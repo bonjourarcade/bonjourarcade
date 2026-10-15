@@ -7,7 +7,6 @@ controls:
 - 'X: Voler'
 - 'Start: Voler'
 to_start: Start
-hide: yes
 
 added: 2025-07-26
 description: "Venez tester Flappy Bird, le phénomène addictif de Nioreh sorti

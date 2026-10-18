@@ -3920,6 +3920,14 @@
                                 handle = null; // permission revoked - re-pick a file below
                             }
 
+                            // Explicit Save State click on a game that already has a
+                            // file: confirm before overwriting, and let the player
+                            // pick another file instead (Cancel).
+                            if (handle && !confirm(`Écraser « ${handle.name} » avec cette sauvegarde ?\n\n` +
+                                'OK : écraser ce fichier\nAnnuler : choisir un autre fichier')) {
+                                handle = null;
+                            }
+
                             if (!handle) {
                                 handle = await window.showSaveFilePicker({
                                     suggestedName: `${key}.state`,
@@ -3944,10 +3952,19 @@
                     window.EJS_onLoadState = async () => {
                         try {
                             const key = window.EJS_gameID;
-                            const handle = await getLocalSaveHandle(key);
+                            let handle = await getLocalSaveHandle(key);
                             if (!handle) {
-                                console.warn('No local save file associated with this game yet. Use Save State first.');
-                                return;
+                                // No file associated yet: let the player pick an existing
+                                // one (e.g. a save received from a friend). It becomes this
+                                // game's local save file, like after a first Save State.
+                                [handle] = await window.showOpenFilePicker({
+                                    types: [{
+                                        description: 'Sauvegarde BonjourArcade',
+                                        accept: { 'application/octet-stream': ['.state'] }
+                                    }]
+                                });
+                                await setLocalSaveHandle(key, handle);
+                                localSaveIsDirty = true; // same as the auto-load path
                             }
                             if (!(await ensureLocalSavePermission(handle, 'read'))) return;
 
@@ -4120,8 +4137,21 @@
                 // the player hasn't already picked their own value for this game, so this
                 // stays a *default* rather than overriding an explicit prior choice.
                 window.EJS_onGameStart = function () {
+                    // Multi-disc games (.m3u) boot to a black screen until the first
+                    // restart, so restart once ourselves, after a delay (an immediate
+                    // restart boots the BIOS shell with no disc), and only then run the
+                    // local save auto-load - otherwise the restart would wipe what it loaded.
+                    const MULTI_DISC_RESTART_DELAY_MS = 3000;
+                    const gm = window.EJS_emulator && window.EJS_emulator.gameManager;
+                    const isMultiDisc = !!gm && gm.getDiskCount() > 1;
+                    if (isMultiDisc) setTimeout(() => gm.restart(), MULTI_DISC_RESTART_DELAY_MS);
+
                     if (typeof window.EJS_localSaveAutoLoad === 'function') {
-                        window.EJS_localSaveAutoLoad();
+                        if (isMultiDisc) {
+                            setTimeout(window.EJS_localSaveAutoLoad, MULTI_DISC_RESTART_DELAY_MS + 1500);
+                        } else {
+                            window.EJS_localSaveAutoLoad();
+                        }
                     }
 
                     // Anti-cheat: any state load from here on - whether from the "Load

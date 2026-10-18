@@ -1100,7 +1100,10 @@ class EmulatorJS {
             }
             fileNames.push(file.filename);
         }
-        this.selectRomFile(fileNames, this.getCore());
+        // BonjourArcade patch: pass the generic system name ("psx"), not the specific core
+        // ("pcsx_rearmed"), so selectRomFile can prefer .m3u for multi-disc PSX games.
+        // Re-apply if EmulatorJS is updated (same comparison exists in emulator.min.js).
+        this.selectRomFile(fileNames, this.getCore(true));
         this.startGame();
     }
 

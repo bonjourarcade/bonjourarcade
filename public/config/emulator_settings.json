@@ -6,6 +6,7 @@
     "fbneo-allow-patched-romsets": "enabled",
     "smsplus_fm_sound": "disabled",
     "fceumm_nospritelimit": "enabled",
+    "genesis_plus_gx_no_sprite_limit": "enabled",
     "ff-ratio": "8.0",
     "gambatte_gb_colorization": "GBC",
     "melonds_touch_mode": "Touch",

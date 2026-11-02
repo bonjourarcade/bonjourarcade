@@ -815,10 +815,14 @@
     dev: 'Développeur'
   };
 
+  // Display-only renames; metadata keeps the original genre value.
+  var GENRE_DISPLAY_NAMES = { platform: 'Platformers' };
+
   function getGameCategoryKeys(game) {
     var keys = [];
     getGenres(game).forEach(function (genre) {
-      keys.push({ key: 'genre:' + genre.toLowerCase(), title: capitalize(genre.toLowerCase()), type: 'genre' });
+      var genreKey = genre.toLowerCase();
+      keys.push({ key: 'genre:' + genreKey, title: GENRE_DISPLAY_NAMES[genreKey] || capitalize(genreKey), type: 'genre' });
     });
 
     var systemLabel = SYSTEM_NAMES[game.core] || game.core;

@@ -1179,7 +1179,19 @@
                     window.location.href = game.pageUrl;
                 }
 
-                tr.addEventListener('click', navigateToGame);
+                tr.addEventListener('click', (e) => {
+                    if (e.metaKey || e.ctrlKey) {
+                        window.open(game.pageUrl, '_blank');
+                        return;
+                    }
+                    navigateToGame();
+                });
+                tr.addEventListener('auxclick', (e) => {
+                    if (e.button === 1) {
+                        e.preventDefault();
+                        window.open(game.pageUrl, '_blank');
+                    }
+                });
                 tr.addEventListener('keydown', (e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault();

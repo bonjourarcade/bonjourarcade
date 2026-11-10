@@ -262,7 +262,7 @@
                 '<td class="profil-score-rank ' + rankClass + '">#' + s.rank + '</td>' +
                 '<td>' +
                     '<div class="profil-score-game">' +
-                        (s.gameImageUrl ? '<img class="profil-score-thumb" src="' + s.gameImageUrl + '" alt="" loading="lazy">' : '') +
+                        (s.gameImageUrl ? '<a href="/b/' + encodeURIComponent(s.gameId) + '" tabindex="-1" aria-hidden="true"><img class="profil-score-thumb" src="' + s.gameImageUrl + '" alt="" loading="lazy"></a>' : '') +
                         '<a class="profil-score-title" href="/b/' + encodeURIComponent(s.gameId) + '">' + escHtml(s.gameTitle) + '</a>' +
                     '</div>' +
                 '</td>' +

@@ -1008,7 +1008,7 @@
             return [
                 '<article class="latest-score-row">',
                 '<div class="latest-score-main">',
-                '<a class="latest-score-game" href="', buildGameUrl(score.gameId), '">', escapeHtml(score.gameTitle || score.gameId), '</a>',
+                '<a class="latest-score-game" href="', buildGameUrl(score.gameId), '">', escapeHtml(score.gameTitle || score.gameId), '</a> <a class="play-inline-link" href="', buildPlayUrl(score.gameId), '" title="Jouer à ce jeu" aria-label="Jouer à ce jeu">▶ Jouer</a>',
                 '<p class="latest-score-player">', renderPlayerButton(score), ' · ', formatScore(score.score), '</p>',
                 '<p class="latest-score-date">', window.BonjourArcadeScoresService.formatDate(score.createdAtMs), '</p>',
                 commentHtml,
@@ -1244,7 +1244,7 @@
 
                 return [
                     '<tr>',
-                    '<td><a class="player-score-game" href="', buildGameUrl(score.gameId), '">', gameLabel, '</a></td>',
+                    '<td><a class="player-score-game" href="', buildGameUrl(score.gameId), '">', gameLabel, '</a> <a class="play-inline-link" href="', buildPlayUrl(score.gameId), '" title="Jouer à ce jeu" aria-label="Jouer à ce jeu">▶ Jouer</a></td>',
                     '<td class="col-score">', formatScoreCell(score, score.scoreType || 'points'), '</td>',
                     '<td>', window.BonjourArcadeScoresService.formatDate(score.createdAtMs), '</td>',
                     '<td><span class="player-score-status is-', escapeHtml(score.status || 'pending'), '">', escapeHtml(getUserScoreStatusLabel(score.status)), '</span></td>',
@@ -1286,7 +1286,7 @@
 
             return [
                 '<tr>',
-                '<td><a class="player-score-game" href="', buildGameUrl(score.gameId), '">', gameLabel, '</a></td>',
+                '<td><a class="player-score-game" href="', buildGameUrl(score.gameId), '">', gameLabel, '</a> <a class="play-inline-link" href="', buildPlayUrl(score.gameId), '" title="Jouer à ce jeu" aria-label="Jouer à ce jeu">▶ Jouer</a></td>',
                 '<td class="col-score">', formatScoreCell(score, score.scoreType || 'points'), '</td>',
                 '<td>', window.BonjourArcadeScoresService.formatDate(score.createdAtMs), '</td>',
                 '<td class="player-score-proof">', proofButton, '</td>',

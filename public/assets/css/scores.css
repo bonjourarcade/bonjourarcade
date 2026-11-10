@@ -1405,16 +1405,3 @@ body[data-is-admin='true'] .admin-actions {
         padding-right: 14px;
     }
 }
-
-.play-inline-link {
-    margin-left: 0.5rem;
-    font-size: 0.85em;
-    white-space: nowrap;
-    text-decoration: none;
-    opacity: 0.85;
-}
-
-.play-inline-link:hover {
-    text-decoration: underline;
-    opacity: 1;
-}

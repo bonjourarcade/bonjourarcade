@@ -739,6 +739,12 @@ body.theme-dark #options-toggle-btn:hover {
 
 .profil-score-title {
   font-weight: 500;
+  color: inherit;
+  text-decoration: none;
+}
+
+a.profil-score-title:hover {
+  text-decoration: underline;
 }
 
 .profil-score-value {

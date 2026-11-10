@@ -263,7 +263,7 @@
                 '<td>' +
                     '<div class="profil-score-game">' +
                         (s.gameImageUrl ? '<img class="profil-score-thumb" src="' + s.gameImageUrl + '" alt="" loading="lazy">' : '') +
-                        '<span class="profil-score-title">' + escHtml(s.gameTitle) + '</span>' +
+                        '<a class="profil-score-title" href="/b/' + encodeURIComponent(s.gameId) + '">' + escHtml(s.gameTitle) + '</a>' +
                     '</div>' +
                 '</td>' +
                 '<td class="profil-score-value">' + formatScore(s.score) + '</td>' +
@@ -510,6 +510,7 @@
           }, { merge: true }); } catch (e) { }
           if (profile) profile.photoURL = avatarState;
         }
+        if (window.TTLCache) window.TTLCache.invalidate('publicProfile_' + currentUser.uid);
       } catch (e) {
         console.error('Error saving avatar:', e);
         throw e;

@@ -1,0 +1,14 @@
+title: JIZLOTS
+year: 2026
+developer: BonjourArcade
+genre: Puzzle
+controls:
+  - "← → : Déplacer"
+  - "↓ : Faire descendre / verrouiller"
+  - "Z ou A : Rotation anti-horaire"
+  - "X : Rotation horaire"
+
+to_start: Appuie sur Entrée, puis choisis ton mode.
+description: "Un hommage aux Tetris The Grand Master sur Sega Genesis : le mode Master de TGM1 avec ses grades et son credits roll, et le mode Normal de TGM2. Gravité à 20G, IRS, ghost piece, fonds de niveau. Une production originale de BonjourArcade."
+
+added: 2026-11-13

@@ -260,6 +260,20 @@
             height: 100%;
         }
 
+        #game-frame {
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+
+        body.run-mode #game-header {
+            display: none;
+        }
+
+        body.run-mode #game-container {
+            top: 0;
+        }
+
         .error-message {
             font-family: sans-serif;
             padding: 20px;
@@ -404,77 +418,42 @@
             const file = fileInput.files[0];
             const core = consoleSelect.value;
             if (!file || !core) return;
-            launchGame(file, core);
+            startInFrame(file, core);
         });
 
-        // Le retour au menu recharge la page (EmulatorJS ne se démonte pas proprement).
-        // Pour reprendre les mêmes paramètres, on garde le fichier (IndexedDB) et la console
-        // juste avant le rechargement, puis on les restaure au chargement suivant.
-        const LAST_ROM_DB = 'custom-rom-last';
-        const LAST_ROM_FLAG = 'customRomRestore';
+        // Le jeu tourne dans une iframe (même page en mode ?run=1) : au retour on la détruit
+        // sans recharger la page. Le champ fichier garde donc sa référence au fichier d'origine
+        // sur disque, et le prochain « Jouer » relit la dernière version (ex: ROM rebuildée).
+        const IS_RUN_MODE = new URLSearchParams(window.location.search).has('run') && window.parent !== window;
 
-        function openLastRomDb() {
-            return new Promise((resolve, reject) => {
-                const req = indexedDB.open(LAST_ROM_DB, 1);
-                req.onupgradeneeded = () => req.result.createObjectStore('kv');
-                req.onsuccess = () => resolve(req.result);
-                req.onerror = () => reject(req.error);
-            });
+        function startInFrame(file, core) {
+            document.getElementById('setup-screen').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'block';
+            document.getElementById('game-header-title').textContent = file.name;
+            window.__customRom = { file, core };
+            const container = document.getElementById('game-container');
+            container.innerHTML = '';
+            const frame = document.createElement('iframe');
+            frame.id = 'game-frame';
+            frame.src = '/custom-rom/?run=1';
+            frame.allow = 'autoplay; fullscreen; gamepad';
+            frame.allowFullscreen = true;
+            frame.addEventListener('load', () => frame.focus());
+            container.appendChild(frame);
         }
 
-        async function saveLastRom(file, core) {
-            const db = await openLastRomDb();
-            await new Promise((resolve, reject) => {
-                const tx = db.transaction('kv', 'readwrite');
-                tx.objectStore('kv').put({ file, core }, 'last');
-                tx.oncomplete = resolve;
-                tx.onerror = () => reject(tx.error);
-            });
-            db.close();
-        }
-
-        async function loadLastRom() {
-            const db = await openLastRomDb();
-            const value = await new Promise((resolve, reject) => {
-                const req = db.transaction('kv').objectStore('kv').get('last');
-                req.onsuccess = () => resolve(req.result);
-                req.onerror = () => reject(req.error);
-            });
-            db.close();
-            return value;
-        }
-
-        document.getElementById('back-button').addEventListener('click', async () => {
-            try {
-                const file = fileInput.files[0];
-                const core = consoleSelect.value;
-                if (file && core) {
-                    await saveLastRom(file, core);
-                    sessionStorage.setItem(LAST_ROM_FLAG, '1');
-                }
-            } catch (e) {
-                console.warn('Impossible de mémoriser la ROM:', e);
-            }
-            window.location.reload();
+        document.getElementById('back-button').addEventListener('click', () => {
+            const container = document.getElementById('game-container');
+            if (container) container.innerHTML = '';
+            window.__customRom = null;
+            document.getElementById('game-screen').style.display = 'none';
+            document.getElementById('setup-screen').style.display = '';
         });
 
-        (async function restoreLastRom() {
-            try {
-                if (sessionStorage.getItem(LAST_ROM_FLAG) !== '1') return;
-                sessionStorage.removeItem(LAST_ROM_FLAG);
-                const last = await loadLastRom();
-                if (!last || !last.file) return;
-                const dt = new DataTransfer();
-                dt.items.add(last.file);
-                fileInput.files = dt.files;
-                fileHint.textContent = last.file.name;
-                fileHint.classList.add('detected');
-                consoleSelect.value = last.core;
-                updateLaunchButtonState();
-            } catch (e) {
-                console.warn('Impossible de restaurer la dernière ROM:', e);
-            }
-        })();
+        if (IS_RUN_MODE) {
+            const pending = window.parent.__customRom;
+            if (pending && pending.file) launchGame(pending.file, pending.core);
+        }
 
         function showLauncherError(message) {
             const gameContainer = document.getElementById('game-container');
@@ -486,6 +465,7 @@
         async function launchGame(file, core) {
             document.getElementById('setup-screen').style.display = 'none';
             document.getElementById('game-screen').style.display = 'block';
+            if (IS_RUN_MODE) document.body.classList.add('run-mode');
             document.getElementById('game-header-title').textContent = file.name;
 
             initLoading({

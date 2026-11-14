@@ -260,20 +260,6 @@
             height: 100%;
         }
 
-        #game-frame {
-            width: 100%;
-            height: 100%;
-            border: 0;
-        }
-
-        body.run-mode #game-header {
-            display: none;
-        }
-
-        body.run-mode #game-container {
-            top: 0;
-        }
-
         .error-message {
             font-family: sans-serif;
             padding: 20px;
@@ -418,42 +404,12 @@
             const file = fileInput.files[0];
             const core = consoleSelect.value;
             if (!file || !core) return;
-            startInFrame(file, core);
+            launchGame(file, core);
         });
-
-        // Le jeu tourne dans une iframe (même page en mode ?run=1) : au retour on la détruit
-        // sans recharger la page. Le champ fichier garde donc sa référence au fichier d'origine
-        // sur disque, et le prochain « Jouer » relit la dernière version (ex: ROM rebuildée).
-        const IS_RUN_MODE = new URLSearchParams(window.location.search).has('run') && window.parent !== window;
-
-        function startInFrame(file, core) {
-            document.getElementById('setup-screen').style.display = 'none';
-            document.getElementById('game-screen').style.display = 'block';
-            document.getElementById('game-header-title').textContent = file.name;
-            window.__customRom = { file, core };
-            const container = document.getElementById('game-container');
-            container.innerHTML = '';
-            const frame = document.createElement('iframe');
-            frame.id = 'game-frame';
-            frame.src = '/custom-rom/?run=1';
-            frame.allow = 'autoplay; fullscreen; gamepad';
-            frame.allowFullscreen = true;
-            frame.addEventListener('load', () => frame.focus());
-            container.appendChild(frame);
-        }
 
         document.getElementById('back-button').addEventListener('click', () => {
-            const container = document.getElementById('game-container');
-            if (container) container.innerHTML = '';
-            window.__customRom = null;
-            document.getElementById('game-screen').style.display = 'none';
-            document.getElementById('setup-screen').style.display = '';
+            window.location.reload();
         });
-
-        if (IS_RUN_MODE) {
-            const pending = window.parent.__customRom;
-            if (pending && pending.file) launchGame(pending.file, pending.core);
-        }
 
         function showLauncherError(message) {
             const gameContainer = document.getElementById('game-container');
@@ -465,7 +421,6 @@
         async function launchGame(file, core) {
             document.getElementById('setup-screen').style.display = 'none';
             document.getElementById('game-screen').style.display = 'block';
-            if (IS_RUN_MODE) document.body.classList.add('run-mode');
             document.getElementById('game-header-title').textContent = file.name;
 
             initLoading({
